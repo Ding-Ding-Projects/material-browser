@@ -75,10 +75,10 @@ Firefox BiDi compatibility still need real browser acceptance tests.
 
 Graceful adapter shutdown calls Puppeteer close or WebDriver quit. A timeout retains process
 ownership instead of claiming it stopped. Initialization failure closes the helper input first
-and then terminates only the owned helper if it cannot settle. If a broken adapter leaves an
-engine descendant alive, browser-native locking and manual recovery remain necessary. Full
-process-tree job-object ownership, crash recovery and external automation-client attachment
-are not yet implemented. Registered manifests cannot enable custom encryption, identity or
+and then terminates the owned process job if it cannot settle. Each helper enters a private
+Windows job before receiving launch configuration; Off-mode browsers start suspended and enter
+that job before being resumed. Loss of the supervisor terminates its owned process family.
+Registered manifests cannot enable custom encryption, identity or
 snapshot features. Their automation booleans are informational and do not configure adapters.
 
 ## Source patch prototype
@@ -92,4 +92,44 @@ fail-closed startup without legacy-provider fallback, key lifecycle review and c
 new-profile runtime evidence remain absent. The boolean factory input itself is not proof
 of ownership; the future native host must establish it. No snapshot implementation patch is
 claimed: a message schema cannot freeze browser subsystems.
+
+## Durable lifetime and mutation leases
+
+Before a native process can start, the supervisor durably writes a launch-intent journal outside
+the browser profile. After launch it records the verified PID, native 100 ns creation timestamp,
+canonical executable and exact profile argument. Interrupted, malformed and unreadable journals
+fail closed. Recreated supervisors inspect the current process identity and independently scan
+profile arguments; PID reuse never grants permission to control another process.
+
+`Supervisor::acquire_profile_idle(id)` returns a `ProfileLease` held through snapshot, restore or
+removal. Its lock is outside the profile directory, so replacing the directory does not replace
+the lock. `assert_profile_inactive` is an observation only and cannot replace that lease.
+Ambiguous launch intents require explicit recovery; the supervisor never silently deletes them.
+Native identity and job containment currently support Windows only. Job containment is a safety
+boundary, not a claim that forced host termination preserves the browser's last unwritten data.
+
+`automation_endpoint(id)` returns a validated literal IPv4 loopback endpoint only for a running
+opt-in profile. Chromium Puppeteer uses CDP, Firefox Puppeteer uses BiDi, and Selenium returns
+the pinned driver's WebDriver URL plus the established session ID. Off returns
+`AUTOMATION_DISABLED`. Paired forwarding must constrain WebDriver access to that exact session;
+a raw driver endpoint alone allows a client to create unrelated sessions and is not profile
+authorization. Native snapshot IPC remains separate and unavailable until engine-side barriers
+are implemented.
+
+Focused verification includes torn launch intent, exact profile argument matching, loopback and
+mode rejection, independent-supervisor lease exclusion, a real hidden process surviving a
+supervisor recreation, PID-reuse rejection, and native job-close termination. These fixtures are
+process-control evidence, not browser encryption, identity or snapshot acceptance.
+
+## Current native source acquisition
+
+`engines/recipes/native-pins.json` records Chromium 155.0.8059.85 at
+`0e66b94549a8bd85f03fbdf189b752d6e7b63c32` and Firefox 158.0 at
+`3c71aeacdb296402e41fb2084b13e797d1770642`. The root entrypoint accepts
+`build.bat -Component BrowserNative -NativeEngine chromium -AcquireOnly` (or `firefox`).
+It acquires exact upstream revisions into a short, user-scoped native source cache outside
+the repository, preserves changes, and verifies the revision. Chromium dependency acquisition
+uses a pinned depot-tools revision and the installed Visual Studio toolchain. Source acquisition
+does not register a runtime or enable advanced capabilities. Product build and acceptance remain
+incomplete until native encryption, identity and whole-profile snapshot integration are real.
 
