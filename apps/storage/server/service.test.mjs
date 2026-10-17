@@ -62,3 +62,8 @@ test('interrupted source removes temporary object; quota and path identifiers fa
  await assert.rejects(store.get('../outside','chunks',id),e=>e.status===400);
  const reopened=await createCiphertextStore(f.root,{maxChunk:1024,quota:8});assert.deepEqual(await reopened.get(vault,'chunks',id),bytes);
 });
+test('HTTP adapter uses the supplied shared store instance',async t=>{
+ let calls=0;const store={stats:async()=>{calls++;return {bytes:17,shared:true};}};
+ const f=await fixture(t,{store});
+ assert.deepEqual(await (await f.auth('/api/stats')).json(),{bytes:17,shared:true});assert.equal(calls,1);
+});

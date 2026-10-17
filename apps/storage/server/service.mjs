@@ -25,7 +25,7 @@ export async function createService(options={}) {
   const maxChunk=options.maxChunk || 16*1024*1024, quota=options.quota || 100*1024*1024*1024;
   const sessions=new Map(), rates=new Map();
   const consumed=path.join(root,'pairing-consumed'); await directory(consumed);
-  const store=await createCiphertextStore(root,{maxChunk,quota});
+  const store=options.store || await createCiphertextStore(root,{maxChunk,quota});
   const web=path.resolve(options.web || fileURLToPath(new URL('../web/',import.meta.url)));
   const server=http.createServer(async(req,res)=>{
     res.setHeader('X-Content-Type-Options','nosniff'); res.setHeader('Referrer-Policy','no-referrer'); res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
