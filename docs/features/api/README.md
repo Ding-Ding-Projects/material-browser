@@ -52,7 +52,9 @@ descriptor produces a connection error. Confirm the recorded process has ended b
 HTTP accepts only `POST /v1/call`, an exact `Host` authority, a bearer credential and a bounded
 `Content-Length`. It rejects browser `Origin` headers, duplicate headers and transfer encoding.
 It sets no CORS allowance. This is a native local API, not an API for websites. Requests are
-serialized; a long vault operation can delay other operations. HTTP is not used on the LAN.
+serialized; a long vault operation can delay other operations. Parsing is isolated across at most
+16 workers with an absolute five-second header/body deadline, so an incomplete connection does
+not monopolize the accept loop. HTTP is not used on the LAN.
 The OpenAPI document and Postman collection in this directory describe only this implemented route.
 
 ## Methods and lifecycle safety
@@ -102,6 +104,19 @@ JSON line containing a local `ws://127.0.0.1:PORT/...` URL for `puppeteer.connec
 local streams and uses the paired encrypted transport for the LAN hop. Other local processes
 under the same account can use that loopback endpoint, so run it only while needed. Browser
 interoperability remains unverified until exercised with a matched engine bundle.
+
+For an existing Selenium session, use the session-confined relay instead:
+
+```text
+material-browser.exe --data-dir C:\ClientIdentity lan-webdriver 192.168.1.20:8788 SERVER_PUBLIC_KEY CLIENT_PUBLIC_KEY PROFILE_UUID
+```
+
+Grant `automation.endpoint` and `automation.webdriver` for that profile. This prints a loopback
+HTTP URL and the owned `sessionId`. The example [paired-selenium.py](../../../examples/paired-selenium.py)
+attaches an ordinary Selenium client to that existing session. Creating a new session through the
+relay is rejected. The relay accepts only the owned session path, exact loopback Host and bounded
+JSON requests, with no browser-origin or transfer-encoding fallback. Host lifecycle operations
+retain ownership, so examples do not quit the managed session behind the host's back.
 
 `operations.list` returns the latest 128 snapshot, restore, synchronization and password-change
 attempts in this host process. Each has a random operation id, method, actual terminal state and

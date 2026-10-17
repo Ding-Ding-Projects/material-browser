@@ -603,6 +603,44 @@ fn constant_eq(a: &[u8], b: &[u8]) -> bool {
     }
     a.iter().zip(b).fold(0u8, |n, (a, b)| n | (a ^ b)) == 0
 }
+struct RequestReader {
+    stream: TcpStream,
+    deadline: std::time::Instant,
+}
+impl Read for RequestReader {
+    fn read(&mut self, bytes: &mut [u8]) -> io::Result<usize> {
+        let remaining = self
+            .deadline
+            .checked_duration_since(std::time::Instant::now())
+            .ok_or_else(|| io::Error::from(io::ErrorKind::TimedOut))?;
+        self.stream
+            .set_read_timeout(Some(remaining.min(Duration::from_secs(1))))?;
+        self.stream.read(bytes)
+    }
+}
+fn dispatch_http(
+    stream: TcpStream,
+    host: Arc<Mutex<Host>>,
+    authority: String,
+    token: String,
+    slots: Arc<std::sync::atomic::AtomicUsize>,
+) {
+    use std::sync::atomic::Ordering;
+    if slots.fetch_add(1, Ordering::SeqCst) >= 16 {
+        slots.fetch_sub(1, Ordering::SeqCst);
+        return;
+    }
+    std::thread::spawn(move || {
+        struct Permit(Arc<std::sync::atomic::AtomicUsize>);
+        impl Drop for Permit {
+            fn drop(&mut self) {
+                self.0.fetch_sub(1, Ordering::SeqCst);
+            }
+        }
+        let _permit = Permit(slots);
+        let _ = http_connection(stream, &host, &authority, &token);
+    });
+}
 fn http_connection(
     mut stream: TcpStream,
     host: &Arc<Mutex<Host>>,
@@ -615,7 +653,10 @@ fn http_connection(
     stream
         .set_write_timeout(Some(Duration::from_secs(5)))
         .map_err(io_error)?;
-    let mut reader = io::BufReader::new(stream.try_clone().map_err(io_error)?);
+    let mut reader = io::BufReader::new(RequestReader {
+        stream: stream.try_clone().map_err(io_error)?,
+        deadline: std::time::Instant::now() + Duration::from_secs(5),
+    });
     let mut total = 0usize;
     let mut lines = Vec::new();
     loop {
@@ -688,9 +729,16 @@ fn daemon(root: &Path, host: Host) -> Result<()> {
     fs::write(&descriptor,serde_json::to_vec(&json!({"schemaVersion":1,"url":format!("http://{authority}/v1/call"),"token":token,"pid":std::process::id()})).unwrap()).map_err(io_error)?;
     private(&descriptor)?;
     let host = Arc::new(Mutex::new(host));
+    let slots = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     for stream in listener.incoming() {
         if let Ok(stream) = stream {
-            let _ = http_connection(stream, &host, &authority, &token);
+            dispatch_http(
+                stream,
+                host.clone(),
+                authority.clone(),
+                token.clone(),
+                slots.clone(),
+            );
         }
     }
     let _ = fs::remove_file(descriptor);
@@ -788,7 +836,7 @@ fn run() -> Result<()> {
         return Err(error("INVALID_DATA_DIR", "Data directory must be absolute"));
     }
     match command.as_str() {
-        "lan-forward" => {
+        "lan-forward" | "lan-webdriver" => {
             let address = args
                 .next()
                 .ok_or_else(|| error("USAGE", "Private LAN destination required"))?
@@ -806,7 +854,11 @@ fn run() -> Result<()> {
             if args.next().is_some() {
                 return Err(error("USAGE", "Unexpected argument"));
             }
-            return lan::forward(&root, address, &server, &client, &profile);
+            return if command == "lan-forward" {
+                lan::forward(&root, address, &server, &client, &profile)
+            } else {
+                lan::forward_webdriver(&root, address, &server, &client, &profile)
+            };
         }
         "call" => {
             let mut input = io::stdin().lock();
@@ -933,6 +985,55 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn partial_http_request_does_not_block_authenticated_status() {
+        let root =
+            std::env::temp_dir().join(format!("material-http-concurrent-test-{}", random_hex()));
+        let host = Arc::new(Mutex::new(Host::new(&root).unwrap()));
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let authority = address.to_string();
+        let secret = random_hex();
+        let slots = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let server_authority = authority.clone();
+        let server_secret = secret.clone();
+        let server_slots = slots.clone();
+        let thread = std::thread::spawn(move || {
+            for _ in 0..2 {
+                let (stream, _) = listener.accept().unwrap();
+                dispatch_http(
+                    stream,
+                    host.clone(),
+                    server_authority.clone(),
+                    server_secret.clone(),
+                    server_slots.clone(),
+                );
+            }
+        });
+        let mut stalled = TcpStream::connect(address).unwrap();
+        stalled
+            .write_all(b"POST /v1/call HTTP/1.1\r\nHost:")
+            .unwrap();
+        let mut valid = TcpStream::connect(address).unwrap();
+        valid
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let body = br#"{"id":"concurrent","method":"system.status","params":{}}"#;
+        write!(valid,"POST /v1/call HTTP/1.1\r\nHost: {authority}\r\nAuthorization: Bearer {secret}\r\nContent-Length: {}\r\n\r\n",body.len()).unwrap();
+        valid.write_all(body).unwrap();
+        let mut response = String::new();
+        valid.read_to_string(&mut response).unwrap();
+        assert!(response.contains("concurrent"));
+        assert!(response.contains("200 OK"));
+        drop(stalled);
+        thread.join().unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
+        while slots.load(std::sync::atomic::Ordering::SeqCst) != 0 {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
     #[cfg(windows)]
     #[test]
     fn private_acl_removes_preexisting_explicit_everyone_rule() {

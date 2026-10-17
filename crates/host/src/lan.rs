@@ -386,6 +386,158 @@ pub fn forward(
     }
     Ok(())
 }
+pub fn forward_webdriver(
+    root: &Path,
+    address: SocketAddr,
+    server: &str,
+    public: &str,
+    profile: &str,
+) -> Result<()> {
+    if !private_address(address) {
+        return Err(error(
+            "INVALID_LISTEN",
+            "An explicit private LAN destination is required",
+        ));
+    }
+    let secret = Zeroizing::new(fs::read(root.join("lan-key")).map_err(io_error)?);
+    if secret.len() != 32 {
+        return Err(error("INVALID_KEY", "Invalid local pairing identity"));
+    }
+    let mut paired = PairedClient::connect(address, &secret, server, public)?;
+    let endpoint = paired.call("automation.endpoint", json!({"id":profile}))?;
+    if endpoint["protocol"] != "webdriver" {
+        return Err(error(
+            "CAPABILITY_UNAVAILABLE",
+            "Profile is not running WebDriver",
+        ));
+    }
+    let session = endpoint["sessionId"]
+        .as_str()
+        .filter(|s| !s.is_empty() && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-'))
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Invalid owned session"))?
+        .to_owned();
+    let listener = TcpListener::bind("127.0.0.1:0").map_err(io_error)?;
+    let authority = listener.local_addr().map_err(io_error)?.to_string();
+    println!(
+        "{}",
+        json!({"url":format!("http://{}",listener.local_addr().map_err(io_error)?),"sessionId":session,"profileId":profile})
+    );
+    // Serialized requests preserve the owned WebDriver session's command ordering.
+    for incoming in listener.incoming() {
+        let mut stream = incoming.map_err(io_error)?;
+        let outcome = (|| -> Result<Value> {
+            stream
+                .set_read_timeout(Some(Duration::from_secs(5)))
+                .map_err(io_error)?;
+            stream
+                .set_write_timeout(Some(Duration::from_secs(5)))
+                .map_err(io_error)?;
+            let mut reader = io::BufReader::new(stream.try_clone().map_err(io_error)?);
+            let line =
+                read_line(&mut reader)?.ok_or_else(|| error("INVALID_HTTP", "Request required"))?;
+            let line =
+                String::from_utf8(line).map_err(|_| error("INVALID_HTTP", "Invalid request"))?;
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields.len() != 3
+                || fields[2] != "HTTP/1.1"
+                || !["GET", "POST", "DELETE"].contains(&fields[0])
+            {
+                return Err(error("INVALID_HTTP", "Unsupported request"));
+            }
+            let prefix = format!("/session/{session}");
+            let path = fields[1]
+                .strip_prefix(&prefix)
+                .filter(|p| p.is_empty() || p.starts_with('/'))
+                .ok_or_else(|| {
+                    error(
+                        "GRANT_REQUIRED",
+                        "Only the owned WebDriver session is available",
+                    )
+                })?;
+            let mut total = line.len();
+            let mut length = None;
+            let mut headers = std::collections::HashMap::new();
+            loop {
+                let line = read_line(&mut reader)?
+                    .ok_or_else(|| error("INVALID_HTTP", "Incomplete headers"))?;
+                total += line.len();
+                if total > 8192 {
+                    return Err(error("INVALID_HTTP", "Headers exceed limit"));
+                }
+                if line == b"\r\n" {
+                    break;
+                }
+                let line =
+                    String::from_utf8(line).map_err(|_| error("INVALID_HTTP", "Invalid header"))?;
+                let (name, value) = line
+                    .split_once(':')
+                    .ok_or_else(|| error("INVALID_HTTP", "Invalid header"))?;
+                if headers
+                    .insert(name.to_ascii_lowercase(), value.trim().to_owned())
+                    .is_some()
+                {
+                    return Err(error("INVALID_HTTP", "Duplicate header"));
+                }
+                if name.eq_ignore_ascii_case("origin")
+                    || name.eq_ignore_ascii_case("transfer-encoding")
+                {
+                    return Err(error(
+                        "INVALID_HTTP",
+                        "Browser origins and transfer encoding are unavailable",
+                    ));
+                }
+                if name.eq_ignore_ascii_case("content-length") {
+                    if length.is_some() {
+                        return Err(error("INVALID_HTTP", "Duplicate length"));
+                    }
+                    length = Some(
+                        value
+                            .trim()
+                            .parse::<usize>()
+                            .map_err(|_| error("INVALID_HTTP", "Invalid length"))?,
+                    );
+                }
+            }
+            if headers.get("host") != Some(&authority) {
+                return Err(error("INVALID_HTTP", "Exact loopback Host required"));
+            }
+            let length = length.unwrap_or(0);
+            if length > 32768 {
+                return Err(error("MESSAGE_TOO_LARGE", "WebDriver body exceeds limit"));
+            }
+            let mut body = Zeroizing::new(vec![0; length]);
+            reader.read_exact(&mut body).map_err(io_error)?;
+            let body = if body.is_empty() {
+                json!({})
+            } else {
+                serde_json::from_slice(&body)
+                    .map_err(|_| error("INVALID_PARAMS", "JSON body required"))?
+            };
+            paired.call(
+                "automation.webdriver",
+                json!({"id":profile,"verb":fields[0],"path":path,"body":body}),
+            )
+        })();
+        let (status, body) = match outcome {
+            Ok(value) => ("200 OK", value),
+            Err(_) => (
+                "403 Forbidden",
+                json!({"value":{"error":"unknown error","message":"Owned-session relay rejected request"}}),
+            ),
+        };
+        let bytes = Zeroizing::new(
+            serde_json::to_vec(&body)
+                .map_err(|_| error("SERIALIZATION", "Cannot encode response"))?,
+        );
+        let _ = write!(
+            stream,
+            "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+            bytes.len()
+        );
+        let _ = stream.write_all(&bytes);
+    }
+    Ok(())
+}
 struct PairedClient {
     socket: tungstenite::WebSocket<TcpStream>,
     transport: snow::TransportState,
