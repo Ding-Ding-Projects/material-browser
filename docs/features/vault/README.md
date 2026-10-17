@@ -61,10 +61,23 @@ retain it and inspect before recovery, never delete it automatically.
 `sync.configure` accepts an absolute `folder` separate from the vault root. Set a profile's
 `sync` to true before `sync.push`. The shared directory receives immutable ciphertext chunks,
 revision manifests and a random encrypted publication manifest, with publication written last.
-No preferences or sync-folder path is exported. This transport requires peers initialized with
-the same vault header and encrypted metadata, unlocked separately. Password-based independent
-vault creation generates different keys and does not join an existing vault. Key enrollment and
-network storage provisioning are not provided by the core.
+No preferences or sync-folder path is exported. Each completed publication includes a small
+wrapping header with format, random salt and authenticated encrypted vault key, published before
+the encrypted manifest. A new computer calls `vault.join` with an absolute `folder` and `password`.
+It authenticates the header, validates the complete encrypted publication and every referenced
+chunk/ancestor, then publishes local encrypted metadata and the wrapping header. A wrong password
+or incomplete transfer leaves the new vault locked and unpublished, allowing a safe retry.
+No manual copying of keys or metadata is required. Join requires an empty local vault and a
+dedicated synchronization folder. At most 64 enrollment-header candidates are attempted and
+10,000 total directory entries are accepted; archive old complete publications before reaching
+these bounds. Do not remove ciphertext still referenced by retained revisions. No timestamp
+selects winning data. Password-based independent vault creation creates unrelated keys and does
+not join a vault. Network provisioning is outside the core.
+
+Changing a local password replaces its wrapping header for future publications. Previously
+published headers remain immutable; changing a password does not revoke access to a vault key
+already learned through an older header. Cryptographic access revocation requires key rotation
+and re-encryption, which this version does not implement.
 
 `sync.pull` validates authenticated manifests, file paths, profile key equality, every encrypted
 chunk, revision identity, and parent completeness. A missing or modified object aborts the
@@ -85,7 +98,7 @@ and links at the time of inspection. The root must be private to the current OS 
 checks are not a defense against an adversary concurrently changing the filesystem between
 inspection and open. The host must serialize operations, prevent two managers writing the same
 root, and protect its local IPC. An OS-exclusive lock rejects a second manager for the same root. The core does not provide secure deletion,
-network authentication, live engine barriers or independent key enrollment.
+network authentication, live engine barriers or cryptographic access revocation.
 
 ## Verification
 
@@ -93,4 +106,5 @@ Run `build.bat -Component Core` and `cargo test -p material-browser-core` locall
 synthetic temporary directories and cover wrong passwords, lock/unlock, password rotation,
 tampered content, cross-profile restore refusal, traversal, plaintext metadata absence,
 concurrent revision preservation, explicit resolution and incomplete synchronization.
+
 

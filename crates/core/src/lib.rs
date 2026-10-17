@@ -308,6 +308,7 @@ impl Manager {
                 atomic(&self.root.join("vault.json"), &serde_json::to_vec(&h)?)?;
                 return Ok(json!({"locked":false}));
             }
+            "vault.join" => return self.join(&p),
             "vault.unlock" => {
                 let h: Header = serde_json::from_slice(&read(&self.root.join("vault.json"))?)?;
                 if h.version != 1 {
@@ -635,6 +636,94 @@ impl Manager {
         self.state.revisions.insert(restored.id.clone(), restored);
         Ok(json!({"restored":true,"revisionId":rid,"previousDirectoryRetained":backup.exists()}))
     }
+    fn join(&mut self, p: &Value) -> Result<Value> {
+        if self.root.join("vault.json").exists() || self.key.is_some() {
+            return Err(err("EXISTS", "A new empty vault root is required to join"));
+        }
+        let folder = PathBuf::from(text(p, "folder")?);
+        if !folder.is_absolute() {
+            return Err(err("UNSAFE_PATH", "Sync folder must be absolute"));
+        }
+        no_links(&folder)?;
+        let folder = fs::canonicalize(folder)?;
+        if folder.starts_with(&self.root) || self.root.starts_with(&folder) {
+            return Err(err(
+                "UNSAFE_PATH",
+                "Sync folder must be separate from vault",
+            ));
+        }
+        let password = text(p, "password")?;
+        let entries = fs::read_dir(&folder)?
+            .take(MAX_FILES + 1)
+            .collect::<std::io::Result<Vec<_>>>()?;
+        if entries.len() > MAX_FILES {
+            return Err(err("LIMIT", "Too many synchronization objects"));
+        }
+        let mut headers: Vec<_> = entries
+            .into_iter()
+            .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("header"))
+            .collect();
+        headers.sort_by_key(|e| e.file_name());
+        if headers.is_empty() {
+            return Err(err(
+                "INCOMPLETE_SYNC",
+                "No published vault enrollment header",
+            ));
+        }
+        if headers.len() > 64 {
+            return Err(err("LIMIT", "Too many enrollment headers"));
+        }
+        let mut authenticated = None;
+        for entry in headers {
+            let path = entry.path();
+            let publication = path
+                .file_stem()
+                .and_then(|x| x.to_str())
+                .ok_or_else(|| err("INTEGRITY", "Invalid publication identity"))?;
+            valid_id(publication)?;
+            if !folder.join(format!("{publication}.manifest")).exists() {
+                continue;
+            }
+            let bytes = read(&path)?;
+            if bytes.len() > 4096 {
+                return Err(err("LIMIT", "Enrollment header exceeds size limit"));
+            }
+            let header: Header = serde_json::from_slice(&bytes)?;
+            if header.version != 1 || header.salt.len() != 16 || header.wrapped.len() != 72 {
+                return Err(err("INTEGRITY", "Invalid enrollment header"));
+            }
+            let wrapping = derive(password, &header.salt)?;
+            if let Ok(key) = open(&wrapping, &header.wrapped, b"vault-key-v1") {
+                authenticated = Some((bytes, key));
+                break;
+            }
+        }
+        let (header, key) = authenticated.ok_or_else(|| {
+            err(
+                "AUTHENTICATION",
+                "Password or published vault authentication failed",
+            )
+        })?;
+        if key.len() != 32 {
+            return Err(err("INTEGRITY", "Invalid vault key length"));
+        }
+        self.key = Some(key);
+        self.state = State::default();
+        self.state.sync_folder = Some(folder);
+        let result = (|| {
+            let pulled = self.pull()?;
+            self.persist()?;
+            atomic(&self.root.join("vault.json"), &header)?;
+            Ok(
+                json!({"joined":true,"locked":false,"profiles":self.state.profiles.len(),"sync":pulled}),
+            )
+        })();
+        if result.is_err() {
+            self.key = None;
+            self.state = State::default();
+        }
+        result
+    }
     fn sync_folder(&self) -> Result<PathBuf> {
         let p = self
             .state
@@ -673,6 +762,11 @@ impl Manager {
             }
         }
         let manifest = Uuid::new_v4().to_string();
+        let header = read(&self.root.join("vault.json"))?;
+        if header.len() > 4096 {
+            return Err(err("INTEGRITY", "Invalid vault header size"));
+        }
+        atomic(&folder.join(format!("{manifest}.header")), &header)?;
         atomic(
             &folder.join(format!("{manifest}.manifest")),
             &seal(
@@ -891,6 +985,84 @@ mod tests {
         let rid = revision["id"].as_str().unwrap().to_string();
         a.state.revisions.get_mut(&rid).unwrap().parents = vec![rid.clone()];
         assert_eq!(a.recompute_heads().unwrap_err().code, "INTEGRITY");
+    }
+    #[test]
+    fn join_authenticates_and_restores_on_new_root_without_manual_copy() {
+        let (t, mut source) = manager();
+        let id = profile(&mut source);
+        source
+            .execute("profiles.update", json!({"id":id,"sync":true}))
+            .unwrap();
+        source
+            .execute(
+                "settings.update",
+                json!({"preferences":{"privateSetting":"local only"}}),
+            )
+            .unwrap();
+        let revision = snapshot(&mut source, &id, "portable synthetic data");
+        let shared = t.path().join("transport");
+        source
+            .execute("sync.configure", json!({"folder":shared}))
+            .unwrap();
+        source.execute("sync.push", json!({})).unwrap();
+        let target_root = t.path().join("new-computer");
+        let mut target = Manager::new(target_root.clone()).unwrap();
+        assert_eq!(
+            target
+                .execute("vault.join", json!({"folder":shared,"password":"wrong"}))
+                .unwrap_err()
+                .code,
+            "AUTHENTICATION"
+        );
+        assert!(!target_root.join("vault.json").exists());
+        let chunk = revision["files"]["sample.txt"].as_str().unwrap();
+        let chunk_path = shared.join(format!("{chunk}.enc"));
+        let saved = fs::read(&chunk_path).unwrap();
+        fs::remove_file(&chunk_path).unwrap();
+        assert!(
+            target
+                .execute(
+                    "vault.join",
+                    json!({"folder":shared,"password":"test password"})
+                )
+                .is_err()
+        );
+        assert!(!target_root.join("vault.json").exists());
+        fs::write(chunk_path, saved).unwrap();
+        target
+            .execute(
+                "vault.join",
+                json!({"folder":shared,"password":"test password"}),
+            )
+            .unwrap();
+        assert_eq!(
+            target.execute("profiles.list", json!({})).unwrap()[0]["id"],
+            id
+        );
+        assert!(target.execute("settings.get", json!({})).unwrap()["preferences"].is_null());
+        target
+            .execute(
+                "revisions.restore",
+                json!({"id":id,"revisionId":revision["id"]}),
+            )
+            .unwrap();
+        assert_eq!(
+            fs::read_to_string(target_root.join("active").join(&id).join("sample.txt")).unwrap(),
+            "portable synthetic data"
+        );
+        target.execute("vault.lock", json!({})).unwrap();
+        target
+            .execute("vault.unlock", json!({"password":"test password"}))
+            .unwrap();
+        assert_eq!(
+            target
+                .execute("profiles.list", json!({}))
+                .unwrap()
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
     }
     #[test]
     fn password_lock_change_and_persistence() {
