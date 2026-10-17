@@ -5,9 +5,11 @@ use chacha20poly1305::{
     aead::{Aead, KeyInit, Payload},
 };
 use fs2::FileExt;
+use hkdf::Hkdf;
 use rand::{RngCore, rngs::OsRng};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use sha2::Sha256;
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt,
@@ -333,6 +335,41 @@ fn recover_restore(root: &Path) -> Result<()> {
 }
 
 impl Manager {
+    /// Supplies the versioned browser encryption key only to trusted in-process code.
+    /// The callback must not retain, serialize, log, or export the supplied bytes.
+    /// This is deliberately absent from the JSON command dispatcher.
+    pub fn with_browser_key<T>(
+        &self,
+        profile_id: &str,
+        use_key: impl FnOnce(&[u8; 32]) -> T,
+    ) -> Result<T> {
+        self.key()?;
+        let profile_uuid =
+            Uuid::parse_str(profile_id).map_err(|_| err("INVALID_ID", "Expected a UUID"))?;
+        if !self.state.profiles.contains_key(profile_id) {
+            return Err(err("NOT_FOUND", "Profile not found"));
+        }
+        let profile_key = self
+            .state
+            .keys
+            .get(profile_id)
+            .ok_or_else(|| err("INTEGRITY", "Profile encryption key is missing"))?;
+        if profile_key.len() != 32 {
+            return Err(err("INTEGRITY", "Invalid profile encryption key"));
+        }
+        // Snapshot encryption uses the original random profile key. Browser keys
+        // use a separate HKDF domain, version and stable UUID context.
+        let hkdf =
+            Hkdf::<Sha256>::new(Some(b"material-browser/browser-native-key/v1"), profile_key);
+        let mut context = b"browser-native-encryption\0".to_vec();
+        context.extend_from_slice(&1u32.to_be_bytes());
+        context.extend_from_slice(profile_uuid.as_bytes());
+        let mut browser_key = Zeroizing::new([0u8; 32]);
+        hkdf.expand(&context, browser_key.as_mut())
+            .map_err(|_| err("CRYPTO", "Browser key derivation failed"))?;
+        Ok(use_key(&browser_key))
+    }
+
     pub fn new(root: PathBuf) -> Result<Self> {
         no_links(&root)?;
         fs::create_dir_all(&root)?;
@@ -1132,6 +1169,79 @@ mod tests {
         fs::write(active.join("sample.txt"), value).unwrap();
         m.execute("profiles.snapshot", json!({"id":id,"running":false}))
             .unwrap()
+    }
+    #[test]
+    fn browser_key_is_profile_scoped_and_never_a_json_export() {
+        let (_t, mut m) = manager();
+        let id = profile(&mut m);
+        let other = profile(&mut m);
+        let key = m.with_browser_key(&id, |key| Zeroizing::new(*key)).unwrap();
+        assert!(
+            m.with_browser_key(&other, |other| key.as_slice() != other)
+                .unwrap()
+        );
+        assert_ne!(key.as_slice(), m.state.keys[&id].as_ref());
+        let metadata = read(&m.root.join("metadata.enc")).unwrap();
+        assert!(!metadata.windows(32).any(|window| window == key.as_slice()));
+        let public = m.execute("profiles.list", json!({})).unwrap();
+        assert!(!format!("{public:?}").contains(&format!("{:?}", key.as_slice())));
+        assert_eq!(
+            m.with_browser_key(&Uuid::new_v4().to_string(), |_| ())
+                .unwrap_err()
+                .code,
+            "NOT_FOUND"
+        );
+        assert!(m.execute("profiles.browserKey", json!({"id":id})).is_err());
+        m.execute("vault.lock", json!({})).unwrap();
+        let mut invoked = false;
+        let error = m.with_browser_key(&id, |_| invoked = true).unwrap_err();
+        assert_eq!(error.code, "LOCKED");
+        assert!(!invoked);
+        assert!(!format!("{error:?}").contains(&format!("{:?}", key.as_slice())));
+    }
+
+    #[test]
+    fn browser_key_survives_encrypted_join_and_password_rewrap() {
+        let (t, mut source) = manager();
+        let id = profile(&mut source);
+        source
+            .execute("profiles.update", json!({"id":id,"sync":true}))
+            .unwrap();
+        let expected = source
+            .with_browser_key(&id, |key| Zeroizing::new(*key))
+            .unwrap();
+        let shared = t.path().join("browser-key-transport");
+        source
+            .execute("sync.configure", json!({"folder":shared}))
+            .unwrap();
+        source.execute("sync.push", json!({})).unwrap();
+        let mut target = Manager::new(t.path().join("browser-key-peer")).unwrap();
+        target
+            .execute(
+                "vault.join",
+                json!({"folder":shared,"password":"test password"}),
+            )
+            .unwrap();
+        assert!(
+            target
+                .with_browser_key(&id, |key| expected.as_slice() == key)
+                .unwrap()
+        );
+        target
+            .execute(
+                "vault.changePassword",
+                json!({"oldPassword":"test password","newPassword":"replacement"}),
+            )
+            .unwrap();
+        target.execute("vault.lock", json!({})).unwrap();
+        target
+            .execute("vault.unlock", json!({"password":"replacement"}))
+            .unwrap();
+        assert!(
+            target
+                .with_browser_key(&id, |key| expected.as_slice() == key)
+                .unwrap()
+        );
     }
     #[test]
     fn exclusive_lock_cross_root_and_cycle_validation() {
