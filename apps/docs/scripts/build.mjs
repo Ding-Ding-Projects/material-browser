@@ -1,8 +1,9 @@
-import {readdir,readFile,mkdir,writeFile,copyFile} from 'node:fs/promises';
+import {readdir,readFile,mkdir,writeFile,copyFile,rm} from 'node:fs/promises';
 import {createHash} from 'node:crypto';import path from 'node:path';import {fileURLToPath} from 'node:url';import {execFileSync} from 'node:child_process';import {build} from 'esbuild';import {renderArticle} from './content.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..'),out=path.join(root,'dist/site');
-async function walk(dir){const all=[];for(const item of await readdir(path.join(root,dir),{withFileTypes:true}).catch(()=>[])){const p=dir+'/'+item.name;if(item.isDirectory())all.push(...await walk(p));else if(p.endsWith('.md'))all.push(p);}return all;}
+async function walk(dir){const all=[];for(const item of await readdir(path.join(root,dir),{withFileTypes:true})){const p=dir+'/'+item.name;if(item.isDirectory())all.push(...await walk(p));else if(p.endsWith('.md'))all.push(p);}return all;}
 const files=[...await walk('docs'),...await walk('wiki')].sort(),available=new Set(files);
+if(out!==path.resolve(root,'dist','site'))throw Error('Unexpected output directory');await rm(out,{recursive:true,force:true});
 const approvals=JSON.parse(await readFile(path.join(root,'apps/docs/approved-assets.json'),'utf8')),assets=new Map();
 for(const approval of approvals){if(!approval||typeof approval.path!=='string'||!/^docs\/evidence\/[a-zA-Z0-9_./-]+\.(png|jpg|jpeg|webp)$/.test(approval.path)||approval.path.split('/').includes('..')||!/^[a-f0-9]{64}$/.test(approval.sha256)||approval.reviewedForPublication!==true)throw Error('Invalid approved asset');const bytes=await readFile(path.join(root,approval.path));if(createHash('sha256').update(bytes).digest('hex')!==approval.sha256)throw Error('Approved image hash changed');const destination='assets/'+approval.sha256+path.extname(approval.path);assets.set(approval.path,destination);await mkdir(path.join(out,'assets'),{recursive:true});await writeFile(path.join(out,destination),bytes);}
 const articles=await Promise.all(files.map(async file=>{const body=await readFile(path.join(root,file),'utf8');return{id:file,title:body.match(/^#\s+(.+)$/m)?.[1]||file,category:file.split('/')[1],html:renderArticle(body,file,available,assets),text:body};}));
