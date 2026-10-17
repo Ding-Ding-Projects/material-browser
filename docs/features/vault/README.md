@@ -53,8 +53,24 @@ accepts `id` and returns revisions with `id`, `profileId`, `parents`, `createdAt
 verifies all content into a new staging directory before swapping the active directory. It
 retains the previous directory as a recovery backup. A restore creates a new revision preserving
 current parents, so restoring old contents does not discard later history. Browser database
-files are never merged. An interrupted directory swap can leave an old directory under staging;
-retain it and inspect before recovery, never delete it automatically.
+files are never merged. Restore prepares and authenticates content, a new immutable revision,
+and candidate encrypted metadata before moving active data. A durable journal names the staged
+and previous directories and a flushed encrypted copy of the previous metadata. Failure rolls
+back both active data and metadata. Startup rolls back any transaction whose journal remains,
+including an interruption after metadata publication. Removing the journal is the commit point.
+If filesystem access prevents rollback, operations return `RECOVERY_REQUIRED`; fix the external
+access condition and reopen the vault. Both directory versions and encrypted recovery metadata
+remain retained. This is filesystem crash recovery, not a claim of protection from damaged
+storage hardware or a filesystem that loses previously flushed writes.
+
+Snapshot and restore check the managed `.material-browser.lock` with an OS-exclusive lock and
+reject an engine collision with `PROFILE_RUNNING`. On Windows the lock file handle must close
+before the directory swap, so the host must retain its process-ownership serialization through
+the operation. Snapshot traversal omits the managed lock and native engine lock/IPC files
+(`SingletonLock`, `SingletonCookie`, `SingletonSocket`, `parent.lock`, `.parentlock`, `lock`,
+`DevToolsActivePort`, `MarionetteActivePort`). Restore rejects revisions containing those entries.
+Malformed engine/automation or boolean option types return `INVALID_ARGUMENT` instead of
+silently changing behavior.
 
 ## Folder synchronization
 

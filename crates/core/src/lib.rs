@@ -100,6 +100,8 @@ struct State {
 }
 pub struct Manager {
     _lock: fs::File,
+    #[cfg(test)]
+    restore_fault: Option<&'static str>,
     root: PathBuf,
     key: Option<Zeroizing<Vec<u8>>>,
     state: State,
@@ -227,7 +229,23 @@ fn atomic(path: &Path, data: &[u8]) -> Result<()> {
 }
 fn safe_relative(s: &str) -> Result<PathBuf> {
     let p = PathBuf::from(s);
-    if s.is_empty()
+    if s.len() > 4096
+        || s.chars().any(|c| c.is_control())
+        || s.split('/').any(|part| {
+            let base = part.split('.').next().unwrap_or("").to_ascii_uppercase();
+            part.is_empty()
+                || part.ends_with('.')
+                || part.ends_with(' ')
+                || part.len() > 255
+                || part.contains(['<', '>', '"', '|', '?', '*'])
+                || [
+                    "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6",
+                    "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7",
+                    "LPT8", "LPT9",
+                ]
+                .contains(&base.as_str())
+        })
+        || s.is_empty()
         || s.contains('\\')
         || s.contains(':')
         || p.components().any(|c| !matches!(c, Component::Normal(_)))
@@ -236,6 +254,84 @@ fn safe_relative(s: &str) -> Result<PathBuf> {
     }
     Ok(p)
 }
+#[derive(Serialize, Deserialize)]
+struct RestoreJournal {
+    profile: String,
+    backup: String,
+    staged: String,
+}
+fn ephemeral(name: &str) -> bool {
+    matches!(
+        name.to_ascii_lowercase().as_str(),
+        ".material-browser.lock"
+            | "singletonlock"
+            | "singletoncookie"
+            | "singletonsocket"
+            | "lock"
+            | ".parentlock"
+            | "parent.lock"
+            | "devtoolsactiveport"
+            | "marionetteactiveport"
+    )
+}
+fn profile_lock(directory: &Path) -> Result<fs::File> {
+    let path = directory.join(".material-browser.lock");
+    no_links(&path)?;
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(path)?;
+    file.try_lock_exclusive().map_err(|_| {
+        err(
+            "PROFILE_RUNNING",
+            "Managed profile is locked by an engine or another operation",
+        )
+    })?;
+    Ok(file)
+}
+fn recover_restore(root: &Path) -> Result<()> {
+    let journal_path = root.join("restore-journal.json");
+    if !journal_path.exists() {
+        return Ok(());
+    }
+    let bytes = read(&journal_path)?;
+    if bytes.len() > 4096 {
+        return Err(err("INTEGRITY", "Invalid restore journal"));
+    }
+    let journal: RestoreJournal = serde_json::from_slice(&bytes)?;
+    valid_id(&journal.profile)?;
+    valid_id(&journal.backup)?;
+    valid_id(&journal.staged)?;
+    let active = root.join("active").join(&journal.profile);
+    let backup = root.join("staging").join(&journal.backup);
+    let retained = root.join("staging").join(&journal.staged);
+    no_links(&active)?;
+    no_links(&backup)?;
+    no_links(&retained)?;
+    let metadata_backup = root
+        .join("staging")
+        .join(format!("{}.metadata", journal.backup));
+    // Roll back every journal still present, including a crash after metadata publication.
+    // Removal of the journal is the commit point. Recovery preserves both directory versions.
+    if backup.exists() {
+        if active.exists() {
+            if retained.exists() {
+                return Err(err("RECOVERY_REQUIRED", "Restore staging collision"));
+            }
+            fs::rename(&active, &retained)?;
+        }
+        fs::rename(&backup, &active)?;
+    }
+    let old = read(&metadata_backup)?;
+    // If an external actor replaced metadata with a directory, do not remove that directory.
+    // Active rollback has already occurred; keep the journal for a supported retry.
+    atomic(&root.join("metadata.enc"), &old)?;
+    fs::remove_file(journal_path)?;
+    Ok(())
+}
+
 impl Manager {
     pub fn new(root: PathBuf) -> Result<Self> {
         no_links(&root)?;
@@ -251,8 +347,11 @@ impl Manager {
             .open(lock_path)?;
         lock.try_lock_exclusive()
             .map_err(|_| err("BUSY", "Vault is already open in another manager"))?;
+        recover_restore(&root)?;
         Ok(Self {
             _lock: lock,
+            #[cfg(test)]
+            restore_fault: None,
             root,
             key: None,
             state: State::default(),
@@ -280,8 +379,29 @@ impl Manager {
         Ok(id)
     }
     pub fn execute(&mut self, method: &str, p: Value) -> Result<Value> {
+        if !p.is_object() {
+            return Err(err("INVALID_ARGUMENT", "Parameters must be an object"));
+        }
+        for field in ["automation", "engine"] {
+            if p.get(field).is_some_and(|v| !v.is_string()) {
+                return Err(err("INVALID_ARGUMENT", "Expected a text option"));
+            }
+        }
+        for field in ["sync", "running"] {
+            if p.get(field).is_some_and(|v| !v.is_boolean()) {
+                return Err(err("INVALID_ARGUMENT", "Expected a boolean option"));
+            }
+        }
         if serde_json::to_vec(&p)?.len() > 1024 * 1024 {
             return Err(err("LIMIT", "Request exceeds size limit"));
+        }
+        if self.root.join("restore-journal.json").exists()
+            && !["system.status", "vault.lock"].contains(&method)
+        {
+            return Err(err(
+                "RECOVERY_REQUIRED",
+                "Reopen vault to finish interrupted restore recovery",
+            ));
         }
         match method {
             "system.status" => {
@@ -343,6 +463,9 @@ impl Manager {
         let result = self.dispatch(method, &p);
         match result {
             Ok(value) => {
+                if method == "revisions.restore" {
+                    return Ok(value);
+                }
                 if let Err(e) = self.persist() {
                     self.state = before;
                     return Err(e);
@@ -520,6 +643,7 @@ impl Manager {
         let dir = self.root.join("active").join(&id);
         no_links(&dir)?;
         fs::create_dir_all(&dir)?;
+        let _profile_lock = profile_lock(&dir)?;
         let mut files = BTreeMap::new();
         let mut queue = vec![dir.clone()];
         let mut directory_count = 1usize;
@@ -528,6 +652,9 @@ impl Manager {
             for entry in fs::read_dir(d)? {
                 let entry = entry?;
                 let path = entry.path();
+                if ephemeral(&entry.file_name().to_string_lossy()) {
+                    continue;
+                }
                 let meta = fs::symlink_metadata(&path)?;
                 if meta.file_type().is_symlink() {
                     return Err(err("UNSAFE_PATH", "Snapshot contains a symbolic link"));
@@ -603,6 +730,12 @@ impl Manager {
         let mut total = 0;
         for (name, chunk) in &r.files {
             let rel = safe_relative(name)?;
+            if rel
+                .components()
+                .any(|c| ephemeral(&c.as_os_str().to_string_lossy()))
+            {
+                return Err(err("INTEGRITY", "Revision contains ephemeral engine data"));
+            }
             let bytes = open(
                 &self.state.keys[&id],
                 &read(&self.object(chunk)?)?,
@@ -617,25 +750,61 @@ impl Manager {
         let active = self.root.join("active").join(&id);
         no_links(&active)?;
         fs::create_dir_all(self.root.join("active"))?;
-        let backup = self.root.join("staging").join(Uuid::new_v4().to_string());
-        if active.exists() {
-            fs::rename(&active, &backup)?;
-        }
-        if let Err(e) = fs::rename(&stage, &active) {
-            if backup.exists() {
-                let _ = fs::rename(&backup, &active);
-            }
-            return Err(e.into());
-        }
+        fs::create_dir_all(&active)?;
+        let profile_guard = profile_lock(&active)?;
+        let transaction_id = Uuid::new_v4().to_string();
+        let backup = self.root.join("staging").join(&transaction_id);
+        let previous_metadata = read(&self.root.join("metadata.enc"))?;
+        // Prepare every fallible encrypted object before moving the productive directory.
         let mut restored = r.clone();
         restored.id = Uuid::new_v4().to_string();
         restored.parents = self.state.heads.get(&id).cloned().unwrap_or_default();
         restored.created_at = now();
         self.write_revision(&restored)?;
-        self.state.heads.insert(id, vec![restored.id.clone()]);
+        self.state
+            .heads
+            .insert(id.clone(), vec![restored.id.clone()]);
         self.state.revisions.insert(restored.id.clone(), restored);
-        Ok(json!({"restored":true,"revisionId":rid,"previousDirectoryRetained":backup.exists()}))
+        let next_metadata = seal(
+            self.key()?,
+            &Zeroizing::new(serde_json::to_vec(&self.state)?),
+            b"metadata-v1",
+        )?;
+        let metadata_backup = self
+            .root
+            .join("staging")
+            .join(format!("{transaction_id}.metadata"));
+        atomic(&metadata_backup, &previous_metadata)?;
+        let journal = RestoreJournal {
+            profile: id.clone(),
+            backup: transaction_id,
+            staged: stage.file_name().unwrap().to_str().unwrap().into(),
+        };
+        atomic(
+            &self.root.join("restore-journal.json"),
+            &serde_json::to_vec(&journal)?,
+        )?;
+        // The engine lock is checked before preparation; Windows requires closing its file
+        // handle before directory rename. The host must retain process ownership serialization.
+        drop(profile_guard);
+        let outcome = (|| -> Result<()> {
+            fs::rename(&active, &backup)?;
+            fs::rename(&stage, &active)?;
+            #[cfg(test)]
+            if self.restore_fault == Some("after-swap") {
+                return Err(err("IO", "Injected publication failure"));
+            }
+            atomic(&self.root.join("metadata.enc"), &next_metadata)?;
+            fs::remove_file(self.root.join("restore-journal.json"))?;
+            Ok(())
+        })();
+        if let Err(original) = outcome {
+            recover_restore(&self.root).map_err(|_|err("RECOVERY_REQUIRED", "Restore rollback is incomplete; reopen vault after resolving filesystem access"))?;
+            return Err(original);
+        }
+        Ok(json!({"restored":true,"revisionId":rid,"previousDirectoryRetained":true}))
     }
+
     fn join(&mut self, p: &Value) -> Result<Value> {
         if self.root.join("vault.json").exists() || self.key.is_some() {
             return Err(err("EXISTS", "A new empty vault root is required to join"));
@@ -1064,6 +1233,156 @@ mod tests {
             1
         );
     }
+    #[test]
+    fn restore_failure_keeps_active_metadata_and_memory() {
+        let (_t, mut m) = manager();
+        let id = profile(&mut m);
+        let a = snapshot(&mut m, &id, "A");
+        snapshot(&mut m, &id, "B");
+        let metadata = m.root.join("metadata.enc");
+        let saved = m.root.join("metadata.saved");
+        let before = fs::read(&metadata).unwrap();
+        let heads = m.state.heads.clone();
+        fs::rename(&metadata, &saved).unwrap();
+        fs::create_dir(&metadata).unwrap();
+        assert_eq!(
+            m.execute("revisions.restore", json!({"id":id,"revisionId":a["id"]}))
+                .unwrap_err()
+                .code,
+            "IO"
+        );
+        assert_eq!(
+            fs::read_to_string(m.root.join("active").join(&id).join("sample.txt")).unwrap(),
+            "B"
+        );
+        assert_eq!(m.state.heads, heads);
+        fs::remove_dir(&metadata).unwrap();
+        fs::rename(saved, &metadata).unwrap();
+        m.restore_fault = Some("after-swap");
+        assert_eq!(
+            m.execute("revisions.restore", json!({"id":id,"revisionId":a["id"]}))
+                .unwrap_err()
+                .code,
+            "IO"
+        );
+        assert_eq!(
+            fs::read_to_string(m.root.join("active").join(&id).join("sample.txt")).unwrap(),
+            "B"
+        );
+        assert_eq!(fs::read(metadata).unwrap(), before);
+        assert_eq!(m.state.heads, heads);
+        assert!(!m.root.join("restore-journal.json").exists());
+    }
+
+    #[test]
+    fn interrupted_restore_recovers_prepared_swapped_and_published_phases() {
+        for phase in ["prepared", "swapped", "published"] {
+            let (_t, mut m) = manager();
+            let id = profile(&mut m);
+            snapshot(&mut m, &id, "B");
+            let root = m.root.clone();
+            let old_metadata = fs::read(root.join("metadata.enc")).unwrap();
+            let heads = m.state.heads.clone();
+            let backup = Uuid::new_v4().to_string();
+            let staged = Uuid::new_v4().to_string();
+            fs::create_dir_all(root.join("staging").join(&staged)).unwrap();
+            fs::write(root.join("staging").join(&staged).join("sample.txt"), "A").unwrap();
+            atomic(
+                &root.join("staging").join(format!("{backup}.metadata")),
+                &old_metadata,
+            )
+            .unwrap();
+            atomic(
+                &root.join("restore-journal.json"),
+                &serde_json::to_vec(&RestoreJournal {
+                    profile: id.clone(),
+                    backup: backup.clone(),
+                    staged: staged.clone(),
+                })
+                .unwrap(),
+            )
+            .unwrap();
+            if phase != "prepared" {
+                fs::rename(
+                    root.join("active").join(&id),
+                    root.join("staging").join(&backup),
+                )
+                .unwrap();
+                fs::rename(
+                    root.join("staging").join(&staged),
+                    root.join("active").join(&id),
+                )
+                .unwrap();
+            }
+            if phase == "published" {
+                m.state.preferences = json!({"interrupted":true});
+                m.persist().unwrap();
+            }
+            drop(m);
+            let mut recovered = Manager::new(root.clone()).unwrap();
+            assert_eq!(
+                fs::read_to_string(root.join("active").join(&id).join("sample.txt")).unwrap(),
+                "B",
+                "{phase}"
+            );
+            assert_eq!(
+                fs::read(root.join("metadata.enc")).unwrap(),
+                old_metadata,
+                "{phase}"
+            );
+            recovered
+                .execute("vault.unlock", json!({"password":"test password"}))
+                .unwrap();
+            assert_eq!(recovered.state.heads, heads);
+            assert!(!root.join("restore-journal.json").exists());
+        }
+    }
+
+    #[test]
+    fn engine_lock_and_ephemeral_files_and_typed_parameters() {
+        let (_t, mut m) = manager();
+        let id = profile(&mut m);
+        for bad in [
+            json!({"id":id,"automation":true}),
+            json!({"id":id,"sync":"yes"}),
+        ] {
+            assert_eq!(
+                m.execute("profiles.update", bad).unwrap_err().code,
+                "INVALID_ARGUMENT"
+            );
+        }
+        assert_eq!(
+            m.execute("profiles.create", json!({"name":"bad","engine":123}))
+                .unwrap_err()
+                .code,
+            "INVALID_ARGUMENT"
+        );
+        let r = snapshot(&mut m, &id, "B");
+        let active = m.root.join("active").join(&id);
+        for name in ["DevToolsActivePort", "SingletonCookie", "parent.lock"] {
+            fs::write(active.join(name), "ephemeral").unwrap();
+        }
+        let lock = profile_lock(&active).unwrap();
+        assert_eq!(
+            m.execute("profiles.snapshot", json!({"id":id,"running":false}))
+                .unwrap_err()
+                .code,
+            "PROFILE_RUNNING"
+        );
+        assert_eq!(
+            m.execute("revisions.restore", json!({"id":id,"revisionId":r["id"]}))
+                .unwrap_err()
+                .code,
+            "PROFILE_RUNNING"
+        );
+        drop(lock);
+        let clean = m
+            .execute("profiles.snapshot", json!({"id":id,"running":false}))
+            .unwrap();
+        assert_eq!(clean["files"].as_object().unwrap().len(), 1);
+        assert!(clean["files"].get("sample.txt").is_some());
+    }
+
     #[test]
     fn password_lock_change_and_persistence() {
         let (_t, mut m) = manager();
