@@ -6,6 +6,36 @@ use tungstenite::{Message, accept_with_config, protocol::WebSocketConfig};
 use zeroize::Zeroizing;
 const PROTOCOL: &str = "Noise_KK_25519_ChaChaPoly_SHA256";
 const MAX_NOISE: usize = 65535;
+struct CheckedStream {
+    stream: TcpStream,
+    root: PathBuf,
+    peer: Option<String>,
+    handshake_started: std::time::Instant,
+    established: bool,
+}
+impl Read for CheckedStream {
+    fn read(&mut self, bytes: &mut [u8]) -> io::Result<usize> {
+        if !self.established && self.handshake_started.elapsed() > Duration::from_secs(10) {
+            return Err(io::ErrorKind::PermissionDenied.into());
+        }
+        if self
+            .peer
+            .as_ref()
+            .is_some_and(|peer| trusted(&self.root, peer).is_err())
+        {
+            return Err(io::ErrorKind::PermissionDenied.into());
+        }
+        self.stream.read(bytes)
+    }
+}
+impl Write for CheckedStream {
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        self.stream.write(bytes)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.stream.flush()
+    }
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 struct Grant {
@@ -124,7 +154,14 @@ fn connection(
     let config = WebSocketConfig::default()
         .max_message_size(Some(MAX_NOISE))
         .max_frame_size(Some(MAX_NOISE));
-    let mut socket = accept_with_config(stream, Some(config))
+    let guarded = CheckedStream {
+        stream,
+        root: root.to_path_buf(),
+        peer: None,
+        handshake_started: std::time::Instant::now(),
+        established: false,
+    };
+    let mut socket = accept_with_config(guarded, Some(config))
         .map_err(|_| error("WEBSOCKET_REJECTED", "WebSocket upgrade rejected"))?;
     // Cleartext peer selection performs no operation and conveys no secret. Static keys are paired out of band.
     let first = socket
@@ -135,6 +172,7 @@ fn connection(
         .map_err(|_| error("PAIRING_REQUIRED", "Base64 public key text required"))?
         .to_string();
     trusted(root, &public)?;
+    socket.get_mut().peer = Some(public.clone());
     let remote = key(&public)?;
     let mut handshake = Builder::new(PROTOCOL.parse::<NoiseParams>().unwrap())
         .local_private_key(secret)
@@ -167,6 +205,7 @@ fn connection(
         return Err(error("NOISE_REJECTED", "Incomplete handshake"));
     }
     let mut transport = handshake.into_transport_mode().map_err(noise_error)?;
+    socket.get_mut().established = true;
     loop {
         let grant = match trusted(root, &public) {
             Ok(g) => g,
