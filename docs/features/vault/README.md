@@ -116,7 +116,24 @@ inspection and open. The host must serialize operations, prevent two managers wr
 root, and protect its local IPC. An OS-exclusive lock rejects a second manager for the same root. The core does not provide secure deletion,
 network authentication, live engine barriers or cryptographic access revocation.
 
-## Verification
+## Native browser key boundary
+
+Trusted in-process host code can call `Manager::with_browser_key(profile_id, callback)`
+while the vault is unlocked. It supplies a borrowed 32-byte browser key to the callback,
+then zeroizes its temporary derived buffer. The callback must not retain, serialize,
+log or export the bytes. No JSON command exposes this operation. A locked vault,
+unknown profile or invalid profile key is rejected before invoking the callback.
+
+HKDF-SHA256 derives this key from the encrypted per-profile random key, using the
+`material-browser/browser-native-key/v1` salt and an information field containing the
+browser purpose, version 1 and profile UUID bytes. Snapshot encryption continues using
+its original key domain. Encrypted synchronization and vault joining preserve the
+derivation; password changes rewrap the vault key without changing browser keys.
+This API alone does not demonstrate browser support or authorize extraction of existing
+browser keys. Native adapters must verify their capability and peer identity before
+supplying the borrowed bytes through an authenticated protected in-process or pipe route.
+
+## Verification commands
 
 Run `build.bat -Component Core` and `cargo test -p material-browser-core` locally. Tests use
 synthetic temporary directories and cover wrong passwords, lock/unlock, password rotation,
