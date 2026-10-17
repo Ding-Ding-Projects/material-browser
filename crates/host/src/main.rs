@@ -42,6 +42,7 @@ pub struct Host {
     registry: EngineRegistry,
     supervisor: Supervisor,
     active: PathBuf,
+    operations: Vec<Value>,
     _lock: File,
 }
 impl Host {
@@ -90,10 +91,59 @@ impl Host {
             registry,
             supervisor,
             active,
+            operations: Vec::new(),
             _lock: lock,
         })
     }
-    fn execute(&mut self, method: &str, mut params: Value) -> Result<Value> {
+    fn execute(&mut self, method: &str, params: Value) -> Result<Value> {
+        if !params.is_object() {
+            return Err(error("INVALID_PARAMS", "Parameters must be an object"));
+        }
+        if method == "operations.list" {
+            return Ok(json!(self.operations));
+        }
+        let tracked = [
+            "profiles.snapshot",
+            "revisions.restore",
+            "sync.push",
+            "sync.pull",
+            "vault.changePassword",
+        ]
+        .contains(&method);
+        if !tracked {
+            return self.execute_inner(method, params);
+        }
+        let id = random_hex();
+        let started = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        let result = self.execute_inner(method, params);
+        let finished = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        let status = if result.is_ok() {
+            "completed"
+        } else {
+            "failed"
+        };
+        let mut operation = json!({"id":id,"method":method,"status":status,"events":[{"state":"started","at":started},{"state":status,"at":finished}]});
+        if let Err(ref e) = result {
+            operation["errorCode"] = json!(e.code);
+        }
+        self.operations.push(operation);
+        if self.operations.len() > 128 {
+            self.operations.remove(0);
+        }
+        result.map(|mut value| {
+            if let Some(object) = value.as_object_mut() {
+                object.insert("operationId".into(), json!(id));
+            }
+            value
+        })
+    }
+    fn execute_inner(&mut self, method: &str, mut params: Value) -> Result<Value> {
         if method.len() > 128 {
             return Err(error("INVALID_REQUEST", "Method name exceeds limit"));
         }
@@ -102,7 +152,7 @@ impl Host {
         }
         match method {
             "engines.list" => Ok(json!(self.registry.list())),
-            "automation.endpoint" | "devices.list" | "operations.list" => Err(error(
+            "automation.endpoint" | "devices.list" => Err(error(
                 "CAPABILITY_UNAVAILABLE",
                 "This host has no verified implementation for this capability",
             )),
@@ -287,12 +337,21 @@ fn private(path: &Path) -> Result<()> {
     }
     #[cfg(windows)]
     {
-        let user = std::env::var("USERNAME")
-            .map_err(|_| error("ACL_FAILED", "Current user could not be resolved"))?;
-        let status = std::process::Command::new("icacls.exe")
-            .arg(path)
-            .args(["/inheritance:r", "/grant:r"])
-            .arg(format!("{user}:(OI)(CI)F"))
+        // Build a fresh protected DACL from the process identity, never an environment name.
+        // Removing inheritance alone leaves pre-existing explicit access rules behind.
+        let script = "$ErrorActionPreference='Stop'; $p=$args[0]; $sid=[System.Security.Principal.WindowsIdentity]::GetCurrent().User; if(Test-Path -LiteralPath $p -PathType Container){$acl=New-Object System.Security.AccessControl.DirectorySecurity; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($sid,'FullControl','ContainerInherit,ObjectInherit','None','Allow')}else{$acl=New-Object System.Security.AccessControl.FileSecurity; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($sid,'FullControl','Allow')}; $acl.SetAccessRuleProtection($true,$false); $acl.AddAccessRule($rule); if(Test-Path -LiteralPath $p -PathType Container){[System.IO.Directory]::SetAccessControl($p,$acl)}else{[System.IO.File]::SetAccessControl($p,$acl)}; $actual=if(Test-Path -LiteralPath $p -PathType Container){[System.IO.Directory]::GetAccessControl($p)}else{[System.IO.File]::GetAccessControl($p)}; if(-not $actual.AreAccessRulesProtected){exit 1}; foreach($r in $actual.Access){if($r.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -ne $sid.Value -or $r.AccessControlType -ne 'Allow'){exit 1}}";
+        let script = script.replace(
+            "$p=$args[0]",
+            &format!("$p='{}'", path.to_string_lossy().replace('\'', "''")),
+        );
+        let status = std::process::Command::new("powershell.exe")
+            .args([
+                "-NoLogo",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                &script,
+            ])
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null())
             .status()
@@ -439,6 +498,7 @@ fn daemon(root: &Path, host: Host) -> Result<()> {
     let token = random_hex();
     let descriptor = root.join("api.json");
     fs::write(&descriptor,serde_json::to_vec(&json!({"schemaVersion":1,"url":format!("http://{authority}/v1/call"),"token":token,"pid":std::process::id()})).unwrap()).map_err(io_error)?;
+    private(&descriptor)?;
     let host = Arc::new(Mutex::new(host));
     for stream in listener.incoming() {
         if let Ok(stream) = stream {
@@ -588,9 +648,23 @@ fn run() -> Result<()> {
                 );
             }
             if action != "lock" {
-                params["password"] = Value::String(
-                    rpassword::prompt_password("Vault password: ").map_err(io_error)?,
-                );
+                let bytes = read_line(&mut io::stdin().lock())?.ok_or_else(|| {
+                    error(
+                        "INVALID_PARAMS",
+                        "JSON password object required on standard input",
+                    )
+                })?;
+                let secret: Value = serde_json::from_slice(&bytes).map_err(|_| {
+                    error(
+                        "INVALID_PARAMS",
+                        "JSON password object required on standard input",
+                    )
+                })?;
+                params["password"] = secret
+                    .get("password")
+                    .filter(|p| p.is_string())
+                    .cloned()
+                    .ok_or_else(|| error("INVALID_PARAMS", "Password string required"))?;
             }
             return cli_call(
                 &root,
@@ -651,6 +725,24 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn operation_history_records_real_failure_without_parameters() {
+        let root = std::env::temp_dir().join(format!("material-operation-test-{}", random_hex()));
+        let mut host = Host::new(&root).unwrap();
+        assert!(
+            host.execute("sync.push", json!({"password":"synthetic-only"}))
+                .is_err()
+        );
+        let history = host.execute("operations.list", json!({})).unwrap();
+        assert_eq!(history.as_array().unwrap().len(), 1);
+        assert_eq!(history[0]["status"], "failed");
+        assert_eq!(history[0]["events"][0]["state"], "started");
+        assert_eq!(history[0]["events"][1]["state"], "failed");
+        assert_eq!(history[0]["id"].as_str().unwrap().len(), 64);
+        assert!(!history.to_string().contains("synthetic-only"));
+        drop(host);
+        fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn bounded_parser() {
         assert!(read_line(&mut io::Cursor::new(vec![b'x'; MAX_MESSAGE + 1])).is_err());

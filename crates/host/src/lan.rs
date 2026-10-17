@@ -92,6 +92,7 @@ pub fn create_key(root: &Path) -> Result<()> {
         .map_err(io_error)?;
     file.write_all(&private_key).map_err(io_error)?;
     file.sync_all().map_err(io_error)?;
+    private(&root.join("lan-key"))?;
     println!(
         "{}",
         json!({"publicKey":B64.encode(keys.public),"protocol":PROTOCOL})
@@ -206,6 +207,7 @@ fn connection(
     }
     let mut transport = handshake.into_transport_mode().map_err(noise_error)?;
     socket.get_mut().established = true;
+    let mut tunnels = std::collections::HashMap::<String, (String, TcpStream)>::new();
     loop {
         let grant = match trusted(root, &public) {
             Ok(g) => g,
@@ -254,7 +256,12 @@ fn connection(
             if !authorized(&current, &request) {
                 return Err(error("GRANT_REQUIRED", "Peer grant changed"));
             }
-            match state.execute(&request.method, request.params) {
+            let result = if request.method.starts_with("tunnel.") {
+                tunnel(&mut tunnels, &mut state, &request)
+            } else {
+                state.execute(&request.method, request.params)
+            };
+            match result {
                 Ok(mut value) => {
                     if ["profiles.list", "profiles.status"].contains(&request.method.as_str())
                         && !current.profile_ids.iter().any(|p| p == "*")
@@ -295,7 +302,7 @@ fn authorized(grant: &Grant, request: &Request) -> bool {
     if grant.revoked || !grant.methods.iter().any(|m| m == &request.method) {
         return false;
     }
-    if ["vault.", "settings.", "sync."]
+    if ["vault.", "settings.", "sync.", "operations."]
         .iter()
         .any(|prefix| request.method.starts_with(prefix))
     {
@@ -304,6 +311,8 @@ fn authorized(grant: &Grant, request: &Request) -> bool {
     if (request.method.starts_with("profiles.")
         && !["profiles.list", "profiles.status"].contains(&request.method.as_str()))
         || request.method.starts_with("revisions.")
+        || request.method.starts_with("automation.")
+        || request.method.starts_with("tunnel.")
     {
         if grant.profile_ids.iter().any(|p| p == "*") {
             return true;
@@ -315,7 +324,114 @@ fn authorized(grant: &Grant, request: &Request) -> bool {
             .and_then(Value::as_str)
             .is_some_and(|id| grant.profile_ids.iter().any(|p| p == id));
     }
-    !request.method.starts_with("automation.") && !request.method.starts_with("tunnel.")
+    true
+}
+fn tunnel(
+    tunnels: &mut std::collections::HashMap<String, (String, TcpStream)>,
+    host: &mut Host,
+    request: &Request,
+) -> Result<Value> {
+    let profile = request
+        .params
+        .get("id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| error("INVALID_PARAMS", "Profile id required"))?;
+    // Every chunk rechecks effective automation. A preference change revokes access immediately.
+    let endpoint = match host.execute("automation.endpoint", json!({"id":profile})) {
+        Ok(endpoint) => endpoint,
+        Err(e) => {
+            tunnels.retain(|_, (owner, _)| owner != profile);
+            return Err(e);
+        }
+    };
+    match request.method.as_str() {
+        "tunnel.open" => {
+            if tunnels.len() >= 4 {
+                return Err(error(
+                    "TUNNEL_LIMIT",
+                    "Four tunnels per peer connection permitted",
+                ));
+            }
+            let url = endpoint["url"]
+                .as_str()
+                .ok_or_else(|| error("INVALID_ENDPOINT", "Engine endpoint unavailable"))?;
+            let uri: tungstenite::http::Uri = url
+                .parse()
+                .map_err(|_| error("INVALID_ENDPOINT", "Invalid engine endpoint"))?;
+            let ip: std::net::IpAddr = uri
+                .host()
+                .ok_or_else(|| error("INVALID_ENDPOINT", "Engine endpoint host unavailable"))?
+                .parse()
+                .map_err(|_| error("INVALID_ENDPOINT", "Engine endpoint must use a loopback IP"))?;
+            if !ip.is_loopback() {
+                return Err(error(
+                    "INVALID_ENDPOINT",
+                    "Engine endpoint must use loopback",
+                ));
+            }
+            let port = uri
+                .port_u16()
+                .ok_or_else(|| error("INVALID_ENDPOINT", "Engine endpoint port unavailable"))?;
+            let stream =
+                TcpStream::connect_timeout(&SocketAddr::new(ip, port), Duration::from_secs(2))
+                    .map_err(io_error)?;
+            stream
+                .set_read_timeout(Some(Duration::from_millis(100)))
+                .map_err(io_error)?;
+            stream
+                .set_write_timeout(Some(Duration::from_secs(2)))
+                .map_err(io_error)?;
+            let id = random_hex();
+            tunnels.insert(id.clone(), (profile.to_owned(), stream));
+            Ok(json!({"tunnelId":id,"endpoint":endpoint,"maxChunkBytes":32768}))
+        }
+        "tunnel.exchange" | "tunnel.close" => {
+            let id = request.params["tunnelId"]
+                .as_str()
+                .ok_or_else(|| error("INVALID_PARAMS", "Tunnel id required"))?;
+            let (owner, stream) = tunnels
+                .get_mut(id)
+                .ok_or_else(|| error("TUNNEL_NOT_FOUND", "Tunnel not found"))?;
+            if owner != profile {
+                return Err(error("GRANT_REQUIRED", "Tunnel belongs to another profile"));
+            }
+            if request.method == "tunnel.close" {
+                tunnels.remove(id);
+                return Ok(json!({"closed":true}));
+            }
+            let data = request
+                .params
+                .get("data")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            if data.len() > 43692 {
+                return Err(error("MESSAGE_TOO_LARGE", "Tunnel chunk exceeds limit"));
+            }
+            let data = Zeroizing::new(
+                B64.decode(data)
+                    .map_err(|_| error("INVALID_PARAMS", "Base64 tunnel data required"))?,
+            );
+            if data.len() > 32768 {
+                return Err(error("MESSAGE_TOO_LARGE", "Tunnel chunk exceeds limit"));
+            }
+            stream.write_all(&data).map_err(io_error)?;
+            let mut buffer = Zeroizing::new(vec![0; 32768]);
+            let count = match stream.read(&mut buffer) {
+                Ok(n) => n,
+                Err(e)
+                    if matches!(
+                        e.kind(),
+                        io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
+                    ) =>
+                {
+                    return Ok(json!({"data":"","eof":false}));
+                }
+                Err(e) => return Err(io_error(e)),
+            };
+            Ok(json!({"data":B64.encode(&buffer[..count]),"eof":count==0}))
+        }
+        _ => Err(error("METHOD_NOT_FOUND", "Unknown tunnel method")),
+    }
 }
 #[cfg(test)]
 mod tests {

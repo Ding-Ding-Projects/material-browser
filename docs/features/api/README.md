@@ -36,7 +36,8 @@ material-browser.exe --data-dir C:\MaterialBrowserData vault lock
 material-browser.exe --data-dir C:\MaterialBrowserData call
 ```
 
-Vault commands prompt without terminal echo. `call` reads a complete envelope from standard input,
+Vault create/unlock/join commands read a JSON object with a `password` string from protected
+standard input. Use a parent process with a private pipe and hidden password input. `call` reads a complete envelope from standard input,
 including vault, sync and revision methods. Never place passwords in command arguments or pipes
 saved to shell history. A running daemon retains the unlocked key between commands. Without a
 daemon, a CLI invocation opens a short-lived host, so create/unlock state ends with that command.
@@ -61,8 +62,16 @@ native transports. The host adds `engines.list`, `profiles.status`, `profiles.la
 `profiles.stop`. A profile's stored automation preference supplies the launch mode. Automation
 remains off unless explicitly configured. `requireStableIdentity` defaults to `true`; an explicitly
 chosen basic launch may send `false`. An unverified native integration returns its capability
-error. `profiles.focus`, `automation.endpoint`, `devices.list` and `operations.list` currently
+error. `profiles.focus`, `automation.endpoint` and `devices.list` currently
 return `CAPABILITY_UNAVAILABLE`; there is no arbitrary-port tunnel.
+
+`operations.list` returns the latest 128 snapshot, restore, synchronization and password-change
+attempts in this host process. Each has a random operation id, method, actual terminal state and
+start/terminal events with Unix millisecond times. Successful object results include `operationId`.
+These calls remain synchronous and serialized, so this is completion history rather than live
+parallel progress. Records contain no request parameters, results or exception messages and do
+not persist after host exit. LAN access to this global history requires an explicit method grant
+and the all-profiles scope.
 
 Snapshot, restore and removal check supervisor state and the engine's exclusive profile lock.
 Caller-supplied `running` is overwritten with host-attested state. Locking the vault requires all
@@ -81,6 +90,10 @@ material-browser.exe --data-dir C:\MaterialBrowserData pair-key
 The private key is written using create-new semantics to protected `lan-key`; only the base64
 public key is printed. Exchange public keys through a trusted out-of-band channel. Never accept
 a key copied from an untrusted WebSocket connection as authorization.
+
+On Windows the host derives the current user's SID from the process identity, replaces the data
+directory DACL with a protected user-only rule, and verifies the resulting rules. It separately
+protects the local API descriptor and LAN identity file, including pre-existing explicit rules.
 Create protected `lan-peers.json` locally with exact method and profile grants:
 
 ```json
