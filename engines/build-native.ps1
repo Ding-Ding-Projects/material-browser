@@ -2,9 +2,9 @@ param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$En
 $ErrorActionPreference='Stop'
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
-$base=Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'MaterialBrowser/native'
+$base=Join-Path ([Environment]::GetFolderPath('UserProfile')) '.material-browser/native'
 if($base -match '\s'){throw 'The supported native source path must contain no spaces.'}
-$nativeRoot=Join-Path $base "$Engine-$($pin.revision)"
+$nativeRoot=Join-Path $base "$Engine-$($pin.revision.Substring(0,12))"
 New-Item -ItemType Directory -Path $nativeRoot -Force | Out-Null
 function Run([string]$Exe,[string[]]$Arguments) {
   & $Exe @Arguments
@@ -20,7 +20,7 @@ function Checkout([string]$Path,[string]$Url,[string]$Revision) {
   if($LASTEXITCODE -ne 0 -or $origin -ne $Url){throw 'Native source origin mismatch'}
   $changes=& git -C $Path status --porcelain
   if($changes){throw 'Native source has changes; preserving it instead of replacing it.'}
-  $current=& git -C $Path rev-parse --verify HEAD 2>$null
+  $current=& git -C $Path rev-parse --verify --quiet HEAD
   if($current -ne $Revision){
     Run 'git' @('-C',$Path,'fetch','--depth','1','origin',$Revision)
     Run 'git' @('-C',$Path,'checkout','--detach',$Revision)
@@ -29,7 +29,7 @@ function Checkout([string]$Path,[string]$Url,[string]$Revision) {
   if($current -ne $Revision){throw 'Native source revision mismatch'}
 }
 if($Engine -eq 'chromium'){
-  $depot=Join-Path $base "depot_tools-$($pins.depotTools.revision)"
+  $depot=Join-Path $base "depot_tools-$($pins.depotTools.revision.Substring(0,12))"
   Checkout $depot $pins.depotTools.url $pins.depotTools.revision
   $env:DEPOT_TOOLS_UPDATE='0'
   $env:DEPOT_TOOLS_WIN_TOOLCHAIN='0'
