@@ -19,10 +19,13 @@ lines 7-21 declares the consuming `old_updater` copy target `testonly = true`, w
 affected payload inside `is_chrome_branded`. The other reference in
 [`chrome/updater/BUILD.gn`](https://chromium.googlesource.com/chromium/src/+/0e66b94549a8bd85f03fbdf189b752d6e7b63c32/chrome/updater/BUILD.gn)
 lines 1128-1134 belongs to updater test data under `target_cpu == "x86"`.
-The supported `.gclient` `custom_deps` override therefore omits exactly
-`src/third_party/updater/chrome_win_x86/cipd`. It does not omit the browser target's required
-code or replace any test with a passing claim. Updater integration tests needing this fixture
-remain unavailable. A successful source sync alone is not a native compilation verdict.
+An attempted `.gclient` `custom_deps` override for exactly
+`src/third_party/updater/chrome_win_x86/cipd` did not suppress the CIPD package in the pinned
+depot-tools implementation. The changed-configuration retry ended with the same scanner
+rejection. No further retry is authorized without first proving, offline, that a reviewed
+source-level optional-fixture filter actually omits it. Updater integration tests needing this
+fixture remain unavailable. No security protection was changed. Native Chromium dependency
+synchronization and compilation remain incomplete.
 
 Firefox acquisition completed at its exact revision. MozillaBuild 4.2.1 was verified with
 a valid Mozilla publisher signature and installer SHA-256
@@ -32,3 +35,21 @@ The initial presence probe found no default shell; this is current-host evidence
 fresh-environment claim. Firefox bootstrap uses its supported `--no-system-changes` option;
 the selected source's `Bootstrapper._add_microsoft_defender_antivirus_exclusions` returns
 immediately under that option. No antivirus exclusions are authorized by this build route.
+
+## Preservation state
+
+The native Rust engine's eleven focused tests passed after the bounded graceful-close repair.
+An earlier revision completed the root release build. The latest graceful-close revision still
+requires the real hidden-browser retry; do not infer that result from the unit tests.
+
+`chromium-155-profile-key.patch` adds a current provider, production startup registration and
+GN source ownership. Patch application was checked against the pinned source. It is not applied
+to the native build tree, compiled, or enabled. The authenticated host-side key channel, Firefox
+key integration, stable identity across frames/workers and whole-profile live snapshot barrier
+are unfinished. All advanced capabilities remain disabled.
+
+Firefox's root-entrypoint operation was still bootstrapping its private Visual Studio toolchain
+at the preservation boundary. It had not produced a native browser. Preserve its existing
+operation and read the eventual exit result before deciding whether any retry is appropriate.
+The managed stock browser bundles are baseline automation inputs only and remain immutable
+while their independent runtime matrix is active.
