@@ -305,6 +305,9 @@ fn authorized(grant: &Grant, request: &Request) -> bool {
     if grant.revoked || !grant.methods.iter().any(|m| m == &request.method) {
         return false;
     }
+    if ["profiles.create", "profiles.duplicate"].contains(&request.method.as_str()) {
+        return grant.profile_ids.iter().any(|id| id == "*");
+    }
     if ["vault.", "settings.", "sync.", "operations."]
         .iter()
         .any(|prefix| request.method.starts_with(prefix))
@@ -892,6 +895,41 @@ mod tests {
     }
     #[test]
     fn grants_are_exact() {
+        let mut create_grant = Grant {
+            public_key: String::new(),
+            methods: vec!["profiles.create".into(), "profiles.duplicate".into()],
+            profile_ids: vec!["allowed".into()],
+            revoked: false,
+        };
+        for method in ["profiles.create", "profiles.duplicate"] {
+            assert!(!authorized(
+                &create_grant,
+                &Request {
+                    id: json!(1),
+                    method: method.into(),
+                    params: json!({"id":"allowed"})
+                }
+            ));
+        }
+        create_grant.profile_ids = vec!["*".into()];
+        for method in ["profiles.create", "profiles.duplicate"] {
+            assert!(authorized(
+                &create_grant,
+                &Request {
+                    id: json!(1),
+                    method: method.into(),
+                    params: json!({"id":"allowed"})
+                }
+            ));
+        }
+        assert!(!authorized(
+            &create_grant,
+            &Request {
+                id: json!(1),
+                method: "profiles.remove".into(),
+                params: json!({"id":"allowed"})
+            }
+        ));
         let secret_grant = Grant {
             public_key: String::new(),
             methods: vec!["vault.secret".into(), "vault.exportKey".into()],
