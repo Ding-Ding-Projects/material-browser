@@ -1,4 +1,8 @@
-param([ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard')][string]$Component='All')
+param(
+  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative')][string]$Component='All',
+  [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
+  [switch]$AcquireOnly
+)
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
@@ -23,6 +27,12 @@ try {
   if($Component -eq 'Storage') {
     if(-not (Get-Command docker -ErrorAction SilentlyContinue)){throw 'Container runtime is unavailable.'}
     & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile apps/storage
+    if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+  }
+  if($Component -eq 'BrowserNative') {
+    $nativeArgs=@{Engine=$NativeEngine}
+    if($AcquireOnly){$nativeArgs.AcquireOnly=$true}
+    & (Join-Path $root 'engines/build-native.ps1') @nativeArgs
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }
   if($Component -eq 'HostingWizard') {
