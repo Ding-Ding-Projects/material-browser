@@ -350,8 +350,6 @@ impl Supervisor {
                 .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
                 .write_all(b"{\"command\":\"shutdown\"}\n")
                 .map_err(io)?;
-        } else {
-            request_close(p.child.id())?;
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
         while Instant::now() < until {
@@ -359,7 +357,17 @@ impl Supervisor {
                 self.processes.remove(id);
                 return Ok(());
             }
-            std::thread::sleep(Duration::from_millis(25));
+            if !p.adapter {
+                // Launch can return before Chromium creates its first top-level window.
+                // Keep requesting graceful close within the caller's bound rather than
+                // treating the first empty enumeration as a terminal failure.
+                match request_close(p.child.id()) {
+                    Ok(()) => {}
+                    Err(e) if e.code == "GRACEFUL_STOP_UNAVAILABLE" => {}
+                    Err(e) => return Err(e),
+                }
+            }
+            std::thread::sleep(Duration::from_millis(100));
         }
         Err(err(
             "GRACEFUL_STOP_UNAVAILABLE",
