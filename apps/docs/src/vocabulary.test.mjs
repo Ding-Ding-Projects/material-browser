@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseVocabulary} from './vocabulary.mjs';
+test('wording rejects duplicate keys and preserves complete valid inventory',()=>{assert.throws(()=>parseVocabulary('{"schemaVersion":1,"entries":{"a":"b","a":"c"}}'));assert.throws(()=>parseVocabulary('{"schemaVersion":2,"entries":{}}'));assert.equal(parseVocabulary('{"schemaVersion":1,"entries":{"Title":"Heading"}}').entries.Title,'Heading');});

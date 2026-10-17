@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {renderArticle} from '../scripts/content.mjs';
+test('full Markdown and local article links',()=>{const html=renderArticle('# Title\n\n[Other](b.md#hello)\n\nLast paragraph.','docs/a.md',new Set(['docs/b.md']));assert.match(html,/Last paragraph/);assert.match(html,/#\/article\/docs%2Fb.md\?anchor=hello/);assert.match(html,/id="title"/);});
+test('untrusted HTML URLs and images are inert',()=>{const html=renderArticle('<script>alert(1)</script>\n\n[x](javascript:alert(1))\n\n![tracking](https://invalid.example/pixel)','docs/a.md',new Set());assert.doesNotMatch(html,/<script|href="javascript:|<img/);});
