@@ -836,6 +836,31 @@ fn run() -> Result<()> {
         return Err(error("INVALID_DATA_DIR", "Data directory must be absolute"));
     }
     match command.as_str() {
+        "lan-call" => {
+            let address = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Private LAN destination required"))?
+                .parse()
+                .map_err(|_| error("USAGE", "Invalid destination"))?;
+            let server = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Server public key required"))?;
+            let client = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Client public key required"))?;
+            if args.next().is_some() {
+                return Err(error("USAGE", "Unexpected argument"));
+            }
+            let bytes = read_line(&mut io::stdin().lock())?.ok_or_else(|| {
+                error(
+                    "INVALID_REQUEST",
+                    "JSON envelope required on standard input",
+                )
+            })?;
+            let request: Request = serde_json::from_slice(&bytes)
+                .map_err(|_| error("INVALID_REQUEST", "Invalid request envelope"))?;
+            return lan::call_remote(&root, address, &server, &client, request);
+        }
         "lan-forward" | "lan-webdriver" => {
             let address = args
                 .next()

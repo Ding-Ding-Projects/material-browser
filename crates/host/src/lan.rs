@@ -545,6 +545,34 @@ struct PairedClient {
     socket: tungstenite::WebSocket<TcpStream>,
     transport: snow::TransportState,
 }
+pub fn call_remote(
+    root: &Path,
+    address: SocketAddr,
+    server: &str,
+    public: &str,
+    request: Request,
+) -> Result<()> {
+    if !private_address(address) {
+        return Err(error(
+            "INVALID_LISTEN",
+            "An explicit private LAN destination is required",
+        ));
+    }
+    let secret = Zeroizing::new(fs::read(root.join("lan-key")).map_err(io_error)?);
+    if secret.len() != 32 {
+        return Err(error("INVALID_KEY", "Invalid local pairing identity"));
+    }
+    let mut client = PairedClient::connect(address, &secret, server, public)?;
+    let reply = match client.call(&request.method, request.params) {
+        Ok(result) => json!({"id":request.id,"result":result}),
+        Err(e) => json!({"id":request.id,"error":e}),
+    };
+    println!("{reply}");
+    if reply.get("error").is_some() {
+        return Err(error("COMMAND_FAILED", "Paired command returned an error"));
+    }
+    Ok(())
+}
 impl PairedClient {
     fn connect(address: SocketAddr, secret: &[u8], server: &str, public: &str) -> Result<Self> {
         let stream =
@@ -628,7 +656,15 @@ impl PairedClient {
         let value: Value = serde_json::from_slice(&buffer[..n])
             .map_err(|_| error("INVALID_RESPONSE", "Invalid relay response"))?;
         if value.get("error").is_some() {
-            return Err(error("RELAY_REJECTED", "Paired relay command rejected"));
+            let code = value["error"]["code"]
+                .as_str()
+                .filter(|s| {
+                    s.len() <= 64
+                        && !s.is_empty()
+                        && s.bytes().all(|b| b.is_ascii_uppercase() || b == b'_')
+                })
+                .unwrap_or("RELAY_REJECTED");
+            return Err(error(code, "Paired relay command rejected"));
         }
         Ok(value["result"].clone())
     }

@@ -175,6 +175,14 @@ The listener caps concurrent connections at 16 and applies handshake/read/write 
 peers never reach the core. A native client must pin the server's out-of-band public key as well.
 There is no unauthenticated LAN control or plaintext HTTP fallback.
 
+`lan-call PRIVATE_ADDRESS SERVER_PUBLIC_KEY CLIENT_PUBLIC_KEY` reads the same complete JSON
+request envelope from standard input and prints one structured reply. Run it with the client
+identity data directory to create/unlock the remote vault or manage remote profile lifecycle
+through explicit grants. Passwords remain in the protected pipe, never arguments or environment.
+The listener owns its own `Host`; do not start another stdio host for the same data directory.
+Profile creation and duplication require both explicit method permission and the global `*`
+profile scope because they mint new ids. An existing-profile grant cannot authorize either.
+
 ## Verification and limitations
 
 Host unit tests cover message bounds, credential comparison, Noise tampering/replay/wrong-key
