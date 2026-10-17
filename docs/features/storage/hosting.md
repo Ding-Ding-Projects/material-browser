@@ -1,0 +1,21 @@
+# Hosting and pairing
+
+Run `host.bat --detached` to pull the published version and start the tracked Compose service. The default port is 8174 on all interfaces. Set `STORAGE_PORT`, `STORAGE_BIND` and `STORAGE_VERSION` before launch when needed. The launcher uses an existing Docker/Compose installation and reports a real failure if it is unavailable. It never installs Docker, changes system security, elevates, restarts the computer or stops unrelated containers.
+
+On first launch the local console asks for a unique one-use pairing code through a protected input. Only its SHA-256 hash is written to the local configuration directory, with inheritance removed and access restricted to the current user and SYSTEM. The plaintext code is not written to configuration or service logs. The configuration directory is mounted read-only in the container. Enter that code in the dashboard to create an eight-hour administration session. Successful pairing atomically records the consumed hash in the persistent data volume, so it cannot be reused, including after restart. `host.bat --detached --newPairingCode` chooses a new code and recreates only this service to read it. Restarting the service invalidates its in-memory sessions. Keep the configuration and persistent volume private.
+
+The service runs as a non-root user, drops capabilities and uses a read-only root filesystem. Persistent encrypted objects use the named `storage-data` volume. Normal start, log-view exit and image upgrades preserve that volume. Back up the volume through a consistent administrative storage procedure before destructive maintenance. The launcher never deletes it.
+
+`host.bat --logs` opens a keyboard-driven status/log view. F toggles following, R refreshes, and Q leaves the view while containers keep running. Double-clicking offers detached or log mode. There is one service, `storage`; no service-selection control is needed for this Compose inventory. Host-side HTTP health is checked through each discovered LAN address and a full verified URL is printed. This proves host-side LAN binding, not reachability from every other device or a firewall exception. The launcher does not weaken the firewall.
+
+## HTTP limitations
+
+The dashboard uses plain HTTP. Browser code, pairing codes, administration cookies and CSRF values can be observed or altered by an active network attacker. Host and Origin validation, SameSite cookies, CSRF checks and CSP limit browser-origin attacks; they do not authenticate downloaded HTTP code or protect HTTP against interception. Pair only on a trusted network. The dashboard must never receive a vault password or profile encryption key. It cannot claim secure unlock or password protection merely because stored objects are encrypted.
+
+Native encrypted transport is a separate endpoint and authentication boundary. Do not transmit a reusable native capability over plaintext LAN HTTP. Native clients must authenticate the pinned transport identity before sending any credential. A reverse proxy or TLS configuration is not silently assumed.
+
+## Limits and recovery
+
+Uploads require Content-Length and a matching lowercase SHA-256 identifier. The default maximum object is 16 MiB, with four active uploads, a 100 GiB service quota, a 30-second request timeout and 300 requests per source address per minute. Pairing is limited more tightly. Sessions are capped at 32. Capacity exhaustion, interruption or a wrong digest never produces an acknowledged object. Temporary files are not visible as objects. A crashed upload can leave a hidden temporary file, which an offline administrator may remove after stopping the service. Such files consume storage and must be included in operational capacity planning.
+
+The server stores only opaque identifiers, byte counts and encrypted revision bodies. The native client authenticates and validates the revision DAG, parent references and chunk references. Head updates use expected-head comparison; a conflict preserves both immutable revisions for client reconciliation. The service does not infer a safe merge or a complete snapshot from object existence.
