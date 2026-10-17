@@ -26,7 +26,7 @@ Replies are `{ "id": "request-id", "result": ... }` or
 No passwords in argv, environment variables or logs. Native clients may supply secrets through
 protected standard input or local IPC. The host owns long-running operation serialization.
 
-Methods: `system.status`, `vault.create`, `vault.unlock`, `vault.lock`, `vault.changePassword`,
+Methods: `system.status`, `vault.create`, `vault.join`, `vault.unlock`, `vault.lock`, `vault.changePassword`,
 `profiles.list`, `profiles.create`, `profiles.update`, `profiles.duplicate`, `profiles.remove`,
 `profiles.snapshot`, `revisions.list`, `revisions.restore`, `sync.configure`, `sync.push`,
 `sync.pull`, `sync.conflicts`, `sync.resolve`, `settings.get`, `settings.update`.
