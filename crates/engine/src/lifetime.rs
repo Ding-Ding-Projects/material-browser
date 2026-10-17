@@ -3,7 +3,7 @@ use super::*;
 use std::io::Write;
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct ProcessIdentity {
     pub pid: u32,
@@ -86,6 +86,15 @@ pub(super) fn capture(pid: u32, executable: &Path, profile: &Path) -> Result<Pro
         executable: executable.into(),
         profile: profile.into(),
     })
+}
+pub(super) fn is_alive(identity: &ProcessIdentity) -> Result<bool> {
+    match native_start_time_if_exists(identity.pid)? {
+        Some(start) if start == identity.start_time => {
+            let actual = capture(identity.pid, &identity.executable, &identity.profile)?;
+            Ok(actual.start_time == identity.start_time)
+        }
+        _ => Ok(false),
+    }
 }
 
 pub(super) fn assert_inactive(root: &Path, id: &str) -> Result<()> {

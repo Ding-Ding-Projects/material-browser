@@ -185,6 +185,7 @@ struct OwnedProcess {
     adapter: bool,
     endpoint: Option<AutomationEndpoint>,
     _job: process_job::ProcessJob,
+    identity: lifetime::ProcessIdentity,
 }
 /// Keep this lease alive for the entire snapshot, restore, or removal operation.
 pub struct ProfileLease {
@@ -293,7 +294,9 @@ impl Supervisor {
         lifetime::persist(
             &self.root,
             &request.profile_id,
-            &lifetime::Journal::Running { identity },
+            &lifetime::Journal::Running {
+                identity: identity.clone(),
+            },
         )?;
         let status = ProcessStatus {
             profile_id: request.profile_id.clone(),
@@ -311,6 +314,7 @@ impl Supervisor {
                 adapter,
                 endpoint,
                 _job: job,
+                identity,
             },
         );
         Ok(status)
@@ -322,7 +326,7 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
-            if p.child.try_wait().map_err(io)?.is_some() {
+            if p.child.try_wait().map_err(io)?.is_some() || !lifetime::is_alive(&p.identity)? {
                 exited.push(id.clone());
             }
         }
