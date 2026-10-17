@@ -36,7 +36,7 @@ try {
   }
   if($Component -eq 'Storage') {
     if(-not (Get-Command docker -ErrorAction SilentlyContinue)){throw 'Container runtime is unavailable.'}
-    & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile apps/storage
+    & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile .
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }
   if($Component -eq 'BrowserNative') {

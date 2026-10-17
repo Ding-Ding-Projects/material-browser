@@ -1,0 +1,12 @@
+**
+!apps/
+!apps/storage/
+!apps/storage/package.json
+!apps/storage/server/
+!apps/storage/server/*.mjs
+apps/storage/server/*.test.mjs
+!apps/storage/web/
+!apps/storage/web/index.html
+!apps/storage/web/app.js
+!apps/storage/web/styles.css
+!apps/storage/Dockerfile
