@@ -57,6 +57,16 @@ The OpenAPI document and Postman collection in this directory describe only this
 
 ## Methods and lifecycle safety
 
+Trusted local engine bundles live under the data directory's `engines/chromium` and
+`engines/firefox` directories. Each contains its verified `manifest.json`; optional `adapters.json`
+maps `selenium` and/or `puppeteer` to the engine's `AdapterRuntime` configuration. It pins absolute
+`node` and `helper` paths plus `nodeSha256`, `helperSha256` and `browserVersion`; Selenium also
+pins `driver`, `driverSha256` and `driverVersion`. The host bounds this file to 64 KiB and the
+engine verifies every hash and driver version. Never obtain this configuration from a renderer or
+paired peer. Stock baseline bundles must declare advanced capabilities false and be launched
+with the explicit `requireStableIdentity:false` choice; baseline automation proves no native
+encryption, live snapshot or stable-identity integration.
+
 The core methods in [the architecture contract](../../architecture.md) are available through all
 native transports. The host adds `engines.list`, `profiles.status`, `profiles.launch` and
 `profiles.stop`. A profile's stored automation preference supplies the launch mode. Automation

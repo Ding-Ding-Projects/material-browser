@@ -1,6 +1,8 @@
 use fs2::FileExt;
 use material_browser_core::Manager;
-use material_browser_engine::{EngineRegistry, LaunchRequest, Supervisor};
+use material_browser_engine::{
+    AdapterRuntime, AutomationMode, EngineKind, EngineRegistry, LaunchRequest, Supervisor,
+};
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -80,6 +82,38 @@ impl Host {
                         code: e.code,
                         message: e.message,
                     })?;
+                let adapter_path = bundle.join("adapters.json");
+                if adapter_path.exists() {
+                    let bytes = fs::read(adapter_path).map_err(io_error)?;
+                    if bytes.len() > 65536 {
+                        return Err(error(
+                            "INVALID_ADAPTER",
+                            "Adapter configuration exceeds limit",
+                        ));
+                    }
+                    let adapters: std::collections::HashMap<String, AdapterRuntime> =
+                        serde_json::from_slice(&bytes).map_err(|_| {
+                            error("INVALID_ADAPTER", "Invalid adapter configuration")
+                        })?;
+                    for (mode, runtime) in adapters {
+                        let mode = match mode.as_str() {
+                            "selenium" => AutomationMode::Selenium,
+                            "puppeteer" => AutomationMode::Puppeteer,
+                            _ => return Err(error("INVALID_ADAPTER", "Unsupported adapter mode")),
+                        };
+                        registry
+                            .register_adapter(
+                                if kind == "chromium" {
+                                    EngineKind::Chromium
+                                } else {
+                                    EngineKind::Firefox
+                                },
+                                mode,
+                                runtime,
+                            )
+                            .map_err(|e| error(&e.code, &e.message))?;
+                    }
+                }
             }
         }
         let active = root.join("active");
@@ -899,6 +933,27 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    #[test]
+    fn private_acl_removes_preexisting_explicit_everyone_rule() {
+        let root = std::env::temp_dir().join(format!("material-acl-test-{}", random_hex()));
+        fs::create_dir_all(&root).unwrap();
+        let script = format!(
+            "$ErrorActionPreference='Stop'; $p='{}'; $acl=[System.IO.Directory]::GetAccessControl($p); $sid=New-Object System.Security.Principal.SecurityIdentifier('S-1-1-0'); $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($sid,'Read','ContainerInherit,ObjectInherit','None','Allow'); $acl.AddAccessRule($rule); [System.IO.Directory]::SetAccessControl($p,$acl)",
+            root.to_string_lossy().replace('\'', "''")
+        );
+        assert!(
+            std::process::Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-Command", &script])
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .status()
+                .unwrap()
+                .success()
+        );
+        private(&root).unwrap(); // Its readback rejects every SID except the current process user.
+        fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn webdriver_proxy_confines_requests_to_owned_session() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();

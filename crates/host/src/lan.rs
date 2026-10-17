@@ -299,6 +299,9 @@ fn connection(
     }
 }
 fn authorized(grant: &Grant, request: &Request) -> bool {
+    if request.method == "vault.secret" || request.method == "vault.exportKey" {
+        return false;
+    }
     if grant.revoked || !grant.methods.iter().any(|m| m == &request.method) {
         return false;
     }
@@ -737,6 +740,22 @@ mod tests {
     }
     #[test]
     fn grants_are_exact() {
+        let secret_grant = Grant {
+            public_key: String::new(),
+            methods: vec!["vault.secret".into(), "vault.exportKey".into()],
+            profile_ids: vec!["*".into()],
+            revoked: false,
+        };
+        for method in ["vault.secret", "vault.exportKey"] {
+            assert!(!authorized(
+                &secret_grant,
+                &Request {
+                    id: json!(1),
+                    method: method.into(),
+                    params: json!({})
+                }
+            ));
+        }
         let grant = Grant {
             public_key: String::new(),
             methods: vec!["profiles.stop".into()],
