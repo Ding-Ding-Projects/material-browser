@@ -28,3 +28,9 @@ The build and publication owners must verify home, every guide step, example on/
 ## Scope limitations
 
 This documentation component does not implement native setup, browser launch, cross-machine restoration, live snapshot consistency or service deployment. It describes the product's capability reports and limitations. Full universal settings, narrator, element appearance/locking, School mode and advanced regex engine tracing remain outside this initial documentation implementation and must remain listed as incomplete acceptance, never claimed supported.
+
+## Independent review and primitive map
+
+Independent review accepted this design conditionally before presentation implementation. Native Material Web 2.5.0 filled/outlined buttons, switches and checkboxes are bundled locally. Navigation uses a Material-shaped semantic rail and a labelled outlined-button narrow-screen toggle, not a details element. Reading cards, guide step chips, progress panels and code surfaces are custom CSS following the documented color, shape and typography tokens; they are not claimed to be native Material components. Search and file/range fields are semantic native controls with shared focus and sizing treatment. These custom primitives still require visual conformance review.
+
+Build output inventory.json enumerates every actual docs/wiki source and the exact source commit. The initial footer displays version, build timestamp and source identity. This is build metadata, not a claim about deployment time. Missing runtime proof and universal feature gaps remain incomplete acceptance items.

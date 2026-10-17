@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative')][string]$Component='All',
+  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative','Docs')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
   [switch]$AcquireOnly
 )
@@ -19,6 +19,16 @@ try {
     Push-Location (Join-Path $root 'apps/desktop')
     try {
       if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & npm.cmd run build
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+    } finally { Pop-Location }
+  }
+  if($Component -in @('All','Docs')) {
+    if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required for documentation.'}
+    Push-Location (Join-Path $root 'apps/docs')
+    try {
+      & npm.cmd ci --no-audit --no-fund
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
       & npm.cmd run build
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}

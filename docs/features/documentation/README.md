@@ -11,3 +11,5 @@ Markdown raw HTML is disabled and rendered output is sanitized. Executable link 
 ## Verification and limitations
 
 Build checks validate complete source inventory, safe Markdown and internal links. Browser interaction, local persistence, narrow layouts, live publication, companion packaging and native launch need separate evidence. The design reference lists the required state and scale matrix. Broader universal settings, narrator, element locking/appearance, shared School mode and full regex tracing are incomplete acceptance items, not shipped claims.
+
+Reviewed local images are supported through `apps/docs/approved-assets.json`: each entry requires a `docs/evidence/` image path, exact SHA-256, and `reviewedForPublication: true`. Builds reject traversal, unsupported files and changed hashes, then copy approved bytes into the offline bundle. The initial inventory is empty because no current captures have been approved. External images never load.
