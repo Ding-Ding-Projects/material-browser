@@ -17,10 +17,11 @@ const run = (command, args, timeout = 15000) => new Promise(resolve => {
   const done = result => { if (!settled) { settled = true; clearTimeout(timer); resolve(result); } };
   const timer = setTimeout(() => { child.kill(); done({ ok: false, reason: 'timeout' }); }, timeout);
   child.stdout.on('data', b => { if (output.length < 4096) output += b.toString(); });
+  child.stderr.resume();
   child.on('error', () => done({ ok: false, reason: 'unavailable' }));
   child.on('close', code => done({ ok: code === 0, version: code === 0 ? output.trim().slice(0, 120) : undefined, reason: code === 0 ? undefined : 'not-ready' }));
 });
-function authorized(event) { if (!window || event.sender !== window.webContents || !event.senderFrame.url.startsWith('file:')) throw new Error('Invalid sender'); }
+function authorized(event) { if (!window || event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame || event.senderFrame.url !== window.webContents.getURL()) throw new Error('Invalid sender'); }
 app.whenReady().then(() => {
   window = new BrowserWindow({ width: 1100, height: 760, minWidth: 720, minHeight: 600, show: false, title: 'Material Browser Storage Setup', autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));

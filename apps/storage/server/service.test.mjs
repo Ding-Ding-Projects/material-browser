@@ -43,6 +43,15 @@ test('one-use pairing survives restart marker, CSRF and hostile origins rejected
  assert.equal((await f.request('/health',{headers:{Host:'attacker.invalid'}})).status,403);
  assert.equal((await fs.readdir(path.join(f.root,'pairing-consumed'))).length,1);
 });
+
+test('dashboard CSP isolates bounded regex workers without allowing inline scripts',async t=>{
+ const f=await fixture(t);
+ const response=await f.request('/health');
+ const policy=response.headers.get('content-security-policy');
+ assert.match(policy, /(?:^|; )worker-src 'self' blob:/);
+ assert.match(policy, /(?:^|; )script-src 'self';/);
+ assert.doesNotMatch(policy, /script-src[^;]*unsafe-inline/);
+});
 test('oversize and wrong digest do not publish or leave temporary objects',async t=>{
  const f=await fixture(t),vault='b'.repeat(64),id='c'.repeat(64),url=`/api/vaults/${vault}/chunks/${id}`;
  assert.equal((await f.auth(url,{method:'PUT',body:Buffer.alloc(1025)})).status,413);

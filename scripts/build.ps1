@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative')][string]$Component='All',
+  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','StorageWeb','HostingWizard','BrowserNative')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
   [switch]$AcquireOnly
 )
@@ -17,6 +17,16 @@ try {
   if($Component -in @('All','Desktop')) {
     if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required. Bootstrap is not yet available on this host.'}
     Push-Location (Join-Path $root 'apps/desktop')
+    try {
+      if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & npm.cmd run build
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+    } finally { Pop-Location }
+  }
+  if($Component -in @('Storage','StorageWeb','HostingWizard')) {
+    if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required for the storage interface.'}
+    Push-Location (Join-Path $root 'apps/storage/web')
     try {
       if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
