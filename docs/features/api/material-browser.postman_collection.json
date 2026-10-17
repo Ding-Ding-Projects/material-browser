@@ -1,1 +1,100 @@
-{"info":{"name":"Material Browser local API","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},"variable":[{"key":"baseUrl","value":"http://127.0.0.1:8787"},{"key":"localCredential","value":""}],"auth":{"type":"bearer","bearer":[{"key":"token","value":"{{localCredential}}","type":"string"}]},"item":[{"name":"List profiles","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"id\":\"postman-list\",\"method\":\"profiles.list\",\"params\":{}}"},"url":"{{baseUrl}}/v1/call","description":"Native Postman only. Set exact baseUrl and credential from the protected local descriptor. Never synchronize the credential."}}]}
+{
+  "info": {
+    "name": "Material Browser local API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8787"
+    },
+    {
+      "key": "localCredential",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{localCredential}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "List profiles",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"postman-list\",\"method\":\"profiles.list\",\"params\":{}}"
+        },
+        "url": "{{baseUrl}}/v1/call",
+        "description": "Native Postman only. Set exact baseUrl and credential from the protected local descriptor. Never synchronize the credential."
+      }
+    },
+    {
+      "name": "Operation history",
+      "request": {
+        "url": "{{baseUrl}}/v1/call",
+        "description": "Native local API only. Configure the exact protected descriptor authority and credential locally.",
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"postman\",\"method\":\"operations.list\",\"params\":{}}"
+        }
+      }
+    },
+    {
+      "name": "Owned automation endpoint",
+      "request": {
+        "url": "{{baseUrl}}/v1/call",
+        "description": "Native local API only. Configure the exact protected descriptor authority and credential locally.",
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"postman\",\"method\":\"automation.endpoint\",\"params\":{\"id\":\"PROFILE_UUID\"}}"
+        }
+      }
+    },
+    {
+      "name": "Owned WebDriver URL",
+      "request": {
+        "url": "{{baseUrl}}/v1/call",
+        "description": "Native local API only. Configure the exact protected descriptor authority and credential locally.",
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"id\":\"postman\",\"method\":\"automation.webdriver\",\"params\":{\"path\":\"/url\",\"id\":\"PROFILE_UUID\",\"verb\":\"GET\"}}"
+        }
+      }
+    }
+  ]
+}

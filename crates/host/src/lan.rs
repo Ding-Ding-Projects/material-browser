@@ -207,7 +207,7 @@ fn connection(
     }
     let mut transport = handshake.into_transport_mode().map_err(noise_error)?;
     socket.get_mut().established = true;
-    let mut tunnels = std::collections::HashMap::<String, (String, TcpStream)>::new();
+    let mut tunnels = std::collections::HashMap::<String, (String, String, TcpStream)>::new();
     loop {
         let grant = match trusted(root, &public) {
             Ok(g) => g,
@@ -326,8 +326,209 @@ fn authorized(grant: &Grant, request: &Request) -> bool {
     }
     true
 }
+// Native local relay for standard browser clients. The network hop remains paired Noise.
+pub fn forward(
+    root: &Path,
+    address: SocketAddr,
+    server_public: &str,
+    client_public: &str,
+    profile: &str,
+) -> Result<()> {
+    if !private_address(address) {
+        return Err(error(
+            "INVALID_LISTEN",
+            "An explicit private LAN destination is required",
+        ));
+    }
+    let secret = Zeroizing::new(fs::read(root.join("lan-key")).map_err(io_error)?);
+    if secret.len() != 32 {
+        return Err(error("INVALID_KEY", "Invalid local pairing identity"));
+    }
+    key(server_public)?;
+    key(client_public)?;
+    let mut client = PairedClient::connect(address, &secret, server_public, client_public)?;
+    let opened = client.call("tunnel.open", json!({"id":profile}))?;
+    let endpoint: tungstenite::http::Uri = opened["endpoint"]["url"]
+        .as_str()
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Missing endpoint"))?
+        .parse()
+        .map_err(|_| error("INVALID_ENDPOINT", "Invalid endpoint"))?;
+    client.call(
+        "tunnel.close",
+        json!({"id":profile,"tunnelId":opened["tunnelId"]}),
+    )?;
+    let listener = TcpListener::bind("127.0.0.1:0").map_err(io_error)?;
+    let local = listener.local_addr().map_err(io_error)?;
+    println!(
+        "{}",
+        json!({"url":format!("ws://{local}{}",endpoint.path_and_query().map(|p|p.as_str()).unwrap_or("/")),"profileId":profile})
+    );
+    let active = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    for stream in listener.incoming() {
+        let stream = stream.map_err(io_error)?;
+        use std::sync::atomic::Ordering;
+        if active.fetch_add(1, Ordering::SeqCst) >= 4 {
+            active.fetch_sub(1, Ordering::SeqCst);
+            continue;
+        }
+        let secret = Zeroizing::new(secret.to_vec());
+        let server = server_public.to_owned();
+        let public = client_public.to_owned();
+        let profile = profile.to_owned();
+        let active = active.clone();
+        std::thread::spawn(move || {
+            let _ = relay(stream, address, &secret, &server, &public, &profile);
+            active.fetch_sub(1, Ordering::SeqCst);
+        });
+    }
+    Ok(())
+}
+struct PairedClient {
+    socket: tungstenite::WebSocket<TcpStream>,
+    transport: snow::TransportState,
+}
+impl PairedClient {
+    fn connect(address: SocketAddr, secret: &[u8], server: &str, public: &str) -> Result<Self> {
+        let stream =
+            TcpStream::connect_timeout(&address, Duration::from_secs(3)).map_err(io_error)?;
+        stream
+            .set_read_timeout(Some(Duration::from_secs(15)))
+            .map_err(io_error)?;
+        stream
+            .set_write_timeout(Some(Duration::from_secs(5)))
+            .map_err(io_error)?;
+        let config = WebSocketConfig::default()
+            .max_message_size(Some(MAX_NOISE))
+            .max_frame_size(Some(MAX_NOISE));
+        let (mut socket, _) = tungstenite::client::client_with_config(
+            format!("ws://{address}/v1/noise"),
+            stream,
+            Some(config),
+        )
+        .map_err(|_| error("PAIRING_FAILED", "Paired transport unavailable"))?;
+        socket
+            .send(Message::Text(public.to_owned().into()))
+            .map_err(|_| error("PAIRING_FAILED", "Peer selection failed"))?;
+        let remote = key(server)?;
+        let mut handshake = Builder::new(PROTOCOL.parse::<NoiseParams>().unwrap())
+            .local_private_key(secret)
+            .remote_public_key(&remote)
+            .build_initiator()
+            .map_err(noise_error)?;
+        let mut buffer = Zeroizing::new(vec![0; MAX_NOISE]);
+        let n = handshake
+            .write_message(&[], &mut buffer)
+            .map_err(noise_error)?;
+        socket
+            .send(Message::Binary(buffer[..n].to_vec().into()))
+            .map_err(|_| error("PAIRING_FAILED", "Handshake write failed"))?;
+        let frame = socket
+            .read()
+            .map_err(|_| error("PAIRING_FAILED", "Handshake read failed"))?;
+        if !frame.is_binary() {
+            return Err(error("NOISE_REJECTED", "Encrypted handshake required"));
+        }
+        if handshake
+            .read_message(&frame.into_data(), &mut buffer)
+            .map_err(noise_error)?
+            != 0
+        {
+            return Err(error("EARLY_DATA", "Handshake payload rejected"));
+        }
+        Ok(Self {
+            socket,
+            transport: handshake.into_transport_mode().map_err(noise_error)?,
+        })
+    }
+    fn call(&mut self, method: &str, params: Value) -> Result<Value> {
+        let plain = Zeroizing::new(
+            serde_json::to_vec(&json!({"id":"relay","method":method,"params":params}))
+                .map_err(|_| error("SERIALIZATION", "Cannot encode relay request"))?,
+        );
+        if plain.len() > MAX_NOISE - 16 {
+            return Err(error("MESSAGE_TOO_LARGE", "Relay request too large"));
+        }
+        let mut buffer = Zeroizing::new(vec![0; MAX_NOISE]);
+        let n = self
+            .transport
+            .write_message(&plain, &mut buffer)
+            .map_err(noise_error)?;
+        self.socket
+            .send(Message::Binary(buffer[..n].to_vec().into()))
+            .map_err(|_| error("TUNNEL_CLOSED", "Paired relay closed"))?;
+        let frame = self
+            .socket
+            .read()
+            .map_err(|_| error("TUNNEL_CLOSED", "Paired relay closed"))?;
+        if !frame.is_binary() {
+            return Err(error("TUNNEL_CLOSED", "Expected encrypted reply"));
+        }
+        let n = self
+            .transport
+            .read_message(&frame.into_data(), &mut buffer)
+            .map_err(noise_error)?;
+        let value: Value = serde_json::from_slice(&buffer[..n])
+            .map_err(|_| error("INVALID_RESPONSE", "Invalid relay response"))?;
+        if value.get("error").is_some() {
+            return Err(error("RELAY_REJECTED", "Paired relay command rejected"));
+        }
+        Ok(value["result"].clone())
+    }
+}
+fn relay(
+    mut local: TcpStream,
+    address: SocketAddr,
+    secret: &[u8],
+    server: &str,
+    public: &str,
+    profile: &str,
+) -> Result<()> {
+    local
+        .set_read_timeout(Some(Duration::from_millis(50)))
+        .map_err(io_error)?;
+    local
+        .set_write_timeout(Some(Duration::from_secs(2)))
+        .map_err(io_error)?;
+    let mut client = PairedClient::connect(address, secret, server, public)?;
+    let opened = client.call("tunnel.open", json!({"id":profile}))?;
+    let tunnel = opened["tunnelId"].clone();
+    let mut buffer = Zeroizing::new(vec![0; 32768]);
+    loop {
+        let n = match local.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(n) => n,
+            Err(e)
+                if matches!(
+                    e.kind(),
+                    io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
+                ) =>
+            {
+                0
+            }
+            Err(e) => return Err(io_error(e)),
+        };
+        let reply = client.call(
+            "tunnel.exchange",
+            json!({"id":profile,"tunnelId":tunnel,"data":B64.encode(&buffer[..n])}),
+        )?;
+        let data = reply["data"]
+            .as_str()
+            .filter(|s| s.len() <= 43692)
+            .ok_or_else(|| error("INVALID_RESPONSE", "Invalid relay payload"))?;
+        let data = Zeroizing::new(
+            B64.decode(data)
+                .map_err(|_| error("INVALID_RESPONSE", "Invalid relay encoding"))?,
+        );
+        local.write_all(&data).map_err(io_error)?;
+        if reply["eof"] == true {
+            break;
+        }
+    }
+    client.call("tunnel.close", json!({"id":profile,"tunnelId":tunnel}))?;
+    Ok(())
+}
 fn tunnel(
-    tunnels: &mut std::collections::HashMap<String, (String, TcpStream)>,
+    tunnels: &mut std::collections::HashMap<String, (String, String, TcpStream)>,
     host: &mut Host,
     request: &Request,
 ) -> Result<Value> {
@@ -340,7 +541,7 @@ fn tunnel(
     let endpoint = match host.execute("automation.endpoint", json!({"id":profile})) {
         Ok(endpoint) => endpoint,
         Err(e) => {
-            tunnels.retain(|_, (owner, _)| owner != profile);
+            tunnels.retain(|_, (owner, _, _)| owner != profile);
             return Err(e);
         }
     };
@@ -350,6 +551,12 @@ fn tunnel(
                 return Err(error(
                     "TUNNEL_LIMIT",
                     "Four tunnels per peer connection permitted",
+                ));
+            }
+            if endpoint["protocol"] == "webdriver" {
+                return Err(error(
+                    "SESSION_PROXY_REQUIRED",
+                    "WebDriver requires the session-confined request route",
                 ));
             }
             let url = endpoint["url"]
@@ -382,17 +589,17 @@ fn tunnel(
                 .set_write_timeout(Some(Duration::from_secs(2)))
                 .map_err(io_error)?;
             let id = random_hex();
-            tunnels.insert(id.clone(), (profile.to_owned(), stream));
+            tunnels.insert(id.clone(), (profile.to_owned(), url.to_owned(), stream));
             Ok(json!({"tunnelId":id,"endpoint":endpoint,"maxChunkBytes":32768}))
         }
         "tunnel.exchange" | "tunnel.close" => {
             let id = request.params["tunnelId"]
                 .as_str()
                 .ok_or_else(|| error("INVALID_PARAMS", "Tunnel id required"))?;
-            let (owner, stream) = tunnels
+            let (owner, bound_url, stream) = tunnels
                 .get_mut(id)
                 .ok_or_else(|| error("TUNNEL_NOT_FOUND", "Tunnel not found"))?;
-            if owner != profile {
+            if owner != profile || endpoint["url"].as_str() != Some(bound_url.as_str()) {
                 return Err(error("GRANT_REQUIRED", "Tunnel belongs to another profile"));
             }
             if request.method == "tunnel.close" {
@@ -436,6 +643,40 @@ fn tunnel(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn native_paired_client_performs_real_encrypted_rpc() {
+        let root =
+            std::env::temp_dir().join(format!("material-relay-client-test-{}", random_hex()));
+        let host = Arc::new(Mutex::new(Host::new(&root).unwrap()));
+        let params: NoiseParams = PROTOCOL.parse().unwrap();
+        let client = Builder::new(params.clone()).generate_keypair().unwrap();
+        let server = Builder::new(params).generate_keypair().unwrap();
+        let client_public = B64.encode(&client.public);
+        let server_public = B64.encode(&server.public);
+        fs::write(root.join("lan-peers.json"),serde_json::to_vec(&json!({"peers":[{"publicKey":client_public,"methods":["system.status"],"profileIds":[],"revoked":false}]})).unwrap()).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server_root = root.clone();
+        let thread = std::thread::spawn(move || {
+            let (stream, _) = listener.accept().unwrap();
+            connection(stream, &server_root, &server.private, &host)
+        });
+        let mut paired =
+            PairedClient::connect(address, &client.private, &server_public, &client_public)
+                .unwrap();
+        assert_eq!(
+            paired.call("system.status", json!({})).unwrap()["locked"],
+            true
+        );
+        assert!(
+            paired
+                .call("vault.unlock", json!({"password":"synthetic-only"}))
+                .is_err()
+        );
+        drop(paired);
+        let _ = thread.join().unwrap();
+        fs::remove_dir_all(root).unwrap();
+    }
     fn session() -> (snow::TransportState, snow::TransportState) {
         let p: NoiseParams = PROTOCOL.parse().unwrap();
         let a = Builder::new(p.clone()).generate_keypair().unwrap();

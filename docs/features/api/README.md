@@ -62,8 +62,36 @@ native transports. The host adds `engines.list`, `profiles.status`, `profiles.la
 `profiles.stop`. A profile's stored automation preference supplies the launch mode. Automation
 remains off unless explicitly configured. `requireStableIdentity` defaults to `true`; an explicitly
 chosen basic launch may send `false`. An unverified native integration returns its capability
-error. `profiles.focus`, `automation.endpoint` and `devices.list` currently
-return `CAPABILITY_UNAVAILABLE`; there is no arbitrary-port tunnel.
+error. `profiles.focus` and `devices.list` currently return `CAPABILITY_UNAVAILABLE`.
+`automation.endpoint` returns only a running, engine-owned endpoint whose effective mode matches
+the stored preference. Turning automation off revokes this lookup immediately, including before
+a pending restart. `automation.webdriver` accepts `id`, `verb` (`GET`, `POST`, `DELETE`), an optional
+session-relative `path` and JSON `body`; the host supplies the owned WebDriver session id itself.
+It cannot create another session or select another profile directory. Paths reject traversal,
+encoding and query characters. Requests and replies have explicit size and time bounds.
+
+Paired LAN sessions additionally support `tunnel.open`, `tunnel.exchange` and `tunnel.close` for
+engine-owned CDP/BiDi endpoints. All require `id` and explicit method/profile grants. Open returns
+`tunnelId`; exchange takes that id plus base64 `data` (at most 32 KiB decoded) and returns base64
+data plus `eof`. Empty exchanges poll a response. Each peer connection owns at most four streams;
+closing it drops every stream. Every chunk rechecks preference, effective endpoint and current
+grants. WebDriver raw TCP tunnels are rejected, use the session-confined command instead. No
+client-supplied host, port or URL is accepted.
+
+The native forwarding client connects a standard Puppeteer client through that framed transport:
+
+```text
+material-browser.exe --data-dir C:\ClientIdentity lan-forward 192.168.1.20:8788 SERVER_PUBLIC_KEY CLIENT_PUBLIC_KEY PROFILE_UUID
+```
+
+Create the client identity with `pair-key`, pair both public keys out of band, and grant the
+client exact `tunnel.open`, `tunnel.exchange`, `tunnel.close` methods plus the profile id on the
+server. The private key stays in the client's protected data directory. The command prints one
+JSON line containing a local `ws://127.0.0.1:PORT/...` URL for `puppeteer.connect`'s
+`browserWSEndpoint`. Keep it alive while connected. It binds only loopback, opens at most four
+local streams and uses the paired encrypted transport for the LAN hop. Other local processes
+under the same account can use that loopback endpoint, so run it only while needed. Browser
+interoperability remains unverified until exercised with a matched engine bundle.
 
 `operations.list` returns the latest 128 snapshot, restore, synchronization and password-change
 attempts in this host process. Each has a random operation id, method, actual terminal state and

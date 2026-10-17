@@ -1,1 +1,106 @@
-{"openapi":"3.1.0","info":{"title":"Material Browser protected local API","version":"0.1.0","description":"Native loopback API. Read the user-only api.json descriptor locally. Browser origins are rejected."},"servers":[{"url":"http://127.0.0.1:8787","description":"Replace with the exact descriptor authority; port is assigned dynamically."}],"paths":{"/v1/call":{"post":{"summary":"Execute one native command","security":[{"localBearer":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Request"}}}},"responses":{"200":{"description":"Structured result or command error","content":{"application/json":{"schema":{"type":"object","required":["id"],"properties":{"id":{},"result":{},"error":{"$ref":"#/components/schemas/Error"}}}}}},"403":{"description":"Invalid authorization, Host, Origin or HTTP framing"}}}}},"components":{"securitySchemes":{"localBearer":{"type":"http","scheme":"bearer"}},"schemas":{"Request":{"type":"object","additionalProperties":false,"required":["id","method"],"properties":{"id":{},"method":{"type":"string","maxLength":128},"params":{"type":"object","default":{}}}},"Error":{"type":"object","required":["code","message"],"properties":{"code":{"type":"string"},"message":{"type":"string"}}}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Material Browser protected local API",
+    "version": "0.1.0",
+    "description": "Native loopback API. Read the user-only api.json descriptor locally. Browser origins are rejected."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Replace with the exact descriptor authority; port is assigned dynamically."
+    }
+  ],
+  "paths": {
+    "/v1/call": {
+      "post": {
+        "summary": "Execute one native command",
+        "security": [
+          {
+            "localBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Structured result or command error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {},
+                    "result": {},
+                    "error": {
+                      "$ref": "#/components/schemas/Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization, Host, Origin or HTTP framing"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "localBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Request": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "method"
+        ],
+        "properties": {
+          "id": {},
+          "method": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Shared native methods include automation.endpoint, automation.webdriver and operations.list. Tunnel framing is available only within the paired Noise WebSocket protocol, not this HTTP route."
+          },
+          "params": {
+            "type": "object",
+            "default": {}
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

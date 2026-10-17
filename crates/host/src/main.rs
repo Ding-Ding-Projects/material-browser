@@ -12,6 +12,7 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
+use zeroize::Zeroizing;
 mod lan;
 const MAX_MESSAGE: usize = 1024 * 1024;
 #[derive(Debug, Serialize)]
@@ -151,8 +152,45 @@ impl Host {
             return Err(error("INVALID_PARAMS", "Parameters must be an object"));
         }
         match method {
+            "automation.webdriver" => {
+                let endpoint = self.execute_inner("automation.endpoint", params.clone())?;
+                webdriver_request(&endpoint, &params)
+            }
             "engines.list" => Ok(json!(self.registry.list())),
-            "automation.endpoint" | "devices.list" => Err(error(
+            "automation.endpoint" => {
+                let id = params["id"]
+                    .as_str()
+                    .ok_or_else(|| error("INVALID_PARAMS", "Profile id required"))?;
+                let profiles = self
+                    .core
+                    .execute("profiles.list", json!({}))
+                    .map_err(|e| error(&e.code, &e.message))?;
+                let desired = profiles
+                    .as_array()
+                    .and_then(|items| items.iter().find(|p| p["id"] == id))
+                    .ok_or_else(|| error("PROFILE_NOT_FOUND", "Profile not found"))?["automation"]
+                    .clone();
+                if desired == "off" {
+                    return Err(error(
+                        "AUTOMATION_DISABLED",
+                        "Automation is disabled by current preference",
+                    ));
+                }
+                let endpoint = self
+                    .supervisor
+                    .automation_endpoint(id)
+                    .map_err(|e| error(&e.code, &e.message))?;
+                let value = serde_json::to_value(endpoint)
+                    .map_err(|_| error("SERIALIZATION", "Endpoint serialization failed"))?;
+                if value["mode"] != desired {
+                    return Err(error(
+                        "RESTART_REQUIRED",
+                        "Automation preference awaits restart",
+                    ));
+                }
+                Ok(value)
+            }
+            "devices.list" => Err(error(
                 "CAPABILITY_UNAVAILABLE",
                 "This host has no verified implementation for this capability",
             )),
@@ -221,13 +259,22 @@ impl Host {
                     ));
                 }
                 let mut locks = Vec::new();
+                let mut leases = Vec::new();
                 for directory in fs::read_dir(&self.active).map_err(io_error)? {
                     let entry = directory.map_err(io_error)?;
                     if entry.file_type().map_err(io_error)?.is_dir() {
-                        locks.push(stopped_lock(
-                            &self.active,
-                            &entry.file_name().to_string_lossy(),
-                        )?);
+                        let id = entry.file_name().to_string_lossy().into_owned();
+                        if [".material-browser-locks", ".material-browser-processes"]
+                            .contains(&id.as_str())
+                        {
+                            continue;
+                        }
+                        leases.push(
+                            self.supervisor
+                                .acquire_profile_idle(&id)
+                                .map_err(|e| error(&e.code, &e.message))?,
+                        );
+                        locks.push(stopped_lock(&self.active, &id)?);
                     }
                 }
                 self.core.execute(method, params).map_err(|e| Error {
@@ -258,7 +305,10 @@ impl Host {
                     ));
                 }
                 // The engine's exclusive owner lock prevents another host from racing this operation.
-                let _lock = stopped_lock(&self.active, &id)?;
+                let _lease = self
+                    .supervisor
+                    .acquire_profile_idle(&id)
+                    .map_err(|e| error(&e.code, &e.message))?;
                 params["running"] = Value::Bool(false);
                 self.core.execute(method, params).map_err(|e| Error {
                     code: e.code,
@@ -328,6 +378,110 @@ fn stopped_lock(active: &Path, id: &str) -> Result<File> {
 }
 fn io_error(_: io::Error) -> Error {
     error("HOST_IO", "Native host I/O operation failed")
+}
+fn webdriver_request(endpoint: &Value, params: &Value) -> Result<Value> {
+    if endpoint["protocol"] != "webdriver" {
+        return Err(error(
+            "CAPABILITY_UNAVAILABLE",
+            "Profile is not running WebDriver",
+        ));
+    }
+    let session = endpoint["sessionId"]
+        .as_str()
+        .filter(|id| !id.is_empty() && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-'))
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Invalid engine session identity"))?;
+    let suffix = params.get("path").and_then(Value::as_str).unwrap_or("");
+    if suffix.len() > 512
+        || (!suffix.is_empty() && !suffix.starts_with('/'))
+        || !suffix
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"/_-".contains(&b))
+    {
+        return Err(error(
+            "INVALID_PARAMS",
+            "A session-relative WebDriver path is required",
+        ));
+    }
+    let method = params.get("verb").and_then(Value::as_str).unwrap_or("GET");
+    if !["GET", "POST", "DELETE"].contains(&method) {
+        return Err(error("INVALID_PARAMS", "Unsupported WebDriver verb"));
+    }
+    let url: tungstenite::http::Uri = endpoint["url"]
+        .as_str()
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Missing engine URL"))?
+        .parse()
+        .map_err(|_| error("INVALID_ENDPOINT", "Invalid engine URL"))?;
+    if url.scheme_str() != Some("http") || url.host() != Some("127.0.0.1") {
+        return Err(error("INVALID_ENDPOINT", "WebDriver must use loopback"));
+    }
+    let port = url
+        .port_u16()
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Missing engine port"))?;
+    let body = Zeroizing::new(
+        serde_json::to_vec(params.get("body").unwrap_or(&json!({})))
+            .map_err(|_| error("INVALID_PARAMS", "Invalid WebDriver body"))?,
+    );
+    if body.len() > 32768 {
+        return Err(error("MESSAGE_TOO_LARGE", "WebDriver body exceeds limit"));
+    }
+    let mut stream = TcpStream::connect_timeout(
+        &SocketAddr::from(([127, 0, 0, 1], port)),
+        Duration::from_secs(2),
+    )
+    .map_err(io_error)?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(10)))
+        .map_err(io_error)?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(2)))
+        .map_err(io_error)?;
+    write!(stream,"{method} /session/{session}{suffix} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).map_err(io_error)?;
+    stream.write_all(&body).map_err(io_error)?;
+    let mut reader = io::BufReader::new(stream);
+    let mut header_bytes = 0;
+    let mut length = None;
+    loop {
+        let line = read_line(&mut reader)?
+            .ok_or_else(|| error("INVALID_HTTP", "Incomplete WebDriver response"))?;
+        header_bytes += line.len();
+        if header_bytes > 8192 {
+            return Err(error("INVALID_HTTP", "WebDriver headers exceed limit"));
+        }
+        if line == b"\r\n" {
+            break;
+        }
+        let line = String::from_utf8(line)
+            .map_err(|_| error("INVALID_HTTP", "Invalid WebDriver headers"))?;
+        if let Some((name, value)) = line.split_once(':') {
+            if name.eq_ignore_ascii_case("transfer-encoding") {
+                return Err(error(
+                    "INVALID_HTTP",
+                    "Chunked WebDriver responses are unsupported",
+                ));
+            }
+            if name.eq_ignore_ascii_case("content-length") {
+                if length.is_some() {
+                    return Err(error("INVALID_HTTP", "Duplicate response length"));
+                }
+                length = Some(
+                    value
+                        .trim()
+                        .parse::<usize>()
+                        .map_err(|_| error("INVALID_HTTP", "Invalid response length"))?,
+                );
+            }
+        }
+    }
+    let length = length.filter(|n| *n <= 49152).ok_or_else(|| {
+        error(
+            "MESSAGE_TOO_LARGE",
+            "Bounded WebDriver response length required",
+        )
+    })?;
+    let mut bytes = Zeroizing::new(vec![0; length]);
+    reader.read_exact(&mut bytes).map_err(io_error)?;
+    serde_json::from_slice(&bytes)
+        .map_err(|_| error("INVALID_HTTP", "WebDriver response must be JSON"))
 }
 fn private(path: &Path) -> Result<()> {
     #[cfg(unix)]
@@ -600,6 +754,26 @@ fn run() -> Result<()> {
         return Err(error("INVALID_DATA_DIR", "Data directory must be absolute"));
     }
     match command.as_str() {
+        "lan-forward" => {
+            let address = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Private LAN destination required"))?
+                .parse()
+                .map_err(|_| error("USAGE", "Invalid LAN destination"))?;
+            let server = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Server public key required"))?;
+            let client = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Client public key required"))?;
+            let profile = args
+                .next()
+                .ok_or_else(|| error("USAGE", "Profile id required"))?;
+            if args.next().is_some() {
+                return Err(error("USAGE", "Unexpected argument"));
+            }
+            return lan::forward(&root, address, &server, &client, &profile);
+        }
         "call" => {
             let mut input = io::stdin().lock();
             let bytes = read_line(&mut input)?
@@ -726,6 +900,47 @@ fn main() {
 mod tests {
     use super::*;
     #[test]
+    fn webdriver_proxy_confines_requests_to_owned_session() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let thread = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut reader = io::BufReader::new(stream.try_clone().unwrap());
+            let mut line = String::new();
+            reader.read_line(&mut line).unwrap();
+            assert_eq!(line, "GET /session/owned-session/url HTTP/1.1\r\n");
+            let mut length = 0usize;
+            loop {
+                line.clear();
+                reader.read_line(&mut line).unwrap();
+                if line == "\r\n" {
+                    break;
+                }
+                if let Some(value) = line.strip_prefix("Content-Length: ") {
+                    length = value.trim().parse().unwrap();
+                }
+            }
+            let mut request_body = vec![0; length];
+            reader.read_exact(&mut request_body).unwrap();
+            let body = br#"{"value":"https://example.test"}"#;
+            write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                body.len()
+            )
+            .unwrap();
+            stream.write_all(body).unwrap();
+        });
+        let endpoint = json!({"protocol":"webdriver","url":format!("http://{address}/"),"sessionId":"owned-session"});
+        assert!(webdriver_request(&endpoint, &json!({"path":"/../session/other"})).is_err());
+        assert!(webdriver_request(&endpoint, &json!({"path":"/%2e%2e/session"})).is_err());
+        assert_eq!(
+            webdriver_request(&endpoint, &json!({"path":"/url"})).unwrap()["value"],
+            "https://example.test"
+        );
+        thread.join().unwrap();
+    }
+    #[test]
     fn operation_history_records_real_failure_without_parameters() {
         let root = std::env::temp_dir().join(format!("material-operation-test-{}", random_hex()));
         let mut host = Host::new(&root).unwrap();
@@ -779,7 +994,7 @@ mod tests {
         let failure = host
             .execute("profiles.snapshot", json!({"id":id,"running":false}))
             .unwrap_err();
-        assert_eq!(failure.code, "PROFILE_ACTIVE");
+        assert_eq!(failure.code, "PROFILE_RUNNING");
         assert_eq!(
             host.execute("vault.lock", json!({})).unwrap_err().code,
             "PROFILE_ACTIVE"
