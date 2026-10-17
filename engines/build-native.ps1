@@ -1,7 +1,5 @@
 param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly)
 $ErrorActionPreference='Stop'
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
-Import-Module Microsoft.PowerShell.Security -ErrorAction Stop
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
 $base=Join-Path ([Environment]::GetFolderPath('UserProfile')) '.material-browser/native'
@@ -11,6 +9,12 @@ New-Item -ItemType Directory -Path $nativeRoot -Force | Out-Null
 function Run([string]$Exe,[string[]]$Arguments) {
   & $Exe @Arguments
   if($LASTEXITCODE -ne 0){throw "$Exe exited with code $LASTEXITCODE"}
+}
+function FileSha256([string]$FilePath) {
+  $stream=[IO.File]::OpenRead($FilePath)
+  $sha=[Security.Cryptography.SHA256]::Create()
+  try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant() }
+  finally { $stream.Dispose(); $sha.Dispose() }
 }
 function Checkout([string]$Path,[string]$Url,[string]$Revision) {
   if(-not (Test-Path -LiteralPath (Join-Path $Path '.git'))){
@@ -59,7 +63,7 @@ if($Engine -eq 'chromium'){
       Run (Join-Path $depot 'autoninja.bat') @('-C','out/MaterialBrowserBaseline','chrome')
       $exe=Join-Path $nativeRoot 'src/out/MaterialBrowserBaseline/chrome.exe'
       if(-not (Test-Path $exe)){throw 'Chromium build did not produce chrome.exe'}
-      Get-FileHash $exe -Algorithm SHA256
+      Write-Output "$exe SHA256 $(FileSha256 $exe)"
       Write-Output 'Built upstream baseline only. Product encryption, snapshot and identity remain unverified and disabled.'
     } finally { Pop-Location }
   } finally { Pop-Location }
@@ -73,7 +77,7 @@ if($Engine -eq 'chromium'){
     $installer=Join-Path $PSScriptRoot 'downloads/MozillaBuildSetup-4.2.1.exe'
     New-Item -ItemType Directory -Path (Split-Path $installer -Parent) -Force | Out-Null
     if(-not (Test-Path $installer)){Invoke-WebRequest -UseBasicParsing 'https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-4.2.1.exe' -OutFile $installer}
-    if((Get-FileHash $installer -Algorithm SHA256).Hash -ne '8EF5B3D2087E4867DC75BF19F5E62F12E917F518239415723CC70896B6F1E3D8'){throw 'MozillaBuild installer hash mismatch'}
+    if((FileSha256 $installer) -ne '8ef5b3d2087e4867dc75bf19f5e62f12e917f518239415723cc70896b6f1e3d8'){throw 'MozillaBuild installer hash mismatch'}
     if((Get-AuthenticodeSignature $installer).Status -ne 'Valid'){throw 'MozillaBuild publisher signature is invalid'}
     $install=Start-Process -FilePath $installer -ArgumentList @('/S') -WindowStyle Hidden -Wait -PassThru
     if($install.ExitCode -ne 0 -or -not (Test-Path $python)){throw "MozillaBuild installation did not complete: $($install.ExitCode)"}
@@ -88,7 +92,7 @@ if($Engine -eq 'chromium'){
     Run $python @('mach','build')
     $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
     if(-not $built){throw 'Firefox build did not produce firefox.exe'}
-    $built | ForEach-Object {Get-FileHash $_.FullName -Algorithm SHA256}
+    $built | ForEach-Object {Write-Output "$($_.FullName) SHA256 $(FileSha256 $_.FullName)"}
     Write-Output 'Built upstream baseline only. Product encryption, snapshot and identity remain unverified and disabled.'
   } finally { Pop-Location }
 }
