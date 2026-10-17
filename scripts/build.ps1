@@ -1,4 +1,4 @@
-param([ValidateSet('All','Core','Engine','Host','Desktop')][string]$Component='All')
+param([ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard')][string]$Component='All')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
@@ -13,6 +13,20 @@ try {
   if($Component -in @('All','Desktop')) {
     if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required. Bootstrap is not yet available on this host.'}
     Push-Location (Join-Path $root 'apps/desktop')
+    try {
+      if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & npm.cmd run build
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+    } finally { Pop-Location }
+  }
+  if($Component -eq 'Storage') {
+    if(-not (Get-Command docker -ErrorAction SilentlyContinue)){throw 'Container runtime is unavailable.'}
+    & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile apps/storage
+    if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+  }
+  if($Component -eq 'HostingWizard') {
+    Push-Location (Join-Path $root 'apps/hosting-wizard')
     try {
       if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
