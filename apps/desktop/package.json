@@ -1,0 +1,33 @@
+{
+  "name": "material-browser-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Encrypted browser profile workspace",
+  "author": "Ding Ding Projects",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "test": "node --test src/*.test.mjs"
+  },
+  "dependencies": {
+    "@material/web": "2.5.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "8.0.1",
+    "@electron-forge/maker-squirrel": "8.0.1",
+    "@types/react": "19.1.10",
+    "@types/react-dom": "19.1.9",
+    "electron": "44.9.0",
+    "typescript": "5.9.2",
+    "vite": "8.3.4"
+  },
+  "config": {
+    "forge": "./forge.config.cjs"
+  }
+}
