@@ -1,0 +1,17 @@
+node_modules/
+target/
+dist/
+out/
+release/
+.agent/
+.cache/
+*.log
+*.tmp
+.env
+.env.*
+!.env.example
+data/
+engines/downloads/
+engines/sources/
+engines/builds/
+
