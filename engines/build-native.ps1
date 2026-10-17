@@ -47,10 +47,15 @@ if($Engine -eq 'chromium'){
   $env:vs2026_install=$vs
   Push-Location $nativeRoot
   try {
-    $config="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': {}, 'custom_vars': {} }]`ntarget_os = ['win']`n"
+    # This branded x86 updater test fixture is not used by the unbranded x64 chrome target.
+    # Preserve the scanner verdict; do not retrieve or alter the excluded payload.
+    $oldConfig="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': {}, 'custom_vars': {} }]`ntarget_os = ['win']`n"
+    $config="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
     $configPath=Join-Path $nativeRoot '.gclient'
     if(Test-Path $configPath){
-      if((Get-Content $configPath -Raw) -ne $config){throw 'Existing native dependency configuration differs.'}
+      $existingConfig=Get-Content $configPath -Raw
+      if($existingConfig -eq $oldConfig){[IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false))}
+      elseif($existingConfig -ne $config){throw 'Existing native dependency configuration differs.'}
     } else { [IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false)) }
     Run (Join-Path $depot 'gclient.bat') @('sync','--no-history','--shallow','--nohooks','--revision',"src@$($pin.revision)")
     $actual=& git -C (Join-Path $nativeRoot 'src') rev-parse HEAD
