@@ -1,5 +1,7 @@
 param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly)
 $ErrorActionPreference='Stop'
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+Import-Module Microsoft.PowerShell.Security -ErrorAction Stop
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
 $base=Join-Path ([Environment]::GetFolderPath('UserProfile')) '.material-browser/native'
@@ -64,7 +66,8 @@ if($Engine -eq 'chromium'){
 } else {
   Checkout (Join-Path $nativeRoot 'src') $pin.url $pin.revision
   if($AcquireOnly){Write-Output "Acquired pinned Firefox source at $nativeRoot"; exit 0}
-  $mozbuild=Join-Path $base 'mozilla-build-4.2.1'
+  # MozillaBuild's supported installer selects this directory. Reuse and verify it.
+  $mozbuild=Join-Path $env:SystemDrive 'mozilla-build'
   $python=Join-Path $mozbuild 'python3/python.exe'
   if(-not (Test-Path $python)){
     $installer=Join-Path $PSScriptRoot 'downloads/MozillaBuildSetup-4.2.1.exe'
@@ -72,9 +75,10 @@ if($Engine -eq 'chromium'){
     if(-not (Test-Path $installer)){Invoke-WebRequest -UseBasicParsing 'https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-4.2.1.exe' -OutFile $installer}
     if((Get-FileHash $installer -Algorithm SHA256).Hash -ne '8EF5B3D2087E4867DC75BF19F5E62F12E917F518239415723CC70896B6F1E3D8'){throw 'MozillaBuild installer hash mismatch'}
     if((Get-AuthenticodeSignature $installer).Status -ne 'Valid'){throw 'MozillaBuild publisher signature is invalid'}
-    $install=Start-Process -FilePath $installer -ArgumentList @('/S',"/D=$mozbuild") -WindowStyle Hidden -Wait -PassThru
+    $install=Start-Process -FilePath $installer -ArgumentList @('/S') -WindowStyle Hidden -Wait -PassThru
     if($install.ExitCode -ne 0 -or -not (Test-Path $python)){throw "MozillaBuild installation did not complete: $($install.ExitCode)"}
   }
+  if((Get-Content (Join-Path $mozbuild 'VERSION') -Raw).Trim() -ne '4.2.1'){throw 'MozillaBuild version does not match the reviewed toolchain'}
   $env:MOZILLABUILD=$mozbuild
   $env:PATH="$(Join-Path $mozbuild 'bin');$(Join-Path $mozbuild 'msys2/usr/bin');$(Join-Path $mozbuild 'python3');$env:PATH"
   Push-Location (Join-Path $nativeRoot 'src')
