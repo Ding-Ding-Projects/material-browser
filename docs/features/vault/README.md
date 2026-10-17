@@ -106,5 +106,3 @@ Run `build.bat -Component Core` and `cargo test -p material-browser-core` locall
 synthetic temporary directories and cover wrong passwords, lock/unlock, password rotation,
 tampered content, cross-profile restore refusal, traversal, plaintext metadata absence,
 concurrent revision preservation, explicit resolution and incomplete synchronization.
-
-
