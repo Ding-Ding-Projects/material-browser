@@ -1,0 +1,23 @@
+{
+  "name": "material-browser-hosting-wizard",
+  "version": "0.1.0",
+  "description": "Portable setup companion for Material Browser encrypted storage",
+  "author": "Ding Ding Projects",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build": "node scripts/build.mjs",
+    "package": "electron-builder --win portable --x64"
+  },
+  "devDependencies": { "electron": "44.9.0", "electron-builder": "26.15.3" },
+  "build": {
+    "appId": "org.dingdingprojects.materialbrowser.storage.setup",
+    "productName": "Material Browser Storage Setup",
+    "directories": { "output": "release" },
+    "files": ["main.cjs", "preload.cjs", "web/**", "package.json"],
+    "extraResources": [{ "from": "resources/hosting", "to": "hosting" }],
+    "win": { "target": [{ "target": "portable", "arch": ["x64"] }], "signAndEditExecutable": false },
+    "portable": { "artifactName": "Material-Browser-Storage-Setup-${version}-${arch}.exe" }
+  }
+}

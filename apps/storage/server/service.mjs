@@ -28,7 +28,7 @@ export async function createService(options={}) {
   const store=options.store || await createCiphertextStore(root,{maxChunk,quota});
   const web=path.resolve(options.web || fileURLToPath(new URL('../web/',import.meta.url)));
   const server=http.createServer(async(req,res)=>{
-    res.setHeader('X-Content-Type-Options','nosniff'); res.setHeader('Referrer-Policy','no-referrer'); res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    res.setHeader('X-Content-Type-Options','nosniff'); res.setHeader('Referrer-Policy','no-referrer'); res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; worker-src 'self' blob:; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try {
       if(!config.allowedHosts.includes(req.headers.host)) throw new Fault(403,'Host not permitted');
       const origin=`http://${req.headers.host}`;
@@ -77,3 +77,4 @@ export async function createService(options={}) {
   server.requestTimeout=30000; server.headersTimeout=10000; server.maxHeadersCount=40; server.maxConnections=128;
   return server;
 }
+
