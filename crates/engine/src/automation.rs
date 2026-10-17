@@ -148,7 +148,12 @@ impl AdapterRuntime {
         engine: &VerifiedEngine,
         profile: &Path,
         mode: AutomationMode,
-    ) -> Result<(Child, u32, Option<AutomationEndpoint>)> {
+    ) -> Result<(
+        Child,
+        u32,
+        Option<AutomationEndpoint>,
+        process_job::ProcessJob,
+    )> {
         self.verify(mode, &engine.manifest.version)?;
         let mut command = Command::new(&self.node);
         command
@@ -157,6 +162,8 @@ impl AdapterRuntime {
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
         let mut child = command.spawn().map_err(io)?;
+        // The helper cannot launch a browser until configuration arrives below.
+        let job = process_job::ProcessJob::attach(&mut child, false)?;
         let config = serde_json::json!({"engine":engine.manifest.engine,"mode":mode,"executable":engine.executable,"profile":profile,"version":engine.manifest.version,"driver":self.driver,"driverSha256":self.driver_sha256});
         let mut wire = serde_json::to_vec(&config)
             .map_err(|_| err("INVALID_ADAPTER", "Invalid adapter configuration"))?;
@@ -208,7 +215,7 @@ impl AdapterRuntime {
             Some((pid, endpoint))
         })();
         match accepted {
-            Some((pid, endpoint)) => Ok((child, pid, Some(endpoint))),
+            Some((pid, endpoint)) => Ok((child, pid, Some(endpoint), job)),
             None => {
                 drop(child.stdin.take());
                 let until = Instant::now() + Duration::from_secs(3);

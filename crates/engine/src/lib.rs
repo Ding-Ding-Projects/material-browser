@@ -184,6 +184,8 @@ struct OwnedProcess {
     _lock: File,
     adapter: bool,
     endpoint: Option<AutomationEndpoint>,
+    _job: process_job::ProcessJob,
+    identity: lifetime::ProcessIdentity,
 }
 /// Keep this lease alive for the entire snapshot, restore, or removal operation.
 pub struct ProfileLease {
@@ -275,18 +277,26 @@ impl Supervisor {
                 profile: path.clone(),
             },
         )?;
-        let (child, pid, endpoint) = if let Some(runtime) = runtime {
+        let (child, pid, endpoint, job) = if let Some(runtime) = runtime {
             runtime.spawn(engine, &path, request.requested_mode)?
         } else {
-            let child = cmd.spawn().map_err(io)?;
+            #[cfg(windows)]
+            {
+                use std::os::windows::process::CommandExt;
+                cmd.creation_flags(0x4); // CREATE_SUSPENDED, contain before any browser instruction.
+            }
+            let mut child = cmd.spawn().map_err(io)?;
+            let job = process_job::ProcessJob::attach(&mut child, true)?;
             let pid = child.id();
-            (child, pid, None)
+            (child, pid, None, job)
         };
         let identity = lifetime::capture(pid, &engine.executable, &path)?;
         lifetime::persist(
             &self.root,
             &request.profile_id,
-            &lifetime::Journal::Running { identity },
+            &lifetime::Journal::Running {
+                identity: identity.clone(),
+            },
         )?;
         let status = ProcessStatus {
             profile_id: request.profile_id.clone(),
@@ -303,6 +313,8 @@ impl Supervisor {
                 _lock: lock,
                 adapter,
                 endpoint,
+                _job: job,
+                identity,
             },
         );
         Ok(status)
@@ -314,7 +326,7 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
-            if p.child.try_wait().map_err(io)?.is_some() {
+            if p.child.try_wait().map_err(io)?.is_some() || !lifetime::is_alive(&p.identity)? {
                 exited.push(id.clone());
             }
         }
@@ -439,6 +451,17 @@ mod tests {
         assert!(validate_id("00000000-0000-0000-0000-000000000000").is_ok());
     }
     #[test]
+    fn idle_lease_excludes_other_supervisors_for_entire_operation() {
+        let root = std::env::temp_dir().join(format!("engine-lease-{}", std::process::id()));
+        let id = "00000000-0000-0000-0000-000000000004";
+        let mut first = Supervisor::new(root.clone()).unwrap();
+        let mut second = Supervisor::new(root).unwrap();
+        let lease = first.acquire_profile_idle(id).unwrap();
+        assert!(second.acquire_profile_idle(id).is_err());
+        drop(lease);
+        assert!(second.acquire_profile_idle(id).is_ok());
+    }
+    #[test]
     fn advanced_capabilities_fail_closed() {
         let mut registry = EngineRegistry::new();
         assert!(registry.get(EngineKind::Chromium).is_err());
@@ -508,6 +531,7 @@ pub mod snapshot_protocol;
 
 pub mod automation;
 mod lifetime;
+mod process_job;
 pub use automation::{AdapterRuntime, AutomationEndpoint};
 fn mode_key(mode: AutomationMode) -> u8 {
     match mode {

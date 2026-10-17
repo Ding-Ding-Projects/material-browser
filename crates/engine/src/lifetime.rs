@@ -3,7 +3,7 @@ use super::*;
 use std::io::Write;
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct ProcessIdentity {
     pub pid: u32,
@@ -86,6 +86,15 @@ pub(super) fn capture(pid: u32, executable: &Path, profile: &Path) -> Result<Pro
         executable: executable.into(),
         profile: profile.into(),
     })
+}
+pub(super) fn is_alive(identity: &ProcessIdentity) -> Result<bool> {
+    match native_start_time_if_exists(identity.pid)? {
+        Some(start) if start == identity.start_time => {
+            let actual = capture(identity.pid, &identity.executable, &identity.profile)?;
+            Ok(actual.start_time == identity.start_time)
+        }
+        _ => Ok(false),
+    }
 }
 
 pub(super) fn assert_inactive(root: &Path, id: &str) -> Result<()> {
@@ -267,5 +276,59 @@ mod tests {
             &[format!("--user-data-dir={}extra", profile.display()).into()],
             &profile
         ));
+    }
+    #[test]
+    #[cfg(windows)]
+    fn recovered_supervisor_rejects_surviving_process_and_reused_pid() {
+        use std::os::windows::process::CommandExt;
+        let root = std::env::temp_dir().join(format!("engine-orphan-{}", std::process::id()));
+        let id = "00000000-0000-0000-0000-000000000003";
+        let profile = root.join(id);
+        fs::create_dir_all(&profile).unwrap();
+        let profile = profile.canonicalize().unwrap();
+        let script = root.join("owned-lifecycle-fixture.ps1");
+        fs::write(&script,b"param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Rest)\nStart-Sleep -Seconds 30\n").unwrap();
+        let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+            .join("System32/WindowsPowerShell/v1.0/powershell.exe")
+            .canonicalize()
+            .unwrap();
+        let mut child = Command::new(&executable)
+            .args(["-NoProfile", "-NonInteractive", "-File"])
+            .arg(&script)
+            .arg(format!("--user-data-dir={}", profile.display()))
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .creation_flags(0x08000000)
+            .spawn()
+            .unwrap();
+        let outcome = (|| -> Result<()> {
+            let identity = capture(child.id(), &executable, &profile)?;
+            persist(&root, id, &Journal::Running { identity })?;
+            let mut recovered = Supervisor::new(root.clone())?;
+            assert_eq!(
+                recovered.assert_profile_inactive(id).unwrap_err().code,
+                "PROFILE_ACTIVE"
+            );
+            // A mismatched birth time cannot authorize control of the reused PID;
+            // an independently observed profile argument still prevents mutation.
+            let mut identity = capture(child.id(), &executable, &profile)?;
+            identity.start_time -= 1;
+            persist(&root, id, &Journal::Running { identity })?;
+            assert_eq!(
+                recovered.assert_profile_inactive(id).unwrap_err().code,
+                "PROFILE_ACTIVE"
+            );
+            Ok(())
+        })();
+        let _ = child.kill();
+        let _ = child.wait();
+        outcome.unwrap();
+        assert!(
+            Supervisor::new(root)
+                .unwrap()
+                .acquire_profile_idle(id)
+                .is_ok()
+        );
     }
 }

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "chromium": {
+    "version": "155.0.8059.85",
+    "revision": "0e66b94549a8bd85f03fbdf189b752d6e7b63c32",
+    "url": "https://chromium.googlesource.com/chromium/src.git",
+    "source": "https://chromiumdash.appspot.com/fetch_releases?channel=Stable&platform=Windows&num=1"
+  },
+  "firefox": {
+    "version": "158.0",
+    "revision": "3c71aeacdb296402e41fb2084b13e797d1770642",
+    "url": "https://github.com/mozilla-firefox/firefox.git",
+    "tag": "FIREFOX_158_0_RELEASE",
+    "source": "https://product-details.mozilla.org/1.0/firefox_versions.json"
+  },
+  "depotTools": {
+    "revision": "889099791deff38466d471fa6590951c91a1d8ab",
+    "url": "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+  }
+}
