@@ -1,0 +1,40 @@
+diff --git a/components/os_crypt/async/browser/material_profile_key_provider.h b/components/os_crypt/async/browser/material_profile_key_provider.h
+new file mode 100644
+--- /dev/null
++++ b/components/os_crypt/async/browser/material_profile_key_provider.h
+@@ -0,0 +1,35 @@
++// Copyright 2026 Material Browser contributors
++// Source prototype for Chromium 134.0.6998.35. Not wired into production.
++#ifndef COMPONENTS_OS_CRYPT_ASYNC_BROWSER_MATERIAL_PROFILE_KEY_PROVIDER_H_
++#define COMPONENTS_OS_CRYPT_ASYNC_BROWSER_MATERIAL_PROFILE_KEY_PROVIDER_H_
++
++#include <memory>
++#include <utility>
++#include "components/os_crypt/async/browser/key_provider.h"
++
++namespace os_crypt_async {
++// The authenticated native host constructs the key in memory for a newly
++// created application-owned profile. No disk import or legacy key lookup.
++// A complete integration must remove legacy providers in this profile mode
++// and fail startup before any writes when the protected key handoff fails.
++class MaterialProfileKeyProvider final : public KeyProvider {
++ public:
++  static std::unique_ptr<MaterialProfileKeyProvider> ForNewProfile(
++      bool application_owned_new_profile, Encryptor::Key key) {
++    if (!application_owned_new_profile) return nullptr;
++    return std::unique_ptr<MaterialProfileKeyProvider>(
++        new MaterialProfileKeyProvider(std::move(key)));
++  }
++  void GetKey(KeyCallback callback) override {
++    // OSCryptAsync initializes providers once. Reuse must fail closed.
++    std::move(callback).Run("mb1", std::exchange(key_, std::nullopt));
++  }
++  bool UseForEncryption() override { return true; }
++  bool IsCompatibleWithOsCryptSync() override { return false; }
++ private:
++  explicit MaterialProfileKeyProvider(Encryptor::Key key)
++      : key_(std::move(key)) {}
++  std::optional<Encryptor::Key> key_;
++};
++}  // namespace os_crypt_async
++#endif
