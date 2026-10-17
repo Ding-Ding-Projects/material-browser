@@ -51,11 +51,40 @@ if($Engine -eq 'chromium'){
     if($actual -ne $pin.revision){throw 'Chromium checkout revision mismatch'}
     if($AcquireOnly){Write-Output "Acquired pinned Chromium source at $nativeRoot"; exit 0}
     Run (Join-Path $depot 'gclient.bat') @('runhooks')
-    # No unreviewed prototype is silently applied or counted as a product build.
-    throw 'Native source acquired. Product encryption, snapshot and identity patches are not integrated; native product build remains incomplete.'
+    Push-Location (Join-Path $nativeRoot 'src')
+    try {
+      Run (Join-Path $depot 'gn.bat') @('gen','out/MaterialBrowserBaseline','--args=is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0 target_cpu="x64"')
+      Run (Join-Path $depot 'autoninja.bat') @('-C','out/MaterialBrowserBaseline','chrome')
+      $exe=Join-Path $nativeRoot 'src/out/MaterialBrowserBaseline/chrome.exe'
+      if(-not (Test-Path $exe)){throw 'Chromium build did not produce chrome.exe'}
+      Get-FileHash $exe -Algorithm SHA256
+      Write-Output 'Built upstream baseline only. Product encryption, snapshot and identity remain unverified and disabled.'
+    } finally { Pop-Location }
   } finally { Pop-Location }
 } else {
   Checkout (Join-Path $nativeRoot 'src') $pin.url $pin.revision
   if($AcquireOnly){Write-Output "Acquired pinned Firefox source at $nativeRoot"; exit 0}
-  throw 'Native source acquired. MozillaBuild bootstrap and product encryption, snapshot and identity integration remain incomplete.'
+  $mozbuild=Join-Path $base 'mozilla-build-4.2.1'
+  $python=Join-Path $mozbuild 'python3/python.exe'
+  if(-not (Test-Path $python)){
+    $installer=Join-Path $PSScriptRoot 'downloads/MozillaBuildSetup-4.2.1.exe'
+    New-Item -ItemType Directory -Path (Split-Path $installer -Parent) -Force | Out-Null
+    if(-not (Test-Path $installer)){Invoke-WebRequest -UseBasicParsing 'https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-4.2.1.exe' -OutFile $installer}
+    if((Get-FileHash $installer -Algorithm SHA256).Hash -ne '8EF5B3D2087E4867DC75BF19F5E62F12E917F518239415723CC70896B6F1E3D8'){throw 'MozillaBuild installer hash mismatch'}
+    if((Get-AuthenticodeSignature $installer).Status -ne 'Valid'){throw 'MozillaBuild publisher signature is invalid'}
+    $install=Start-Process -FilePath $installer -ArgumentList @('/S',"/D=$mozbuild") -WindowStyle Hidden -Wait -PassThru
+    if($install.ExitCode -ne 0 -or -not (Test-Path $python)){throw "MozillaBuild installation did not complete: $($install.ExitCode)"}
+  }
+  $env:MOZILLABUILD=$mozbuild
+  $env:PATH="$(Join-Path $mozbuild 'bin');$(Join-Path $mozbuild 'msys2/usr/bin');$(Join-Path $mozbuild 'python3');$env:PATH"
+  Push-Location (Join-Path $nativeRoot 'src')
+  try {
+    # The supported option prevents bootstrap's antivirus-exclusion and host-configuration changes.
+    Run $python @('mach','--no-interactive','bootstrap','--application-choice','browser','--no-system-changes')
+    Run $python @('mach','build')
+    $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
+    if(-not $built){throw 'Firefox build did not produce firefox.exe'}
+    $built | ForEach-Object {Get-FileHash $_.FullName -Algorithm SHA256}
+    Write-Output 'Built upstream baseline only. Product encryption, snapshot and identity remain unverified and disabled.'
+  } finally { Pop-Location }
 }
