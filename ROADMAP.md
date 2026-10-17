@@ -1,5 +1,11 @@
 # Roadmap
 
+Current preservation state: component source and focused checks exist, but the complete
+product remains unfinished. Core 12, host 14, desktop 5, documentation 6 and storage 6 focused
+checks were reported at their recorded candidates. The actual frozen browser matrix failed
+at graceful stop. The repair and native-engine production work remain on the recovery branch;
+no end-to-end completion, release, deployment or two-computer acceptance is claimed.
+
 ## Foundation
 - [ ] Encrypted vault and isolated profile records
 - [ ] Persistent per-profile automation preferences

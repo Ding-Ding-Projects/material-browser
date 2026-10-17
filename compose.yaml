@@ -1,0 +1,23 @@
+name: material-browser-storage
+services:
+  storage:
+    image: ghcr.io/ding-ding-projects/material-browser-storage:${STORAGE_VERSION:-0.1.0}
+    ports:
+      - "${STORAGE_BIND:-0.0.0.0}:${STORAGE_PORT:-8174}:8174"
+    volumes:
+      - storage-data:/data
+      - ${STORAGE_CONFIG_DIR:-./.storage-config}:/config:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8174/health',{headers:{Host:'127.0.0.1:8174'}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+volumes:
+  storage-data:

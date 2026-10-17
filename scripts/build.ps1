@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative','Docs')][string]$Component='All',
+  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','StorageWeb','HostingWizard','BrowserNative','Docs')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
   [switch]$AcquireOnly
 )
@@ -34,9 +34,19 @@ try {
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
     } finally { Pop-Location }
   }
+  if($Component -in @('Storage','StorageWeb','HostingWizard')) {
+    if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required for the storage interface.'}
+    Push-Location (Join-Path $root 'apps/storage/web')
+    try {
+      if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & npm.cmd run build
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+    } finally { Pop-Location }
+  }
   if($Component -eq 'Storage') {
     if(-not (Get-Command docker -ErrorAction SilentlyContinue)){throw 'Container runtime is unavailable.'}
-    & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile apps/storage
+    & docker build --tag material-browser-storage:local --file apps/storage/Dockerfile .
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }
   if($Component -eq 'BrowserNative') {

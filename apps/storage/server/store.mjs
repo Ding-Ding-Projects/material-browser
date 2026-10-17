@@ -1,0 +1,24 @@
+import { promises as fs, constants } from 'node:fs';
+import path from 'node:path';
+import { createHash, randomBytes } from 'node:crypto';
+const hex=/^[a-f0-9]{64}$/;
+export class StorageFault extends Error {constructor(status,message){super(message);this.status=status;}}
+export async function safeDirectory(p){await fs.mkdir(p,{recursive:true,mode:0o700});const stat=await fs.lstat(p);if(!stat.isDirectory()||stat.isSymbolicLink())throw new Error('Unsafe storage directory');}
+export async function readRegular(p){const file=await fs.open(p,constants.O_RDONLY|(constants.O_NOFOLLOW||0));try{if(!(await file.stat()).isFile())throw new Error('Not a regular file');return await file.readFile();}finally{await file.close();}}
+export async function createCiphertextStore(root,limits={}){
+ root=path.resolve(root);await safeDirectory(root);const vaults=path.join(root,'vaults');await safeDirectory(vaults);
+ const maxChunk=limits.maxChunk||16*1024*1024,quota=limits.quota||100*1024*1024*1024,headLocks=new Set();let active=0,reserved=0;
+ function check(vault,kind,id){if(!hex.test(vault)||!['chunks','revisions'].includes(kind)||(id!==undefined&&!hex.test(id)))throw new StorageFault(400,'Invalid opaque object identifier');}
+ async function objectDirectory(vault,kind){check(vault,kind);const v=path.join(vaults,vault);await safeDirectory(v);const dir=path.join(v,kind);await safeDirectory(dir);return dir;}
+ async function stats(){let bytes=0,chunks=0,revisions=0;for(const v of await fs.readdir(vaults,{withFileTypes:true})){if(!v.isDirectory()||!hex.test(v.name))continue;for(const kind of ['chunks','revisions']){for(const f of await fs.readdir(path.join(vaults,v.name,kind),{withFileTypes:true}).catch(()=>[])){if(!f.isFile())continue;const st=await fs.lstat(path.join(vaults,v.name,kind,f.name));if(st.isFile()){bytes+=st.size;if(hex.test(f.name))kind==='chunks'?chunks++:revisions++;}}}}return {bytes,chunks,revisions,quotaBytes:quota,maxChunkBytes:maxChunk};}
+ async function get(vault,kind,id){check(vault,kind,id);return readRegular(path.join(await objectDirectory(vault,kind),id));}
+ async function put(vault,kind,id,source,length){
+  check(vault,kind,id);if(!Number.isSafeInteger(length)||length<1||length>maxChunk)throw new StorageFault(413,'Bounded Content-Length required');if(active>=4)throw new StorageFault(429,'Upload concurrency limit reached');active++;reserved+=length;let tmp,file;
+  try{if((await stats()).bytes+reserved>quota)throw new StorageFault(507,'Storage quota exceeded');const dir=await objectDirectory(vault,kind);tmp=path.join(dir,`.upload-${randomBytes(16).toString('hex')}`);file=await fs.open(tmp,'wx',0o600);const hash=createHash('sha256');let size=0;for await(const chunk of source){const bytes=Buffer.from(chunk);size+=bytes.length;if(size>length||size>maxChunk)throw new StorageFault(413,'Request too large');hash.update(bytes);await file.writeFile(bytes);}if(size!==length||hash.digest('hex')!==id)throw new StorageFault(422,'Content hash mismatch');await file.sync();await file.close();file=null;try{await fs.link(tmp,path.join(dir,id));}catch(e){if(e.code!=='EEXIST')throw e;const existing=await get(vault,kind,id);if(createHash('sha256').update(existing).digest('hex')!==id)throw new StorageFault(409,'Existing object failed integrity verification');}return {id,bytes:size};}
+  finally{if(file)await file.close();if(tmp)await fs.unlink(tmp).catch(()=>{});active--;reserved-=length;}
+ }
+ async function getHead(vault){check(vault,'revisions');await safeDirectory(path.join(vaults,vault));const current=await readRegular(path.join(vaults,vault,'head')).catch(e=>{if(e.code==='ENOENT')return null;throw e;});return {revisionId:current?current.toString():null};}
+ async function compareAndSetHead(vault,revisionId,expectedHead){check(vault,'revisions',revisionId);if(expectedHead!==null&&!hex.test(expectedHead))throw new StorageFault(400,'Invalid expected revision');if(headLocks.has(vault))throw new StorageFault(409,'Head update in progress');headLocks.add(vault);let tmp;try{await get(vault,'revisions',revisionId);if((await getHead(vault)).revisionId!==expectedHead)throw new StorageFault(409,'Head changed; preserve both revisions and retry');const dir=path.join(vaults,vault);tmp=path.join(dir,`.head-${randomBytes(16).toString('hex')}`);const file=await fs.open(tmp,'wx',0o600);try{await file.writeFile(revisionId);await file.sync();}finally{await file.close();}await fs.rename(tmp,path.join(dir,'head'));tmp=null;return {revisionId};}finally{if(tmp)await fs.unlink(tmp).catch(()=>{});headLocks.delete(vault);}}
+ async function list(vault,kind){const dir=await objectDirectory(vault,kind);return (await fs.readdir(dir,{withFileTypes:true})).filter(f=>f.isFile()&&hex.test(f.name)).map(f=>f.name).sort();}
+ return Object.freeze({get,put,list,stats,getHead,compareAndSetHead});
+}
