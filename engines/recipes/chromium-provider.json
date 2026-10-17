@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "portableEncryptionVerified": false,
+  "upstream": "https://chromium.googlesource.com/chromium/src",
+  "files": [
+    {
+      "sha256": "ec04ca8955411ca975860f9bce3972b4469923c3d101f3db94aceecc3131754e",
+      "path": "components/os_crypt/async/browser/os_crypt_async.h"
+    },
+    {
+      "sha256": "c7349b7a1dccb51908af2e3fb3a83f893d3a891ece81b6f941a649d4062e9407",
+      "path": "components/os_crypt/async/browser/key_provider.h"
+    },
+    {
+      "sha256": "8ce0b7506048fd7c75c8f38090a59ef8ec67148c4cd43f10f1c63b5c731812a1",
+      "path": "components/os_crypt/async/common/encryptor.h"
+    },
+    {
+      "sha256": "af1670c7afad59417b0a8e1f1039a93610a5a834b501fba5f34b468acace9002",
+      "path": "chrome/browser/browser_process_impl.cc"
+    }
+  ],
+  "liveSnapshotVerified": false,
+  "revision": "134.0.6998.35",
+  "status": "interfaces-acquired-not-compiled"
+}
