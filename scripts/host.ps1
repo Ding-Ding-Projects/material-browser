@@ -1,4 +1,4 @@
-param([switch]$detached,[switch]$logs,[switch]$newPairingCode,[switch]$JsonSetup)
+param([switch]$detached,[switch]$logs,[switch]$newPairingCode,[switch]$JsonSetup,[string]$ConfigRoot)
 $ErrorActionPreference='Stop'
 function Progress($stage,$state){if($JsonSetup){[Console]::Out.WriteLine((@{type='progress';stage=$stage;state=$state}|ConvertTo-Json -Compress))}else{Write-Host "$stage : $state"}}
 function DockerCommand([string[]]$arguments){$output=& docker @arguments 2>&1;if($LASTEXITCODE -ne 0){throw 'Docker operation failed. Existing storage data was preserved.'};if(-not $JsonSetup){$output|ForEach-Object{Write-Host $_}}}
@@ -18,12 +18,33 @@ try {
     $newPairingCode=$inputData.rotatePairingCode -eq $true
     $detached=$true
   }
-  $configDir=Join-Path $root '.storage-config'
+  if($ConfigRoot){
+    if(-not[IO.Path]::IsPathRooted($ConfigRoot) -or $ConfigRoot.StartsWith('\\') -or $ConfigRoot -match '[\r\n\x00]'){throw 'Configuration root must be an absolute local path.'}
+    $configDir=[IO.Path]::GetFullPath($ConfigRoot)
+  }else{
+    $localData=[Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+    if(-not $localData){throw 'Per-user application data directory is unavailable.'}
+    $configDir=Join-Path $localData 'MaterialBrowser\hosting'
+  }
+  if($configDir.TrimEnd('\','/') -eq [IO.Path]::GetPathRoot($configDir).TrimEnd('\','/')){throw 'Configuration root cannot be a drive root.'}
   if(Test-Path -LiteralPath $configDir){if((Get-Item -LiteralPath $configDir).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Configuration directory must not be a link.'}}
   else{New-Item -ItemType Directory -Path $configDir|Out-Null}
   $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name
   & icacls $configDir /inheritance:r /grant:r "${identity}:(OI)(CI)F" 'SYSTEM:(OI)(CI)F' 2>&1|Out-Null
   if($LASTEXITCODE -ne 0){throw 'Unable to protect configuration.'}
+  $legacyDir=Join-Path $root '.storage-config'
+  if((Test-Path -LiteralPath $legacyDir) -and $legacyDir -ne $configDir){
+    if((Get-Item -LiteralPath $legacyDir).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Legacy configuration must not be a link.'}
+    foreach($name in @('config.json','host-settings.json','config.json.previous','host-settings.json.previous')){
+      $legacyFile=Join-Path $legacyDir $name
+      $destination=Join-Path $configDir $name
+      if((Test-Path -LiteralPath $legacyFile) -and -not(Test-Path -LiteralPath $destination)){
+        $item=Get-Item -LiteralPath $legacyFile
+        if($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Legacy configuration file is unsafe.'}
+        Copy-Item -LiteralPath $legacyFile -Destination $destination
+      }
+    }
+  }
   $settingsFile=Join-Path $configDir 'host-settings.json'
   $previous=if(Test-Path -LiteralPath $settingsFile){Get-Content -Raw -LiteralPath $settingsFile|ConvertFrom-Json}else{$null}
   $port=if($null -ne $inputData.port){$parsed=0;if(-not[int]::TryParse([string]$inputData.port,[ref]$parsed)){throw 'Port must be an integer.'};$parsed}elseif($previous){[int]$previous.port}elseif($env:STORAGE_PORT){[int]$env:STORAGE_PORT}else{8174}
@@ -62,7 +83,7 @@ try {
   $hash=$null
   @{port=$port;storageDir=$storageDir}|ConvertTo-Json|Set-Content -LiteralPath $settingsFile -Encoding Ascii
   $env:STORAGE_CONFIG_DIR=$configDir;$env:STORAGE_PORT=[string]$port
-  $composeArgs=@('compose','-f',(Join-Path $root 'compose.yaml'))
+  $composeArgs=@('compose','--project-name','material-browser-storage','-f',(Join-Path $root 'compose.yaml'))
   if($storageDir){$override=Join-Path $configDir 'storage.compose.json';@{services=@{storage=@{volumes=@(@{type='bind';source=$storageDir;target='/data'})}}}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $override -Encoding Ascii;$composeArgs+=@('-f',$override)}
   Progress 'configuration' 'complete'
   Progress 'pull' 'running';DockerCommand ($composeArgs+@('pull'));Progress 'pull' 'complete'
