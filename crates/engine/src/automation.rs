@@ -2,6 +2,75 @@ use super::*;
 use std::io::{BufRead, BufReader, Write};
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AutomationEndpoint {
+    #[serde(default)]
+    pub profile_id: String,
+    pub mode: AutomationMode,
+    pub protocol: String,
+    pub url: String,
+    pub session_id: Option<String>,
+}
+impl AutomationEndpoint {
+    pub fn validate(&self, mode: AutomationMode) -> Result<()> {
+        let parsed = url::Url::parse(&self.url)
+            .map_err(|_| err("INVALID_ENDPOINT", "Invalid automation URL"))?;
+        let correct_protocol = match mode {
+            AutomationMode::Off => false,
+            AutomationMode::Selenium => self.protocol == "webdriver" && parsed.scheme() == "http",
+            AutomationMode::Puppeteer => {
+                matches!(self.protocol.as_str(), "cdp" | "bidi") && parsed.scheme() == "ws"
+            }
+        };
+        if !correct_protocol
+            || self.mode != mode
+            || parsed.host_str() != Some("127.0.0.1")
+            || parsed.port().is_none()
+            || parsed.port() == Some(0)
+            || !parsed.username().is_empty()
+            || parsed.password().is_some()
+            || parsed.fragment().is_some()
+        {
+            return Err(err(
+                "INVALID_ENDPOINT",
+                "Automation must use a literal IPv4 loopback endpoint with an explicit port",
+            ));
+        }
+        Ok(())
+    }
+}
+#[cfg(test)]
+mod endpoint_tests {
+    use super::*;
+    #[test]
+    fn endpoint_rejects_remote_credentials_and_mode_confusion() {
+        let mut endpoint = AutomationEndpoint {
+            profile_id: String::new(),
+            mode: AutomationMode::Puppeteer,
+            protocol: "cdp".into(),
+            url: "ws://127.0.0.1:45678/devtools/browser/test".into(),
+            session_id: None,
+        };
+        assert!(endpoint.validate(AutomationMode::Puppeteer).is_ok());
+        assert!(endpoint.validate(AutomationMode::Off).is_err());
+        assert!(endpoint.validate(AutomationMode::Selenium).is_err());
+        for invalid in [
+            "ws://localhost:45678/x",
+            "ws://127.0.0.1.evil.test:45678/x",
+            "ws://192.168.1.1:45678/x",
+            "ws://user@127.0.0.1:45678/x",
+            "ws://127.0.0.1/x",
+            "http://127.0.0.1:45678/x",
+        ] {
+            endpoint.url = invalid.into();
+            assert!(
+                endpoint.validate(AutomationMode::Puppeteer).is_err(),
+                "{invalid}"
+            );
+        }
+    }
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AdapterRuntime {
     pub node: PathBuf,
     pub node_sha256: String,
@@ -79,7 +148,7 @@ impl AdapterRuntime {
         engine: &VerifiedEngine,
         profile: &Path,
         mode: AutomationMode,
-    ) -> Result<(Child, u32)> {
+    ) -> Result<(Child, u32, Option<AutomationEndpoint>)> {
         self.verify(mode, &engine.manifest.version)?;
         let mut command = Command::new(&self.node);
         command
@@ -133,10 +202,13 @@ impl AdapterRuntime {
             if pid == 0 {
                 return None;
             }
-            Some(pid)
+            let endpoint: AutomationEndpoint =
+                serde_json::from_value(value["endpoint"].clone()).ok()?;
+            endpoint.validate(mode).ok()?;
+            Some((pid, endpoint))
         })();
         match accepted {
-            Some(pid) => Ok((child, pid)),
+            Some((pid, endpoint)) => Ok((child, pid, Some(endpoint))),
             None => {
                 drop(child.stdin.take());
                 let until = Instant::now() + Duration::from_secs(3);

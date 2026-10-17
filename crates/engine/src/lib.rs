@@ -183,6 +183,11 @@ struct OwnedProcess {
     status: ProcessStatus,
     _lock: File,
     adapter: bool,
+    endpoint: Option<AutomationEndpoint>,
+}
+/// Keep this lease alive for the entire snapshot, restore, or removal operation.
+pub struct ProfileLease {
+    _lock: File,
 }
 pub struct Supervisor {
     root: PathBuf,
@@ -226,22 +231,28 @@ impl Supervisor {
                 "Profile must be an application-owned direct child",
             ));
         }
+        fs::create_dir_all(self.root.join(".material-browser-locks")).map_err(io)?;
         let lock = OpenOptions::new()
             .create(true)
             .truncate(false)
             .read(true)
             .write(true)
-            .open(path.join(".material-browser.lock"))
+            .open(
+                self.root
+                    .join(".material-browser-locks")
+                    .join(format!("{}.lock", request.profile_id)),
+            )
             .map_err(io)?;
         lock.try_lock_exclusive()
             .map_err(|_| err("PROFILE_LOCKED", "Profile is in use by another supervisor"))?;
+        lifetime::assert_inactive(&self.root, &request.profile_id)?;
         let mut cmd = Command::new(&engine.executable);
         cmd.stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
         cmd.args(off_arguments(request.engine, &path));
         let adapter = request.requested_mode != AutomationMode::Off;
-        let (child, pid) = if adapter {
+        let runtime = if adapter {
             let runtime = registry
                 .adapters
                 .get(&(request.engine, mode_key(request.requested_mode)))
@@ -251,12 +262,32 @@ impl Supervisor {
                         "No pinned adapter runtime is configured",
                     )
                 })?;
+            runtime.verify(request.requested_mode, &engine.manifest.version)?;
+            Some(runtime)
+        } else {
+            None
+        };
+        // Persist intent before spawning. A crash at any later instruction cannot look idle.
+        lifetime::persist(
+            &self.root,
+            &request.profile_id,
+            &lifetime::Journal::Starting {
+                profile: path.clone(),
+            },
+        )?;
+        let (child, pid, endpoint) = if let Some(runtime) = runtime {
             runtime.spawn(engine, &path, request.requested_mode)?
         } else {
             let child = cmd.spawn().map_err(io)?;
             let pid = child.id();
-            (child, pid)
+            (child, pid, None)
         };
+        let identity = lifetime::capture(pid, &engine.executable, &path)?;
+        lifetime::persist(
+            &self.root,
+            &request.profile_id,
+            &lifetime::Journal::Running { identity },
+        )?;
         let status = ProcessStatus {
             profile_id: request.profile_id.clone(),
             pid,
@@ -271,6 +302,7 @@ impl Supervisor {
                 status: status.clone(),
                 _lock: lock,
                 adapter,
+                endpoint,
             },
         );
         Ok(status)
@@ -327,6 +359,58 @@ impl Supervisor {
             "LIVE_SNAPSHOT_UNAVAILABLE",
             "No verified native quiescence barrier; live directories must not be copied",
         ))
+    }
+    pub fn assert_profile_inactive(&mut self, id: &str) -> Result<()> {
+        validate_id(id)?;
+        self.reap()?;
+        if self.processes.contains_key(id) {
+            return Err(err("PROFILE_ACTIVE", "Profile has a supervised process"));
+        }
+        lifetime::assert_inactive(&self.root, id)
+    }
+    pub fn acquire_profile_idle(&mut self, id: &str) -> Result<ProfileLease> {
+        validate_id(id)?;
+        let path = self.root.join(id);
+        fs::create_dir_all(&path).map_err(io)?;
+        let path = path.canonicalize().map_err(io)?;
+        if path.parent() != Some(self.root.as_path()) {
+            return Err(err(
+                "INVALID_PROFILE_PATH",
+                "Profile must be a direct child",
+            ));
+        }
+        fs::create_dir_all(self.root.join(".material-browser-locks")).map_err(io)?;
+        let lock = OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .read(true)
+            .write(true)
+            .open(
+                self.root
+                    .join(".material-browser-locks")
+                    .join(format!("{id}.lock")),
+            )
+            .map_err(io)?;
+        lock.try_lock_exclusive()
+            .map_err(|_| err("PROFILE_LOCKED", "Profile is in use"))?;
+        self.assert_profile_inactive(id)?;
+        Ok(ProfileLease { _lock: lock })
+    }
+    pub fn automation_endpoint(&mut self, id: &str) -> Result<AutomationEndpoint> {
+        validate_id(id)?;
+        self.reap()?;
+        let process = self
+            .processes
+            .get(id)
+            .ok_or_else(|| err("PROFILE_NOT_RUNNING", "No supervised profile"))?;
+        let mut endpoint = process.endpoint.clone().ok_or_else(|| {
+            err(
+                "AUTOMATION_DISABLED",
+                "This profile has no automation endpoint",
+            )
+        })?;
+        endpoint.profile_id = id.into();
+        Ok(endpoint)
     }
 }
 fn validate_id(id: &str) -> Result<()> {
@@ -423,7 +507,8 @@ fn request_close(_pid: u32) -> Result<()> {
 pub mod snapshot_protocol;
 
 pub mod automation;
-pub use automation::AdapterRuntime;
+mod lifetime;
+pub use automation::{AdapterRuntime, AutomationEndpoint};
 fn mode_key(mode: AutomationMode) -> u8 {
     match mode {
         AutomationMode::Off => 0,

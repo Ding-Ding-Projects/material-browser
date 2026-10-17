@@ -4,12 +4,12 @@ const readline = require('node:readline');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const lines = readline.createInterface({input: process.stdin});
-let browser, driver, started = false, closing = false;
+let browser, driver, service, started = false, closing = false;
 const pins = { 'puppeteer-core': '25.14.0', 'selenium-webdriver': '4.51.0' };
 async function close() {
   if (closing) return;
   closing = true;
-  try { if (browser) await browser.close(); if (driver) await driver.quit(); }
+  try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); }
   finally { process.exit(0); }
 }
 process.on('SIGTERM', close);
@@ -24,15 +24,16 @@ lines.on('line', async line => {
     if (!['chromium','firefox'].includes(config.engine) || !['selenium','puppeteer'].includes(config.mode)) throw Error('Invalid adapter');
     const pkg = config.mode === 'puppeteer' ? 'puppeteer-core' : 'selenium-webdriver';
     if (require(`${pkg}/package.json`).version !== pins[pkg]) throw Error('Adapter version mismatch');
-    let version, pid;
+    let version, pid, endpoint;
     if (config.mode === 'puppeteer') {
       const puppeteer = require('puppeteer-core');
       browser = await puppeteer.launch({ browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
         protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
-        userDataDir: config.profile, headless: false, pipe: config.engine === 'chromium',
-        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check'] : [], timeout: 20000 });
+        userDataDir: config.profile, headless: false, pipe: false,
+        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1'] : ['--remote-debugging-host=127.0.0.1'], timeout: 20000 });
       version = (await browser.version()).replace(/^[^/]+\//, '');
       pid = browser.process()?.pid;
+      endpoint = {mode:config.mode, protocol:config.engine === 'chromium' ? 'cdp' : 'bidi', url:browser.wsEndpoint(), sessionId:null};
     } else {
       if (!config.driver || !config.driverSha256 || crypto.createHash('sha256').update(fs.readFileSync(config.driver)).digest('hex') !== config.driverSha256) throw Error('Driver hash mismatch');
       const {Builder} = require('selenium-webdriver');
@@ -40,21 +41,27 @@ lines.on('line', async line => {
       const options = new adapter.Options();
       if (config.engine === 'chromium') options.setChromeBinaryPath(config.executable).addArguments(`--user-data-dir=${config.profile}`, '--no-first-run','--no-default-browser-check');
       else options.setBinary(config.executable).addArguments('-no-remote','-profile',config.profile);
-      const service = new adapter.ServiceBuilder(config.driver);
-      let builder = new Builder().forBrowser(config.engine === 'chromium' ? 'chrome' : 'firefox');
-      builder = config.engine === 'chromium' ? builder.setChromeOptions(options).setChromeService(service) : builder.setFirefoxOptions(options).setFirefoxService(service);
+      const serviceBuilder = new adapter.ServiceBuilder(config.driver).setLoopback(true).setHostname('127.0.0.1');
+      serviceBuilder.addArguments(config.engine === 'firefox' ? '--host=127.0.0.1' : '--allowed-ips=127.0.0.1');
+      service = serviceBuilder.build();
+      const serviceUrl = await service.start(20000);
+      let builder = new Builder().forBrowser(config.engine === 'chromium' ? 'chrome' : 'firefox').usingServer(serviceUrl);
+      builder = config.engine === 'chromium' ? builder.setChromeOptions(options) : builder.setFirefoxOptions(options);
       driver = await builder.build();
       const caps = await driver.getCapabilities();
       version = caps.get('browserVersion');
       pid = caps.get('goog:processID') || caps.get('moz:processID');
+      endpoint = {mode:config.mode,protocol:'webdriver',url:serviceUrl,sessionId:(await driver.getSession()).getId()};
     }
     if (version !== config.version || !Number.isInteger(pid) || pid <= 0) throw Error('Browser version or process receipt mismatch');
     clearTimeout(timer);
-    process.stdout.write(JSON.stringify({pid,version,mode:config.mode,engine:config.engine})+'\n');
+    const url = new URL(endpoint.url);
+    if (url.hostname !== '127.0.0.1' || !url.port || url.username || url.password) throw Error('Unsafe endpoint');
+    process.stdout.write(JSON.stringify({pid,version,mode:config.mode,engine:config.engine,endpoint})+'\n');
   } catch (_) {
     clearTimeout(timer);
     process.stderr.write('Engine adapter initialization failed\n');
-    try { if (browser) await browser.close(); if (driver) await driver.quit(); } finally { process.exit(1); }
+    try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); } finally { process.exit(1); }
   }
 });
 
