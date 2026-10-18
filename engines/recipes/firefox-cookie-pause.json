@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "revision": "3c71aeacdb296402e41fb2084b13e797d1770642",
   "patch": "firefox-158-cookie-pause.patch",
-  "patchSha256": "27615047fda1658f85064ee9cdb87ca06c015f9875c304e8f69a9fa9eebe942d",
+  "patchSha256": "b51ce5e6bfc8fc926c9873ed9dfecf3db19c9c41404ef5c52819e8008d82a53f",
   "files": [
     {
       "path": "netwerk/cookie/CookieDBWriteQueue.h",
@@ -12,7 +12,7 @@
     {
       "path": "netwerk/cookie/CookieDBWriteQueue.cpp",
       "baselineSha256": "427d88180b23f259c28e3ac82b0a1c248ce96f939c31c73514d093022cffc97d",
-      "patchedSha256": "d4f053cfb2da3d28612ddd5ea05553d40c80adf24b013c422950c0cb385e0d92"
+      "patchedSha256": "5eb379892666d2c91d7af8749835ed25f5caf526121f0489dcb95d789c9c8383"
     },
     {
       "path": "netwerk/cookie/CookiePersistentStorage.h",
@@ -27,7 +27,7 @@
     {
       "path": "netwerk/test/gtest/TestCookie.cpp",
       "baselineSha256": "c6bdd07de45b015c5732900b1ec78e72c1dec76b7113e77c665dc40fe64959f5",
-      "patchedSha256": "2e836d2adb1d6270b521f306dc2378d977c5f213e329f1e1e74020be33d7c5f6"
+      "patchedSha256": "483fd2f03d27267b5be37045dd752de0ece65f3c24fd842c71ab02bc5914a0a7"
     },
     {
       "path": "netwerk/cookie/CookieStorage.h",

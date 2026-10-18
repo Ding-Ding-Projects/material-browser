@@ -1,0 +1,2 @@
+# Python's rebuildable bytecode cache for the receipt generator.
+__pycache__/

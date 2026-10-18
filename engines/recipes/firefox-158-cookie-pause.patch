@@ -32,7 +32,7 @@
  }  // namespace net
 --- a/netwerk/cookie/CookieDBWriteQueue.cpp
 +++ b/netwerk/cookie/CookieDBWriteQueue.cpp
-@@ -9,6 +9,7 @@
+@@ -9,9 +9,13 @@
  #include "CookiePersistentStorage.h"
  #include "mozilla/StaticPrefs_network.h"
  #include "nsITimer.h"
@@ -40,7 +40,13 @@
  
  namespace mozilla {
  namespace net {
-@@ -113,24 +114,56 @@
++
++// All access is main-thread-only. Storage replacement cannot reuse a lease.
++static uint64_t sSnapshotLease = 0;
+ 
+ CookieDBWriteQueue::CookieDBWriteQueue(CookiePersistentStorage* aStorage)
+     : mStorage(aStorage) {
+@@ -113,24 +117,56 @@
  }
  
  void CookieDBWriteQueue::Clear() {
@@ -66,7 +72,7 @@
  
 +uint64_t CookieDBWriteQueue::TryPauseForSnapshot() {
 +  MOZ_ASSERT(NS_IsMainThread());
-+  if (mSnapshotPaused || mWriteFailed || mSnapshotLease == UINT64_MAX) {
++  if (mSnapshotPaused || mWriteFailed || sSnapshotLease == UINT64_MAX) {
 +    return 0;
 +  }
 +  FlushNow();
@@ -74,7 +80,7 @@
 +    return 0;
 +  }
 +  mSnapshotPaused = true;
-+  return ++mSnapshotLease;
++  return mSnapshotLease = ++sSnapshotLease;
 +}
 +
 +bool CookieDBWriteQueue::SnapshotPauseValid(uint64_t aLease) const {
@@ -99,7 +105,7 @@
      return;
    }
  
-@@ -153,7 +186,7 @@
+@@ -153,7 +189,7 @@
  }
  
  void CookieDBWriteQueue::Flush() {
@@ -108,7 +114,7 @@
      return;
    }
  
-@@ -187,6 +220,7 @@
+@@ -187,6 +223,7 @@
    if (mStorage->ExecuteWriteBatch(removals, insertions, updates)) {
      ++mFlushesInFlight;
    } else {
@@ -237,7 +243,7 @@
  #include "CookieStorage.h"
  #include "TestCommon.h"
  #include "gtest/gtest.h"
-@@ -1460,6 +1461,41 @@
+@@ -1460,6 +1461,48 @@
  
  namespace mozilla::net {
  
@@ -264,6 +270,13 @@
 +  uint64_t third = queue.TryPauseForSnapshot();
 +  queue.FlushNow();
 +  EXPECT_FALSE(queue.SnapshotPauseValid(third));
++
++  CookieDBWriteQueue replacement(storage);
++  uint64_t replacementLease = replacement.TryPauseForSnapshot();
++  EXPECT_GT(replacementLease, third);
++  EXPECT_FALSE(replacement.ResumeAfterSnapshot(first));
++  EXPECT_TRUE(replacement.SnapshotPauseValid(replacementLease));
++  EXPECT_TRUE(replacement.ResumeAfterSnapshot(replacementLease));
 +
 +  queue.mFlushesInFlight = 1;
 +  EXPECT_EQ(queue.TryPauseForSnapshot(), 0u);

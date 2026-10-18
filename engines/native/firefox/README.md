@@ -82,3 +82,9 @@ unregistered and does not complete the cookie provider: session cookies need
 their own consistent state, WAL/connection durability and direct-writer coverage
 need runtime validation, and the provider must propagate invalidation and thaw
 through the authenticated native transaction before any output is published.
+
+`refresh-cookie-receipt.py --source <pinned-source> --check` reconstructs the patch
+against the pinned Git objects and verifies every expected receipt hash without
+changing the native source. Omitting `--check` regenerates the receipt after a
+reviewed patch change. Lease identifiers are monotonic across storage instances,
+so replacement storage cannot accidentally accept a stale release.
