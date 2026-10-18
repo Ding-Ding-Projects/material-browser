@@ -44,8 +44,14 @@ These genuine captures show the packaged desktop at source `7257d2238a6c6a495c84
 
 The workflow created a vault and profile, skipped optional synchronization, saved automation from Off to Selenium, and changed language/theme through the interface. Effective automation remains unavailable: no managed browser was launched in this capture run. The updated-at value remains unavailable. Native installation, restart persistence, keyboard-only input, a complete scale/language matrix and overall accessibility acceptance remain unverified. [Evidence inventory](docs/evidence/desktop/inventory.json).
 
-Settings currently implements appearance and personal wording only. The complete required-feature
-settings inventory and its missing working controls are the current implementation priority.
+Settings now contains ten categories and 37 validated local preferences, with contextual help,
+practice values, schedules, notifications, history/export workflows, installed-font discovery
+and bounded external-editor handoff. Eleven reviewed state-transition repairs are integrated.
+The native preference and protected-history GUI integration remains in progress. The
+[required-feature inventory](docs/features/desktop/settings-acceptance.json) still records
+65 desktop-applicable rows with none claimed comprehensively complete. Explanatory localization,
+actual audio, deeper appearance controls, complete regex parity and the full layout matrix
+remain among the explicit gaps.
 
 ## Portable handbook evidence
 

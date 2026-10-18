@@ -13,5 +13,25 @@
     "path": "docs/evidence/desktop/settings-dark-bilingual.png",
     "sha256": "9a385b1ad9c40e05b1ecd476482691ec721493a682007e532fa4f6212c165350",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/handbook/portable-home.png",
+    "sha256": "d72af2104bf4fca9cee5db7f41d01afaec4593f930ea1eaa22aa15f0bae919e2",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/handbook/portable-wiki.png",
+    "sha256": "00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/handbook/portable-guide.png",
+    "sha256": "ee4ff864ad45b26f6169153dae1dae75e818d05b035b5f5747cebaf7a9c4efff",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/handbook/portable-settings.png",
+    "sha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79",
+    "reviewedForPublication": true
   }
 ]
