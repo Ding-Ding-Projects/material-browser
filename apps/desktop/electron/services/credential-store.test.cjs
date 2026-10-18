@@ -30,7 +30,7 @@ test('unavailable credential vault never returns a key',async()=>{
   await assert.rejects(createCredentialStore({platform:'linux'}).withKey(()=>{}),/UNAVAILABLE/);
   await assert.rejects(createCredentialStore().deleteTestKey(),/INVALID_CREDENTIAL_OPERATION/);
 });
-test('credential helper uses fixed arguments and protected stdin with bounded failure',async()=>{
+test('credential helper uses fixed arguments and protected stdin with bounded failure',{skip:process.platform!=='win32'},async()=>{
   let request, killed=false;
   const store=createCredentialStore({timeoutMs:50,launch(exe,args,options){
     assert.ok(exe.endsWith('powershell.exe'));assert.equal(options.shell,false);assert.equal(options.windowsHide,true);

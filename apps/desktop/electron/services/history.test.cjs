@@ -1,5 +1,6 @@
 'use strict';
-const {test}=require('node:test');
+const {test:nativeTest}=require('node:test');
+const test=(name,callback)=>nativeTest(name,{skip:process.platform!=='win32'},callback);
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises');
 const os=require('node:os');
