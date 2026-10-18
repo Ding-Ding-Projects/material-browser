@@ -31,7 +31,13 @@ exact managed files and directories plus their ancestors. Links, hardlinks,
 unexpected types and unexpected entries are rejected without deleting them.
 The empty global config is created exclusively and never truncated. Atomic
 updates use random exclusive temporary files, flush them and recheck destination
-paths before rename. An unexpected leftover file remains an explicit blocker.
+paths before rename. Abandoned `auth.json.<UUID>.tmp` and
+`pending.json.<UUID>.tmp` files remain inert and preserved in place. The inventory
+accepts only exact names, regular single-link files, up to 400,000 bytes each,
+128 files and eight MiB combined. Their contents are never activated, imported,
+authenticated or committed. Status reports only their count. Unknown, linked,
+wrong-type or oversized leftovers remain explicit blockers. The last durable
+journal governs recovery, so a failed phase update does not hide it.
 Before every Git invocation, pure filesystem checks allow only the app's small
 core configuration, reject includes and executable configuration, reject
 attributes and repository indirection, and require an empty managed hooks folder.
