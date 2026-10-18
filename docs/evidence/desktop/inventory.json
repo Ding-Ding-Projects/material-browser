@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "onboarding",
+      "active": true,
+      "path": "docs/evidence/desktop/onboarding.png",
+      "sourceCommit": "7257d2238a6c6a495c84321a98bffc283450af9c",
+      "artifactSha256": "4fb75974bc9ff0d7e200c5bb4d4b06715a8cf987e12e350963c74cda8a6826a0",
+      "captureSha256": "7af317ca751cbad08313821107d22b11da8d302d21f2d777c55fd1f84fc35d9c",
+      "screen": "setup",
+      "state": "new isolated vault",
+      "theme": "light",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "setup",
+      "interactionReceiptSha256": "0a94c70bb2beed9d8b6d2f8e0be28e6ec471b46bc2557f0e51921c5a665850d1",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "automation-saved",
+      "active": true,
+      "path": "docs/evidence/desktop/automation-saved.png",
+      "sourceCommit": "7257d2238a6c6a495c84321a98bffc283450af9c",
+      "artifactSha256": "4fb75974bc9ff0d7e200c5bb4d4b06715a8cf987e12e350963c74cda8a6826a0",
+      "captureSha256": "0b60ceeadd1be9af130f7de71c4a9e5cf4a72a6ea3fc85ee6bc378b19158d253",
+      "screen": "profiles",
+      "state": "saved selenium preference, runtime unavailable",
+      "theme": "light",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "workflow",
+      "interactionReceiptSha256": "d8c4b71f7e2bf31528a2cb5efe28e79a2dfe6ccc6c782c38a975e7983d140d5c",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "settings-dark-bilingual",
+      "active": true,
+      "path": "docs/evidence/desktop/settings-dark-bilingual.png",
+      "sourceCommit": "7257d2238a6c6a495c84321a98bffc283450af9c",
+      "artifactSha256": "4fb75974bc9ff0d7e200c5bb4d4b06715a8cf987e12e350963c74cda8a6826a0",
+      "captureSha256": "9a385b1ad9c40e05b1ecd476482691ec721493a682007e532fa4f6212c165350",
+      "screen": "settings",
+      "state": "bilingual appearance controls",
+      "theme": "dark",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "settings-final",
+      "interactionReceiptSha256": "56b7ef7853b614a87a2bc1a4b42664ab8f3cb216515645215a91d65de36b59f8",
+      "inspectionStatus": "inspected"
+    }
+  ]
+}

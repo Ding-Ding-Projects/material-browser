@@ -3,6 +3,15 @@ const { spawn } = require("node:child_process");
 const path = require("node:path");
 const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
+const dataArguments = process.argv.filter((value) => value.startsWith("--material-data-dir="));
+if (dataArguments.length > 1) throw new Error("INVALID_DATA_DIRECTORY");
+if (dataArguments.length === 1) {
+  const directory = dataArguments[0].slice("--material-data-dir=".length);
+  const resolved = path.resolve(directory);
+  if (!path.isAbsolute(directory) || directory.includes("\0") || path.parse(resolved).root === resolved)
+    throw new Error("INVALID_DATA_DIRECTORY");
+  app.setPath("userData", resolved);
+}
 const allowed = new Set([
   "system.status",
   "vault.create",
@@ -58,9 +67,11 @@ function startHost() {
   host.on("exit", () => {
     host = undefined;
     failPending();
-    window?.webContents.send("material:event", {
-      type: "backend-disconnected",
-    });
+    if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
+      window.webContents.send("material:event", {
+        type: "backend-disconnected",
+      });
+    }
   });
   const lines = readline.createInterface({ input: host.stdout });
   lines.on("line", (line) => {
