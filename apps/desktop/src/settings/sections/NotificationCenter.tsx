@@ -78,10 +78,12 @@ export function NotificationCenter({
         <Button
           secondary
           disabled={!selected.length}
-          onClick={() => {
-            setUndo(selected);
-            c.dismiss(selected);
-            setSelected([]);
+          onClick={async () => {
+            const result = await c.dismiss(selected);
+            if (result.ok) {
+              setUndo(selected);
+              setSelected([]);
+            }
           }}
         >
           {t("Dismiss selected")}
@@ -89,14 +91,14 @@ export function NotificationCenter({
         <Button
           secondary
           disabled={!undo.length}
-          onClick={() => {
-            c.persist((old) => ({
+          onClick={async () => {
+            const result = await c.persist((old) => ({
               ...old,
               notices: old.notices.map((n) =>
                 undo.includes(n.id) ? { ...n, dismissed: false } : n,
               ),
             }));
-            setUndo([]);
+            if (result.ok) setUndo([]);
           }}
         >
           {t("Undo dismissal")}

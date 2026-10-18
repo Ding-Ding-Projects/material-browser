@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { readPresentationRecord, readStoredPresentation } from "./record.mjs";
-import type { SettingsRecord } from "./types";
+import type { SettingsRecord, SaveResult } from "./types";
 import {
   loadNativePreferences,
   preferenceIdentity,
@@ -34,7 +34,7 @@ export function useSettingsPersistence() {
     [saving, setSaving] = useState(false);
   const current = useRef(record);
   const nativeRevision = useRef<number | null>(null);
-  const writes = useRef<Promise<void>>(Promise.resolve());
+  const writes = useRef<Promise<SaveResult>>(Promise.resolve({ ok: true }));
   const initialization = useRef<Promise<any> | null>(null);
   const pendingWrites = useRef(0);
   const nativeRequest = useCallback(
@@ -115,22 +115,23 @@ export function useSettingsPersistence() {
     (change: (old: SettingsRecord) => SettingsRecord) => {
       pendingWrites.current++;
       setSaving(true);
-      const operation = writes.current
-        .then(async () => {
+      const operation: Promise<SaveResult> = writes.current
+        .then(async (): Promise<SaveResult> => {
           if (nativeRevision.current === null)
             throw Error(
               "Preferences are still loading or unavailable. Reload saved preferences before editing.",
             );
           const old = current.current,
             next = change(old);
-          if (next === old) return;
+          if (next === old) return { ok: true };
           const projection = (value: SettingsRecord) =>
             JSON.stringify([
               value.preferences,
               value.schedules,
               value.writtenKeys,
             ]);
-          if (projection(old) !== projection(next)) {
+          const nativeChanged = projection(old) !== projection(next);
+          if (nativeChanged) {
             const saved = await nativeRequest("preferences-write", {
               expectedRevision: nativeRevision.current,
               preferences: next.preferences,
@@ -149,17 +150,26 @@ export function useSettingsPersistence() {
             localStorage.setItem(KEY, JSON.stringify(next));
             setStorageError("");
           } catch {
-            setStorageError(
-              "Preferences were saved, but the local workspace cache could not be updated.",
-            );
+            const message = nativeChanged
+              ? "Preferences were saved, but the local workspace cache could not be updated."
+              : "The workspace change could not be saved. The previous state was preserved.";
+            setStorageError(message);
+            if (!nativeChanged) {
+              current.current = old;
+              setRecord(old);
+              return { ok: false, message };
+            }
+            return { ok: true, warning: message };
           }
+          return { ok: true };
         })
-        .catch((error) => {
-          setStorageError(
+        .catch((error): SaveResult => {
+          const message =
             error instanceof Error
               ? error.message
-              : "Preferences could not be saved. Existing saved values were preserved.",
-          );
+              : "Preferences could not be saved. Existing saved values were preserved.";
+          setStorageError(message);
+          return { ok: false, message };
         })
         .finally(() => {
           pendingWrites.current--;

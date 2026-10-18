@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Field } from "../../components";
 import { Search } from "../../Search";
 import { resolveSearchRecords } from "../interaction-model.mjs";
@@ -35,6 +35,9 @@ export function HistoryTransfer({
     [action, setAction] = useState(""),
     [rows, setRows] = useState<string[]>([]),
     [selected, setSelected] = useState<string[]>([]);
+  const [applying, setApplying] = useState(false);
+  const applyingRef = useRef(false),
+    errorRef = useRef<HTMLParagraphElement>(null);
   const filtered = c.record.revisions.filter(
     (r) =>
       (!from || r.at.slice(0, 10) >= from) &&
@@ -50,6 +53,7 @@ export function HistoryTransfer({
       setPending({ ...next, action: "Imported preferences" });
       setError("");
     } catch (e) {
+      setPending(null);
       setError(e instanceof Error ? e.message : "Invalid import");
     }
   }
@@ -101,7 +105,11 @@ export function HistoryTransfer({
             {t("Reset all preferences")}
           </Button>
         </div>
-        {error && <p role="alert">{t(error)}</p>}
+        {error && (
+          <p role="alert" tabIndex={-1} ref={errorRef}>
+            {t(error)}
+          </p>
+        )}
         {pending && (
           <div className="import-preview">
             <h3>{t("Review import")}</h3>
@@ -117,17 +125,43 @@ export function HistoryTransfer({
               {t("Schedules")}: {pending.schedules.length}
             </p>
             <Button
-              onClick={() => {
-                c.transact(
-                  pending.action || "Imported preferences",
-                  pending.preferences,
-                  pending.schedules,
-                  Object.keys(pending.preferences),
-                );
-                setPending(null);
+              disabled={applying}
+              onClick={async () => {
+                if (applyingRef.current) return;
+                applyingRef.current = true;
+                setApplying(true);
+                try {
+                  const result = await c.transact(
+                    pending.action || "Imported preferences",
+                    pending.preferences,
+                    pending.schedules,
+                    Object.keys(pending.preferences),
+                  );
+                  if (result.ok) {
+                    setPending(null);
+                    setError("");
+                  } else {
+                    setError(result.message);
+                    requestAnimationFrame(() => errorRef.current?.focus());
+                  }
+                } catch {
+                  setError(
+                    "The import could not be saved. Review the values and retry.",
+                  );
+                  requestAnimationFrame(() => errorRef.current?.focus());
+                } finally {
+                  applyingRef.current = false;
+                  setApplying(false);
+                }
               }}
             >
-              {t("Apply import")}
+              {t(
+                applying
+                  ? "Saving preferences"
+                  : error
+                    ? "Retry import"
+                    : "Apply import",
+              )}
             </Button>
             <Button secondary onClick={() => setPending(null)}>
               {t("Cancel")}
@@ -290,14 +324,15 @@ export function HistoryTransfer({
           )}
           t={t}
           onCancel={() => setReset(false)}
-          onConfirm={() => {
-            c.transact(
+          onConfirm={async () => {
+            const result = await c.transact(
               "Reset preferences",
               { ...defaults },
               [],
               Object.keys(defaults),
             );
-            setReset(false);
+            if (result.ok) setReset(false);
+            return result;
           }}
         />
       )}

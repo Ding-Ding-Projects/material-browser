@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Modal } from "../components";
+import type { SaveResult } from "./types";
 export function ConfirmAction({
   title,
   description,
@@ -11,11 +12,35 @@ export function ConfirmAction({
   description: string;
   t: (s: string) => string;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<SaveResult>;
 }) {
   const [first, setFirst] = useState(false),
     [second, setSecond] = useState(false),
-    [position, setPosition] = useState(0);
+    [position, setPosition] = useState(0),
+    [saving, setSaving] = useState(false),
+    [error, setError] = useState("");
+  const pending = useRef(false),
+    errorRef = useRef<HTMLParagraphElement>(null);
+  async function confirm() {
+    if (pending.current) return;
+    pending.current = true;
+    setSaving(true);
+    try {
+      const result = await onConfirm();
+      if (!result.ok) {
+        setError(result.message);
+        requestAnimationFrame(() => errorRef.current?.focus());
+      }
+    } catch {
+      setError(
+        "The change could not be saved. Your confirmation is retained; retry or exit.",
+      );
+      requestAnimationFrame(() => errorRef.current?.focus());
+    } finally {
+      pending.current = false;
+      setSaving(false);
+    }
+  }
   return (
     <Modal title={title} onClose={onCancel}>
       <p>{description}</p>
@@ -53,15 +78,26 @@ export function ConfirmAction({
         onInput: (e: any) => setPosition(Number(e.target.value)),
       })}
       <p role="status">{position}%</p>
+      {error && (
+        <p ref={errorRef} role="alert" tabIndex={-1}>
+          {t(error)}
+        </p>
+      )}
       <div className="actions">
         <Button secondary onClick={onCancel}>
           {t("Emergency exit")}
         </Button>
         <Button
-          disabled={!first || !second || position !== 100}
-          onClick={onConfirm}
+          disabled={!first || !second || position !== 100 || saving}
+          onClick={confirm}
         >
-          {t("Confirm")}
+          {t(
+            saving
+              ? "Saving preferences"
+              : error
+                ? "Retry confirmation"
+                : "Confirm",
+          )}
         </Button>
       </div>
     </Modal>

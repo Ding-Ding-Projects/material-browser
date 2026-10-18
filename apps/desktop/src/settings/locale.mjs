@@ -71,6 +71,15 @@ const labels = {
   "The previous local preferences are invalid. They were preserved and were not migrated.":
     "原有的本機設定無效。記錄已保留，未有遷移。",
   "Saving preferences": "正在儲存設定",
+  "Retry save": "重試儲存",
+  "Retry import": "重試匯入",
+  "Retry confirmation": "重試確認",
+  "The change could not be saved. Your confirmation is retained; retry or exit.":
+    "未能儲存更改。確認選項已保留，你可以重試或離開。",
+  "The import could not be saved. Review the values and retry.":
+    "未能儲存匯入設定。請檢查數值後重試。",
+  "The workspace change could not be saved. The previous state was preserved.":
+    "未能儲存工作區更改。原有狀態已保留。",
   "Preference storage needs attention": "設定儲存需要處理",
   "Reload saved preferences": "重新載入已儲存的設定",
   "Preferences changed elsewhere. Reload the saved preferences before editing again.":

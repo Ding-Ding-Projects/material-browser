@@ -42,7 +42,7 @@ export function useSettings() {
         current.current.preferences,
         current.current.schedules,
       ]);
-      persist((old) => {
+      return persist((old) => {
         if (JSON.stringify([old.preferences, old.schedules]) !== expected)
           throw Error(
             "Another preference change completed first. Review the saved values and retry this action.",
@@ -64,7 +64,7 @@ export function useSettings() {
   const update = useCallback(
     (key: string, value: any) => {
       validateValue(key, value);
-      persist(
+      return persist(
         (old) =>
           historyTransition(
             old,

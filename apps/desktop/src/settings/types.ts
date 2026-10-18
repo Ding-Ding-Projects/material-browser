@@ -1,4 +1,7 @@
 export type Preferences = Record<string, any>;
+export type SaveResult =
+  | { ok: true; warning?: string }
+  | { ok: false; message: string };
 export type Revision = {
   id: string;
   at: string;
