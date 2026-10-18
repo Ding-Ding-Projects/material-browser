@@ -5,6 +5,11 @@ schedule rules. It is an isolated local Git repository inside the application's
 stable data directory, independent of profile vault unlock and synchronization.
 There are no network commands, remotes or user-selected repository paths.
 
+The service boundaries are explicit: `history.cjs` owns authentication and
+transactions, `history-storage.cjs` owns managed filesystem and Git integrity,
+`native-lock.cjs` owns the protected cross-process kernel lock, and
+`credential-store.cjs` owns the application-scoped Credential Manager adapter.
+
 ## Main-process integration
 
 Create `createHistoryService` from `electron/services/history.cjs` with trusted
