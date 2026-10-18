@@ -326,7 +326,7 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
-            if p.child.try_wait().map_err(io)?.is_some() || !lifetime::is_alive(&p.identity)? {
+            if !lifetime::is_alive(&p.identity)? {
                 exited.push(id.clone());
             }
         }
@@ -353,7 +353,7 @@ impl Supervisor {
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
         while Instant::now() < until {
-            if p.child.try_wait().map_err(io)?.is_some() {
+            if p.child.try_wait().map_err(io)?.is_some() && !lifetime::is_alive(&p.identity)? {
                 self.processes.remove(id);
                 return Ok(());
             }
@@ -451,6 +451,52 @@ fn validate_id(id: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    #[cfg(windows)]
+    fn adapter_exit_does_not_release_a_surviving_browser_or_profile_lock() {
+        use std::os::windows::process::CommandExt;
+        let root = std::env::temp_dir().join(format!("engine-adapter-exit-{}", std::process::id()));
+        let id = "00000000-0000-0000-0000-000000000006";
+        let profile = root.join(id);
+        fs::create_dir_all(&profile).unwrap();
+        let profile = profile.canonicalize().unwrap();
+        let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+            .join("System32/WindowsPowerShell/v1.0/powershell.exe").canonicalize().unwrap();
+        let script = root.join("browser-fixture.ps1");
+        fs::write(&script, b"param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Rest)\nStart-Sleep -Seconds 30\n").unwrap();
+        let mut supervisor = Supervisor::new(root.clone()).unwrap();
+        let lease = supervisor.acquire_profile_idle(id).unwrap();
+        let mut native = Command::new(&executable).args(["-NoProfile", "-NonInteractive", "-File"])
+            .arg(&script).arg(format!("--user-data-dir={}", profile.display()))
+            .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
+            .creation_flags(0x08000000).spawn().unwrap();
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let identity = lifetime::capture(native.id(), &executable, &profile).unwrap();
+            let mut helper = Command::new(&executable).args(["-NoProfile", "-NonInteractive", "-Command", "$null = [Console]::ReadLine()"])
+                .stdin(Stdio::piped()).stdout(Stdio::null()).stderr(Stdio::null())
+                .creation_flags(0x08000004).spawn().unwrap();
+            let job = process_job::ProcessJob::attach(&mut helper, true).unwrap();
+            lifetime::persist(&root, id, &lifetime::Journal::Running { identity: identity.clone() }).unwrap();
+            supervisor.processes.insert(id.into(), OwnedProcess {
+                child: helper, status: ProcessStatus { profile_id: id.into(), pid: native.id(), engine: EngineKind::Chromium,
+                    effective_mode: AutomationMode::Puppeteer, engine_version: "synthetic".into() },
+                _lock: lease._lock, adapter: true, endpoint: None, _job: job, identity,
+            });
+            assert_eq!(supervisor.stop(id, Duration::from_millis(500)).unwrap_err().code, "GRACEFUL_STOP_UNAVAILABLE");
+            // The helper read shutdown and exited, while the native identity is still alive.
+            let until = Instant::now() + Duration::from_secs(5);
+            while supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_none() && Instant::now() < until {
+                std::thread::sleep(Duration::from_millis(25));
+            }
+            assert!(supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_some());
+            assert_eq!(supervisor.status().unwrap().len(), 1);
+            assert!(supervisor.acquire_profile_idle(id).is_err());
+        }));
+        // This exact child handle belongs only to the synthetic test process.
+        let _ = native.kill();
+        let _ = native.wait();
+        outcome.unwrap();
+    }
     #[test]
     fn profile_identity_cannot_escape_root() {
         for id in ["../personal", "", "00000000-0000-0000-0000-00000000000/"] {

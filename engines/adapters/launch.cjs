@@ -3,14 +3,28 @@
 const readline = require('node:readline');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
+function puppeteerOptions(config) {
+  return { browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
+    protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
+    userDataDir: config.profile, headless: false, pipe: false,
+    args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : [], timeout: 20000 };
+}
+module.exports = { puppeteerOptions };
+if (require.main === module) {
 const lines = readline.createInterface({input: process.stdin});
-let browser, driver, service, started = false, closing = false;
+let browser, driver, service, firefoxEndpoint, started = false, closing = false;
 const pins = { 'puppeteer-core': '25.14.0', 'selenium-webdriver': '4.51.0' };
 async function close() {
   if (closing) return;
   closing = true;
-  try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); }
-  finally { process.exit(0); }
+  let exit = 0;
+  try {
+    if (firefoxEndpoint) browser = await require('puppeteer-core').connect({browserWSEndpoint: firefoxEndpoint, protocol: 'webDriverBiDi', protocolTimeout: 10000});
+    if (browser) await browser.close();
+    if (driver) await driver.quit();
+    if (service) await service.kill();
+  } catch (_) { exit = 1; }
+  finally { process.exit(exit); }
 }
 process.on('SIGTERM', close);
 lines.on('close', close);
@@ -27,13 +41,17 @@ lines.on('line', async line => {
     let version, pid, endpoint;
     if (config.mode === 'puppeteer') {
       const puppeteer = require('puppeteer-core');
-      browser = await puppeteer.launch({ browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
-        protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
-        userDataDir: config.profile, headless: false, pipe: false,
-        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1'] : [], timeout: 20000 });
+      browser = await puppeteer.launch(puppeteerOptions(config));
       version = (await browser.version()).replace(/^[^/]+\//, '');
       pid = browser.process()?.pid;
       endpoint = {mode:config.mode, protocol:config.engine === 'chromium' ? 'cdp' : 'bidi', url:browser.wsEndpoint(), sessionId:null};
+      if (config.engine === 'firefox') {
+        // Firefox permits only one BiDi session. Release the launch session so
+        // the external client can connect, then reacquire it for graceful close.
+        firefoxEndpoint = endpoint.url;
+        await browser.disconnect();
+        browser = null;
+      }
     } else {
       if (!config.driver || !config.driverSha256 || crypto.createHash('sha256').update(fs.readFileSync(config.driver)).digest('hex') !== config.driverSha256) throw Error('Driver hash mismatch');
       const {Builder} = require('selenium-webdriver');
@@ -64,4 +82,5 @@ lines.on('line', async line => {
     try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); } finally { process.exit(1); }
   }
 });
+}
 
