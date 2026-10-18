@@ -229,7 +229,15 @@ if($Engine -eq 'chromium'){
     Run (Join-Path $depot 'gclient.bat') @('runhooks')
     Push-Location (Join-Path $nativeRoot 'src')
     try {
-      Run (Join-Path $depot 'gn.bat') @('gen','out/MaterialBrowserBaseline','--args=is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0 target_cpu="x64"')
+      $outputRoot=Join-Path $nativeRoot 'src/out/MaterialBrowserBaseline'
+      New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
+      $argsPath=Join-Path $outputRoot 'args.gn'
+      $argsText="is_debug = false`nis_component_build = false`nsymbol_level = 0`nblink_symbol_level = 0`ntarget_cpu = `"x64`"`n"
+      if(Test-Path $argsPath){
+        $existingArgs=[IO.File]::ReadAllText($argsPath).Replace("`r`n","`n")
+        if($existingArgs -ne $argsText){throw 'Existing Chromium build arguments differ; preserving them.'}
+      } else {[IO.File]::WriteAllText($argsPath,$argsText,[Text.UTF8Encoding]::new($false))}
+      Run (Join-Path $depot 'gn.bat') @('gen','out/MaterialBrowserBaseline')
       Run (Join-Path $depot 'autoninja.bat') @('-C','out/MaterialBrowserBaseline','chrome')
       $exe=Join-Path $nativeRoot 'src/out/MaterialBrowserBaseline/chrome.exe'
       if(-not (Test-Path $exe)){throw 'Chromium build did not produce chrome.exe'}
