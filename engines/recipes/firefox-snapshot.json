@@ -35,7 +35,8 @@
     },
     {
       "path": "browser/components/moz.build",
-      "sha256": "d15845a77e18aa0c21d3725f8abab0c2a42b9493893ebf169f88bdc8e9269371"
+      "sha256": "b59169e9170dc3d2248017c88e9ad314c34fbad1943bcc3e24da9974cb981fd7"
     }
-  ]
+  ],
+  "hashBasis": "pinned-git-object-bytes"
 }
