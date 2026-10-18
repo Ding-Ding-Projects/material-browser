@@ -190,6 +190,13 @@ if($Engine -eq 'chromium'){
   $env:DEPOT_TOOLS_UPDATE='0'
   $env:DEPOT_TOOLS_WIN_TOOLCHAIN='0'
   $env:PATH="$depot;$env:PATH"
+  if(-not (Test-Path (Join-Path $depot 'python3_bin_reldir.txt'))){
+    $allowGlobalConfig=& git config --global --get depot-tools.allowGlobalGitConfig
+    if($allowGlobalConfig -in @('true','1','yes','on')){throw 'Pinned depot_tools bootstrap would update global Git settings; preserving them instead.'}
+    Run (Join-Path $depot 'bootstrap/win_tools.bat') @()
+    if(-not (Test-Path (Join-Path $depot 'python3_bin_reldir.txt'))){throw 'Pinned depot_tools Python bootstrap did not produce its launcher receipt.'}
+  }
+  Run (Join-Path $depot 'python-bin/python3.bat') @('--version')
   $vswhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
   if(-not (Test-Path $vswhere)){throw 'Visual Studio discovery is unavailable.'}
   $vs=& $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
