@@ -11,10 +11,13 @@ manifest, and passes the persisted profile automation preference into `LaunchReq
   exclusive supervisor lifetime lock. Browser-native profile locks remain necessary after a host crash.
 - Chromium and Firefox Off-mode launch arguments contain no driver, debugging port, debugging
   pipe or automation flag. No extension or injected script is used to pretend native identity support.
-- Process status reports the actual child PID, effective mode and pinned engine version.
-- Windows stop posts WM_CLOSE only to windows with the owned child PID, then waits at most
-  30 seconds. A close prompt, hung process or unavailable window returns an explicit error and
-  retains ownership. It does not force-kill. Other platforms report graceful stop unavailable.
+- Process status reports the launch root PID, effective mode and pinned engine version. A browser
+  launcher can exit while its actual browser child remains in the private process job.
+- Windows Off-mode stop posts WM_CLOSE only after pinning the window owner's live process handle
+  and checking exact private job membership, creation ordering, executable and the current window
+  owner. Stop waits at most 30 seconds for native exit and an empty private job. A close prompt,
+  hung process, failed identity check or unavailable window returns an explicit error and retains
+  ownership. It does not force-kill. Other platforms report graceful stop unavailable.
 
 ## Deliberate unavailable capabilities
 
@@ -60,7 +63,8 @@ integrity. It does not download browsers or drivers, and never invokes Selenium 
 
 The bundled helper pins `selenium-webdriver` 4.51.0 and `puppeteer-core` 25.14.0. Selenium uses
 explicit ChromeDriver or geckodriver service builders and the application profile path.
-Puppeteer uses Chromium CDP through an inherited pipe, or Firefox WebDriver BiDi. The helper
+Puppeteer uses a loopback Chromium CDP WebSocket, or Firefox WebDriver BiDi. Chromium explicitly
+requests an ephemeral debugging port alongside its loopback debugging address. The helper
 checks the exact browser version and a positive native PID before returning a launch receipt.
 Version mismatch fails initialization and requests browser close. Configuration and shutdown
 travel over inherited stdin. No arbitrary user script, navigation or page evaluation command
@@ -68,10 +72,9 @@ is exposed by this helper. Automation is enabled only by the persisted requested
 
 `EngineRegistry::list()` reports configured adapters separately from runtime verification.
 A configured adapter is not runtime proof. A successful `ProcessStatus` effective mode follows
-the helper's exact browser receipt. No browser/driver version combination was launched in this
-session; the adapters remain runtime-unverified. Native-host trusted installation configuration
-must supply a compatible exact browser and driver pair. Chromium driver compatibility and
-Firefox BiDi compatibility still need real browser acceptance tests.
+the helper's exact browser receipt. Native-host trusted installation configuration must supply
+a compatible exact browser and driver pair. See [the native automation verification record](native-automation-verification.md)
+for the tested combinations and remaining limits; it does not verify other versions.
 
 Graceful adapter shutdown calls Puppeteer close or WebDriver quit. A timeout retains process
 ownership instead of claiming it stopped. Initialization failure closes the helper input first
@@ -80,6 +83,17 @@ Windows job before receiving launch configuration; Off-mode browsers start suspe
 that job before being resumed. Loss of the supervisor terminates its owned process family.
 Registered manifests cannot enable custom encryption, identity or
 snapshot features. Their automation booleans are informational and do not configure adapters.
+
+Firefox permits one active BiDi session. The helper releases its initial launch session before
+returning the endpoint, allowing the external client to connect. It reacquires a session for
+graceful shutdown after the external client disconnects. While an external client remains
+attached, stop reports incomplete and retains ownership. The helper stays alive after a Firefox
+protocol close reply until the native supervisor proves browser exit and that the complete job
+contains only the exact live helper child. The supervisor then sends a private settlement command
+and still waits for an empty job. An external client closing the browser is handled through the
+same independently verified transition. A retained process handle with a nonzero native exit
+timestamp does not make the exited browser live. Paired RPC reads allow 40 seconds so the native
+30-second stop result is not replaced by an earlier transport timeout.
 
 ## Source patch prototype
 
