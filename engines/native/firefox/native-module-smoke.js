@@ -13,6 +13,11 @@ if (control.status.available || control.status.active || control.status.poisoned
 }
 let finished = false;
 let failure = null;
+const deadline = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+deadline.initWithCallback(() => {
+  failure = new Error("Native snapshot default command exceeded its smoke-check deadline");
+  finished = true;
+}, 10000, Ci.nsITimer.TYPE_ONE_SHOT);
 control.dispatch({ command: "begin", protocol: 1, requestId: "synthetic-request",
   profileId: "synthetic-owned-profile" }).then(result => {
   if (result.status !== "unavailable" || result.storageWritersFrozen !== undefined ||
@@ -24,8 +29,12 @@ control.dispatch({ command: "begin", protocol: 1, requestId: "synthetic-request"
   failure = error;
   finished = true;
 });
-Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager)
-  .spinEventLoopUntil("MaterialSnapshotModuleSmoke", () => finished);
+try {
+  Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager)
+    .spinEventLoopUntil("MaterialSnapshotModuleSmoke", () => finished);
+} finally {
+  deadline.cancel();
+}
 if (failure) {
   throw failure;
 }
