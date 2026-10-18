@@ -49,6 +49,19 @@ until it closes new-write admission, drains outstanding work, flushes durable
 state and holds the freeze until explicit release, including renderer and worker
 coordination. The complete inventory still requires an engine-wide audit.
 
+Known unfinished writers inside `otherProfileWriters` include:
+
+| Store | Inspected source and outstanding boundary |
+| --- | --- |
+| NSS key and certificate storage | `security/nss/lib/softoken/sdb.c` and `sftkdb.c` use independent SQLite begin/commit operations. A cookie pause does not coordinate these records with saved logins. |
+| Site permissions | `extensions/permissions/PermissionManager.cpp` owns `permissions.sqlite`; its shutdown barrier is registered at `xpcom-will-shutdown`, later than `profile-before-change`. No reusable snapshot admission barrier is implemented. |
+| Form history | `toolkit/components/satchel/FormHistory.sys.mjs` uses its own SQLite transactions and shutdown-close blocker. No live write freeze is implemented. |
+| Content preferences | `toolkit/components/contentprefs/ContentPrefService2.sys.mjs` owns `content-prefs.sqlite`, a separate connection and memory caches. Its shutdown observer is not a resumable live freeze. |
+| Search settings | `toolkit/components/search/SearchSettings.sys.mjs` finalizes a pending batch task through `_ensurePendingWritesCompleted`; later settings changes can schedule more work. No admission freeze is implemented. |
+| Persistent window state | `toolkit/components/xulstore/XULStore.sys.mjs` delays writes and disables future saves at `profile-before-change`. Triggering shutdown to borrow that behavior is not a reusable snapshot provider. |
+
+These are identified gaps, not a claim that every profile writer has been found.
+
 ## Verification
 
 `node --test engines/native/firefox/snapshot-barrier.test.mjs` executes the actual

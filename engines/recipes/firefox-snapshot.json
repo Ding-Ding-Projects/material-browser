@@ -36,6 +36,34 @@
     {
       "path": "browser/components/moz.build",
       "sha256": "b59169e9170dc3d2248017c88e9ad314c34fbad1943bcc3e24da9974cb981fd7"
+    },
+    {
+      "path": "extensions/permissions/PermissionManager.cpp",
+      "sha256": "d39162af0861985d30942976f929f7f3a5b4de17f0f360885ed9b95807df9e50"
+    },
+    {
+      "path": "toolkit/components/satchel/FormHistory.sys.mjs",
+      "sha256": "b983d4ff862b31166868a0343d8dbcc7499fe7ad5d0fa7a0e02ba886e69bfb33"
+    },
+    {
+      "path": "toolkit/components/contentprefs/ContentPrefService2.sys.mjs",
+      "sha256": "9bbeb0f9d111748f35fd07c3e4f29d6df1b2043052c6103e328e6b073e55a892"
+    },
+    {
+      "path": "toolkit/components/search/SearchSettings.sys.mjs",
+      "sha256": "f6a51979c2fa6d096d6fd612145a17c05d866bcfa76183f2f3e0b99928d558ce"
+    },
+    {
+      "path": "toolkit/components/xulstore/XULStore.sys.mjs",
+      "sha256": "d1276cf5413bed79e7156306e14ec109d9b2abe34f71323f5f7682c221c7b836"
+    },
+    {
+      "path": "security/nss/lib/softoken/sdb.c",
+      "sha256": "e685e612cae4a58f41674eb2beaeef6d8c2f90f4e000110a84afda22676cdec0"
+    },
+    {
+      "path": "security/nss/lib/softoken/sftkdb.c",
+      "sha256": "f8112e46e063aa6ae03c202388c3ec8c96059c6bda7584c0a8d6d98690e1a888"
     }
   ],
   "hashBasis": "pinned-git-object-bytes"
