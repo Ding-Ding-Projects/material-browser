@@ -76,6 +76,18 @@ function createHistoryService(options) {
             throw new Error('HISTORY_SNAPSHOT_TOO_LARGE');
         return snapshot;
     }
+    function expectedContext(context, desired) {
+        if (!context || typeof context !== 'object' || Array.isArray(context) ||
+            Object.keys(context).some(key => !['expected', 'expectedNativeRevision'].includes(key)) ||
+            !Number.isSafeInteger(context.expectedNativeRevision) || context.expectedNativeRevision < 0)
+            throw new Error('INVALID_RESTORE_EXPECTATION');
+        let expected;
+        try { expected = project(context.expected); }
+        catch { throw new Error('INVALID_RESTORE_EXPECTATION'); }
+        if (expected.kind !== desired.kind || expected.recordId !== desired.recordId)
+            throw new Error('INVALID_RESTORE_EXPECTATION');
+        return { expected, expectedNativeRevision: context.expectedNativeRevision };
+    }
     async function seal(value, id) {
         return credentialStore.withKey(key => {
             const recordId = value.snapshot?.recordId || value.recordId || 'presentation-settings-v1';
@@ -180,7 +192,16 @@ function createHistoryService(options) {
                 unlockedUntil = 0;
                 sessionGeneration = null;
             }
-            return { configured: isConfigured, unlocked: Date.now() < unlockedUntil, recoveryPending, abandonedTempCount, physicalPruneAvailable: false };
+            let recoveryCode = recoveryPending ? 'HISTORY_RECOVERY_AUTH_REQUIRED' : null;
+            if (recoveryPending && Date.now() < unlockedUntil) {
+                const pending = await read('pending');
+                try {
+                    expectedContext({ expected: pending.previous, expectedNativeRevision: pending.expectedNativeRevision }, project(pending.snapshot));
+                    recoveryCode = 'HISTORY_RECOVERY_REQUIRED';
+                }
+                catch { recoveryCode = 'HISTORY_RECOVERY_EXPECTATION_REQUIRED'; }
+            }
+            return { configured: isConfigured, unlocked: Date.now() < unlockedUntil, recoveryPending, recoveryCode, needsExplicitDiscard: recoveryCode === 'HISTORY_RECOVERY_EXPECTATION_REQUIRED', abandonedTempCount, physicalPruneAvailable: false };
         },
         async setup(secret) {
             return serial(async () => {
@@ -271,7 +292,7 @@ function createHistoryService(options) {
                 }
             });
         },
-        async transactDisplayName({ before, after, action = 'updated' }, apply) {
+        async transactDisplayName({ before, after, action = 'updated', expectedNativeRevision }, apply) {
             return serial(async () => {
                 await requireAuth();
                 await active();
@@ -281,6 +302,7 @@ function createHistoryService(options) {
                     throw new Error('INVALID_HISTORY_ACTION');
                 const snapshot = project({ schemaVersion: 1, kind: 'display-name', recordId: 'application-display-name-v1', displayName: after });
                 const previous = project({ ...snapshot, displayName: before });
+                const context = expectedContext({ expected: previous, expectedNativeRevision }, snapshot);
                 if (stable(snapshot) === stable(previous))
                     return { recorded: false, unchanged: true };
                 const latest = (await rows()).find(row => row.snapshot?.kind === 'display-name' && !row.prepared && row.action !== 'restore-prepared');
@@ -294,7 +316,7 @@ function createHistoryService(options) {
                     if (error.code !== 'ENOENT')
                         throw error;
                 }
-                const transaction = { operation: 'display-name', transactionId: crypto.randomUUID(), phase: 'prepared', action, snapshot, previous };
+                const transaction = { operation: 'display-name', transactionId: crypto.randomUUID(), phase: 'prepared', action, snapshot, previous, expectedNativeRevision: context.expectedNativeRevision };
                 await atomic(journal, await seal(transaction, 'pending'));
                 await onTransition('journal-prepared');
                 await append({ action: 'transaction-prepared', prepared: true, recordId: snapshot.recordId, snapshot });
@@ -303,10 +325,11 @@ function createHistoryService(options) {
                 await atomic(journal, await seal(transaction, 'pending'));
                 try {
                     assertHeld();
-                    await apply(snapshot, { expected: previous });
+                    await apply(snapshot, context);
                     await onTransition('applied');
                 }
-                catch {
+                catch (error) {
+                    if (['SETTINGS_CONFLICT', 'DISPLAY_NAME_CONFLICT'].includes(error?.message)) throw new Error('HISTORY_STATE_CONFLICT');
                     throw new Error('HISTORY_RECOVERY_REQUIRED');
                 }
                 transaction.phase = 'applied';
@@ -349,7 +372,7 @@ function createHistoryService(options) {
                 return append({ action: 'labelled', target: revision, label });
             });
         },
-        async restore(revision, apply) {
+        async restore(revision, expected, apply) {
             return serial(async () => {
                 await requireAuth();
                 await active();
@@ -367,7 +390,8 @@ function createHistoryService(options) {
                 if (!row.snapshot)
                     throw new Error('INVALID_REVISION');
                 const snapshot = project(row.snapshot);
-                const transaction = { operation: 'restore', transactionId: crypto.randomUUID(), phase: 'prepared', source: revision, snapshot };
+                const context = expectedContext(expected, snapshot);
+                const transaction = { operation: 'restore', transactionId: crypto.randomUUID(), phase: 'prepared', source: revision, snapshot, previous: context.expected, expectedNativeRevision: context.expectedNativeRevision };
                 await atomic(journal, await seal(transaction, 'pending'));
                 await onTransition('journal-prepared');
                 await append({ action: 'restore-prepared', recordId: snapshot.recordId || 'presentation-settings-v1', snapshot });
@@ -376,10 +400,11 @@ function createHistoryService(options) {
                 await atomic(journal, await seal(transaction, 'pending'));
                 try {
                     assertHeld();
-                    await apply(snapshot);
+                    await apply(snapshot, context);
                     await onTransition('applied');
                 }
-                catch {
+                catch (error) {
+                    if (['SETTINGS_CONFLICT', 'DISPLAY_NAME_CONFLICT'].includes(error?.message)) throw new Error('HISTORY_STATE_CONFLICT');
                     throw new Error('HISTORY_RECOVERY_REQUIRED');
                 }
                 transaction.phase = 'applied';
@@ -402,12 +427,16 @@ function createHistoryService(options) {
                     if (typeof apply !== 'function')
                         throw new Error('TRUSTED_APPLY_REQUIRED');
                     const snapshot = project(pending.snapshot);
+                    let context;
+                    try { context = expectedContext({ expected: pending.previous, expectedNativeRevision: pending.expectedNativeRevision }, snapshot); }
+                    catch { throw new Error('HISTORY_RECOVERY_EXPECTATION_REQUIRED'); }
                     await append({ action: 'transaction-prepared', prepared: true, recordId: snapshot.recordId || 'presentation-settings-v1', snapshot });
                     try {
                         assertHeld();
-                        await apply(snapshot, { expected: pending.previous, recovery: true });
+                        await apply(snapshot, { ...context, recovery: true });
                     }
-                    catch {
+                    catch (error) {
+                        if (['SETTINGS_CONFLICT', 'DISPLAY_NAME_CONFLICT'].includes(error?.message)) throw new Error('HISTORY_STATE_CONFLICT');
                         throw new Error('HISTORY_RECOVERY_REQUIRED');
                     }
                     const receipt = await append({ action: pending.operation === 'display-name' ? pending.action : 'restored', recordId: snapshot.recordId || 'presentation-settings-v1', snapshot });

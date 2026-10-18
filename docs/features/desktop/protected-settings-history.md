@@ -99,19 +99,29 @@ application's target prefix and exchanges values through local process pipes.
 ## Browse, restore and recovery
 
 An independently unlocked session is required for `list({actions,from,to,limit})`,
-`diff(revision)`, `label(revision,label)`, `restore(revision,apply)`,
+`diff(revision)`, `label(revision,label)`, `restore(revision,context,apply)`,
 `setRetention({visibleDays})`, and `exportRedacted()`.
 List supports inclusive ISO date and action filters. Diff returns changed setting
 keys and schedule counts, without freeform text or voice identifiers. Labels are
 encrypted; redacted export excludes their contents, snapshot values and user text.
 
-Restore first writes an encrypted recovery journal and commits a prepared record.
+Restore requires main-owned context `{expected, expectedNativeRevision}`. The
+expected semantic snapshot must validate against the same record kind as the
+desired snapshot; the native revision must be a nonnegative safe integer. Missing,
+malformed and mixed-kind contexts fail before apply. Renderer callbacks and
+renderer-supplied filesystem or native context are never accepted.
+Restore first writes that exact context into an encrypted recovery journal and
+commits a prepared record.
 Only then does it call the trusted main-process apply callback. A successful apply
 is followed by a new restored revision; history is never reset or rewritten.
 An interruption leaves `recoveryPending:true`. After independent unlock, main
-can offer `recover('retry', apply)` to retry the validated snapshot, or an explicit
+can offer `recover('retry', apply)` with the identical original expected semantic
+snapshot and native revision, or an explicit
 `recover('discard')` to retain the current live state and record the decision.
 No automatic recovery overwrites live preferences at startup.
+Historical journals without complete expectations remain incomplete, with
+`HISTORY_RECOVERY_EXPECTATION_REQUIRED` and an authenticated status indication
+`needsExplicitDiscard:true`. Recovery never guesses their current state.
 
 ## Limits and verification
 
@@ -121,7 +131,8 @@ The service caps storage at 2,000 event files and list/export at 500 entries per
 request. A complete paginated export, freeform search, password reset,
 and physical pruning remain unfinished.
 
-Display-name changes use `transactDisplayName({before,after,action}, apply)` with
+Display-name changes use
+`transactDisplayName({before,after,action,expectedNativeRevision}, apply)` with
 an independently unlocked session. Values are a bounded chosen string or null;
 actions are created, updated, deleted and reset. The encrypted typed snapshot is
 `{schemaVersion:1,kind:'display-name',recordId:'application-display-name-v1',displayName}`.
@@ -130,19 +141,23 @@ so deleting and restoring a name cannot orphan its encrypted history. Legacy
 settings envelopes remain readable, while new envelopes carry authenticated
 record identity explicitly.
 
-Main's trusted apply callback receives `(snapshot, {expected: previousSnapshot})`
-and must compare the expected value with live state and write atomically. The
+Main's trusted apply callback receives
+`(snapshot, {expected: previousSnapshot, expectedNativeRevision})` and must compare
+both the semantic state and revision under its own native preferences mutex
+before writing atomically. The
 callback must be idempotent: if live state already equals the requested value,
 return success without rewriting it. Recovery supplies `recovery:true` and may
 retry after an earlier apply succeeded but its final history commit did not.
 Recovery records a durable preparation again before calling apply.
-The
-service rejects a before-value conflicting with the latest committed display-name
+The service rejects a before-value conflicting with the latest committed display-name
 record. Its cross-process mutex spans preparation, durable commit, apply and final
 commit. Failure leaves the encrypted phase journal for explicit recovery and never
 reports applied success. Main must route every display-name mutation through this
 transaction API. Restore and recovery callbacks dispatch using snapshot kind.
 Names are omitted from ordinary diff/export metadata.
+Exactly `SETTINGS_CONFLICT` and `DISPLAY_NAME_CONFLICT` from trusted apply map to
+the safe service code `HISTORY_STATE_CONFLICT`, preserving the pending journal.
+Other callback text is not reflected to the renderer.
 
 Secret and authenticator mutations remain outside this snapshot schema.
 `recordSettings` cannot accept a display-name record or a protected mutation;

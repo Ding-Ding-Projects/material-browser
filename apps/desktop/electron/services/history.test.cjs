@@ -45,7 +45,7 @@ test('real local history authenticates independently, encrypts, records no-ops a
         assert.equal((await f.service.unlock('fixture-only-password')).ok, true);
         assert.equal((await f.service.label(first.revision, 'A private label')).ok, true);
         let restored;
-        const receipt = await f.service.restore(first.revision, value => {
+        const receipt = await f.service.restore(first.revision, {expected:snapshot('dark'),expectedNativeRevision:0}, value => {
             restored = value;
         });
         assert.equal(receipt.recorded, true);
@@ -72,7 +72,7 @@ test('real local history authenticates independently, encrypts, records no-ops a
 const WORKER = String.raw `
 const fs=require('node:fs');const input=JSON.parse(fs.readFileSync(0,'utf8'));const {createHistoryService}=require(input.module);const key=Buffer.from(input.key,'base64');
 let temps=0;const options={...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>({...v}),validateSchedule:v=>({...v}),onTransition:async phase=>{if(phase==='temp-synced')temps++;if(phase===input.stop&&(!input.tempNumber||temps===input.tempNumber)){if(input.overlap)fs.writeFileSync(input.overlap,'transient fixture');process.stdout.write('STOPPED\n');await new Promise(()=>{});}}};
-const service=createHistoryService(options);(async()=>{if(input.restore){await service.unlock('fixture-only-password');console.log(JSON.stringify(await service.restore(input.restore,async()=>{})));}else console.log(JSON.stringify(await service.recordSettings({after:{schemaVersion:1,preferences:{theme:input.theme,nextAction:'worker text'},schedules:[]}})));})().catch(()=>{process.exitCode=1});setInterval(()=>{},1000).unref();
+const service=createHistoryService(options);(async()=>{if(input.restore){await service.unlock('fixture-only-password');console.log(JSON.stringify(await service.restore(input.restore,{expected:{schemaVersion:1,preferences:{theme:'light',nextAction:'local private text'},schedules:[]},expectedNativeRevision:0},async()=>{})));}else console.log(JSON.stringify(await service.recordSettings({after:{schemaVersion:1,preferences:{theme:input.theme,nextAction:'worker text'},schedules:[]}})));})().catch(()=>{process.exitCode=1});setInterval(()=>{},1000).unref();
 `;
 function worker(f, extra = {}) {
     const child = spawn(process.execPath, ['-e', WORKER], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -197,7 +197,7 @@ test('interrupted restore remains pending across restart and requires deliberate
     try {
         await f.service.setup('fixture-only-password');
         const first = await f.service.recordSettings({ after: snapshot() });
-        const failed = await f.service.restore(first.revision, () => {
+        const failed = await f.service.restore(first.revision, {expected:snapshot(),expectedNativeRevision:0}, () => {
             throw new Error('simulated apply interruption');
         });
         assert.equal(failed.error.code, 'HISTORY_RECOVERY_REQUIRED');
@@ -228,18 +228,18 @@ test('display-name mutations require independent authentication, reject stale st
                 assert.equal(live, expected.displayName);
             live = value.displayName;
         };
-        assert.equal((await f.service.transactDisplayName({ before: null, after: 'A private display name', action: 'created' }, apply)).error.code, 'HISTORY_LOCKED');
+        assert.equal((await f.service.transactDisplayName({ expectedNativeRevision:0, before: null, after: 'A private display name', action: 'created' }, apply)).error.code, 'HISTORY_LOCKED');
         await f.service.unlock('fixture-only-password');
-        const first = await f.service.transactDisplayName({ before: null, after: 'A private display name', action: 'created' }, apply);
+        const first = await f.service.transactDisplayName({ expectedNativeRevision:0, before: null, after: 'A private display name', action: 'created' }, apply);
         assert.equal(first.recorded, true);
         assert.equal(live, 'A private display name');
-        assert.equal((await f.service.transactDisplayName({ before: null, after: 'Wrong stale name' }, apply)).error.code, 'HISTORY_STATE_CONFLICT');
-        const rename = await f.service.transactDisplayName({ before: live, after: 'Another private name' }, apply);
+        assert.equal((await f.service.transactDisplayName({ expectedNativeRevision:0, before: null, after: 'Wrong stale name' }, apply)).error.code, 'HISTORY_STATE_CONFLICT');
+        const rename = await f.service.transactDisplayName({ expectedNativeRevision:0, before: live, after: 'Another private name' }, apply);
         assert.equal(rename.applied, true);
-        const deleted = await f.service.transactDisplayName({ before: live, after: null, action: 'deleted' }, apply);
+        const deleted = await f.service.transactDisplayName({ expectedNativeRevision:0, before: live, after: null, action: 'deleted' }, apply);
         assert.equal(deleted.applied, true);
         assert.equal(live, null);
-        const restored = await f.service.restore(first.revision, apply);
+        const restored = await f.service.restore(first.revision, {expected:{schemaVersion:1,kind:'display-name',recordId:'application-display-name-v1',displayName:null},expectedNativeRevision:0}, apply);
         assert.equal(restored.restored, true);
         assert.equal(live, 'A private display name');
         assert.equal((await f.service.diff(first.revision)).recordKind, 'display-name');
@@ -259,7 +259,7 @@ test('protected write and recovery never apply before a successful preparation c
         const broken = createHistoryService({ ...f.options, gitSha256: '0'.repeat(64) });
         await broken.unlock('fixture-only-password');
         let applies = 0;
-        const result = await broken.transactDisplayName({ before: null, after: 'Protected fixture name', action: 'created' }, () => {
+        const result = await broken.transactDisplayName({ expectedNativeRevision:0, before: null, after: 'Protected fixture name', action: 'created' }, () => {
             applies++;
         });
         assert.equal(result.ok, false);
@@ -384,7 +384,7 @@ test('password change revokes other instances while preserving encrypted revisio
     try {
         await f.service.setup('fixture-only-password');
         const first = await f.service.recordSettings({ after: snapshot() });
-        await f.service.restore(first.revision, async () => { throw new Error('SIMULATED_APPLY'); });
+        await f.service.restore(first.revision, {expected:snapshot(),expectedNativeRevision:0}, async () => { throw new Error('SIMULATED_APPLY'); });
         const other = createHistoryService(f.options);
         await other.unlock('fixture-only-password');
         const event = path.join(f.options.historyRoot, 'repository/events', first.revision + '.json');
@@ -469,4 +469,85 @@ const service=require(input.module).createHistoryService({...input.options,crede
         child?.kill();
         await f.dispose();
     }
+});
+test('restore rejects missing, malformed and mixed-kind expected context before applying', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        let calls = 0;
+        for (const context of [undefined, {}, { expected: snapshot(), expectedNativeRevision: -1 }, { expected: snapshot(), expectedNativeRevision: 1.5 }, { expected: snapshot(), expectedNativeRevision: '1' }, { expected: snapshot(), expectedNativeRevision: 0, unknown: true }, { expected: { schemaVersion: 1, kind: 'display-name', recordId: 'application-display-name-v1', displayName: null }, expectedNativeRevision: 0 }]) {
+            assert.equal((await f.service.restore(first.revision, context, async () => { calls++; })).error.code, 'INVALID_RESTORE_EXPECTATION');
+        }
+        assert.equal(calls, 0);
+        assert.equal((await f.service.status()).recoveryPending, false);
+    }
+    finally { await f.dispose(); }
+});
+test('stale restore and restarted recovery keep identical expected CAS context and preserve current data', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        const expected = { expected: snapshot(), expectedNativeRevision: 7 };
+        let live = snapshot('dark'), revision = 8, calls = 0;
+        const apply = async (desired, context) => {
+            calls++;
+            assert.deepEqual(context.expected, expected.expected);
+            assert.equal(context.expectedNativeRevision, expected.expectedNativeRevision);
+            if (JSON.stringify(live) === JSON.stringify(desired)) return;
+            if (revision !== context.expectedNativeRevision || JSON.stringify(live) !== JSON.stringify(context.expected)) throw new Error('SETTINGS_CONFLICT');
+            live = desired; revision++;
+        };
+        assert.equal((await f.service.restore(first.revision, expected, apply)).error.code, 'HISTORY_STATE_CONFLICT');
+        const restarted = createHistoryService(f.options); await restarted.unlock('fixture-only-password');
+        assert.equal((await restarted.recover('retry', apply)).error.code, 'HISTORY_STATE_CONFLICT');
+        assert.equal(live.preferences.theme, 'dark'); assert.equal(revision, 8); assert.equal(calls, 2);
+        assert.equal((await restarted.status()).recoveryPending, true);
+    }
+    finally { await f.dispose(); }
+});
+test('already-applied recovery is idempotent with the original semantic and native expectations', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        const expected = { expected: snapshot('dark'), expectedNativeRevision: 12 };
+        let live = snapshot('dark'), revision = 12;
+        assert.equal((await f.service.restore(first.revision, expected, async (desired, context) => {
+            assert.deepEqual(context, expected); live = desired; revision++;
+            throw new Error('SIMULATED_AFTER_NATIVE_REPLACEMENT');
+        })).error.code, 'HISTORY_RECOVERY_REQUIRED');
+        const restarted = createHistoryService(f.options); await restarted.unlock('fixture-only-password');
+        const result = await restarted.recover('retry', async (desired, context) => {
+            assert.deepEqual(context, { ...expected, recovery: true });
+            if (JSON.stringify(live) === JSON.stringify(desired)) return;
+            throw new Error('SETTINGS_CONFLICT');
+        });
+        assert.equal(result.recovered, true); assert.equal(revision, 13);
+    }
+    finally { await f.dispose(); }
+});
+test('historical pending restore without expectations stays incomplete until explicit authenticated discard', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        await f.service.restore(first.revision, { expected: snapshot(), expectedNativeRevision: 0 }, async () => { throw new Error('SIMULATED_APPLY'); });
+        const file = path.join(f.options.historyRoot, 'pending.json');
+        const envelope = JSON.parse(await fs.readFile(file, 'utf8'));
+        const aad = Buffer.from('material-browser:settings-history:v1:' + envelope.recordId + ':pending');
+        const decipher = crypto.createDecipheriv('aes-256-gcm', f.key, Buffer.from(envelope.nonce, 'base64')); decipher.setAAD(aad); decipher.setAuthTag(Buffer.from(envelope.tag, 'base64'));
+        const plaintext = Buffer.concat([decipher.update(Buffer.from(envelope.data, 'base64')), decipher.final()]);
+        const pending = JSON.parse(plaintext.toString('utf8')); plaintext.fill(0); delete pending.previous; delete pending.expectedNativeRevision;
+        const nonce = crypto.randomBytes(12), cipher = crypto.createCipheriv('aes-256-gcm', f.key, nonce); cipher.setAAD(aad);
+        const data = Buffer.concat([cipher.update(JSON.stringify(pending)), cipher.final()]);
+        await fs.writeFile(file, JSON.stringify({ ...envelope, nonce: nonce.toString('base64'), tag: cipher.getAuthTag().toString('base64'), data: data.toString('base64') }));
+        const original = await fs.readFile(file), restarted = createHistoryService(f.options); await restarted.unlock('fixture-only-password');
+        assert.equal((await restarted.status()).needsExplicitDiscard, true);
+        let calls = 0; assert.equal((await restarted.recover('retry', async () => { calls++; })).error.code, 'HISTORY_RECOVERY_EXPECTATION_REQUIRED');
+        assert.equal(calls, 0); assert.ok((await fs.readFile(file)).equals(original));
+        assert.equal((await restarted.recover('discard')).discarded, true);
+    }
+    finally { await f.dispose(); }
 });
