@@ -20,6 +20,22 @@ recording and trusted apply callbacks. A fixed local helper holds the mutex unti
 its input pipe closes. Process termination releases it through normal pipe and
 kernel abandonment handling, without guessing whether a PID is stale. Credential
 creation has its own app-owned mutex, preventing simultaneous key replacement.
+The mutex uses the global namespace and the current user's SID, with an explicit
+protected owner-only ACL. Existing mutex ownership and access rules are checked;
+an unsafe pre-created mutex is rejected. Actual second-logon-session acceptance
+has not been performed; same-session process concurrency and crash recovery are
+verified separately.
+
+Before the first filesystem mutation and on every reuse, the service verifies
+exact managed files and directories plus their ancestors. Links, hardlinks,
+unexpected types and unexpected entries are rejected without deleting them.
+The empty global config is created exclusively and never truncated. Atomic
+updates use random exclusive temporary files, flush them and recheck destination
+paths before rename. An unexpected leftover file remains an explicit blocker.
+Before every Git invocation, pure filesystem checks allow only the app's small
+core configuration, reject includes and executable configuration, reject
+attributes and repository indirection, and require an empty managed hooks folder.
+Initialization uses that verified empty template and disables filesystem monitors.
 
 The exact v1 snapshot is `{schemaVersion:1, preferences, schedules}`. Unknown
 fields are rejected, not silently imported. The shared model validates all

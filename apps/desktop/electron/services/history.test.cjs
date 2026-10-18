@@ -96,3 +96,30 @@ test('protected write and recovery never apply before a successful preparation c
   assert.equal((await f.service.recover('retry',()=>{applies++;})).recovered,true);assert.equal(applies,1);
  }finally{await f.dispose();}
 });
+test('local configuration, attributes and hooks cannot execute helpers',async()=>{
+ for(const variant of ['fsmonitor','filter','post-commit','managed-hook','include','config-prefix','info-attributes']){
+  const f=await fixture();try{
+   await f.service.setup('fixture-only-password');const repository=path.join(f.options.historyRoot,'repository'),admin=path.join(repository,'.git'),marker=path.join(f.root,'execution-marker.txt'),script=path.join(f.root,'marker.sh');
+   await fs.writeFile(script,'#!/bin/sh\nprintf executed > "'+marker.replaceAll('\\','/')+'"\n');
+   const config=path.join(admin,'config');const original=await fs.readFile(config,'utf8');
+   if(variant==='fsmonitor')await fs.appendFile(config,'\n[core]\nfsmonitor = '+script.replaceAll('\\','/')+'\n');
+   if(variant==='filter'){await fs.appendFile(config,'\n[filter "unsafe"]\nclean = sh "'+script.replaceAll('\\','/')+'"\nrequired = true\n');await fs.writeFile(path.join(repository,'.gitattributes'),'events/*.json filter=unsafe\n');}
+   if(variant==='post-commit'){await fs.mkdir(path.join(admin,'hooks'));await fs.writeFile(path.join(admin,'hooks/post-commit'),await fs.readFile(script));}
+   if(variant==='managed-hook')await fs.writeFile(path.join(f.options.historyRoot,'no-hooks/post-commit'),await fs.readFile(script));
+   if(variant==='include')await fs.appendFile(config,'\n[include]\npath = '+script.replaceAll('\\','/')+'\n');
+   if(variant==='config-prefix')await fs.writeFile(config,'[core]\nrepositoryformatversion = 0\nbare = false\nfsmonitor = sh '+script.replaceAll('\\','/')+'\n'+original);
+   if(variant==='info-attributes'){await fs.mkdir(path.join(admin,'info'));await fs.writeFile(path.join(admin,'info/attributes'),'events/*.json filter=unsafe\n');}
+   const before=await fs.readFile(config);const result=await f.service.recordSettings({after:snapshot()});assert.equal(result.ok,false,variant);assert.ok(result.error.code.startsWith('UNSAFE_HISTORY_'),variant);assert.deepEqual(await fs.readFile(config),before);await assert.rejects(fs.access(marker),{code:'ENOENT'});assert.equal((await fs.readdir(path.join(repository,'events'))).length,0);
+  }finally{await f.dispose();}
+ }
+});
+test('managed linked paths are rejected before writes and unrelated victims remain unchanged',async()=>{
+ for(const variant of ['empty-config','no-hooks','events','auth.json','pending.json','temp']){
+  const f=await fixture();try{
+   const history=f.options.historyRoot;await fs.mkdir(path.join(history,'repository'),{recursive:true});const victim=path.join(f.root,'victim');await fs.mkdir(victim);const victimFile=path.join(victim,'original.txt');await fs.writeFile(victimFile,'unchanged victim');
+   let target;if(variant==='events')target=path.join(history,'repository/events');else if(variant==='temp')target=path.join(history,'auth.json.'+crypto.randomUUID()+'.tmp');else target=path.join(history,variant);
+   await fs.symlink(['no-hooks','events'].includes(variant)?victim:victimFile,target,['no-hooks','events'].includes(variant)?'junction':'file');
+   const result=await f.service.status();assert.equal(result.ok,false,variant);assert.ok(result.error.code.startsWith('UNSAFE_HISTORY_'),variant);assert.equal(await fs.readFile(victimFile,'utf8'),'unchanged victim');assert.deepEqual(await fs.readdir(victim),['original.txt']);assert.ok((await fs.lstat(target)).isSymbolicLink());
+  }finally{await f.dispose();}
+ }
+});
