@@ -2,8 +2,10 @@
 
 Current preservation state: component source and focused checks exist, but the complete
 product remains unfinished. Core 12, host 14, desktop 5, documentation 6 and storage 6 focused
-checks were reported at their recorded candidates. The actual frozen browser matrix failed
-at graceful stop. The repair and native-engine production work remain on the recovery branch;
+checks were reported at their recorded candidates. A fresh native run verifies Off-mode
+graceful stop and stopped-profile snapshot in both engines, plus Chromium Selenium locally
+and over the paired LAN path. Firefox Selenium shutdown and Chromium Puppeteer remain failing.
+The Off-mode repair is integrated; native-engine production work remains on the recovery branch;
 no end-to-end completion, release, deployment or two-computer acceptance is claimed.
 
 ## Foundation

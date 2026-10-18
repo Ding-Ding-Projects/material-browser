@@ -1,7 +1,8 @@
 # Material Browser continuation
 
-The approved full objective remains active and incomplete. Work stopped for account allowance
-preservation, not because the requested product is finished. This file records state up to its
+The approved full objective remains incomplete. Implementation resumed after account allowance
+replenishment. The stored goal tool state remains usageLimited and is not a completion verdict.
+This file records state up to its
 own commit; the accompanying conversation adds the final pushed reference.
 
 ## Repository and ownership
@@ -28,10 +29,18 @@ interactive docs/wiki, ciphertext storage and portable setup wizard. Component c
 core 12, native host 14, desktop 5, documentation 6, storage 6. These are narrow component
 results. The assembled main tree needs its complete build and integration validation.
 
-Actual frozen Chromium local, Firefox local and Chromium LAN attempts all failed at
-profiles.stop:GRACEFUL_STOP_UNAVAILABLE after default-Off launch. Selenium/Puppeteer, their
-title checks, stopped snapshots and tunneling were not reached. Owned verification resources
-were closed. The later engine stop repair is unverified in a new actual browser run.
+Historical frozen Chromium local, Firefox local and Chromium LAN attempts failed at
+profiles.stop:GRACEFUL_STOP_UNAVAILABLE. A fresh candidate 4434a65 now verifies Off launch,
+graceful stop and stopped-profile snapshots in both engines, and Chromium Selenium locally
+and through paired LAN forwarding. Firefox Selenium shutdown and Chromium Puppeteer startup
+remain incomplete. Candidate executable SHA-256:
+fa09c58628d6172706a14c299a390e5230fe12661215db62946bda4a7a738819.
+The bounded Off-mode repair is integrated as d369e75. Owned verification desktops were absent
+after the runs. Adapter repair continues in feature/native-host.
+
+The assembled desktop has a genuine initial onboarding capture using the real native host
+and a synthetic isolated vault at candidate 0e2e39e. Further workflow, typography and capture
+verification continues in feature/desktop-workspace. A capture is not whole-product acceptance.
 
 Native portable encryption is an uncompiled source integration. Protected key delivery,
 consistent native live snapshots and advanced identity remain incomplete. Chromium source
@@ -48,7 +57,7 @@ Generated announcement images are private and never runtime evidence.
 
 ## Remaining delivery
 
-Recheck current source and producer state, verify the stop repair, complete native engine
+Recheck current source and producer state, finish adapter repairs, complete native engine
 integration, rebuild and validate the assembled product, obtain a second physical Windows
 computer for restoration proof, complete required features and all UI evidence, integrate
 storage and docs companion, publish and verify the container/LAN service and documentation,
