@@ -32,6 +32,15 @@ ADAPTER_START_FAILED, and Chromium LAN Puppeteer returned TUNNEL_CLOSED. The bou
 shutdown repair is integrated in main as d369e75. Advanced native capabilities remain unverified.
 The tested executable SHA-256 is fa09c58628d6172706a14c299a390e5230fe12661215db62946bda4a7a738819.
 
+The subsequent candidate bfd4fb5 passed all three modes locally in both engines and the
+Chromium paired LAN matrix. Firefox LAN Selenium passed; Firefox LAN Puppeteer returned HTTP
+400 during its WebSocket upgrade and remains under repair. Tests disconnect external BiDi
+clients before requesting stop; stop with a client still attached is not verified.
+Independent lifecycle/endpoint review found no blocking regression. Integration bf1d305
+passed the exact Host build (26.44s), 39 Rust workspace tests (14 host, 12 core, 13 engine)
+and two adapter launch-option tests. Native runtime evidence remains bound to bfd4fb5,
+executable SHA-256 9c0cf62321cfe8f0833d625fa5583e0b356424e8d2a587f7ef8d94a1d369f00d.
+
 ## Incomplete engine work
 
 The engine recovery branch preserves source acquisition, current source pins, process ownership,

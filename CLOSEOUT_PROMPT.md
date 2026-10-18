@@ -38,6 +38,16 @@ fa09c58628d6172706a14c299a390e5230fe12661215db62946bda4a7a738819.
 The bounded Off-mode repair is integrated as d369e75. Owned verification desktops were absent
 after the runs. Adapter repair continues in feature/native-host.
 
+Later candidate bfd4fb5 passed all modes locally for both engines and Chromium paired LAN.
+Firefox LAN Selenium passed; Firefox LAN Puppeteer HTTP 400 remains under repair. The tested
+workflow disconnects the external BiDi client before stop. Integration bf1d305 passed Host
+build, 39 Rust workspace tests and two adapter tests, with independent lifecycle review.
+
+Native Firefox coordinator work is preserved on feature/browser-engines at
+869e45a2510a631c0bf90b2c86cd05f90668534b, verified on the remote. Its nine focused checks
+do not prove live snapshots: real storage barriers and protected IPC are not implemented.
+The baseline native build and subsequent recipe/wire-alignment repairs remain in progress.
+
 The assembled desktop has a genuine initial onboarding capture using the real native host
 and a synthetic isolated vault at candidate 0e2e39e. Further workflow, typography and capture
 verification continues in feature/desktop-workspace. A capture is not whole-product acceptance.
