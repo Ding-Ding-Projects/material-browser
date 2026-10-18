@@ -1,5 +1,7 @@
 :root {
   font-family: "Segoe UI", system-ui, sans-serif;
+  --md-ref-typeface-plain: "Segoe UI", system-ui, sans-serif;
+  --md-ref-typeface-brand: "Segoe UI", system-ui, sans-serif;
   color: #1b1b20;
   background: #f7f9fc;
   --md-sys-color-primary: #475f99;

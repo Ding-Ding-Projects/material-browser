@@ -66,9 +66,11 @@ function startHost() {
   host.on("exit", () => {
     host = undefined;
     failPending();
-    window?.webContents.send("material:event", {
-      type: "backend-disconnected",
-    });
+    if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
+      window.webContents.send("material:event", {
+        type: "backend-disconnected",
+      });
+    }
   });
   const lines = readline.createInterface({ input: host.stdout });
   lines.on("line", (line) => {
