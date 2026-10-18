@@ -1,41 +1,10 @@
 'use strict';
-const {spawn} = require('node:child_process');
+const { spawn } = require('node:child_process');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const LOCK_HELPER=String.raw`
-$ErrorActionPreference='Stop'
-$r=[Console]::In.ReadLine()|ConvertFrom-Json
-if($r.id -notmatch '^[a-f0-9]{64}$' -or $r.timeout -lt 50 -or $r.timeout -gt 30000){exit 2}
-$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User
-$security=New-Object Security.AccessControl.MutexSecurity
-$security.SetAccessRuleProtection($true,$false)
-$security.SetOwner($sid)
-$security.AddAccessRule((New-Object Security.AccessControl.MutexAccessRule($sid,[Security.AccessControl.MutexRights]::FullControl,[Security.AccessControl.AccessControlType]::Allow)))
-$created=$false
-$mutex=New-Object System.Threading.Mutex($false,('Global\MaterialBrowser.SettingsHistory.'+$sid.Value+'.'+$r.id),[ref]$created,$security)
-$actual=$mutex.GetAccessControl()
-$rules=$actual.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])
-if($actual.GetOwner([Security.Principal.SecurityIdentifier]).Value -ne $sid.Value -or -not $actual.AreAccessRulesProtected -or $rules.Count -ne 1 -or $rules[0].IdentityReference.Value -ne $sid.Value -or $rules[0].AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or $rules[0].MutexRights -ne [Security.AccessControl.MutexRights]::FullControl){$mutex.Dispose();exit 4}
-$held=$false
-try {try{$held=$mutex.WaitOne([int]$r.timeout)}catch [System.Threading.AbandonedMutexException]{$held=$true};if(-not $held){exit 3};[Console]::Out.WriteLine('LOCKED');[Console]::Out.Flush();[void][Console]::In.ReadLine()}finally{if($held){$mutex.ReleaseMutex()};$mutex.Dispose()}
-`;
-async function withNativeLock(id,callback,{timeoutMs=30000}={}) {
-  if(process.platform!=='win32'||!/^[a-f0-9]{64}$/.test(id)||typeof callback!=='function')throw new Error('HISTORY_LOCK_UNAVAILABLE');
-  if(!Number.isInteger(timeoutMs)||timeoutMs<50||timeoutMs>30000)throw new Error('INVALID_LOCK_TIMEOUT');
-  const child=spawn(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',LOCK_HELPER],{windowsHide:true,shell:false,stdio:['pipe','pipe','ignore']});
-  let held=false,lost=false,output='';
-  child.on('exit',()=>{lost=true;});child.stdin.on('error',()=>{lost=true;});
-  try {
-    await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(new Error('HISTORY_LOCK_TIMEOUT'));},timeoutMs+2000);const fail=()=>{clearTimeout(timer);reject(new Error('HISTORY_LOCK_UNAVAILABLE'));};child.once('error',fail);child.once('exit',()=>{if(!held)fail();});child.stdout.on('data',chunk=>{output+=chunk.toString('utf8');if(output.length>128){child.kill();fail();}else if(output==='LOCKED\r\n'||output==='LOCKED\n'){held=true;clearTimeout(timer);resolve();}});child.stdin.write(JSON.stringify({id,timeout:timeoutMs})+'\n');});
-    const assertHeld=()=>{if(lost||!held)throw new Error('HISTORY_LOCK_LOST');};assertHeld();
-    return await callback({assertHeld});
-  } finally {
-    held=false;child.stdin.end('\n');
-    if(!lost)await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill();resolve();},2000);child.once('exit',()=>{clearTimeout(timer);resolve();});});
-  }
-}
+const { withNativeLock } = require('./native-lock.cjs');
 // The helper accepts only this application's targets and exchanges values over pipes.
-const HELPER = String.raw`
+const HELPER = String.raw `
 $ErrorActionPreference='Stop'
 Add-Type -TypeDefinition @'
 using System;
@@ -60,39 +29,100 @@ if($r.operation -eq 'read') {
 } elseif($r.operation -eq 'delete') {if(-not [MaterialBrowserCredentials]::Delete($r.target,1,0) -and [Runtime.InteropServices.Marshal]::GetLastWin32Error() -ne 1168){throw 'VAULT_UNAVAILABLE'};[Console]::Out.Write('{"ok":true}') } else {throw 'INVALID_OPERATION'}
 `;
 function createCredentialStore(options = {}) {
-  const {namespace = 'primary', platform = process.platform, launch = spawn, timeoutMs = 10000} = options;
-  if (!/^(primary|test-[a-f0-9-]{36})$/.test(namespace) || !Number.isInteger(timeoutMs) || timeoutMs < 50 || timeoutMs > 30000) throw new Error('INVALID_CREDENTIAL_OPTIONS');
-  const target = `MaterialBrowser.SettingsHistory.v1/${namespace}`;
-  async function execute(operation, value) {
-    if (platform !== 'win32') throw new Error('CREDENTIAL_VAULT_UNAVAILABLE');
-    return new Promise((resolve,reject) => {
-      let child, output = '', done = false;
-      const finish = (error,result) => {if(done)return;done=true;clearTimeout(timer);error?reject(new Error(error)):resolve(result);};
-      const timer = setTimeout(()=>{child?.kill();finish('CREDENTIAL_VAULT_TIMEOUT');},timeoutMs);
-      try {
-        child=launch(path.join(process.env.SystemRoot || 'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',HELPER],{windowsHide:true,shell:false,stdio:['pipe','pipe','ignore']});
-        child.on('error',()=>finish('CREDENTIAL_VAULT_UNAVAILABLE'));
-        child.stdin.on('error',()=>finish('CREDENTIAL_VAULT_UNAVAILABLE'));
-        child.stdout.on('data',chunk=>{output+=chunk.toString('utf8');if(output.length>4096){child.kill();finish('CREDENTIAL_VAULT_INVALID_RESPONSE');}});
-        child.on('close',code=>{if(code!==0)return finish('CREDENTIAL_VAULT_UNAVAILABLE');try {const result=JSON.parse(output);if(result.ok!==true)throw new Error();finish(null,result);}catch{finish('CREDENTIAL_VAULT_INVALID_RESPONSE');}output='';});
-        child.stdin.end(JSON.stringify({operation,target,...(value?{value:value.toString('base64')}:{})})+'\n');
-      } catch {finish('CREDENTIAL_VAULT_UNAVAILABLE');}
+    const { namespace = 'primary', platform = process.platform, launch = spawn, timeoutMs = 10000 } = options;
+    if (!/^(primary|test-[a-f0-9-]{36})$/.test(namespace) || !Number.isInteger(timeoutMs) || timeoutMs < 50 || timeoutMs > 30000)
+        throw new Error('INVALID_CREDENTIAL_OPTIONS');
+    const target = `MaterialBrowser.SettingsHistory.v1/${namespace}`;
+    async function execute(operation, value) {
+        if (platform !== 'win32')
+            throw new Error('CREDENTIAL_VAULT_UNAVAILABLE');
+        return new Promise((resolve, reject) => {
+            let child, output = '', done = false;
+            const finish = (error, result) => {
+                if (done)
+                    return;
+                done = true;
+                clearTimeout(timer);
+                error ? reject(new Error(error)) : resolve(result);
+            };
+            const timer = setTimeout(() => {
+                child?.kill();
+                finish('CREDENTIAL_VAULT_TIMEOUT');
+            }, timeoutMs);
+            try {
+                child = launch(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', HELPER], { windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'ignore'] });
+                child.on('error', () => finish('CREDENTIAL_VAULT_UNAVAILABLE'));
+                child.stdin.on('error', () => finish('CREDENTIAL_VAULT_UNAVAILABLE'));
+                child.stdout.on('data', chunk => {
+                    output += chunk.toString('utf8');
+                    if (output.length > 4096) {
+                        child.kill();
+                        finish('CREDENTIAL_VAULT_INVALID_RESPONSE');
+                    }
+                });
+                child.on('close', code => {
+                    if (code !== 0)
+                        return finish('CREDENTIAL_VAULT_UNAVAILABLE');
+                    try {
+                        const result = JSON.parse(output);
+                        if (result.ok !== true)
+                            throw new Error();
+                        finish(null, result);
+                    }
+                    catch {
+                        finish('CREDENTIAL_VAULT_INVALID_RESPONSE');
+                    }
+                    output = '';
+                });
+                child.stdin.end(JSON.stringify({ operation, target, ...(value ? { value: value.toString('base64') } : {}) }) + '\n');
+            }
+            catch {
+                finish('CREDENTIAL_VAULT_UNAVAILABLE');
+            }
+        });
+    }
+    return Object.freeze({
+        async withKey(callback, { create = false } = {}) {
+            if (typeof callback !== 'function')
+                throw new Error('INVALID_KEY_CALLBACK');
+            let response = await withNativeLock(crypto.createHash('sha256').update('credential:' + target).digest('hex'), async (lease) => {
+                let found = await execute('read');
+                lease.assertHeld();
+                if (found.missing && create) {
+                    const generated = crypto.randomBytes(32);
+                    try {
+                        lease.assertHeld();
+                        await execute('write', generated);
+                    }
+                    finally {
+                        generated.fill(0);
+                    }
+                    found = await execute('read');
+                    lease.assertHeld();
+                }
+                return found;
+            });
+            if (response.missing)
+                throw new Error('HISTORY_KEY_MISSING');
+            const key = Buffer.from(response.value || '', 'base64');
+            response.value = '';
+            if (key.length !== 32) {
+                key.fill(0);
+                throw new Error('HISTORY_KEY_INVALID');
+            }
+            try {
+                return await callback(key);
+            }
+            finally {
+                key.fill(0);
+            }
+        },
+        // Only test-owned namespaces can delete, production recovery must preserve its key.
+        async deleteTestKey() {
+            if (!namespace.startsWith('test-'))
+                throw new Error('INVALID_CREDENTIAL_OPERATION');
+            await execute('delete');
+        }
     });
-  }
-  return Object.freeze({
-    async withKey(callback, {create = false} = {}) {
-      if(typeof callback!=='function')throw new Error('INVALID_KEY_CALLBACK');
-      let response=await withNativeLock(crypto.createHash('sha256').update('credential:'+target).digest('hex'),async lease=>{
-        let found=await execute('read');lease.assertHeld();
-        if(found.missing&&create){const generated=crypto.randomBytes(32);try{lease.assertHeld();await execute('write',generated);}finally{generated.fill(0);}found=await execute('read');lease.assertHeld();}return found;
-      });
-      if(response.missing)throw new Error('HISTORY_KEY_MISSING');
-      const key=Buffer.from(response.value || '', 'base64');response.value='';
-      if(key.length!==32){key.fill(0);throw new Error('HISTORY_KEY_INVALID');}
-      try{return await callback(key);}finally{key.fill(0);}
-    },
-    // Only test-owned namespaces can delete, production recovery must preserve its key.
-    async deleteTestKey(){if(!namespace.startsWith('test-'))throw new Error('INVALID_CREDENTIAL_OPERATION');await execute('delete');}
-  });
 }
-module.exports={createCredentialStore,withNativeLock};
+module.exports = { createCredentialStore, withNativeLock };
