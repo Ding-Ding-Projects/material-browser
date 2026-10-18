@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','StorageWeb','HostingWizard','BrowserNative','Docs')][string]$Component='All',
+  [ValidateSet('All','Core','Engine','Host','Desktop','Storage','StorageWeb','HostingWizard','BrowserNative','Docs','DocsCompanion')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
   [switch]$AcquireOnly
 )
@@ -7,6 +7,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
+  if($Component -eq 'DocsCompanion') { & (Join-Path $root 'apps/docs-companion/scripts/ensure-node.ps1') }
   if($Component -in @('All','Core','Engine','Host')) {
     if(-not (Get-Command cargo -ErrorAction SilentlyContinue)){throw 'Rust is required. Bootstrap is not yet available on this host.'}
     $packages=@{Core='material-browser-core';Engine='material-browser-engine';Host='material-browser'}
@@ -24,9 +25,18 @@ try {
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
     } finally { Pop-Location }
   }
-  if($Component -in @('All','Docs')) {
+  if($Component -in @('All','Docs','DocsCompanion')) {
     if(-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)){throw 'Node.js is required for documentation.'}
     Push-Location (Join-Path $root 'apps/docs')
+    try {
+      & npm.cmd ci --no-audit --no-fund
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & npm.cmd run build
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+    } finally { Pop-Location }
+  }
+  if($Component -eq 'DocsCompanion') {
+    Push-Location (Join-Path $root 'apps/docs-companion')
     try {
       & npm.cmd ci --no-audit --no-fund
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}

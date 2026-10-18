@@ -1,0 +1,12 @@
+import { readFile, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const here=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const pkg=JSON.parse(await readFile(path.join(here,'package.json'),'utf8'));
+const manifest=JSON.parse(await readFile(path.join(here,'dist/bundle-manifest.json'),'utf8'));
+const filename=`Material-Browser-Handbook-${pkg.version}-x64.exe`, full=path.join(here,'release',filename);
+const bytes=await readFile(full);if(bytes.length<1000000||bytes[0]!==0x4d||bytes[1]!==0x5a)throw Error('Portable executable is missing or invalid.');
+const archive=path.join(here,'release/win-unpacked/resources/app.asar');if((await stat(archive)).size<1000)throw Error('Bundled application archive is missing.');
+const receipt={version:1,source:manifest.source,productVersion:pkg.version,filename,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),archiveSha256:createHash('sha256').update(await readFile(archive)).digest('hex'),bundleManifestSha256:createHash('sha256').update(await readFile(path.join(here,'dist/bundle-manifest.json'))).digest('hex'),producedAt:new Date().toISOString(),runtimeVerified:false};
+await writeFile(path.join(here,'release/package-receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));
