@@ -348,3 +348,50 @@ test("production settings actions propagate the persistence promise to their cal
   assert.equal(c.undo(), waiting.promise);
   assert.equal(c.redo(), waiting.promise);
 });
+
+test("production single notification rejection retains the previous undo target", async () => {
+  const wait = deferred(),
+    c = baseController();
+  c.record.notices = [
+    {
+      id: "a",
+      at: "2026-01-01T00:00:00Z",
+      kind: "info",
+      message: "First",
+      dismissed: true,
+    },
+    {
+      id: "b",
+      at: "2026-01-01T00:01:00Z",
+      kind: "info",
+      message: "Second",
+      dismissed: false,
+    },
+  ];
+  c.dismiss = () => wait.promise;
+  let restored;
+  c.persist = async (change) => {
+    restored = change(c.record);
+    return { ok: true };
+  };
+  const view = component(
+    "./settings/sections/NotificationCenter.tsx",
+    "NotificationCenter",
+    { 0: ["b"], 2: ["a"], 3: true },
+    { controller: c },
+  );
+  const dismissal = view.find("Dismiss").props.onClick();
+  assert.equal(
+    view.changes.some((change) => change.key === 2),
+    false,
+  );
+  wait.resolve({ ok: false, message: "Cache save rejected" });
+  await dismissal;
+  assert.equal(
+    view.changes.some((change) => change.key === 2),
+    false,
+  );
+  await view.find("Undo dismissal").props.onClick();
+  assert.equal(restored.notices.find((row) => row.id === "a").dismissed, false);
+  assert.equal(restored.notices.find((row) => row.id === "b").dismissed, false);
+});

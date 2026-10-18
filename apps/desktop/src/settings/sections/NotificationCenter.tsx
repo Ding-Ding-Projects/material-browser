@@ -149,9 +149,9 @@ export function NotificationCenter({
               <Button
                 secondary
                 disabled={n.dismissed}
-                onClick={() => {
-                  setUndo([n.id]);
-                  c.dismiss([n.id]);
+                onClick={async () => {
+                  const result = await c.dismiss([n.id]);
+                  if (result.ok) setUndo([n.id]);
                 }}
               >
                 {t("Dismiss")}
