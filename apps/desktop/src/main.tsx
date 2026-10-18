@@ -17,6 +17,7 @@ import {
 } from "./settings/LiveTools";
 import { styledMessage } from "./settings/messages.mjs";
 import { definitions } from "./settings/model.mjs";
+import { useDisplayName } from "./settings/useDisplayName";
 const read = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -25,6 +26,7 @@ const read = (key: string, fallback: any) => {
   }
 };
 function App() {
+  const displayName = useDisplayName();
   const settingsController = useSettings();
   const prefs = settingsController.preferences;
   usePresentationEffects(prefs);
@@ -226,7 +228,7 @@ function App() {
               : "M"}
         </div>
         <div className="identity">
-          <strong>Material Browser</strong>
+          <strong>{displayName || "Material Browser"}</strong>
           <small>
             {t("Version")} 0.1.0 · {t("Updated")}: {t("Unavailable")}
           </small>

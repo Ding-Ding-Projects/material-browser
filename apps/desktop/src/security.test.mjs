@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { EventEmitter } from "node:events";
 
 function fixture({
@@ -15,7 +16,9 @@ function fixture({
   let dataDirectory;
   let sent = 0;
   const contents = {
-    mainFrame: {},
+    mainFrame: {
+      url: pathToFileURL(path.join("/test", "../dist/index.html")).href,
+    },
     isDestroyed: () => contentsDestroyed,
     send() {
       if (destroyed || contentsDestroyed)
@@ -71,6 +74,7 @@ function fixture({
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
           "node:child_process": { spawn: () => host },
           "node:path": path,
+          "node:url": { pathToFileURL },
           "node:readline": { createInterface: () => new EventEmitter() },
           "node:crypto": { randomUUID: () => "request-id" },
         })[name],
@@ -110,6 +114,27 @@ test("window has sandbox, isolated context and no Node; popups are denied", () =
   assert.equal(options.webPreferences.contextIsolation, true);
   assert.equal(options.webPreferences.nodeIntegration, false);
   assert.equal(contents.popup().action, "deny");
+});
+
+test("privileged requests require the exact bundled document URL even in the owning frame", () => {
+  const { handlers, contents } = fixture();
+  const call = handlers.get("material:request");
+  for (const url of [
+    "https://example.invalid/",
+    "file:///different/index.html",
+    "about:blank",
+  ]) {
+    contents.mainFrame.url = url;
+    assert.throws(
+      () =>
+        call(
+          { sender: contents, senderFrame: contents.mainFrame },
+          "profiles.list",
+          {},
+        ),
+      /INVALID_REQUEST/,
+    );
+  }
 });
 
 test("late host exit never sends into a destroyed window", () => {

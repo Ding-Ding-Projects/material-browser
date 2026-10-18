@@ -5,6 +5,11 @@ const { randomUUID } = require("node:crypto");
 const { listInstalledFonts } = require("./services/fonts.cjs");
 const { discoverEditors, openInEditor } = require("./services/editors.cjs");
 const settingsFiles = require("./settings-files.cjs");
+const { createPreferencesStore } = require("./settings-preferences.cjs");
+const {
+  createSettingsHistory,
+  historyOperations,
+} = require("./settings-history.cjs");
 const {
   createPreferencesOperations,
 } = require("./settings-preferences-ipc.cjs");
@@ -15,6 +20,7 @@ const operations = new Set([
   "open-export",
   "preferences-read",
   "preferences-write",
+  ...historyOperations,
 ]);
 const failure = (code, message) => ({ ok: false, error: { code, message } });
 function registerSettingsIpc({
@@ -23,10 +29,29 @@ function registerSettingsIpc({
   dialog,
   trusted,
   getWindow,
+  resourcesPath,
+  explicitDataDirectory = false,
   files = settingsFiles,
   editors = { discoverEditors, openInEditor },
 }) {
-  const preferences = createPreferencesOperations({ app, getWindow });
+  let preferenceStore;
+  const getPreferencesStore = () =>
+    preferenceStore ||
+    (preferenceStore = createPreferencesStore({
+      appDataRoot: app.getPath("userData"),
+    }));
+  const history = createSettingsHistory({
+    app,
+    resourcesPath,
+    explicitDataDirectory,
+    getPreferencesStore,
+  });
+  const preferences = createPreferencesOperations({
+    app,
+    getWindow,
+    getPreferencesStore,
+    onSaved: history.recordChange,
+  });
   let selectedEditor;
   let loadedEditor = false;
   async function editorOptions() {
@@ -78,6 +103,8 @@ function registerSettingsIpc({
           operation === "preferences-write"
         )
           return await preferences(operation, params);
+        if (historyOperations.includes(operation))
+          return await history.handle(operation, params);
         if (operation === "fonts") {
           if (Object.keys(params).length)
             return failure(

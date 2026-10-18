@@ -131,6 +131,7 @@ export function useSettingsPersistence() {
               value.writtenKeys,
             ]);
           const nativeChanged = projection(old) !== projection(next);
+          let historyWarning = "";
           if (nativeChanged) {
             const saved = await nativeRequest("preferences-write", {
               expectedRevision: nativeRevision.current,
@@ -142,13 +143,16 @@ export function useSettingsPersistence() {
             next.preferences = saved.record.preferences;
             next.schedules = saved.record.schedules;
             next.writtenKeys = saved.record.writtenKeys;
+            if (saved.history?.warning)
+              historyWarning =
+                "Preferences were saved, but protected history could not record this change.";
           }
           next.revision = old.revision + 1;
           current.current = next;
           setRecord(next);
           try {
             localStorage.setItem(KEY, JSON.stringify(next));
-            setStorageError("");
+            setStorageError(historyWarning);
           } catch {
             const message = nativeChanged
               ? "Preferences were saved, but the local workspace cache could not be updated."
@@ -161,7 +165,9 @@ export function useSettingsPersistence() {
             }
             return { ok: true, warning: message };
           }
-          return { ok: true };
+          return historyWarning
+            ? { ok: true, warning: historyWarning }
+            : { ok: true };
         })
         .catch((error): SaveResult => {
           const message =

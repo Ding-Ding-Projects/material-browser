@@ -27,11 +27,6 @@ const unavailable = [
     "Protected entry storage, local QR registration and standards-vector acceptance are not yet connected. No credential input is collected here.",
   ],
   [
-    "privacy",
-    "Protected native history",
-    "The isolated encrypted Git history and independent access factor are not connected. The local preference revision list is not that service.",
-  ],
-  [
     "tools",
     "File converter",
     "Packaged offline conversion adapters and output validators are missing. No format is offered as working without its adapter.",

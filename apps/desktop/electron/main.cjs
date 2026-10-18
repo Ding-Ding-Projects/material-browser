@@ -1,9 +1,12 @@
 const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
 const { spawn } = require("node:child_process");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
 const { registerSettingsIpc } = require("./settings-ipc.cjs");
+const rendererFile = path.join(__dirname, "../dist/index.html");
+const rendererUrl = pathToFileURL(rendererFile).href;
 const dataArguments = process.argv.filter((value) =>
   value.startsWith("--material-data-dir="),
 );
@@ -101,11 +104,22 @@ function startHost() {
 function trusted(event) {
   return (
     window &&
+    !window.isDestroyed() &&
+    !window.webContents.isDestroyed() &&
     event.sender === window.webContents &&
-    event.senderFrame === window.webContents.mainFrame
+    event.senderFrame === window.webContents.mainFrame &&
+    event.senderFrame.url === rendererUrl
   );
 }
-registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
+registerSettingsIpc({
+  ipcMain,
+  app,
+  dialog,
+  trusted,
+  getWindow: () => window,
+  resourcesPath: process.resourcesPath,
+  explicitDataDirectory: dataArguments.length === 1,
+});
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||
@@ -164,7 +178,7 @@ app.whenReady().then(() => {
   });
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   window.webContents.on("will-navigate", (event) => event.preventDefault());
-  window.loadFile(path.join(__dirname, "../dist/index.html"));
+  window.loadFile(rendererFile);
 });
 app.on("window-all-closed", () => app.quit());
 app.on("before-quit", () => {
