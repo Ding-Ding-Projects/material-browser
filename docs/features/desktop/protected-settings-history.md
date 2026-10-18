@@ -70,6 +70,17 @@ Error messages exclude user content, helper output and paths.
 session. The session expires after ten minutes. Vault unlock never unlocks history.
 `status()` reports configured, unlocked and recovery-pending state without data.
 
+`changePassword(oldSecret, newSecret)` independently verifies the current password
+or PIN and atomically replaces only its salted verifier under the history mutex.
+It preserves the credential-vault encryption key, encrypted revisions and pending
+recovery journal. The calling instance stays unlocked after success. A persisted
+authentication generation invalidates every other instance's old session before
+its next protected operation or status read. Credential verification alone still
+does not unlock anything. Version-one auth records remain readable and migrate
+to version two only on password change. Interrupted writes leave the old auth
+record active and preserve the inert temporary file; reset and erasure are not
+implemented by this operation.
+
 `recordSettings({before,after,action})` records a real mutation as an encrypted
 new file and a new Git commit. Identical before/after snapshots produce no commit.
 Normal settings writes must happen independently: history failure returns
@@ -107,7 +118,7 @@ No automatic recovery overwrites live preferences at startup.
 Retention is logical visibility only. Its policy is itself a new revision;
 physical pruning remains unavailable and is explicitly reported as unfinished.
 The service caps storage at 2,000 event files and list/export at 500 entries per
-request. A complete paginated export, freeform search, password reset/change,
+request. A complete paginated export, freeform search, password reset,
 and physical pruning remain unfinished.
 
 Display-name changes use `transactDisplayName({before,after,action}, apply)` with
