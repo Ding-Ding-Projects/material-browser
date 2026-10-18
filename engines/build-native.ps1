@@ -212,7 +212,9 @@ if($Engine -eq 'chromium'){
       if($existingConfig -in @($oldConfig,$previousConfig)){[IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false))}
       elseif($existingConfig -ne $config){throw 'Existing native dependency configuration differs.'}
     } else { [IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false)) }
-    Run (Join-Path $depot 'gclient.bat') @('sync','--no-history','--shallow','--nohooks','--revision',"src@$($pin.revision)")
+    # The root source was admitted above. A revision override would force an
+    # update of this unmanaged solution and reject its reviewed DEPS overlay.
+    Run (Join-Path $depot 'gclient.bat') @('sync','--no-history','--shallow','--nohooks')
     $actual=& git -C (Join-Path $nativeRoot 'src') rev-parse HEAD
     if($actual -ne $pin.revision){throw 'Chromium checkout revision mismatch'}
     if($AcquireOnly){Write-Output "Acquired pinned Chromium source at $nativeRoot"; exit 0}
