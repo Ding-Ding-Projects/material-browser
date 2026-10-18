@@ -30,6 +30,18 @@ function NormalizedSha256([string]$FilePath) {
   try { return ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($text)))).Replace('-','').ToLowerInvariant() }
   finally { $sha.Dispose() }
 }
+function FirefoxBackendOverlay([string]$Path,[switch]$CheckOnly) {
+  $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-build-backend.json') -Raw | ConvertFrom-Json
+  $patchPath=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
+  $target=Join-Path $Path $recipe.path
+  if($recipe.revision -ne $pins.firefox.revision -or (NormalizedSha256 $patchPath) -ne $recipe.patchSha256){throw 'Firefox build backend patch receipt mismatch'}
+  $actual=NormalizedSha256 $target
+  if($actual -notin @($recipe.baselineSha256,$recipe.patchedSha256)){throw 'Firefox build backend differs from the reviewed input; preserving it.'}
+  if($CheckOnly){return}
+  if($actual -eq $recipe.baselineSha256){Run 'git' @('-C',$Path,'apply','--whitespace=error-all',$patchPath)}
+  if((NormalizedSha256 $target) -ne $recipe.patchedSha256){throw 'Firefox build backend patch readback mismatch'}
+  Write-Output 'Staged Firefox make prerequisite path normalization repair.'
+}
 function FirefoxCookieOverlay([string]$Path,[switch]$CheckOnly) {
   $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
   $patchPath=Join-Path $PSScriptRoot 'recipes/firefox-158-cookie-pause.patch'
@@ -74,7 +86,8 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   $existing=(Get-Content -LiteralPath $manifestPath -Raw).Replace("`r`n","`n").TrimEnd("`n")
   $changes=@(& git -C $Path status --porcelain --untracked-files=all)
   $cookieRecipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
-  $allowed=@('browser/components/moz.build',$relativeModule)+@($cookieRecipe.files | ForEach-Object {$_.path})
+  $backendRecipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-build-backend.json') -Raw | ConvertFrom-Json
+  $allowed=@('browser/components/moz.build',$relativeModule,$backendRecipe.path)+@($cookieRecipe.files | ForEach-Object {$_.path})
   foreach($change in $changes){
     if($change.Length -lt 4 -or $change.Substring(3) -notin $allowed){
       throw 'Native Firefox source has unrelated changes; preserving it.'
@@ -86,6 +99,7 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
     throw 'Existing Firefox snapshot module differs from the managed overlay; preserving it.'
   }
   FirefoxCookieOverlay $Path -CheckOnly
+  FirefoxBackendOverlay $Path -CheckOnly
   if($CheckOnly){return}
   if($existing -ne $expected){[IO.File]::WriteAllText($manifestPath,"$expected`n",[Text.UTF8Encoding]::new($false))}
   if(-not (Test-Path -LiteralPath $modulePath)){Copy-Item -LiteralPath $moduleSource -Destination $modulePath}
@@ -173,6 +187,7 @@ if($Engine -eq 'chromium'){
     # The supported option prevents bootstrap's antivirus-exclusion and host-configuration changes.
     Run $python @('mach','--no-interactive','bootstrap','--application-choice','browser','--no-system-changes')
     FirefoxOverlay (Join-Path $nativeRoot 'src')
+    FirefoxBackendOverlay (Join-Path $nativeRoot 'src')
     if($baselineOnly){
       AssertFirefoxBaseline (Join-Path $nativeRoot 'src')
       Write-Output 'Baseline-only diagnostics selected. Native cookie candidate is not applied.'

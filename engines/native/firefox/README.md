@@ -15,6 +15,15 @@ The default mode stages the candidate. Every Firefox build writes a unique
 structured `mach` diagnostic log inside its private native cache. Logs contain
 local build paths and must not be published without review and sanitization.
 
+Both modes apply `firefox-158-make-paths.patch`, a pinned build-backend repair.
+The upstream recursive-make backend emitted native `os.path.relpath` separators
+for cross-directory object prerequisites. On Windows, the content-analysis test
+agent consequently reported a missing Abseil object even though that object was
+present. The patch uses Mozilla's existing normalized `mozpath.relpath` helper.
+It preserves tests and content-analysis functionality. Baseline and patched
+source hashes are recorded in `firefox-build-backend.json`; unknown local edits
+are rejected, never overwritten.
+
 The coordinator implements the restricted begin, commit and abort state machine.
 It binds requests to the trusted profile and executable digest, rejects extra
 fields and competing transactions, and releases acquired barriers in reverse
