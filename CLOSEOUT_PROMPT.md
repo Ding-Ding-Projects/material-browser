@@ -21,14 +21,16 @@ Retain these task-owned branches and their worktrees:
 - feature/desktop-workspace: Settings inventory/design/model and subsequent implementation.
   Design handoff 2316d16 is under independent review; 109 neutral obligation rows include
   65 desktop-applicable items, with none claimed complete.
-- feature/native-host: process/job ownership, normal shutdown and paired automation repair.
-  Candidate 3922665 has fresh local/LAN and client-lifecycle verification in progress.
+- feature/native-host: final candidate 7031adb and documentation 7856399 are integrated
+  in main 7df4e81 after six actual hidden-desktop runs and independent review.
 - feature/browser-engines: native source/build recipes, disabled snapshot coordinator and
-  unapplied cookie-pause candidates. Last verified remote preservation was 1e4e7b7;
-  later local candidates include f59f73b and remain incomplete. Firefox baseline is compiling.
-- feature/storage-service: offline documentation companion. Package 3a59755 built successfully;
-  actual one-file runtime verification is in progress. Existing storage/wizard work is retained.
-- feature/encrypted-core: retained completed core contribution and recovery evidence.
+  unapplied cookie-pause candidates. Last verified remote preservation was 8186a1f;
+  local 3ebb68c corrects Windows build object references. Baseline build is in progress,
+  with xul.dll and xpcshell.exe produced but no terminal success or native snapshot proof.
+- feature/storage-service: offline companion 3a59755 has actual one-file runtime proof;
+  cache hardening 6c0a836 is independently approved and integrated in main 2196857.
+- feature/encrypted-core: fonts/editor services integrated in main 1d5a210. Protected
+  history candidate 7bcddc4 remains withheld for managed-path and Git execution-config fixes.
 
 Do not delete active or unfinished branches, worktrees, ignored evidence or private announcements.
 
@@ -58,7 +60,20 @@ superseded, and require exact owned-process/window proof plus complete job exit 
 reporting stopped or releasing the profile lease.
 
 The strengthened native candidate also covers the paired WebSocket Host authority, active
-Firefox BiDi clients, and a browser already closed normally. Its final results remain pending.
+Firefox BiDi clients, and a browser already closed normally. The final six runs passed at
+7031adb, with exact job-empty proof and hidden-desktop teardown. Main 7df4e81 passed its exact
+Host build, 45 Rust workspace tests and two adapter tests. Earlier weak results stay superseded.
+
+Main 2196857 passed the exact DocsCompanion build (20 articles, eight files). Companion
+security tests: three passed. Bootstrap integrity checks: six passed. Font/editor tests:
+five passed, including actual installed-font enumeration. The older portable executable
+and its runtime receipts remain bound to 3a59755, not the newer source.
+
+Settings progress on feature/desktop-workspace includes ten categories, 37 local controls,
+help/practice, schedules, notifications, local history, export and explicit tab workflows.
+Three real progress images and restart-persistence proof belong to fea7da5. Nine reviewed
+state/accessibility defects are under repair before main integration. The 109-row inventory
+has 65 desktop-applicable rows, none complete. This is progress, not full required-feature proof.
 
 ## Unfinished central features
 
@@ -91,8 +106,8 @@ and remain private. Generated announcement images are never runtime evidence.
 ## Next actions
 
 1. Review the Settings design/inventory and implement its real missing workflows.
-2. Finish the strengthened native lifecycle matrix and independently review the final source.
-3. Verify and integrate the offline documentation companion.
+2. Fix the nine Settings defects and protected-history security findings; independently review.
+3. Verify a current-source offline documentation executable and remaining delivery paths.
 4. Complete native engine integrations and cross-computer proof before portability claims.
 5. Finish delivery requirements, publish only verified outputs, integrate completed work into
    main, verify remote references and clean up only proven task-owned redundant state.
