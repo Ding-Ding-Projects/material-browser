@@ -6,7 +6,16 @@ const LOCK_HELPER=String.raw`
 $ErrorActionPreference='Stop'
 $r=[Console]::In.ReadLine()|ConvertFrom-Json
 if($r.id -notmatch '^[a-f0-9]{64}$' -or $r.timeout -lt 50 -or $r.timeout -gt 30000){exit 2}
-$mutex=New-Object System.Threading.Mutex($false,('Local\MaterialBrowser.SettingsHistory.'+$r.id))
+$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User
+$security=New-Object Security.AccessControl.MutexSecurity
+$security.SetAccessRuleProtection($true,$false)
+$security.SetOwner($sid)
+$security.AddAccessRule((New-Object Security.AccessControl.MutexAccessRule($sid,[Security.AccessControl.MutexRights]::FullControl,[Security.AccessControl.AccessControlType]::Allow)))
+$created=$false
+$mutex=New-Object System.Threading.Mutex($false,('Global\MaterialBrowser.SettingsHistory.'+$sid.Value+'.'+$r.id),[ref]$created,$security)
+$actual=$mutex.GetAccessControl()
+$rules=$actual.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])
+if($actual.GetOwner([Security.Principal.SecurityIdentifier]).Value -ne $sid.Value -or -not $actual.AreAccessRulesProtected -or $rules.Count -ne 1 -or $rules[0].IdentityReference.Value -ne $sid.Value -or $rules[0].AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or $rules[0].MutexRights -ne [Security.AccessControl.MutexRights]::FullControl){$mutex.Dispose();exit 4}
 $held=$false
 try {try{$held=$mutex.WaitOne([int]$r.timeout)}catch [System.Threading.AbandonedMutexException]{$held=$true};if(-not $held){exit 3};[Console]::Out.WriteLine('LOCKED');[Console]::Out.Flush();[void][Console]::In.ReadLine()}finally{if($held){$mutex.ReleaseMutex()};$mutex.Dispose()}
 `;
