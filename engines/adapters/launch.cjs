@@ -17,19 +17,35 @@ const pins = { 'puppeteer-core': '25.14.0', 'selenium-webdriver': '4.51.0' };
 async function close() {
   if (closing) return;
   closing = true;
-  let exit = 0;
   try {
     if (firefoxEndpoint) browser = await require('puppeteer-core').connect({browserWSEndpoint: firefoxEndpoint, protocol: 'webDriverBiDi', protocolTimeout: 10000});
     if (browser) await browser.close();
     if (driver) await driver.quit();
     if (service) await service.kill();
-  } catch (_) { exit = 1; }
-  finally { process.exit(exit); }
+  } catch (_) {
+    // An external Firefox client may still own its sole BiDi session. Exiting
+    // here would trigger Puppeteer's process-exit cleanup and force the browser
+    // closed. Retain the helper so stop can report incomplete and be retried.
+    closing = false;
+    process.stderr.write('Graceful adapter shutdown is unavailable\n');
+    return;
+  }
+  // A reconnecting BiDi client has no native process wait in browser.close().
+  // Keep the original launch process and its exit hooks alive until the native
+  // supervisor proves that the browser and all descendants have actually exited.
+  if (firefoxEndpoint) return;
+  process.exit(0);
 }
 process.on('SIGTERM', close);
 lines.on('close', close);
 lines.on('line', async line => {
-  if (started) { if (line === '{"command":"shutdown"}') await close(); return; }
+  if (started) {
+    if (line === '{"command":"shutdown"}') await close();
+    // Only the native supervisor may send this after proving browser exit and
+    // that the helper is the sole remaining member of its private process job.
+    if (line === '{"command":"shutdown-browser-exited"}') process.exit(0);
+    return;
+  }
   started = true;
   let timer = setTimeout(() => { process.stderr.write('Adapter startup timeout\n'); close(); }, 25000);
   try {
