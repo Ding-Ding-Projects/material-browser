@@ -1,9 +1,13 @@
 param(
   [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
-  [switch]$AcquireOnly
+  [switch]$AcquireOnly,
+  [switch]$NativeCookieSnapshotTests
 )
 $ErrorActionPreference='Stop'
+if($NativeCookieSnapshotTests -and ($Component -ne 'BrowserNative' -or $NativeEngine -ne 'firefox' -or $AcquireOnly -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){
+  throw 'NativeCookieSnapshotTests requires a Firefox BrowserNative production build without AcquireOnly or baseline-only diagnostics.'
+}
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
@@ -32,6 +36,7 @@ try {
   if($Component -eq 'BrowserNative') {
     $nativeArgs=@{Engine=$NativeEngine}
     if($AcquireOnly){$nativeArgs.AcquireOnly=$true}
+    if($NativeCookieSnapshotTests){$nativeArgs.CookieSnapshotTests=$true}
     & (Join-Path $root 'engines/build-native.ps1') @nativeArgs
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }

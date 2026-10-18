@@ -1,5 +1,6 @@
-param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly)
+param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly,[switch]$CookieSnapshotTests)
 $ErrorActionPreference='Stop'
+if($CookieSnapshotTests -and ($Engine -ne 'firefox' -or $AcquireOnly -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){throw 'CookieSnapshotTests requires a Firefox production build without AcquireOnly or baseline-only diagnostics.'}
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
 $baselineSetting=[Environment]::GetEnvironmentVariable('MATERIAL_BROWSER_NATIVE_BASELINE_ONLY','Process')
@@ -199,6 +200,7 @@ if($Engine -eq 'chromium'){
     $buildLog=Join-Path $logDir ("mach-build-{0}.jsonl" -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
     Write-Output "Native build diagnostic log: $buildLog"
     Run $python @('mach','--log-file',$buildLog,'build')
+    if($CookieSnapshotTests){Run $python @('mach','gtest','TestCookieDBWriteQueue.SnapshotPause','--combine-suites')}
     $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
     if(-not $built){throw 'Firefox build did not produce firefox.exe'}
     $built | ForEach-Object {Write-Output "$($_.FullName) SHA256 $(FileSha256 $_.FullName)"}
