@@ -4,6 +4,8 @@ The desktop shell provides an isolated React interface backed by the native host
 
 ## Security and process boundary
 
+The [settings file boundary](settings-file-boundary.md) documents export and editor-choice path validation, durable replacement, failure handling, and focused negative tests.
+
 The renderer has no Node access and uses an allowlisted preload bridge. The main process checks sender and frame identity, bounds requests, rejects permission requests and new windows, and launches the native host with an application-owned data directory. Passwords travel through stdin JSON requests, not arguments or logs. Backend errors are reduced to stable error codes at the renderer boundary. Browser profiles are launched only by the native host. The bundled renderer has a restrictive content security policy.
 
 ## Personal wording

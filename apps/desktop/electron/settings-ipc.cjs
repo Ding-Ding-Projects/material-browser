@@ -1,10 +1,10 @@
 "use strict";
-const fs = require("node:fs/promises");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { randomUUID } = require("node:crypto");
 const { listInstalledFonts } = require("./services/fonts.cjs");
 const { discoverEditors, openInEditor } = require("./services/editors.cjs");
+const settingsFiles = require("./settings-files.cjs");
 const operations = new Set([
   "fonts",
   "editors",
@@ -12,7 +12,15 @@ const operations = new Set([
   "open-export",
 ]);
 const failure = (code, message) => ({ ok: false, error: { code, message } });
-function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
+function registerSettingsIpc({
+  ipcMain,
+  app,
+  dialog,
+  trusted,
+  getWindow,
+  files = settingsFiles,
+  editors = { discoverEditors, openInEditor },
+}) {
   let selectedEditor;
   let loadedEditor = false;
   async function editorOptions() {
@@ -20,8 +28,10 @@ function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
       loadedEditor = true;
       try {
         const file = path.join(app.getPath("userData"), "editor-choice.json");
-        if ((await fs.stat(file)).size <= 4096) {
-          const value = JSON.parse(await fs.readFile(file, "utf8"));
+        {
+          const value = JSON.parse(
+            (await files.read(file, 4096)).toString("utf8"),
+          );
           if (typeof value.executable === "string")
             selectedEditor = value.executable;
         }
@@ -71,7 +81,7 @@ function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
               "INVALID_REQUEST",
               "Editor discovery takes no renderer paths.",
             );
-          const result = await discoverEditors(await editorOptions());
+          const result = await editors.discoverEditors(await editorOptions());
           return result.ok
             ? {
                 ok: true,
@@ -92,7 +102,9 @@ function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
           if (result.canceled || result.filePaths.length !== 1)
             return { ok: true, state: "cancelled" };
           const chosen = result.filePaths[0];
-          const verified = await discoverEditors({ selectedEditor: chosen });
+          const verified = await editors.discoverEditors({
+            selectedEditor: chosen,
+          });
           if (
             !verified.ok ||
             !verified.editors.some((e) => e.id === "selected")
@@ -101,19 +113,13 @@ function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
               "INVALID_EDITOR",
               "The selected editor could not be verified.",
             );
-          selectedEditor = chosen;
           const root = app.getPath("userData");
-          await fs.mkdir(root, { recursive: true });
-          const temporary = path.join(
-            root,
-            `editor-choice-${randomUUID()}.tmp`,
-          );
-          await fs.writeFile(
-            temporary,
+          await files.atomic(
+            path.join(root, "editor-choice.json"),
             JSON.stringify({ version: 1, executable: chosen }),
-            { flag: "wx" },
           );
-          await fs.rename(temporary, path.join(root, "editor-choice.json"));
+          selectedEditor = chosen;
+          loadedEditor = true;
           return { ok: true, state: "selected", editorId: "selected" };
         }
         if (
@@ -147,11 +153,11 @@ function registerSettingsIpc({ ipcMain, app, dialog, trusted, getWindow }) {
           app.getPath("userData"),
           "settings-exports",
         );
-        await fs.mkdir(exportRoot, { recursive: true });
+        await files.directory(exportRoot);
         const fileId = randomUUID(),
           file = path.join(exportRoot, `${fileId}.${params.format}`);
-        await fs.writeFile(file, text, { encoding: "utf8", flag: "wx" });
-        return await openInEditor(
+        await files.writeExclusive(file, text);
+        return await editors.openInEditor(
           { editorId: params.editorId, fileId },
           {
             ...(await editorOptions()),
