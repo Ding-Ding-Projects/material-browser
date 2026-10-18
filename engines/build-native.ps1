@@ -2,6 +2,10 @@ param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$En
 $ErrorActionPreference='Stop'
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
+$baselineSetting=[Environment]::GetEnvironmentVariable('MATERIAL_BROWSER_NATIVE_BASELINE_ONLY','Process')
+if($baselineSetting -and $baselineSetting -notin @('0','1')){throw 'MATERIAL_BROWSER_NATIVE_BASELINE_ONLY must be 0 or 1.'}
+$baselineOnly=$baselineSetting -eq '1'
+if($baselineOnly -and ($Engine -ne 'firefox' -or $AcquireOnly)){throw 'Baseline-only diagnostics require a Firefox production build.'}
 $base=Join-Path ([Environment]::GetFolderPath('UserProfile')) '.material-browser/native'
 if($base -match '\s'){throw 'The supported native source path must contain no spaces.'}
 $sourceName=if($Engine -eq 'firefox'){'ff'}else{$Engine}
@@ -48,6 +52,14 @@ function FirefoxCookieOverlay([string]$Path,[switch]$CheckOnly) {
   }
   Write-Output 'Staged native cookie write-pause candidate. Whole-profile snapshot capability remains disabled.'
 }
+function AssertFirefoxBaseline([string]$Path) {
+  $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
+  foreach($entry in $recipe.files){
+    if((NormalizedSha256 (Join-Path $Path $entry.path)) -ne $entry.baselineSha256){
+      throw 'Baseline-only diagnostics cannot replace an already patched or modified native source.'
+    }
+  }
+}
 function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   $moduleName='MaterialSnapshotBarrier.sys.mjs'
   $relativeModule="browser/components/$moduleName"
@@ -75,8 +87,8 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   }
   FirefoxCookieOverlay $Path -CheckOnly
   if($CheckOnly){return}
-  [IO.File]::WriteAllText($manifestPath,"$expected`n",[Text.UTF8Encoding]::new($false))
-  Copy-Item -LiteralPath $moduleSource -Destination $modulePath
+  if($existing -ne $expected){[IO.File]::WriteAllText($manifestPath,"$expected`n",[Text.UTF8Encoding]::new($false))}
+  if(-not (Test-Path -LiteralPath $modulePath)){Copy-Item -LiteralPath $moduleSource -Destination $modulePath}
   Write-Output 'Staged privileged Firefox snapshot coordinator. No storage providers or external control endpoint are enabled.'
 }
 function Checkout([string]$Path,[string]$Url,[string]$Revision,[bool]$ManagedFirefox=$false) {
@@ -161,11 +173,20 @@ if($Engine -eq 'chromium'){
     # The supported option prevents bootstrap's antivirus-exclusion and host-configuration changes.
     Run $python @('mach','--no-interactive','bootstrap','--application-choice','browser','--no-system-changes')
     FirefoxOverlay (Join-Path $nativeRoot 'src')
-    FirefoxCookieOverlay (Join-Path $nativeRoot 'src')
-    Run $python @('mach','build')
+    if($baselineOnly){
+      AssertFirefoxBaseline (Join-Path $nativeRoot 'src')
+      Write-Output 'Baseline-only diagnostics selected. Native cookie candidate is not applied.'
+    } else { FirefoxCookieOverlay (Join-Path $nativeRoot 'src') }
+    $logDir=Join-Path $nativeRoot 'logs'
+    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+    $buildLog=Join-Path $logDir ("mach-build-{0}.jsonl" -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+    Write-Output "Native build diagnostic log: $buildLog"
+    Run $python @('mach','--log-file',$buildLog,'build')
     $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
     if(-not $built){throw 'Firefox build did not produce firefox.exe'}
     $built | ForEach-Object {Write-Output "$($_.FullName) SHA256 $(FileSha256 $_.FullName)"}
-    Write-Output 'Built pinned Firefox with restricted snapshot coordination and cookie pause candidate. Product encryption, snapshot and identity remain unverified and disabled.'
+    if($baselineOnly){Write-Output 'Built pinned Firefox baseline with disabled snapshot coordinator. Native cookie candidate was not applied.'}
+    else {Write-Output 'Built pinned Firefox with restricted snapshot coordination and cookie pause candidate.'}
+    Write-Output 'Product encryption, snapshot and identity remain unverified and disabled.'
   } finally { Pop-Location }
 }

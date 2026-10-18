@@ -7,6 +7,14 @@
 the short `ff-<revision-prefix>` directory because Mozilla rejects Windows source
 paths longer than 62 characters.
 
+For a diagnostic retry of the baseline, set the process-local environment variable
+`MATERIAL_BROWSER_NATIVE_BASELINE_ONLY=1` and invoke the same root command. This
+retains the disabled privileged coordinator but skips the native cookie patch.
+It rejects an already patched or modified cookie source instead of resetting it.
+The default mode stages the candidate. Every Firefox build writes a unique
+structured `mach` diagnostic log inside its private native cache. Logs contain
+local build paths and must not be published without review and sanitization.
+
 The coordinator implements the restricted begin, commit and abort state machine.
 It binds requests to the trusted profile and executable digest, rejects extra
 fields and competing transactions, and releases acquired barriers in reverse
