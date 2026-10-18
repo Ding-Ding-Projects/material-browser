@@ -73,3 +73,17 @@ test('interrupted restore remains pending across restart and requires deliberate
   let restored;assert.equal((await restarted.recover('retry',value=>{restored=value;})).recovered,true);assert.equal(restored.preferences.theme,'light');assert.equal((await restarted.status()).recoveryPending,false);
  }finally{await f.dispose();}
 });
+test('display-name mutations require independent authentication, reject stale state, and restore encrypted identity',async()=>{
+ const f=await fixture();try{
+  await f.service.setup('fixture-only-password');await f.service.lock();let live=null;
+  const apply=async(value,{expected}={})=>{if(expected)assert.equal(live,expected.displayName);live=value.displayName;};
+  assert.equal((await f.service.transactDisplayName({before:null,after:'A private display name',action:'created'},apply)).error.code,'HISTORY_LOCKED');
+  await f.service.unlock('fixture-only-password');const first=await f.service.transactDisplayName({before:null,after:'A private display name',action:'created'},apply);assert.equal(first.recorded,true);assert.equal(live,'A private display name');
+  assert.equal((await f.service.transactDisplayName({before:null,after:'Wrong stale name'},apply)).error.code,'HISTORY_STATE_CONFLICT');
+  const rename=await f.service.transactDisplayName({before:live,after:'Another private name'},apply);assert.equal(rename.applied,true);
+  const deleted=await f.service.transactDisplayName({before:live,after:null,action:'deleted'},apply);assert.equal(deleted.applied,true);assert.equal(live,null);
+  const restored=await f.service.restore(first.revision,apply);assert.equal(restored.restored,true);assert.equal(live,'A private display name');
+  assert.equal((await f.service.diff(first.revision)).recordKind,'display-name');assert.ok(!JSON.stringify(await f.service.exportRedacted()).includes('A private display name'));
+  const files=await fs.readdir(path.join(f.options.historyRoot,'repository/events'));for(const name of files)assert.ok(!(await fs.readFile(path.join(f.options.historyRoot,'repository/events',name),'utf8')).includes('A private display name'));
+ }finally{await f.dispose();}
+});

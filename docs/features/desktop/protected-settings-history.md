@@ -78,10 +78,32 @@ The service caps storage at 2,000 event files and list/export at 500 entries per
 request. A complete paginated export, freeform search, password reset/change,
 and physical pruning remain unfinished.
 
-Secret, authenticator and display-name mutations are outside this snapshot schema.
-`protectedMutation:true` returns `PROTECTED_TRANSACTION_REQUIRED`; main must not
-advertise those mutation histories as implemented or treat this as permission to
-complete a protected mutation without its own durable transaction adapter.
+Display-name changes use `transactDisplayName({before,after,action}, apply)` with
+an independently unlocked session. Values are a bounded chosen string or null;
+actions are created, updated, deleted and reset. The encrypted typed snapshot is
+`{schemaVersion:1,kind:'display-name',recordId:'application-display-name-v1',displayName}`.
+The stable record identity is authenticated alongside the immutable revision ID,
+so deleting and restoring a name cannot orphan its encrypted history. Legacy
+settings envelopes remain readable, while new envelopes carry authenticated
+record identity explicitly.
+
+Main's trusted apply callback receives `(snapshot, {expected: previousSnapshot})`
+and must compare the expected value with live state and write atomically. The
+callback must be idempotent: if live state already equals the requested value,
+return success without rewriting it. Recovery supplies `recovery:true` and may
+retry after an earlier apply succeeded but its final history commit did not.
+Recovery records a durable preparation again before calling apply.
+The
+service rejects a before-value conflicting with the latest committed display-name
+record. Its cross-process mutex spans preparation, durable commit, apply and final
+commit. Failure leaves the encrypted phase journal for explicit recovery and never
+reports applied success. Main must route every display-name mutation through this
+transaction API. Restore and recovery callbacks dispatch using snapshot kind.
+Names are omitted from ordinary diff/export metadata.
+
+Secret and authenticator mutations remain outside this snapshot schema.
+`recordSettings` cannot accept a display-name record or a protected mutation;
+those attempts return `PROTECTED_TRANSACTION_REQUIRED`.
 
 Focused tests exercise actual local Git commits, independent authentication,
 restart, no-op recording, encrypted file contents, append-only restoration,
