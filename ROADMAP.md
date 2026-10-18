@@ -1,15 +1,18 @@
 # Roadmap
 
 Current preservation state: component source and focused checks exist, but the complete
-product remains unfinished. Core 12, host 14, desktop 5, documentation 6 and storage 6 focused
-checks were reported at their recorded candidates. Earlier browser stop results are superseded
-by stronger owned-job checks: Firefox's launcher can exit while its browser survives.
-Graceful shutdown and safe snapshot timing require corrected native runtime proof.
+product remains unfinished. Integrated native lifecycle work passed the exact Host build,
+45 Rust workspace tests and two adapter tests. Six real hidden-desktop runs covered local
+and paired automation, contention and already-closed handling. Earlier launcher-only stop
+results remain superseded. These results do not establish whole-profile live snapshots.
 The source repairs are partly integrated; further engine work remains on the recovery branches;
 no end-to-end completion, release, deployment or two-computer acceptance is claimed.
 
 ## Foundation
 - [ ] Complete applicable settings and preferences with real behavior, persistence and evidence
+  - [ ] Integrate the independently reviewed nine-repair Settings slice after current built proof
+  - [ ] Complete the 109-row inventory, including all 65 desktop-applicable rows
+  - [ ] Connect protected native history after safety and interruption recovery verification
 - [ ] Encrypted vault and isolated profile records
 - [ ] Persistent per-profile automation preferences
 - [ ] Desktop workspace connected to the Rust core
@@ -27,4 +30,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Hosting entrypoints and portable setup wizard
 - [ ] Required per-surface feature inventory and evidence
 - [ ] Windows installer, public documentation, wiki and verified release
+  - [ ] Rebuild and verify the portable handbook against current integrated source
+  - [ ] Publish the documentation website and verify its exact repository homepage
+  - [ ] Deliver the dedicated portable build interface and verify real entrypoint actions
 
