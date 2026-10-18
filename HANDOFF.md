@@ -41,6 +41,19 @@ passed the exact Host build (26.44s), 39 Rust workspace tests (14 host, 12 core,
 and two adapter launch-option tests. Native runtime evidence remains bound to bfd4fb5,
 executable SHA-256 9c0cf62321cfe8f0833d625fa5583e0b356424e8d2a587f7ef8d94a1d369f00d.
 
+Desktop integration 98d6eea passed the exact Desktop build and seven focused tests. Three
+genuine packaged-desktop captures are retained in docs/evidence/desktop and displayed in the
+README, bound specifically to production source 7257d22. They prove real onboarding/profile
+creation, saved automation preference and bilingual dark settings, not browser execution or
+restart persistence. All three promotion receipts and the bounded layout receipt passed.
+
+Documentation candidate e979aa5 passed a real accessibility-tree recheck: the guided checkbox
+and two appearance switches have correct English/Cantonese names, with zero unnamed targets
+across 12 observations. Their state persisted after reload. The earlier 18-article runtime
+inventory, interactive walkthroughs and narrow layouts passed; a favicon resource is missing.
+These are local runtime results, not deployment proof. Raw documentation captures remain
+unpromoted because the original complete build receipt was unavailable.
+
 ## Incomplete engine work
 
 The engine recovery branch preserves source acquisition, current source pins, process ownership,

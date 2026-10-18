@@ -52,6 +52,15 @@ The assembled desktop has a genuine initial onboarding capture using the real na
 and a synthetic isolated vault at candidate 0e2e39e. Further workflow, typography and capture
 verification continues in feature/desktop-workspace. A capture is not whole-product acceptance.
 
+The later desktop candidate 7257d22 completed real packaged capture and normal close. Three
+inspected source/hash-bound PNGs are integrated through 98d6eea, with seven desktop tests and
+the exact Desktop build passing. See docs/evidence/desktop for source, hashes and limits.
+Its evidence branch tip 15ca4275b3b1263ef956c8f07190b2477fe99135 is verified on the remote.
+The documentation accessible-label correction e979aa5 passed a fresh English/Cantonese AX
+and persistence recheck. All owned listeners and hidden desktops were closed. The temporary
+documentation profiles remain ignored after automatic approval rejected their deletion;
+do not retry through another route. No installation, release or hosted-page proof is implied.
+
 Native portable encryption is an uncompiled source integration. Protected key delivery,
 consistent native live snapshots and advanced identity remain incomplete. Chromium source
 sync stopped on an antivirus-blocked optional test payload; the attempted custom dependency
