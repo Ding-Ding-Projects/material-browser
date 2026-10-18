@@ -168,14 +168,22 @@ function createPreferencesStore({
       }),
     // History invokes this trusted callback with an authenticated expected snapshot.
     // It shares the same lock as ordinary writes, without re-entering the IPC queue.
-    apply: (value, { expected }) =>
+    apply: (value, { expected, expectedNativeRevision }) =>
       serial(async (lease) => {
+        if (
+          !Number.isSafeInteger(expectedNativeRevision) ||
+          expectedNativeRevision < 0
+        )
+          throw Error("INVALID_SETTINGS_REVISION");
         const target = await snapshot(value),
           previous = await snapshot(expected),
           old = await load();
         if (equal(project(old.record), target))
           return { ...old, changed: false };
-        if (!equal(project(old.record), previous))
+        if (
+          old.record.revision !== expectedNativeRevision ||
+          !equal(project(old.record), previous)
+        )
           throw Error("SETTINGS_CONFLICT");
         const changedKeys = Object.keys(target.preferences).filter(
           (key) => !equal(target.preferences[key], old.record.preferences[key]),

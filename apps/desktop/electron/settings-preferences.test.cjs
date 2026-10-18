@@ -33,6 +33,34 @@ const snapshot = (record) => ({
   schedules: record.schedules,
 });
 
+test("history apply rejects missing revision and an ABA change despite matching semantics", async (t) => {
+  const { store } = await fixture(t);
+  const initial = (await store.read()).record;
+  const a = await store.write(request(initial));
+  const before = snapshot(a.record),
+    target = {
+      ...before,
+      preferences: { ...before.preferences, density: "compact" },
+    };
+  await assert.rejects(
+    store.apply(target, { expected: before }),
+    /INVALID_SETTINGS_REVISION/,
+  );
+  const b = await store.write(
+    request(a.record, {
+      preferences: { ...a.record.preferences, theme: "dark" },
+    }),
+  );
+  await store.write(request(b.record, { preferences: a.record.preferences }));
+  await assert.rejects(
+    store.apply(target, {
+      expected: before,
+      expectedNativeRevision: a.record.revision,
+    }),
+    /SETTINGS_CONFLICT/,
+  );
+});
+
 test("native preferences initialize once, retain field provenance, and reject stale migration", async (t) => {
   const { root, store } = await fixture(t);
   const initial = await store.read();
@@ -84,14 +112,18 @@ test("history apply checks the expected snapshot and supports idempotent recover
       ...before,
       preferences: { ...before.preferences, theme: "dark" },
     };
-  const restored = await store.apply(after, { expected: before });
+  const context = {
+    expected: before,
+    expectedNativeRevision: a.record.revision,
+  };
+  const restored = await store.apply(after, context);
   assert.equal(restored.record.preferences.theme, "dark");
   assert.deepEqual(restored.record.writtenKeys, ["theme"]);
-  assert.equal((await store.apply(after, { expected: before })).changed, false);
+  assert.equal((await store.apply(after, context)).changed, false);
   await assert.rejects(
     store.apply(
       { ...before, preferences: { ...before.preferences, density: "compact" } },
-      { expected: before },
+      context,
     ),
     /SETTINGS_CONFLICT/,
   );
@@ -141,7 +173,7 @@ test("native preference validation excludes unknown fields and private payload r
   await assert.rejects(
     store.apply(
       { ...snapshot(current), wording: {} },
-      { expected: snapshot(current) },
+      { expected: snapshot(current), expectedNativeRevision: current.revision },
     ),
     /INVALID_SETTINGS_SNAPSHOT/,
   );
