@@ -379,3 +379,94 @@ test('crash after temporary journal fsync preserves inert originals and permits 
         await f.dispose();
     }
 });
+test('password change revokes other instances while preserving encrypted revisions and pending recovery', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        await f.service.restore(first.revision, async () => { throw new Error('SIMULATED_APPLY'); });
+        const other = createHistoryService(f.options);
+        await other.unlock('fixture-only-password');
+        const event = path.join(f.options.historyRoot, 'repository/events', first.revision + '.json');
+        const eventBytes = await fs.readFile(event);
+        const journalBytes = await fs.readFile(path.join(f.options.historyRoot, 'pending.json'));
+        const auth = path.join(f.options.historyRoot, 'auth.json');
+        const authBytes = await fs.readFile(auth);
+        assert.equal((await f.service.changePassword('incorrect-old-password', 'new-fixture-password')).error.code, 'HISTORY_AUTH_FAILED');
+        assert.ok((await fs.readFile(auth)).equals(authBytes));
+        assert.equal((await f.service.changePassword('fixture-only-password', 'new-fixture-password')).changed, true);
+        assert.ok((await fs.readFile(event)).equals(eventBytes));
+        assert.ok((await fs.readFile(path.join(f.options.historyRoot, 'pending.json'))).equals(journalBytes));
+        assert.equal((await other.list()).error.code, 'HISTORY_SESSION_REVOKED');
+        assert.equal((await other.unlock('fixture-only-password')).error.code, 'HISTORY_AUTH_FAILED');
+        assert.equal((await other.unlock('new-fixture-password')).ok, true);
+        assert.equal((await other.recover('retry', async () => {})).recovered, true);
+    }
+    finally { await f.dispose(); }
+});
+test('interrupted auth update keeps the old credential active and preserves inert temporary bytes', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const interrupted = createHistoryService({ ...f.options, onTransition: async (phase, detail) => {
+            if (phase === 'temp-synced' && detail.target === 'auth.json') throw new Error('SIMULATED_AUTH_WRITE');
+        } });
+        assert.equal((await interrupted.changePassword('fixture-only-password', 'new-fixture-password')).ok, false);
+        const restarted = createHistoryService(f.options);
+        assert.equal((await restarted.status()).abandonedTempCount, 1);
+        assert.equal((await restarted.unlock('fixture-only-password')).ok, true);
+        assert.equal((await restarted.verify('new-fixture-password')).error.code, 'HISTORY_AUTH_FAILED');
+        assert.equal((await f.service.status()).unlocked, true);
+    }
+    finally { await f.dispose(); }
+});
+test('legacy authentication records migrate on password change without losing history', async () => {
+    const f = await fixture();
+    try {
+        await f.service.setup('fixture-only-password');
+        const authPath = path.join(f.options.historyRoot, 'auth.json');
+        const auth = JSON.parse(await fs.readFile(authPath, 'utf8'));
+        delete auth.generation; auth.version = 1;
+        await fs.writeFile(authPath, JSON.stringify(auth));
+        const legacy = createHistoryService(f.options);
+        assert.equal((await legacy.unlock('fixture-only-password')).ok, true);
+        assert.equal((await legacy.changePassword('fixture-only-password', 'new-fixture-password')).changed, true);
+        assert.equal(JSON.parse(await fs.readFile(authPath, 'utf8')).version, 2);
+        assert.equal((await legacy.list()).ok, true);
+    }
+    finally { await f.dispose(); }
+});
+test('password generation revokes an authenticated session in another real process', async () => {
+    const f = await fixture();
+    let child;
+    try {
+        await f.service.setup('fixture-only-password');
+        const code = String.raw`
+const input=JSON.parse(require('node:fs').readFileSync(0,'utf8'));
+const key=Buffer.from(input.key,'base64');
+const service=require(input.module).createHistoryService({...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>v,validateSchedule:v=>v});
+(async()=>{
+ const result=await service.unlock(input.secret);process.send({ready:result.ok});
+ process.once('message',async()=>{const result=await service.list();process.send({code:result.error?.code||'UNEXPECTED_SUCCESS'});key.fill(0);process.disconnect();});
+})().catch(()=>{process.exitCode=1;process.disconnect();});
+`;
+        child = spawn(process.execPath, ['-e', code], { windowsHide: true, stdio: ['pipe', 'ignore', 'ignore', 'ipc'] });
+        const done = new Promise(resolve => child.once('exit', resolve));
+        const nextMessage = () => new Promise((resolve, reject) => {
+            const timer = setTimeout(() => { child.kill(); reject(new Error('SESSION_WORKER_TIMEOUT')); }, 15000);
+            child.once('message', message => { clearTimeout(timer); resolve(message); });
+            child.once('error', error => { clearTimeout(timer); reject(error); });
+        });
+        const ready = nextMessage();
+        child.stdin.end(JSON.stringify({ module: require.resolve('./history.cjs'), options: { appDataRoot: f.root, historyRoot: f.options.historyRoot, gitExecutable: f.options.gitExecutable, gitSha256: f.options.gitSha256 }, key: f.key.toString('base64'), secret: 'fixture-only-password' }));
+        assert.equal((await ready).ready, true);
+        assert.equal((await f.service.changePassword('fixture-only-password', 'new-fixture-password')).changed, true);
+        const response = nextMessage(); child.send({ probe: true });
+        assert.equal((await response).code, 'HISTORY_SESSION_REVOKED');
+        await done;
+    }
+    finally {
+        child?.kill();
+        await f.dispose();
+    }
+});
