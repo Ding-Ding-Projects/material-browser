@@ -90,8 +90,16 @@ pub(super) fn capture(pid: u32, executable: &Path, profile: &Path) -> Result<Pro
 pub(super) fn is_alive(identity: &ProcessIdentity) -> Result<bool> {
     match native_start_time_if_exists(identity.pid)? {
         Some(start) if start == identity.start_time => {
-            let actual = capture(identity.pid, &identity.executable, &identity.profile)?;
-            Ok(actual.start_time == identity.start_time)
+            match capture(identity.pid, &identity.executable, &identity.profile) {
+                Ok(actual) => Ok(actual.start_time == identity.start_time),
+                Err(error) => match native_start_time_if_exists(identity.pid)? {
+                    // Exit may race the metadata read. Only fresh native absence
+                    // or a different creation time proves this identity is gone.
+                    None => Ok(false),
+                    Some(start) if start != identity.start_time => Ok(false),
+                    _ => Err(error),
+                },
+            }
         }
         _ => Ok(false),
     }
@@ -216,6 +224,11 @@ fn native_start_time_if_exists(pid: u32) -> Result<Option<u64>> {
                 "Cannot read native process creation time",
             ));
         }
+        // A retained Child handle keeps the process object queryable after exit.
+        // A nonzero exit FILETIME proves it is no longer a live process.
+        if times[1].low != 0 || times[1].high != 0 {
+            return Ok(None);
+        }
         Ok(Some(
             (u64::from(times[0].high) << 32) | u64::from(times[0].low),
         ))
@@ -239,6 +252,18 @@ fn native_start_time_if_exists(_pid: u32) -> Result<Option<u64>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    #[cfg(windows)]
+    fn retained_child_handle_does_not_make_an_exited_process_alive() {
+        use std::os::windows::process::CommandExt;
+        let mut child = Command::new("cmd.exe").args(["/d", "/c", "exit", "0"])
+            .creation_flags(0x08000000).spawn().unwrap();
+        let pid = child.id();
+        assert!(child.wait().unwrap().success());
+        assert_eq!(native_start_time_if_exists(pid).unwrap(), None);
+        // Keep the exact Child handle alive until after the observation.
+        drop(child);
+    }
     #[test]
     fn interrupted_and_torn_journals_never_mean_idle() {
         let root = std::env::temp_dir().join(format!("engine-lifetime-{}", std::process::id()));

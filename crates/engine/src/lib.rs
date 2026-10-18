@@ -464,14 +464,14 @@ mod tests {
             .join("System32/WindowsPowerShell/v1.0/powershell.exe").canonicalize().unwrap();
         let script = root.join("browser-fixture.ps1");
         fs::write(&script, b"param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Rest)\nStart-Sleep -Seconds 30\n").unwrap();
+        let mut supervisor = Supervisor::new(root.clone()).unwrap();
+        let lease = supervisor.acquire_profile_idle(id).unwrap();
         let mut native = Command::new(&executable).args(["-NoProfile", "-NonInteractive", "-File"])
             .arg(&script).arg(format!("--user-data-dir={}", profile.display()))
             .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
             .creation_flags(0x08000000).spawn().unwrap();
         let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let identity = lifetime::capture(native.id(), &executable, &profile).unwrap();
-            let mut supervisor = Supervisor::new(root.clone()).unwrap();
-            let lease = supervisor.acquire_profile_idle(id).unwrap();
             let mut helper = Command::new(&executable).args(["-NoProfile", "-NonInteractive", "-Command", "$null = [Console]::ReadLine()"])
                 .stdin(Stdio::piped()).stdout(Stdio::null()).stderr(Stdio::null())
                 .creation_flags(0x08000004).spawn().unwrap();
