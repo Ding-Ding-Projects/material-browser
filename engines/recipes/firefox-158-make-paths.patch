@@ -1,11 +1,16 @@
 --- a/python/mozbuild/mozbuild/backend/recursivemake.py
 +++ b/python/mozbuild/mozbuild/backend/recursivemake.py
-@@ -1624,7 +1624,7 @@
+@@ -1624,7 +1624,12 @@
          if isinstance(obj, (Program, SharedLibrary)):
              obj_target = self._pretty_path(obj.output_path, backend_file)
  
 -        objs_ref = " \\\n    ".join(os.path.relpath(o, obj.objdir) for o in objs)
-+        objs_ref = " \\\n    ".join(mozpath.relpath(o, obj.objdir) for o in objs)
++        objs_ref = " \\\n    ".join(
++            mozpath.normpath(o)
++            if os.name == "nt"
++            else mozpath.relpath(o, obj.objdir)
++            for o in objs
++        )
          if isinstance(obj, (SimpleProgram, Program, SharedLibrary)):
              # Don't bother with a list file if we're only linking objects built
              # in this directory.

@@ -16,11 +16,16 @@ structured `mach` diagnostic log inside its private native cache. Logs contain
 local build paths and must not be published without review and sanitization.
 
 Both modes apply `firefox-158-make-paths.patch`, a pinned build-backend repair.
-The upstream recursive-make backend emitted native `os.path.relpath` separators
-for cross-directory object prerequisites. On Windows, the content-analysis test
-agent consequently reported a missing Abseil object even though that object was
-present. The patch uses Mozilla's existing normalized `mozpath.relpath` helper.
-It preserves tests and content-analysis functionality. Baseline and patched
+The upstream recursive-make backend emitted native `os.path.relpath` paths for
+cross-directory object prerequisites. On Windows, the content-analysis test
+agent reported a missing Abseil object even though that object was present.
+Normalizing separators alone did not resolve the observed failure. The current
+candidate uses normalized absolute object paths on Windows and normalized
+relative paths elsewhere. The observed absolute path was 189 characters and the
+raw combined relative path was 260; the build must verify this candidate rather
+than assuming that path length caused the failure. A hash-bound upgrade patch
+handles the earlier reviewed normalization without resetting source. This
+preserves tests and content-analysis functionality. Baseline and patched
 source hashes are recorded in `firefox-build-backend.json`; unknown local edits
 are rejected, never overwritten.
 

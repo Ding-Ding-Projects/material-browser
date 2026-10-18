@@ -3,7 +3,10 @@
   "revision": "3c71aeacdb296402e41fb2084b13e797d1770642",
   "path": "python/mozbuild/mozbuild/backend/recursivemake.py",
   "patch": "firefox-158-make-paths.patch",
-  "patchSha256": "a18a6bba4001b6d776a2f113195f42f4f30e2c4277e22838b9acd4fd5eeef8c1",
+  "patchSha256": "ad451889fc374cd75d4e591a31f6b203155cd51b674a3fa5de70aecf6b62c7f6",
   "baselineSha256": "b5f799f5b4a0c43611afbe6ba73a8c124958d6e67193f7b36a7dbad8259267de",
-  "patchedSha256": "87bc94b019b2dcfedee63c8810ee19d0dd9bf182266635c82925bedfcd73d1b9"
+  "previousPatchedSha256": "87bc94b019b2dcfedee63c8810ee19d0dd9bf182266635c82925bedfcd73d1b9",
+  "patchedSha256": "61a164bef366156d013cbde3f685f88309a3dec4241dd39561090880204fade8",
+  "upgradePatch": "firefox-158-make-paths-upgrade.patch",
+  "upgradePatchSha256": "9b33cf0bbec271f787e3800632ce131e2674f343cf5162fe5f5cd3888dc3ce6e"
 }

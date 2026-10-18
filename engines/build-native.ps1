@@ -33,14 +33,16 @@ function NormalizedSha256([string]$FilePath) {
 function FirefoxBackendOverlay([string]$Path,[switch]$CheckOnly) {
   $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-build-backend.json') -Raw | ConvertFrom-Json
   $patchPath=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
+  $upgradePath=Join-Path $PSScriptRoot "recipes/$($recipe.upgradePatch)"
   $target=Join-Path $Path $recipe.path
-  if($recipe.revision -ne $pins.firefox.revision -or (NormalizedSha256 $patchPath) -ne $recipe.patchSha256){throw 'Firefox build backend patch receipt mismatch'}
+  if($recipe.revision -ne $pins.firefox.revision -or (NormalizedSha256 $patchPath) -ne $recipe.patchSha256 -or (NormalizedSha256 $upgradePath) -ne $recipe.upgradePatchSha256){throw 'Firefox build backend patch receipt mismatch'}
   $actual=NormalizedSha256 $target
-  if($actual -notin @($recipe.baselineSha256,$recipe.patchedSha256)){throw 'Firefox build backend differs from the reviewed input; preserving it.'}
+  if($actual -notin @($recipe.baselineSha256,$recipe.previousPatchedSha256,$recipe.patchedSha256)){throw 'Firefox build backend differs from the reviewed input; preserving it.'}
   if($CheckOnly){return}
   if($actual -eq $recipe.baselineSha256){Run 'git' @('-C',$Path,'apply','--whitespace=error-all',$patchPath)}
+  elseif($actual -eq $recipe.previousPatchedSha256){Run 'git' @('-C',$Path,'apply','--whitespace=error-all',$upgradePath)}
   if((NormalizedSha256 $target) -ne $recipe.patchedSha256){throw 'Firefox build backend patch readback mismatch'}
-  Write-Output 'Staged Firefox make prerequisite path normalization repair.'
+  Write-Output 'Staged normalized absolute Firefox object prerequisites on Windows. Native rebuild verdict remains pending.'
 }
 function FirefoxCookieOverlay([string]$Path,[switch]$CheckOnly) {
   $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
