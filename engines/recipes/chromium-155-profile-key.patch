@@ -8,7 +8,7 @@
  #elif BUILDFLAG(IS_MAC)
  #include "chrome/browser/chrome_browser_main_mac.h"
  #include "chrome/browser/shutdown_watchdog_mac.h"
-@@ -1615,21 +1616,12 @@
+@@ -1615,21 +1616,11 @@
    }
  
  #if BUILDFLAG(IS_WIN)
@@ -27,9 +27,8 @@
 -      /*precedence=*/15u,
 -      std::make_unique<os_crypt_async::AppBoundEncryptionProviderWin>(
 -          local_state(), /*force_protection_level=*/std::nullopt)));
-+  // This managed build only opens application-owned profiles and never falls
-+  // back to machine-bound keys. The provider authenticates the host pipe before
-+  // any encryption consumer receives a key.
++  // This managed build requires an authenticated profile-scoped broker before
++  // any asynchronous encryption consumer receives a key. No platform fallback.
 +  providers.clear();
 +  providers.emplace_back(20u,
 +      std::make_unique<material_browser::ProfileKeyProvider>());
@@ -38,17 +37,18 @@
  #if BUILDFLAG(IS_LINUX) && BUILDFLAG(USE_DBUS)
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -832,6 +832,7 @@
+@@ -832,6 +832,8 @@
      "after_startup_task_utils.cc",
      "browser_about_handler.cc",
      "browser_process_impl.cc",
 +    "material_profile_key_provider_win.h",
++    "profile_key_channel_win.h",
      "chrome_browser_field_trials.cc",
      "chrome_browser_interface_binders.cc",
      "chrome_browser_interface_binders.h",
 --- /dev/null
 +++ b/chrome/browser/material_profile_key_provider_win.h
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,71 @@
 +// Copyright 2026 Material Browser Authors.
 +// New application-owned profile support. No platform credential import path.
 +#ifndef CHROME_BROWSER_MATERIAL_PROFILE_KEY_PROVIDER_WIN_H_
@@ -62,6 +62,8 @@
 +#include <utility>
 +
 +#include "base/check.h"
++#include "base/rand_util.h"
++#include "chrome/browser/profile_key_channel_win.h"
 +#include "base/command_line.h"
 +#include "base/containers/span.h"
 +#include "base/strings/string_number_conversions.h"
@@ -79,41 +81,29 @@
 + public:
 +  ProfileKeyProvider() {
 +    const auto* command = base::CommandLine::ForCurrentProcess();
++    CHECK_EQ(command->GetSwitchValueASCII("material-profile-key-mode"), "managed-v2");
 +    const auto pipe_name = command->GetSwitchValueNative("material-profile-key-pipe");
 +    uint32_t expected_host = 0;
++    uint64_t expected_host_created = 0;
 +    CHECK(base::StringToUint(command->GetSwitchValueASCII("material-host-pid"),
-+                             &expected_host));
-+    CHECK_NE(expected_host, 0u);
-+    CHECK(command->HasSwitch("user-data-dir"));
-+    CHECK(base::StartsWith(pipe_name, L"\\\\.\\pipe\\material-browser-key-"));
-+    CHECK_LT(pipe_name.size(), 256u);
-+    CHECK(::WaitNamedPipeW(pipe_name.c_str(), 30000));
-+    base::win::ScopedHandle pipe(::CreateFileW(
-+        pipe_name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-+        OPEN_EXISTING, SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, nullptr));
-+    CHECK(pipe.is_valid());
-+    ULONG server_pid = 0;
-+    CHECK(::GetNamedPipeServerProcessId(pipe.get(), &server_pid));
-+    CHECK_EQ(server_pid, expected_host);
-+
-+    std::array<uint8_t, 40> frame{};
-+    DWORD received = 0;
-+    constexpr std::array<uint8_t, 8> kMagic = {'M','B','K','E','Y',0,0,1};
-+    const bool valid_frame =
-+        ::ReadFile(pipe.get(), frame.data(), static_cast<DWORD>(frame.size()),
-+                   &received, nullptr) && received == frame.size() &&
-+        std::equal(kMagic.begin(), kMagic.end(), frame.begin());
-+    if (!valid_frame) {
-+      ::SecureZeroMemory(frame.data(), frame.size());
-+      CHECK(valid_frame);
++                            &expected_host));
++    CHECK(base::StringToUint64(
++        command->GetSwitchValueASCII("material-host-created"),
++        &expected_host_created));
++    const auto profile_id = command->GetSwitchValueASCII("material-profile-id");
++    const auto profile_path = command->GetSwitchValueNative("user-data-dir");
++    std::array<uint8_t, 32> nonce{};
++    base::RandBytes(nonce);
++    std::array<uint8_t, 32> key{};
++    const bool received = key_channel::Receive(
++        pipe_name, expected_host, expected_host_created, profile_id,
++        profile_path, nonce, key);
++    if (!received) {
++      ::SecureZeroMemory(key.data(), key.size());
++      CHECK(received);
 +    }
-+    key_.emplace(base::span(frame).subspan<8>(),
-+                 os_crypt_async::mojom::Algorithm::kAES256GCM);
-+    ::SecureZeroMemory(frame.data(), frame.size());
-+    const uint8_t acknowledgment = 1;
-+    DWORD sent = 0;
-+    CHECK(::WriteFile(pipe.get(), &acknowledgment, 1, &sent, nullptr));
-+    CHECK_EQ(sent, 1u);
++    key_.emplace(base::span(key), os_crypt_async::mojom::Algorithm::kAES256GCM);
++    ::SecureZeroMemory(key.data(), key.size());
 +  }
 +
 +  void GetKey(KeyCallback callback) override {
@@ -130,3 +120,153 @@
 +};
 +}  // namespace material_browser
 +#endif  // CHROME_BROWSER_MATERIAL_PROFILE_KEY_PROVIDER_WIN_H_
+--- /dev/null
++++ b/chrome/browser/profile_key_channel_win.h
+@@ -0,0 +1,147 @@
++// Copyright 2026 Material Browser Authors.
++// Bounded local transport only. Request metadata is not authorization.
++#ifndef MATERIAL_BROWSER_PROFILE_KEY_CHANNEL_WIN_H_
++#define MATERIAL_BROWSER_PROFILE_KEY_CHANNEL_WIN_H_
++
++#include <windows.h>
++#include <algorithm>
++#include <array>
++#include <cstdint>
++#include <string>
++#include <vector>
++
++namespace material_browser::key_channel {
++inline constexpr std::array<uint8_t, 8> kRequestMagic = {'M','B','K','R','E','Q',0,2};
++inline constexpr std::array<uint8_t, 8> kReplyMagic = {'M','B','K','R','E','P',0,2};
++inline constexpr DWORD kMaximumTimeoutMs = 30000;
++inline constexpr size_t kReplySize = 72;
++
++inline uint64_t CreationTime(HANDLE process) {
++  FILETIME created{}, exited{}, kernel{}, user{};
++  if (!GetProcessTimes(process, &created, &exited, &kernel, &user)) return 0;
++  return (uint64_t{created.dwHighDateTime} << 32) | created.dwLowDateTime;
++}
++
++inline bool ValidProfileId(const std::string& id) {
++  if (id.size() != 36) return false;
++  for (size_t i = 0; i < id.size(); ++i) {
++    if (i == 8 || i == 13 || i == 18 || i == 23) {
++      if (id[i] != '-') return false;
++    } else if (!((id[i] >= '0' && id[i] <= '9') ||
++                 (id[i] >= 'a' && id[i] <= 'f'))) return false;
++  }
++  return true;
++}
++
++inline bool ValidProfilePath(const std::wstring& path) {
++  // Only an explicit normalized local drive path is admitted. The broker must
++  // resolve its final filesystem identity and compare its own managed record.
++  if (path.size() < 4 || path.size() > 1024 || path[1] != L':' ||
++      path[2] != L'\\' || path.find(L'/') != std::wstring::npos ||
++      path.find(L'\0') != std::wstring::npos) return false;
++  if (!((path[0] >= L'A' && path[0] <= L'Z') ||
++        (path[0] >= L'a' && path[0] <= L'z'))) return false;
++  const std::wstring segments = L"\\" + path.substr(3) + L"\\";
++  return segments.find(L"\\..\\") == std::wstring::npos &&
++         segments.find(L"\\.\\") == std::wstring::npos &&
++         segments.find(L"\\\\") == std::wstring::npos &&
++         path.find(L':', 2) == std::wstring::npos;
++}
++
++inline void AppendInteger(std::vector<uint8_t>& out, uint64_t value, size_t bytes) {
++  for (size_t i = 0; i < bytes; ++i) out.push_back(uint8_t(value >> (i * 8)));
++}
++
++inline std::vector<uint8_t> Request(const std::string& profile_id,
++                                    const std::wstring& profile_path,
++                                    const std::array<uint8_t, 32>& nonce) {
++  if (!ValidProfileId(profile_id) || !ValidProfilePath(profile_path)) return {};
++  const uint64_t created = CreationTime(GetCurrentProcess());
++  if (!created) return {};
++  std::vector<uint8_t> request(kRequestMagic.begin(), kRequestMagic.end());
++  request.insert(request.end(), nonce.begin(), nonce.end());
++  AppendInteger(request, GetCurrentProcessId(), 4);
++  AppendInteger(request, created, 8);
++  AppendInteger(request, profile_path.size(), 2);
++  request.insert(request.end(), profile_id.begin(), profile_id.end());
++  for (wchar_t c : profile_path) AppendInteger(request, uint16_t(c), 2);
++  return request;
++}
++
++inline bool DecodeReply(const std::vector<uint8_t>& reply,
++                        const std::array<uint8_t, 32>& nonce,
++                        std::array<uint8_t, 32>& key) {
++  SecureZeroMemory(key.data(), key.size());
++  if (reply.size() != kReplySize ||
++      !std::equal(kReplyMagic.begin(), kReplyMagic.end(), reply.begin()) ||
++      !std::equal(nonce.begin(), nonce.end(), reply.begin() + 8)) return false;
++  std::copy_n(reply.begin() + 40, key.size(), key.begin());
++  return true;
++}
++
++inline bool Receive(const std::wstring& pipe_name, DWORD expected_host,
++                    uint64_t expected_host_created,
++                    const std::string& profile_id,
++                    const std::wstring& profile_path,
++                    const std::array<uint8_t, 32>& nonce,
++                    std::array<uint8_t, 32>& key,
++                    DWORD timeout_ms = kMaximumTimeoutMs) {
++  SecureZeroMemory(key.data(), key.size());
++  constexpr wchar_t prefix[] = L"\\\\.\\pipe\\material-browser-key-";
++  if (pipe_name.rfind(prefix, 0) != 0 || pipe_name.size() < std::size(prefix) ||
++      pipe_name.size() >= 256 ||
++      !expected_host || !expected_host_created || !timeout_ms ||
++      timeout_ms > kMaximumTimeoutMs) return false;
++  for (wchar_t c : pipe_name.substr(std::size(prefix) - 1)) {
++    if (!((c >= L'a' && c <= L'z') || (c >= L'0' && c <= L'9') || c == L'-'))
++      return false;
++  }
++  auto request = Request(profile_id, profile_path, nonce);
++  if (request.empty()) return false;
++  const ULONGLONG deadline = GetTickCount64() + timeout_ms;
++  HANDLE pipe = INVALID_HANDLE_VALUE;
++  while (GetTickCount64() < deadline) {
++    pipe = CreateFileW(pipe_name.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
++                       nullptr, OPEN_EXISTING,
++                       SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, nullptr);
++    if (pipe != INVALID_HANDLE_VALUE) break;
++    const DWORD error = GetLastError();
++    if (error != ERROR_PIPE_BUSY && error != ERROR_FILE_NOT_FOUND) return false;
++    Sleep(5);
++  }
++  if (pipe == INVALID_HANDLE_VALUE) return false;
++  struct ClosePipe { HANDLE handle; ~ClosePipe() { CloseHandle(handle); } } close{pipe};
++  ULONG server_pid = 0;
++  if (!GetNamedPipeServerProcessId(pipe, &server_pid) || server_pid != expected_host)
++    return false;
++  HANDLE host = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, server_pid);
++  if (!host) return false;
++  const bool same_host = CreationTime(host) == expected_host_created;
++  CloseHandle(host);
++  if (!same_host) return false;
++  // Explicit nonblocking message mode makes every ReadFile/WriteFile return
++  // immediately. Byte pipes are rejected. No pending OVERLAPPED buffer survives
++  // a timeout, and all retry loops share one deadline.
++  DWORD mode = PIPE_READMODE_MESSAGE | PIPE_NOWAIT;
++  if (!SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr)) return false;
++  DWORD written = 0;
++  if (!WriteFile(pipe, request.data(), DWORD(request.size()), &written, nullptr) ||
++      written != request.size()) return false;
++  std::vector<uint8_t> reply(kReplySize);
++  bool valid = false;
++  while (GetTickCount64() < deadline) {
++    DWORD read = 0;
++    if (ReadFile(pipe, reply.data(), DWORD(reply.size()), &read, nullptr)) {
++      reply.resize(read);
++      valid = DecodeReply(reply, nonce, key);
++      break;
++    }
++    if (GetLastError() != ERROR_NO_DATA) break;
++    Sleep(5);
++  }
++  SecureZeroMemory(reply.data(), reply.size());
++  if (!valid) SecureZeroMemory(key.data(), key.size());
++  return valid;
++}
++}  // namespace material_browser::key_channel
++#endif

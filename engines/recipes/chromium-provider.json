@@ -1,26 +1,33 @@
 {
-  "schemaVersion": 1,
-  "portableEncryptionVerified": false,
-  "upstream": "https://chromium.googlesource.com/chromium/src",
+  "schemaVersion": 2,
+  "revision": "0e66b94549a8bd85f03fbdf189b752d6e7b63c32",
+  "version": "155.0.8059.85",
+  "upstream": "https://chromium.googlesource.com/chromium/src.git",
+  "patch": "chromium-155-profile-key.patch",
+  "patchSha256": "8865486c2c733bbc86e3c21fee7952916b04b3c0a63c7340cac38262bc6cb1e3",
   "files": [
     {
-      "sha256": "ec04ca8955411ca975860f9bce3972b4469923c3d101f3db94aceecc3131754e",
-      "path": "components/os_crypt/async/browser/os_crypt_async.h"
+      "path": "chrome/browser/browser_process_impl.cc",
+      "baselineSha256": "80318c9fee1b95eb1ab00abe646b0b8982de9ac287e630d9feae36b4f1d914b0",
+      "patchedSha256": "493df4c747f0b2d44150c7665fb5fff9242bd524aacb2cbb4e83662c2bf8b96a"
     },
     {
-      "sha256": "c7349b7a1dccb51908af2e3fb3a83f893d3a891ece81b6f941a649d4062e9407",
-      "path": "components/os_crypt/async/browser/key_provider.h"
+      "path": "chrome/browser/BUILD.gn",
+      "baselineSha256": "5c9a66b731954d1d28c7f630071880f0a879bfef924338362004b9ad19f4444b",
+      "patchedSha256": "b8671fbd9772d544d2d50d0576b78c6db8c0be0256c039fe09e4a5ee1720e7c0"
     },
     {
-      "sha256": "8ce0b7506048fd7c75c8f38090a59ef8ec67148c4cd43f10f1c63b5c731812a1",
-      "path": "components/os_crypt/async/common/encryptor.h"
+      "path": "chrome/browser/material_profile_key_provider_win.h",
+      "baselineSha256": null,
+      "patchedSha256": "6e412fc0702eaeaedfd2f820fab8a0ed4f3d386a90c4453b8d32f22ff7ca6b94"
     },
     {
-      "sha256": "af1670c7afad59417b0a8e1f1039a93610a5a834b501fba5f34b468acace9002",
-      "path": "chrome/browser/browser_process_impl.cc"
+      "path": "chrome/browser/profile_key_channel_win.h",
+      "baselineSha256": null,
+      "patchedSha256": "192204b6ea997c9cca982d271d683e18ef80206575e9c347b21bb76efb6dc80a"
     }
   ],
+  "portableEncryptionVerified": false,
   "liveSnapshotVerified": false,
-  "revision": "134.0.6998.35",
-  "status": "interfaces-acquired-not-compiled"
+  "status": "v2-source-candidate-native-provider-uncompiled"
 }

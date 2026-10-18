@@ -2,9 +2,13 @@ param(
   [ValidateSet('All','Core','Engine','Host','Desktop','Storage','HostingWizard','BrowserNative')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
   [switch]$AcquireOnly,
-  [switch]$NativeCookieSnapshotTests
+  [switch]$NativeCookieSnapshotTests,
+  [switch]$NativeChromiumChannelTests
 )
 $ErrorActionPreference='Stop'
+if($NativeChromiumChannelTests -and ($Component -ne 'BrowserNative' -or $NativeEngine -ne 'chromium' -or $AcquireOnly -or $NativeCookieSnapshotTests -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){
+  throw 'NativeChromiumChannelTests requires Chromium BrowserNative without AcquireOnly, NativeCookieSnapshotTests or baseline-only diagnostics.'
+}
 if($NativeCookieSnapshotTests -and ($Component -ne 'BrowserNative' -or $NativeEngine -ne 'firefox' -or $AcquireOnly -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){
   throw 'NativeCookieSnapshotTests requires a Firefox BrowserNative production build without AcquireOnly or baseline-only diagnostics.'
 }
@@ -37,6 +41,7 @@ try {
     $nativeArgs=@{Engine=$NativeEngine}
     if($AcquireOnly){$nativeArgs.AcquireOnly=$true}
     if($NativeCookieSnapshotTests){$nativeArgs.CookieSnapshotTests=$true}
+    if($NativeChromiumChannelTests){$nativeArgs.ChromiumChannelTests=$true}
     & (Join-Path $root 'engines/build-native.ps1') @nativeArgs
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }

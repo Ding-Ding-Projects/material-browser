@@ -11,6 +11,8 @@
 #include <utility>
 
 #include "base/check.h"
+#include "base/rand_util.h"
+#include "chrome/browser/profile_key_channel_win.h"
 #include "base/command_line.h"
 #include "base/containers/span.h"
 #include "base/strings/string_number_conversions.h"
@@ -28,41 +30,29 @@ class ProfileKeyProvider final : public os_crypt_async::KeyProvider {
  public:
   ProfileKeyProvider() {
     const auto* command = base::CommandLine::ForCurrentProcess();
+    CHECK_EQ(command->GetSwitchValueASCII("material-profile-key-mode"), "managed-v2");
     const auto pipe_name = command->GetSwitchValueNative("material-profile-key-pipe");
     uint32_t expected_host = 0;
+    uint64_t expected_host_created = 0;
     CHECK(base::StringToUint(command->GetSwitchValueASCII("material-host-pid"),
-                             &expected_host));
-    CHECK_NE(expected_host, 0u);
-    CHECK(command->HasSwitch("user-data-dir"));
-    CHECK(base::StartsWith(pipe_name, L"\\\\.\\pipe\\material-browser-key-"));
-    CHECK_LT(pipe_name.size(), 256u);
-    CHECK(::WaitNamedPipeW(pipe_name.c_str(), 30000));
-    base::win::ScopedHandle pipe(::CreateFileW(
-        pipe_name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-        OPEN_EXISTING, SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, nullptr));
-    CHECK(pipe.is_valid());
-    ULONG server_pid = 0;
-    CHECK(::GetNamedPipeServerProcessId(pipe.get(), &server_pid));
-    CHECK_EQ(server_pid, expected_host);
-
-    std::array<uint8_t, 40> frame{};
-    DWORD received = 0;
-    constexpr std::array<uint8_t, 8> kMagic = {'M','B','K','E','Y',0,0,1};
-    const bool valid_frame =
-        ::ReadFile(pipe.get(), frame.data(), static_cast<DWORD>(frame.size()),
-                   &received, nullptr) && received == frame.size() &&
-        std::equal(kMagic.begin(), kMagic.end(), frame.begin());
-    if (!valid_frame) {
-      ::SecureZeroMemory(frame.data(), frame.size());
-      CHECK(valid_frame);
+                            &expected_host));
+    CHECK(base::StringToUint64(
+        command->GetSwitchValueASCII("material-host-created"),
+        &expected_host_created));
+    const auto profile_id = command->GetSwitchValueASCII("material-profile-id");
+    const auto profile_path = command->GetSwitchValueNative("user-data-dir");
+    std::array<uint8_t, 32> nonce{};
+    base::RandBytes(nonce);
+    std::array<uint8_t, 32> key{};
+    const bool received = key_channel::Receive(
+        pipe_name, expected_host, expected_host_created, profile_id,
+        profile_path, nonce, key);
+    if (!received) {
+      ::SecureZeroMemory(key.data(), key.size());
+      CHECK(received);
     }
-    key_.emplace(base::span(frame).subspan<8>(),
-                 os_crypt_async::mojom::Algorithm::kAES256GCM);
-    ::SecureZeroMemory(frame.data(), frame.size());
-    const uint8_t acknowledgment = 1;
-    DWORD sent = 0;
-    CHECK(::WriteFile(pipe.get(), &acknowledgment, 1, &sent, nullptr));
-    CHECK_EQ(sent, 1u);
+    key_.emplace(base::span(key), os_crypt_async::mojom::Algorithm::kAES256GCM);
+    ::SecureZeroMemory(key.data(), key.size());
   }
 
   void GetKey(KeyCallback callback) override {

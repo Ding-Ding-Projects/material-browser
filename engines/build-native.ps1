@@ -1,5 +1,6 @@
-param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly,[switch]$CookieSnapshotTests)
+param([Parameter(Mandatory=$true)][ValidateSet('chromium','firefox')][string]$Engine,[switch]$AcquireOnly,[switch]$CookieSnapshotTests,[switch]$ChromiumChannelTests)
 $ErrorActionPreference='Stop'
+if($ChromiumChannelTests -and ($Engine -ne 'chromium' -or $AcquireOnly -or $CookieSnapshotTests)){throw 'ChromiumChannelTests requires Chromium without AcquireOnly or CookieSnapshotTests.'}
 if($CookieSnapshotTests -and ($Engine -ne 'firefox' -or $AcquireOnly -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){throw 'CookieSnapshotTests requires a Firefox production build without AcquireOnly or baseline-only diagnostics.'}
 $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.json') -Raw | ConvertFrom-Json
 $pin=$pins.$Engine
@@ -130,6 +131,27 @@ function Checkout([string]$Path,[string]$Url,[string]$Revision,[bool]$ManagedFir
   if($current -ne $Revision){throw 'Native source revision mismatch'}
 }
 if($Engine -eq 'chromium'){
+  if($ChromiumChannelTests){
+    $vswhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+    if(-not (Test-Path $vswhere)){throw 'Visual Studio discovery is unavailable.'}
+    $vs=& $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+    if(-not $vs){throw 'Visual Studio C++ tools are required.'}
+    $vcvars=Join-Path $vs 'VC/Auxiliary/Build/vcvars64.bat'
+    if(-not (Test-Path $vcvars)){throw 'Supported MSVC environment entrypoint is unavailable.'}
+    $testRoot=Join-Path $nativeRoot 'channel-tests'
+    New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
+    $fixture=Join-Path $PSScriptRoot 'native/chromium/profile_key_channel_test_win.cc'
+    $exe=Join-Path $testRoot 'profile_key_channel_test.exe'
+    $object=Join-Path $testRoot 'profile_key_channel_test.obj'
+    $compile=Join-Path $testRoot 'compile.cmd'
+    $commands=@('@echo off',('call "{0}"' -f $vcvars),'if errorlevel 1 exit /b %errorlevel%',('cl.exe /nologo /std:c++20 /EHsc /W4 /WX "{0}" /Fe:"{1}" /Fo:"{2}" /link advapi32.lib' -f $fixture,$exe,$object),'exit /b %errorlevel%')
+    [IO.File]::WriteAllLines($compile,$commands,[Text.ASCIIEncoding]::new())
+    Run $env:ComSpec @('/d','/c',$compile)
+    Run $exe @()
+    Write-Output "Synthetic channel fixture SHA256 $(FileSha256 $exe)"
+    Write-Output 'Synthetic protected-channel tests passed. Chromium provider compilation and portable profile encryption remain unverified and disabled.'
+    exit 0
+  }
   $depot=Join-Path $base "depot_tools-$($pins.depotTools.revision.Substring(0,12))"
   Checkout $depot $pins.depotTools.url $pins.depotTools.revision
   $env:DEPOT_TOOLS_UPDATE='0'
@@ -145,11 +167,12 @@ if($Engine -eq 'chromium'){
     # This branded x86 updater test fixture is not used by the unbranded x64 chrome target.
     # Preserve the scanner verdict; do not retrieve or alter the excluded payload.
     $oldConfig="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': {}, 'custom_vars': {} }]`ntarget_os = ['win']`n"
-    $config="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
+    $previousConfig="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
+    $config="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None, 'src/third_party/updater/chrome_win_x86_sans_iid/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
     $configPath=Join-Path $nativeRoot '.gclient'
     if(Test-Path $configPath){
       $existingConfig=Get-Content $configPath -Raw
-      if($existingConfig -eq $oldConfig){[IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false))}
+      if($existingConfig -in @($oldConfig,$previousConfig)){[IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false))}
       elseif($existingConfig -ne $config){throw 'Existing native dependency configuration differs.'}
     } else { [IO.File]::WriteAllText($configPath,$config,[Text.UTF8Encoding]::new($false)) }
     Run (Join-Path $depot 'gclient.bat') @('sync','--no-history','--shallow','--nohooks','--revision',"src@$($pin.revision)")
