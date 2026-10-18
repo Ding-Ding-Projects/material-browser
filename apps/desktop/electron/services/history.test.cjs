@@ -38,7 +38,7 @@ test('real local history authenticates independently, encrypts, records no-ops a
 });
 const WORKER=String.raw`
 const fs=require('node:fs');const input=JSON.parse(fs.readFileSync(0,'utf8'));const {createHistoryService}=require(input.module);const key=Buffer.from(input.key,'base64');
-const options={...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>({...v}),validateSchedule:v=>({...v}),onTransition:async phase=>{if(phase===input.stop){process.stdout.write('STOPPED\n');await new Promise(()=>{});}}};
+let temps=0;const options={...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>({...v}),validateSchedule:v=>({...v}),onTransition:async phase=>{if(phase==='temp-synced')temps++;if(phase===input.stop&&(!input.tempNumber||temps===input.tempNumber)){process.stdout.write('STOPPED\n');await new Promise(()=>{});}}};
 const service=createHistoryService(options);(async()=>{if(input.restore){await service.unlock('fixture-only-password');console.log(JSON.stringify(await service.restore(input.restore,async()=>{})));}else console.log(JSON.stringify(await service.recordSettings({after:{schemaVersion:1,preferences:{theme:input.theme,nextAction:'worker text'},schedules:[]}})));})().catch(()=>{process.exitCode=1});setInterval(()=>{},1000).unref();
 `;
 function worker(f,extra={}){
@@ -122,4 +122,11 @@ test('managed linked paths are rejected before writes and unrelated victims rema
    const result=await f.service.status();assert.equal(result.ok,false,variant);assert.ok(result.error.code.startsWith('UNSAFE_HISTORY_'),variant);assert.equal(await fs.readFile(victimFile,'utf8'),'unchanged victim');assert.deepEqual(await fs.readdir(victim),['original.txt']);assert.ok((await fs.lstat(target)).isSymbolicLink());
   }finally{await f.dispose();}
  }
+});
+test('crash after temporary journal fsync preserves inert originals and permits durable recovery',async()=>{
+ const f=await fixture();let child;try{
+  await f.service.setup('fixture-only-password');const first=await f.service.recordSettings({after:snapshot()});const waiting=worker(f,{restore:first.revision,stop:'temp-synced',tempNumber:2});child=waiting.child;await waiting.stopped();child.kill();await waiting.done;
+  const names=(await fs.readdir(f.options.historyRoot)).filter(name=>name.endsWith('.tmp'));assert.equal(names.length,1);const preserved=await fs.readFile(path.join(f.options.historyRoot,names[0]));
+  const restarted=createHistoryService(f.options);const status=await restarted.status();assert.equal(status.ok,true);assert.equal(status.abandonedTempCount,1);assert.equal(status.recoveryPending,true);assert.equal((await restarted.unlock('fixture-only-password')).ok,true);assert.equal((await restarted.recover('retry',async()=>{})).recovered,true);assert.deepEqual(await fs.readFile(path.join(f.options.historyRoot,names[0])),preserved);assert.equal((await restarted.status()).abandonedTempCount,1);
+ }finally{child?.kill();await f.dispose();}
 });

@@ -54,15 +54,25 @@ function createHistoryService(options) {
     for(const target of [authFile,journal])await checkedPath(target,'file',{maxBytes:400000});
     const config=path.join(historyRoot,'empty-config');if(await checkedPath(config,'file',{maxBytes:0})){if((await boundedRead(config,0)).length)throw new Error('UNSAFE_HISTORY_GIT_CONFIG');}
     const hooks=path.join(historyRoot,'no-hooks');if(await checkedPath(hooks,'directory'))if((await fs.readdir(hooks)).length)throw new Error('UNSAFE_HISTORY_HOOKS');
-    if(await checkedPath(historyRoot,'directory'))for(const name of await fs.readdir(historyRoot)){const target=path.join(historyRoot,name);if(!['repository','no-hooks','empty-config','auth.json','pending.json'].includes(name))throw new Error('UNSAFE_HISTORY_MANAGED_STATE');await noLinks(target);}
+    let abandonedTempCount=0,abandonedBytes=0;
+    if(await checkedPath(historyRoot,'directory'))for(const name of await fs.readdir(historyRoot)){
+      const target=path.join(historyRoot,name);
+      if(/^(auth|pending)\.json\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.tmp$/.test(name)){
+        const stat=await checkedPath(target,'file',{missing:false,maxBytes:400000});abandonedTempCount++;abandonedBytes+=stat.size;
+        if(abandonedTempCount>128||abandonedBytes>8*1024*1024)throw new Error('HISTORY_ABANDONED_TEMP_LIMIT');
+        continue;
+      }
+      if(!['repository','no-hooks','empty-config','auth.json','pending.json'].includes(name))throw new Error('UNSAFE_HISTORY_MANAGED_STATE');await noLinks(target);
+    }
     if(await checkedPath(repo,'directory'))for(const name of await fs.readdir(repo)){if(!['.git','events'].includes(name))throw new Error('UNSAFE_HISTORY_ATTRIBUTES');await noLinks(path.join(repo,name));}
     if(await checkedPath(events,'directory'))for(const name of await fs.readdir(events)){if(!/^[a-f0-9-]{36}\.json$/.test(name))throw new Error('UNSAFE_HISTORY_ATTRIBUTES');await checkedPath(path.join(events,name),'file',{missing:false,maxBytes:400000});}
-    await verifyGitConfiguration();
+    await verifyGitConfiguration();return {abandonedTempCount};
   }
   async function atomic(file,value){
     assertHeld();await verifyManagedPaths();await checkedPath(path.dirname(file),'directory',{missing:false});await checkedPath(file,'file',{maxBytes:400000});
     const temp=file+'.'+crypto.randomUUID()+'.tmp';await noLinks(temp);const handle=await fs.open(temp,'wx',0o600);
     try{await handle.writeFile(stable(value));await handle.sync();}finally{await handle.close();}
+    await onTransition('temp-synced',{target:path.basename(file)});
     assertHeld();await checkedPath(path.dirname(file),'directory',{missing:false});await checkedPath(file,'file',{maxBytes:400000});await checkedPath(temp,'file',{missing:false,maxBytes:400000});await fs.rename(temp,file);assertHeld();
   }
   async function git(args){ assertHeld(); await verifyManagedPaths();
@@ -90,7 +100,7 @@ function createHistoryService(options) {
   async function requireAuth(){await init();if(!await configured())throw new Error('HISTORY_NOT_CONFIGURED');}
   async function rows(){await requireAuth();active();const diskFiles=await fs.readdir(events);if(diskFiles.length>2000)throw new Error('HISTORY_CAPACITY_REACHED');if(!diskFiles.length)return [];const files=(await git(['ls-tree','--name-only','HEAD:events'])).split(/\r?\n/).filter(Boolean);const all=[];for(const file of files){if(!/^[a-f0-9-]{36}\.json$/.test(file))throw new Error('INVALID_HISTORY_FILE');const id=file.slice(0,-5);all.push({revision:id,...await read(id)});}return all.sort((a,b)=>b.date.localeCompare(a.date)||b.revision.localeCompare(a.revision));}
   const methods={
-    async status(){await init();let recoveryPending=false;try{await fs.access(journal);recoveryPending=true;}catch{}return {configured:await configured(),unlocked:Date.now()<unlockedUntil,recoveryPending,physicalPruneAvailable:false};},
+    async status(){await init();const {abandonedTempCount}=await verifyManagedPaths();let recoveryPending=false;try{await fs.access(journal);recoveryPending=true;}catch{}return {configured:await configured(),unlocked:Date.now()<unlockedUntil,recoveryPending,abandonedTempCount,physicalPruneAvailable:false};},
     async setup(secret){return serial(async()=>{await init();if(await configured())throw new Error('HISTORY_ALREADY_CONFIGURED');if(typeof secret!=='string'||secret.length<6||secret.length>256)throw new Error('INVALID_HISTORY_PASSWORD');const salt=crypto.randomBytes(16),derived=await scrypt(secret,salt,32);try{await credentialStore.withKey(()=>{},{create:true});await atomic(authFile,{version:1,salt:salt.toString('base64'),verifier:derived.toString('base64')});unlockedUntil=Date.now()+10*60*1000;return {configured:true,unlocked:true};}finally{derived.fill(0);}});},
     async verify(secret){await requireAuth();if(typeof secret!=='string'||secret.length>256)throw new Error('INVALID_HISTORY_PASSWORD');const auth=JSON.parse((await boundedRead(authFile,8192)).toString('utf8'));if(auth.version!==1||Buffer.from(auth.salt,'base64').length!==16||Buffer.from(auth.verifier,'base64').length!==32)throw new Error('INVALID_HISTORY_AUTH');const derived=await scrypt(secret,Buffer.from(auth.salt,'base64'),32);try{if(!crypto.timingSafeEqual(derived,Buffer.from(auth.verifier,'base64')))throw new Error('HISTORY_AUTH_FAILED');await credentialStore.withKey(()=>{});return {verified:true};}finally{derived.fill(0);}},
     async unlock(secret){await methods.verify(secret);unlockedUntil=Date.now()+10*60*1000;return {unlocked:true};},
