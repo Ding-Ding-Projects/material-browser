@@ -67,6 +67,24 @@ const labels = {
   "No matching settings": "沒有符合的設定",
   "Settings are saved on this device.": "設定會儲存在這部電腦。",
   "Save rejected": "未能儲存",
+  "Loading saved preferences": "正在載入已儲存的設定",
+  "The previous local preferences are invalid. They were preserved and were not migrated.":
+    "原有的本機設定無效。記錄已保留，未有遷移。",
+  "Saving preferences": "正在儲存設定",
+  "Preference storage needs attention": "設定儲存需要處理",
+  "Reload saved preferences": "重新載入已儲存的設定",
+  "Preferences changed elsewhere. Reload the saved preferences before editing again.":
+    "設定已在其他位置更改。請先重新載入已儲存的設定，再繼續編輯。",
+  "Preferences could not be saved or loaded. The existing saved record was preserved.":
+    "未能儲存或載入設定。原有的已儲存記錄已保留。",
+  "Preferences were saved, but the local workspace cache could not be updated.":
+    "設定已儲存，但未能更新本機工作區快取。",
+  "Native preference storage is unavailable. Existing saved preferences were preserved.":
+    "本機設定儲存暫時無法使用。原有的已儲存設定已保留。",
+  "Preferences are still loading or unavailable. Reload saved preferences before editing.":
+    "設定仍在載入或暫時無法使用。請先重新載入已儲存的設定，再進行編輯。",
+  "Another preference change completed first. Review the saved values and retry this action.":
+    "另一項設定更改已先完成。請檢查已儲存的數值，再重試這項操作。",
   Select: "選擇",
   On: "開啟",
   Off: "關閉",

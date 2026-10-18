@@ -5,11 +5,16 @@ const { randomUUID } = require("node:crypto");
 const { listInstalledFonts } = require("./services/fonts.cjs");
 const { discoverEditors, openInEditor } = require("./services/editors.cjs");
 const settingsFiles = require("./settings-files.cjs");
+const {
+  createPreferencesOperations,
+} = require("./settings-preferences-ipc.cjs");
 const operations = new Set([
   "fonts",
   "editors",
   "choose-editor",
   "open-export",
+  "preferences-read",
+  "preferences-write",
 ]);
 const failure = (code, message) => ({ ok: false, error: { code, message } });
 function registerSettingsIpc({
@@ -21,6 +26,7 @@ function registerSettingsIpc({
   files = settingsFiles,
   editors = { discoverEditors, openInEditor },
 }) {
+  const preferences = createPreferencesOperations({ app, getWindow });
   let selectedEditor;
   let loadedEditor = false;
   async function editorOptions() {
@@ -67,6 +73,11 @@ function registerSettingsIpc({
           "The settings request exceeds its size limit.",
         );
       try {
+        if (
+          operation === "preferences-read" ||
+          operation === "preferences-write"
+        )
+          return await preferences(operation, params);
         if (operation === "fonts") {
           if (Object.keys(params).length)
             return failure(

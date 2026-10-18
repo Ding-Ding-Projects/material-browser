@@ -74,3 +74,17 @@ test("settings bridge bounds payloads and rejects malformed structures", async (
     "INVALID_REQUEST",
   );
 });
+
+test("native preference operations reach their dedicated validated handler", async () => {
+  const call = fixture();
+  const read = await call({ trusted: true }, "preferences-read", {
+    path: "outside",
+  });
+  assert.equal(read.error.code, "INVALID_SETTINGS_REQUEST");
+  const unavailable = await call({ trusted: true }, "preferences-read");
+  assert.equal(unavailable.error.code, "SETTINGS_STORAGE_UNAVAILABLE");
+  assert.equal(
+    (await call({}, "preferences-write", {})).error.code,
+    "INVALID_REQUEST",
+  );
+});

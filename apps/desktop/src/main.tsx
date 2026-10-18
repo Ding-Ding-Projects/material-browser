@@ -94,9 +94,10 @@ function App() {
   };
   useEffect(() => {
     refresh().catch(() => setStatus(null));
-    const off = window.materialBrowser?.onEvent(() =>
-      refresh().catch(() => setStatus(null)),
-    );
+    const off = window.materialBrowser?.onEvent((event: any) => {
+      if (event?.type !== "settings-updated")
+        refresh().catch(() => setStatus(null));
+    });
     return off;
   }, []);
   useEffect(() => {

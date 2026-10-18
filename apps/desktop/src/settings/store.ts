@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   defaults,
   validatePreferences,
@@ -7,113 +7,23 @@ import {
   effectivePreferences,
 } from "./model.mjs";
 import { historyTransition } from "./history-model.mjs";
-import { readPresentationRecord, readStoredPresentation } from "./record.mjs";
-export type Preferences = Record<string, any>;
-export type Revision = {
-  id: string;
-  at: string;
-  action: string;
-  keys: string[];
-  preferences: Preferences;
-  schedules: any[];
-};
-export type Notice = {
-  id: string;
-  at: string;
-  kind: "info" | "success" | "warning" | "error";
-  message: string;
-  dismissed: boolean;
-};
-export type SettingsRecord = {
-  schemaVersion: 1;
-  revision: number;
-  preferences: Preferences;
-  writtenKeys: string[];
-  schedules: any[];
-  revisions: Revision[];
-  undoStack: Array<{ preferences: Preferences; schedules: any[] }>;
-  redoStack: Array<{ preferences: Preferences; schedules: any[] }>;
-  notices: Notice[];
-  section: string;
-  snoozeUntil: number;
-};
-const KEY = "presentation.v1";
-function initial(): SettingsRecord {
-  try {
-    return readStoredPresentation(
-      localStorage.getItem(KEY),
-      localStorage.getItem("appearance"),
-    ) as SettingsRecord;
-  } catch {
-    const empty = readPresentationRecord(null) as SettingsRecord;
-    empty.notices = [
-      {
-        id: crypto.randomUUID(),
-        at: new Date().toISOString(),
-        kind: "warning",
-        message:
-          "Saved preferences could not be read. Defaults are active; the original record was not overwritten.",
-        dismissed: false,
-      },
-    ];
-    return empty;
-  }
-}
+import { useSettingsPersistence } from "./useSettingsPersistence";
+import type { SettingsRecord, Preferences, Notice } from "./types";
+export type { SettingsRecord, Preferences, Notice, Revision } from "./types";
 export function useSettings() {
-  const [record, setRecord] = useState<SettingsRecord>(initial),
-    [storageError, setStorageError] = useState(""),
-    [now, setNow] = useState(() => new Date());
-  const current = useRef(record);
+  const {
+    record,
+    current,
+    persist,
+    storageError,
+    storageReady,
+    saving,
+    reloadSaved,
+  } = useSettingsPersistence();
+  const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(timer);
-  }, []);
-  const persist = useCallback(
-    (change: (old: SettingsRecord) => SettingsRecord) => {
-      const old = current.current,
-        next = change(old);
-      if (next === old) return;
-      next.revision = old.revision + 1;
-      try {
-        const stored = localStorage.getItem(KEY);
-        if (stored) {
-          const parsed = readPresentationRecord(stored);
-          if (parsed.revision !== old.revision)
-            throw Error(
-              "Preferences changed in another window. Reload before editing.",
-            );
-        }
-        localStorage.setItem(KEY, JSON.stringify(next));
-        setStorageError("");
-      } catch (e) {
-        setStorageError(
-          e instanceof Error
-            ? e.message
-            : "Local storage could not save this change.",
-        );
-        return;
-      }
-      current.current = next;
-      setRecord(next);
-    },
-    [],
-  );
-  useEffect(() => {
-    const listener = (e: StorageEvent) => {
-      if (e.key !== KEY || !e.newValue) return;
-      try {
-        const next = readPresentationRecord(e.newValue) as SettingsRecord;
-        current.current = next;
-        setRecord(next);
-        setStorageError("");
-      } catch {
-        setStorageError(
-          "A newer local preferences record is invalid. The current values are retained.",
-        );
-      }
-    };
-    window.addEventListener("storage", listener);
-    return () => window.removeEventListener("storage", listener);
   }, []);
   const transact = useCallback(
     (
@@ -128,33 +38,50 @@ export function useSettings() {
         );
       if (validSchedules.length > 200)
         throw Error("At most 200 local schedules are supported");
-      persist(
-        (old) =>
-          historyTransition(
-            old,
-            { preferences: validated, schedules: validSchedules },
-            {
-              action,
-              id: crypto.randomUUID(),
-              at: new Date().toISOString(),
-              written,
-            },
-          ) as SettingsRecord,
-      );
+      const expected = JSON.stringify([
+        current.current.preferences,
+        current.current.schedules,
+      ]);
+      persist((old) => {
+        if (JSON.stringify([old.preferences, old.schedules]) !== expected)
+          throw Error(
+            "Another preference change completed first. Review the saved values and retry this action.",
+          );
+        return historyTransition(
+          old,
+          { preferences: validated, schedules: validSchedules },
+          {
+            action,
+            id: crypto.randomUUID(),
+            at: new Date().toISOString(),
+            written,
+          },
+        ) as SettingsRecord;
+      });
     },
     [persist],
   );
   const update = useCallback(
     (key: string, value: any) => {
       validateValue(key, value);
-      transact(
-        `Changed ${key}`,
-        { ...current.current.preferences, [key]: value },
-        undefined,
-        [key],
+      persist(
+        (old) =>
+          historyTransition(
+            old,
+            {
+              preferences: { ...old.preferences, [key]: value },
+              schedules: old.schedules,
+            },
+            {
+              action: `Changed ${key}`,
+              id: crypto.randomUUID(),
+              at: new Date().toISOString(),
+              written: [key],
+            },
+          ) as SettingsRecord,
       );
     },
-    [transact],
+    [persist],
   );
   const notify = useCallback(
     (message: string, kind: Notice["kind"] = "info") =>
@@ -182,6 +109,9 @@ export function useSettings() {
     preferences: effective.preferences,
     activeSchedules: effective.active,
     storageError,
+    storageReady,
+    saving,
+    reloadSaved,
     update,
     transact,
     undo: () =>

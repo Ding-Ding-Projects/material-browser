@@ -170,12 +170,23 @@ export function SettingsWorkspace({
     <div className="settings-workspace">
       <div className="page-heading">
         <h1>{t("Settings")}</h1>
-        <p>{t("Settings are saved on this device.")}</p>
+        <p role="status">
+          {t(
+            !c.storageReady
+              ? "Loading saved preferences"
+              : c.saving
+                ? "Saving preferences"
+                : "Settings are saved on this device.",
+          )}
+        </p>
       </div>
       {c.storageError && (
         <div className="banner" role="alert">
-          <h2>{t("Save rejected")}</h2>
+          <h2>{t("Preference storage needs attention")}</h2>
           <p>{t(c.storageError)}</p>
+          <Button secondary onClick={() => void c.reloadSaved()}>
+            {t("Reload saved preferences")}
+          </Button>
         </div>
       )}
       <details className="settings-global-finder">
