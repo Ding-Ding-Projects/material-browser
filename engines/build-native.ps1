@@ -98,7 +98,7 @@ function EnsureChromiumSdk {
   if((Get-Item $installer).VersionInfo.ProductVersion -ne '10.1.28000.2957'){throw 'Windows SDK installer version mismatch'}
   $sdkLog=Join-Path $sdkCache ("sdk-install-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
   Write-Output "Windows SDK installer diagnostic log: $sdkLog"
-  $installation=Start-Process -FilePath $installer -ArgumentList @('/quiet','/norestart','/features','OptionId.WindowsDesktopSoftwareDevelopmentKit','OptionId.WindowsDesktopDebuggers','/log',$sdkLog) -WindowStyle Hidden -PassThru -Wait
+  $installation=Start-Process -FilePath $installer -ArgumentList @('/quiet','/norestart','/features','OptionId.DesktopCPPx86','OptionId.DesktopCPPx64','OptionId.WindowsDesktopDebuggers','/log',$sdkLog) -WindowStyle Hidden -PassThru -Wait
   if($installation.ExitCode -in @(3010,1641)){throw "Windows SDK installation requires a restart; native build remains incomplete ($($installation.ExitCode)). No restart was initiated."}
   if($installation.ExitCode -ne 0){throw "Windows SDK installation did not complete: $($installation.ExitCode)"}
   foreach($relative in $required){if(-not (Test-Path (Join-Path $sdk $relative))){throw "SDK installer exited zero but required input is missing: $relative"}}
