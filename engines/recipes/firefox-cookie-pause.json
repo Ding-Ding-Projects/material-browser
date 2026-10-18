@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "revision": "3c71aeacdb296402e41fb2084b13e797d1770642",
+  "patch": "firefox-158-cookie-pause.patch",
+  "patchSha256": "27615047fda1658f85064ee9cdb87ca06c015f9875c304e8f69a9fa9eebe942d",
+  "files": [
+    {
+      "path": "netwerk/cookie/CookieDBWriteQueue.h",
+      "baselineSha256": "9d53d1e71f453f084570caddceaa7e7f88d61dfe35cf5647ba8d894fea6785ce",
+      "patchedSha256": "66b0783e2c600579ec1d2203c1d4d63a5de934e47c52053b90771651f1ef051a"
+    },
+    {
+      "path": "netwerk/cookie/CookieDBWriteQueue.cpp",
+      "baselineSha256": "427d88180b23f259c28e3ac82b0a1c248ce96f939c31c73514d093022cffc97d",
+      "patchedSha256": "d4f053cfb2da3d28612ddd5ea05553d40c80adf24b013c422950c0cb385e0d92"
+    },
+    {
+      "path": "netwerk/cookie/CookiePersistentStorage.h",
+      "baselineSha256": "e01131cfdea0a3c387741b14a2ad58b72c6691413b2f8fe554a374e6b75f0eb1",
+      "patchedSha256": "7c28a79784589ef6f88db7b1dadaff101bf5365c304ca1cbddff048610d5ac47"
+    },
+    {
+      "path": "netwerk/cookie/CookiePersistentStorage.cpp",
+      "baselineSha256": "44bdad57e5f256464453d4805f20cc92662618fd378ac478c5ad9aa2e0c5300a",
+      "patchedSha256": "f12a3a8936ef5d4da32e249b85b37148d914843c9329a7f77907afc6f1c39d9f"
+    },
+    {
+      "path": "netwerk/test/gtest/TestCookie.cpp",
+      "baselineSha256": "c6bdd07de45b015c5732900b1ec78e72c1dec76b7113e77c665dc40fe64959f5",
+      "patchedSha256": "2e836d2adb1d6270b521f306dc2378d977c5f213e329f1e1e74020be33d7c5f6"
+    },
+    {
+      "path": "netwerk/cookie/CookieStorage.h",
+      "baselineSha256": "d26ce42d49fdc8f5d7494b96400d4becb5cb6a1e9dd881219c4176d51b24e6e8",
+      "patchedSha256": "5d946d755712e861f3fa84110cb7466c5d65744b2e6921659e535de33ddb013b"
+    },
+    {
+      "path": "netwerk/cookie/CookieService.h",
+      "baselineSha256": "8b32eab333336a73a5bc1f1507ae55ed3f8d741710f3862ae6222541f8019e5d",
+      "patchedSha256": "53fb07e51a5e8b3ce94ab142300ce79f6984c3ebe6c89de5ad64b077305a9bd7"
+    },
+    {
+      "path": "netwerk/cookie/CookieService.cpp",
+      "baselineSha256": "d5eec111822d21c1e7f0100e045e165185ec96401a3abbca193b963ffed27561",
+      "patchedSha256": "f57152605666172f85dddccbad57506b48a9f9c4f206e21b6ba9c4fa04334a73"
+    }
+  ],
+  "nativeCompiled": false,
+  "liveSnapshotVerified": false
+}

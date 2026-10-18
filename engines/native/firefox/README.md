@@ -71,10 +71,13 @@ mutations buffered. Reset, corruption and close invalidate the lease; stale
 release requests cannot thaw a newer lease. Write errors permanently disable
 snapshot acquisition for that storage instance without stopping normal recovery.
 
-The patch also adds native cookie tests, but is not automatically applied by the
-build recipe. Preserve the current baseline producer, then review and apply this
-candidate to the exact pinned source and rebuild through the root entrypoint.
-Patch application was checked, not native compilation or execution. It remains
+The patch also adds native cookie tests. The next root Firefox build stages it
+after bootstrap and before compilation. Its recipe admits every affected file
+against normalized SHA-256 hashes of the reviewed baseline and patched result,
+then verifies each staged result. It resumes partial application only when all
+files still match one of those two admitted states. The running baseline is
+immutable and does not receive this candidate halfway through compilation.
+Patch application and current-source admission were checked, not native compilation or execution. It remains
 unregistered and does not complete the cookie provider: session cookies need
 their own consistent state, WAL/connection durability and direct-writer coverage
 need runtime validation, and the provider must propagate invalidation and thaw

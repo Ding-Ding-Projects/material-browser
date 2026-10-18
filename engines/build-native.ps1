@@ -20,6 +20,34 @@ function FileSha256([string]$FilePath) {
   try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant() }
   finally { $stream.Dispose(); $sha.Dispose() }
 }
+function NormalizedSha256([string]$FilePath) {
+  $text=[IO.File]::ReadAllText($FilePath).Replace("`r`n","`n")
+  $sha=[Security.Cryptography.SHA256]::Create()
+  try { return ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($text)))).Replace('-','').ToLowerInvariant() }
+  finally { $sha.Dispose() }
+}
+function FirefoxCookieOverlay([string]$Path,[switch]$CheckOnly) {
+  $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
+  $patchPath=Join-Path $PSScriptRoot 'recipes/firefox-158-cookie-pause.patch'
+  if($recipe.revision -ne $pins.firefox.revision -or (NormalizedSha256 $patchPath) -ne $recipe.patchSha256){throw 'Firefox cookie patch receipt mismatch'}
+  $sourceRevision=& git -C $Path rev-parse HEAD
+  if($LASTEXITCODE -ne 0 -or $sourceRevision -ne $recipe.revision){throw 'Firefox cookie patch source revision mismatch'}
+  # Admit every affected file before writing any of them. Resume an interrupted
+  # application only when each file is exactly the reviewed baseline or result.
+  foreach($entry in $recipe.files){
+    $actual=NormalizedSha256 (Join-Path $Path $entry.path)
+    if($actual -notin @($entry.baselineSha256,$entry.patchedSha256)){throw "Firefox cookie source differs from reviewed input: $($entry.path)"}
+  }
+  if($CheckOnly){return}
+  foreach($entry in $recipe.files){
+    $target=Join-Path $Path $entry.path
+    if((NormalizedSha256 $target) -eq $entry.baselineSha256){
+      Run 'git' @('-C',$Path,'apply','--whitespace=error-all',"--include=$($entry.path)",$patchPath)
+    }
+    if((NormalizedSha256 $target) -ne $entry.patchedSha256){throw "Firefox cookie patch readback mismatch: $($entry.path)"}
+  }
+  Write-Output 'Staged native cookie write-pause candidate. Whole-profile snapshot capability remains disabled.'
+}
 function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   $moduleName='MaterialSnapshotBarrier.sys.mjs'
   $relativeModule="browser/components/$moduleName"
@@ -33,16 +61,19 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   $expected=$baseline.Replace($anchor,"$anchor`n    `"$moduleName`",")
   $existing=(Get-Content -LiteralPath $manifestPath -Raw).Replace("`r`n","`n").TrimEnd("`n")
   $changes=@(& git -C $Path status --porcelain --untracked-files=all)
+  $cookieRecipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-cookie-pause.json') -Raw | ConvertFrom-Json
+  $allowed=@('browser/components/moz.build',$relativeModule)+@($cookieRecipe.files | ForEach-Object {$_.path})
   foreach($change in $changes){
-    if($change.Length -lt 4 -or $change.Substring(3) -notin @('browser/components/moz.build',$relativeModule)){
+    if($change.Length -lt 4 -or $change.Substring(3) -notin $allowed){
       throw 'Native Firefox source has unrelated changes; preserving it.'
     }
   }
   $previous=$baseline.Replace('MOZ_SRC_FILES += [',"MOZ_SRC_FILES += [`n    `"$moduleName`",")
   if($existing -ne $baseline -and $existing -ne $expected -and $existing -ne $previous){throw 'Existing Firefox module manifest differs from the managed overlay'}
-  if((Test-Path -LiteralPath $modulePath) -and (FileSha256 $modulePath) -ne (FileSha256 $moduleSource)){
+  if((Test-Path -LiteralPath $modulePath) -and (NormalizedSha256 $modulePath) -ne (NormalizedSha256 $moduleSource)){
     throw 'Existing Firefox snapshot module differs from the managed overlay; preserving it.'
   }
+  FirefoxCookieOverlay $Path -CheckOnly
   if($CheckOnly){return}
   [IO.File]::WriteAllText($manifestPath,"$expected`n",[Text.UTF8Encoding]::new($false))
   Copy-Item -LiteralPath $moduleSource -Destination $modulePath
@@ -130,10 +161,11 @@ if($Engine -eq 'chromium'){
     # The supported option prevents bootstrap's antivirus-exclusion and host-configuration changes.
     Run $python @('mach','--no-interactive','bootstrap','--application-choice','browser','--no-system-changes')
     FirefoxOverlay (Join-Path $nativeRoot 'src')
+    FirefoxCookieOverlay (Join-Path $nativeRoot 'src')
     Run $python @('mach','build')
     $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
     if(-not $built){throw 'Firefox build did not produce firefox.exe'}
     $built | ForEach-Object {Write-Output "$($_.FullName) SHA256 $(FileSha256 $_.FullName)"}
-    Write-Output 'Built upstream baseline only. Product encryption, snapshot and identity remain unverified and disabled.'
+    Write-Output 'Built pinned Firefox with restricted snapshot coordination and cookie pause candidate. Product encryption, snapshot and identity remain unverified and disabled.'
   } finally { Pop-Location }
 }
