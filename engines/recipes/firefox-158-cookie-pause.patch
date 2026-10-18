@@ -123,9 +123,9 @@
    void OnWriteBatchCompleted(uint16_t aReason);
  
 +  void OnRemoveAllCompleted(uint16_t aReason);
-+  uint64_t TryPauseWritesForSnapshot();
-+  bool SnapshotWritePauseValid(uint64_t aLease) const;
-+  bool ResumeWritesAfterSnapshot(uint64_t aLease);
++  uint64_t TryPauseWritesForSnapshot() override;
++  bool SnapshotWritePauseValid(uint64_t aLease) const override;
++  bool ResumeWritesAfterSnapshot(uint64_t aLease) override;
 +
   protected:
    const char* NotificationTopic() const override { return "cookie-changed"; }
@@ -279,3 +279,56 @@
  TEST(TestCookieDBWriteQueue, Coalesce)
  {
    using OpType = CookieDBWriteQueue::OpType;
+--- a/netwerk/cookie/CookieStorage.h
++++ b/netwerk/cookie/CookieStorage.h
+@@ -106,6 +106,10 @@
+       const OriginAttributesPattern& aPattern);
+ 
+   void RemoveAll();
++
++  virtual uint64_t TryPauseWritesForSnapshot() { return 0; }
++  virtual bool SnapshotWritePauseValid(uint64_t aLease) const { return false; }
++  virtual bool ResumeWritesAfterSnapshot(uint64_t aLease) { return false; }
+ 
+   void NotifyChanged(nsISupports* aSubject,
+                      nsICookieNotification::Action aAction,
+--- a/netwerk/cookie/CookieService.h
++++ b/netwerk/cookie/CookieService.h
+@@ -57,6 +57,11 @@
+   CookieService();
+   static already_AddRefed<nsICookieService> GetXPCOMSingleton();
+   nsresult Init();
++
++  // Native-only controls. No web, extension or debugging API is exposed.
++  uint64_t TryPauseWritesForSnapshot();
++  bool SnapshotWritePauseValid(uint64_t aLease) const;
++  bool ResumeWritesAfterSnapshot(uint64_t aLease);
+ 
+   static void Update3PCBExceptionInfo(nsIChannel* aChannel);
+ 
+--- a/netwerk/cookie/CookieService.cpp
++++ b/netwerk/cookie/CookieService.cpp
+@@ -267,6 +267,23 @@
+   return NS_OK;
+ }
+ 
++uint64_t CookieService::TryPauseWritesForSnapshot() {
++  MOZ_ASSERT(NS_IsMainThread());
++  return mPersistentStorage ? mPersistentStorage->TryPauseWritesForSnapshot() : 0;
++}
++
++bool CookieService::SnapshotWritePauseValid(uint64_t aLease) const {
++  MOZ_ASSERT(NS_IsMainThread());
++  return mPersistentStorage &&
++         mPersistentStorage->SnapshotWritePauseValid(aLease);
++}
++
++bool CookieService::ResumeWritesAfterSnapshot(uint64_t aLease) {
++  MOZ_ASSERT(NS_IsMainThread());
++  return mPersistentStorage &&
++         mPersistentStorage->ResumeWritesAfterSnapshot(aLease);
++}
++
+ void CookieService::InitCookieStorages() {
+   NS_ASSERTION(!mPersistentStorage, "already have a default CookieStorage");
+   NS_ASSERTION(!mPrivateStorage, "already have a private CookieStorage");
