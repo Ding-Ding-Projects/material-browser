@@ -196,3 +196,21 @@ test("R9 routine messages preserve queued critical and bilingual groups in order
   assert.equal(bounded.accepted, false);
   assert.equal(bounded.queue[0].id, "critical");
 });
+import { bindTabChanges } from "./settings/interaction-model.mjs";
+test("R10 explicit custom-element change binding selects the workspace and detaches safely", () => {
+  const element = new EventTarget();
+  element.activeTabIndex = 1;
+  const selected = [];
+  const detach = bindTabChanges(element, ["language", "history"], (id) =>
+    selected.push(id),
+  );
+  element.dispatchEvent(new Event("change"));
+  assert.deepEqual(selected, ["history"]);
+  element.activeTabIndex = 99;
+  element.dispatchEvent(new Event("change"));
+  assert.deepEqual(selected, ["history"]);
+  detach();
+  element.activeTabIndex = 0;
+  element.dispatchEvent(new Event("change"));
+  assert.deepEqual(selected, ["history"]);
+});

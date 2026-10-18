@@ -22,3 +22,12 @@ export function choiceAccessibleName(label, value, options, automatic) {
 export function parseNumericDraft(text) {
   return text.trim() === "" ? Number.NaN : Number(text);
 }
+export function bindTabChanges(element, ids, onSelect) {
+  const changed = (event) => {
+    if (event.target !== element) return;
+    const id = ids[element.activeTabIndex];
+    if (typeof id === "string") onSelect(id);
+  };
+  element.addEventListener("change", changed);
+  return () => element.removeEventListener("change", changed);
+}

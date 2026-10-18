@@ -1,6 +1,7 @@
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
+import { bindTabChanges } from "./interaction-model.mjs";
 import { Choice } from "./SettingControl";
 import { categories } from "./model.mjs";
 import {
@@ -51,6 +52,7 @@ export function SettingsTabs({
     [bulkQuery, setBulkQuery] = useState(""),
     [bulkValid, setBulkValid] = useState(false);
   const instance = useId();
+  const strip = useRef<HTMLElement | null>(null);
   const label = (id: string) =>
       t(categories.find((x) => x[0] === id)?.[1] || id),
     visible = orderedOpenTabs(state, value),
@@ -59,6 +61,12 @@ export function SettingsTabs({
       (id: string) => state.membership[id] === selectedGroup,
     ),
     vertical = ["left", "right"].includes(state.edge);
+  const displayedIds = rows.filter((id) => visible.includes(id));
+  useEffect(() => {
+    const element = strip.current;
+    if (!element) return;
+    return bindTabChanges(element, displayedIds, onChange);
+  }, [JSON.stringify(displayedIds), onChange]);
   function save(next: any) {
     try {
       const valid = validateTabs(next);
@@ -142,16 +150,12 @@ export function SettingsTabs({
         {React.createElement(
           "material-settings-tabs",
           {
+            ref: strip,
             vertical: vertical ? "" : undefined,
             "aria-orientation": vertical ? "vertical" : "horizontal",
             activeTabIndex: rows
               .filter((id) => visible.includes(id))
               .indexOf(value),
-            onChange: (e: any) => {
-              const ids = rows.filter((id) => visible.includes(id));
-              if (ids[e.target.activeTabIndex])
-                onChange(ids[e.target.activeTabIndex]);
-            },
           },
           rows
             .filter((id) => visible.includes(id))
