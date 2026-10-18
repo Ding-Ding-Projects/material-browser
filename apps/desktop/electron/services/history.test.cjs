@@ -24,6 +24,7 @@ test('real local history authenticates independently, encrypts, records no-ops a
   const second=await f.service.recordSettings({before:snapshot(),after:snapshot('dark')});assert.equal(second.recorded,true);
   assert.deepEqual((await f.service.diff(second.revision)).changedKeys,['theme']);
   await f.service.lock();assert.equal((await f.service.list()).error.code,'HISTORY_LOCKED');
+  assert.equal((await f.service.verify('fixture-only-password')).verified,true);assert.equal((await f.service.status()).unlocked,false);
   assert.equal((await f.service.unlock('incorrect')).error.code,'HISTORY_AUTH_FAILED');
   assert.equal((await f.service.unlock('fixture-only-password')).ok,true);
   assert.equal((await f.service.label(first.revision,'A private label')).ok,true);

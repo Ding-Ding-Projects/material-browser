@@ -29,7 +29,8 @@ Error messages exclude user content, helper output and paths.
 ## Authentication and recording
 
 `setup(secret)` establishes an independent password or PIN (6 to 256 characters).
-`unlock(secret)` verifies its salted scrypt verifier locally; `lock()` closes the
+`verify(secret)` checks its salted scrypt verifier without unlocking anything.
+`unlock(secret)` performs that verification and opens a session; `lock()` closes the
 session. The session expires after ten minutes. Vault unlock never unlocks history.
 `status()` reports configured, unlocked and recovery-pending state without data.
 
