@@ -377,7 +377,7 @@ impl Supervisor {
                 // Launch can return before Chromium creates its first top-level window.
                 // Keep requesting graceful close within the caller's bound rather than
                 // treating the first empty enumeration as a terminal failure.
-                match request_close(p.status.pid) {
+                match request_close(&p._job, &p.identity) {
                     Ok(()) => {}
                     Err(e) if e.code == "GRACEFUL_STOP_UNAVAILABLE" => {}
                     Err(e) => return Err(e),
@@ -555,7 +555,7 @@ mod tests {
 }
 
 #[cfg(windows)]
-fn request_close(pid: u32) -> Result<()> {
+fn request_close(job: &process_job::ProcessJob, identity: &lifetime::ProcessIdentity) -> Result<()> {
     use std::ffi::c_void;
     #[link(name = "user32")]
     unsafe extern "system" {
@@ -566,21 +566,32 @@ fn request_close(pid: u32) -> Result<()> {
         fn GetWindowThreadProcessId(hwnd: *mut c_void, pid: *mut u32) -> u32;
         fn PostMessageW(hwnd: *mut c_void, msg: u32, wparam: usize, lparam: isize) -> i32;
     }
-    struct Close {
-        pid: u32,
+    struct Close<'a> {
+        job: &'a process_job::ProcessJob,
+        identity: &'a lifetime::ProcessIdentity,
+        members: Vec<u32>,
         sent: bool,
+        error: Option<EngineError>,
     }
     unsafe extern "system" fn visit(hwnd: *mut c_void, param: isize) -> i32 {
-        let close = unsafe { &mut *(param as *mut Close) };
+        let close = unsafe { &mut *(param as *mut Close<'_>) };
         let mut owner = 0;
         unsafe { GetWindowThreadProcessId(hwnd, &mut owner) };
-        if owner == close.pid && unsafe { PostMessageW(hwnd, 0x0010, 0, 0) } != 0 {
-            close.sent = true;
+        if close.members.contains(&owner) {
+            match close.job.with_live_member(owner, &close.identity.executable, close.identity.start_time, || {
+                let mut current = 0;
+                unsafe { GetWindowThreadProcessId(hwnd, &mut current) };
+                current == owner && unsafe { PostMessageW(hwnd, 0x0010, 0, 0) } != 0
+            }) {
+                Ok(sent) => close.sent |= sent,
+                Err(error) => { close.error = Some(error); return 0; },
+            }
         }
         1
     }
-    let mut close = Close { pid, sent: false };
-    unsafe { EnumWindows(visit, &mut close as *mut Close as isize) };
+    let mut close = Close { job, identity, members: job.process_ids()?, sent: false, error: None };
+    unsafe { EnumWindows(visit, &mut close as *mut Close<'_> as isize) };
+    if let Some(error) = close.error { return Err(error); }
     if close.sent {
         Ok(())
     } else {
@@ -591,7 +602,7 @@ fn request_close(pid: u32) -> Result<()> {
     }
 }
 #[cfg(not(windows))]
-fn request_close(_pid: u32) -> Result<()> {
+fn request_close(_job: &process_job::ProcessJob, _identity: &lifetime::ProcessIdentity) -> Result<()> {
     Err(err(
         "GRACEFUL_STOP_UNAVAILABLE",
         "Native graceful shutdown is not implemented on this platform",

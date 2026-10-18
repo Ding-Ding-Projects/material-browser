@@ -7,6 +7,9 @@ mod native {
     use std::{ffi::c_void, os::windows::io::AsRawHandle};
     #[repr(C)]
     #[derive(Default)]
+    struct FileTime { low: u32, high: u32 }
+    #[repr(C)]
+    #[derive(Default)]
     struct BasicLimits {
         process_time: i64,
         job_time: i64,
@@ -40,6 +43,12 @@ mod native {
     }
     #[link(name = "kernel32")]
     unsafe extern "system" {
+        fn OpenProcess(access: u32, inherit: i32, pid: u32) -> *mut c_void;
+        fn IsProcessInJob(process: *mut c_void, job: *mut c_void, member: *mut i32) -> i32;
+        fn QueryFullProcessImageNameW(process: *mut c_void, flags: u32, path: *mut u16, length: *mut u32) -> i32;
+        fn WaitForSingleObject(handle: *mut c_void, timeout: u32) -> u32;
+        fn GetProcessTimes(process: *mut c_void, creation: *mut FileTime, exit: *mut FileTime, kernel: *mut FileTime, user: *mut FileTime) -> i32;
+        fn GetLastError() -> u32;
         fn QueryInformationJobObject(job: *mut c_void, class: i32, info: *mut c_void, length: u32, returned: *mut u32) -> i32;
         fn CreateJobObjectW(attributes: *const c_void, name: *const u16) -> *mut c_void;
         fn SetInformationJobObject(
@@ -60,6 +69,44 @@ mod native {
     // The job handle is owned, never accessed concurrently, and only closes on Drop.
     unsafe impl Send for ProcessJob {}
     impl ProcessJob {
+        pub fn with_live_member(&self, pid: u32, executable: &Path, minimum_start: u64, action: impl FnOnce() -> bool) -> Result<bool> {
+            use std::os::windows::ffi::OsStringExt;
+            struct ProcessHandle(*mut c_void);
+            impl Drop for ProcessHandle { fn drop(&mut self) { unsafe { CloseHandle(self.0); } } }
+            let raw = unsafe { OpenProcess(0x00101000, 0, pid) };
+            if raw.is_null() {
+                if unsafe { GetLastError() } == 87 { return Ok(false); }
+                return Err(err("PROCESS_IDENTITY", "Cannot pin owned job member identity"));
+            }
+            let handle = ProcessHandle(raw);
+            let mut member = 0;
+            if unsafe { IsProcessInJob(handle.0, self.0, &mut member) } == 0 || member == 0 {
+                return Err(err("PROCESS_IDENTITY", "Window process is no longer an owned job member"));
+            }
+            match unsafe { WaitForSingleObject(handle.0, 0) } {
+                0 => return Ok(false),
+                258 => {},
+                _ => return Err(err("PROCESS_IDENTITY", "Cannot verify owned member liveness")),
+            }
+            let mut times = [FileTime::default(), FileTime::default(), FileTime::default(), FileTime::default()];
+            let ptr = times.as_mut_ptr();
+            if unsafe { GetProcessTimes(handle.0, ptr, ptr.add(1), ptr.add(2), ptr.add(3)) } == 0 {
+                return Err(err("PROCESS_IDENTITY", "Cannot verify owned member creation time"));
+            }
+            if times[1].low != 0 || times[1].high != 0 { return Ok(false); }
+            let start = (u64::from(times[0].high) << 32) | u64::from(times[0].low);
+            if start < minimum_start { return Err(err("PROCESS_IDENTITY", "Owned member predates launch identity")); }
+            let mut path = vec![0u16; 32768];
+            let mut length = path.len() as u32;
+            if unsafe { QueryFullProcessImageNameW(handle.0, 0, path.as_mut_ptr(), &mut length) } == 0 {
+                return Err(err("PROCESS_IDENTITY", "Cannot verify owned member executable"));
+            }
+            let actual = PathBuf::from(std::ffi::OsString::from_wide(&path[..length as usize])).canonicalize().map_err(io)?;
+            if actual != executable { return Ok(false); }
+            // Keep this process handle pinned across the caller's HWND recheck
+            // and close request, preventing PID reuse during the action.
+            Ok(action())
+        }
         pub fn process_ids(&self) -> Result<Vec<u32>> {
             #[repr(C)]
             struct Members { assigned: u32, listed: u32, ids: [usize; 256] }
@@ -157,6 +204,31 @@ impl ProcessJob {
 mod tests {
     use super::*;
     use std::os::windows::process::CommandExt;
+    #[test]
+    fn member_action_requires_live_owned_job_and_exact_executable() {
+        let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+            .join("System32/WindowsPowerShell/v1.0/powershell.exe").canonicalize().unwrap();
+        let spawn = || Command::new(&executable).args(["-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 30"])
+            .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
+            .creation_flags(0x08000004).spawn().unwrap();
+        let mut owned = spawn();
+        let job = ProcessJob::attach(&mut owned, true).unwrap();
+        let mut foreign = spawn();
+        // The suspended foreign fixture is not assigned to this private job.
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            assert!(job.process_ids().unwrap().contains(&owned.id()));
+            assert!(job.with_live_member(owned.id(), &executable, 0, || true).unwrap());
+            let mut acted = false;
+            assert!(!job.with_live_member(owned.id(), Path::new("unrelated.exe"), 0, || { acted = true; true }).unwrap());
+            assert!(!acted);
+            assert!(job.with_live_member(owned.id(), &executable, u64::MAX, || { acted = true; true }).is_err());
+            assert!(job.with_live_member(foreign.id(), &executable, 0, || { acted = true; true }).is_err());
+            assert!(!acted);
+        }));
+        let _ = foreign.kill(); let _ = foreign.wait();
+        drop(job); let _ = owned.wait();
+        result.unwrap();
+    }
     #[test]
     fn owned_job_is_empty_after_native_exit_with_retained_child_handle() {
         let mut child = Command::new("cmd.exe").args(["/d", "/c", "exit", "0"])
