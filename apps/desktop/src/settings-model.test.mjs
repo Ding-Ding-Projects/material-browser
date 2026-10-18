@@ -1,19 +1,310 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {definitions,defaults,validateValue,migrateAppearance,validateSchedule,scheduleMatches,effectivePreferences,exportPreferences,parseImport,formatExport} from './settings/model.mjs';
-const required=['language','funnyEnglish','funnyCantonese','dialogEmoji','narration','narratorLanguage','voiceEnglish','voiceCantonese','speechRate','speechPitch','screenReaderMode','theme','density','accent','fontFamily','fontScale','fontWeight','motion','logoPreset','accessibilityVisible','textScale','highContrast','strongFocus','largeTargets','focus','lowStimulation','timeAwareness','oneThing','nextAction','momentum','idleMinutes','snoozeMinutes','toastSeconds','quietEnabled','quietStart','quietEnd','paletteSize'];
-const rule=(extra={})=>({id:'test-rule',label:'Evening',enabled:true,priority:1,startDate:'',endDate:'',startTime:'22:00',endTime:'06:00',weekdays:[1],source:'local',values:{theme:'dark'},...extra});
-test('hand-written preference inventory rejects omissions and has unique defaults/help',()=>{assert.deepEqual(definitions.map(x=>x.key).sort(),[...required].sort());assert.equal(new Set(definitions.map(x=>x.help)).size,required.length);for(const x of definitions){assert.ok(x.help.length>30);assert.equal(validateValue(x.key,x.initial),x.initial);}});
-test('independent style and accessibility defaults stay exact',()=>{assert.equal(defaults.funnyEnglish,5);assert.equal(defaults.funnyCantonese,5);for(const key of ['narration','focus','lowStimulation','timeAwareness','oneThing','momentum'])assert.equal(defaults[key],false);assert.equal(defaults.accessibilityVisible,true);});
-test('numeric bounds, steps and nonfinite values reject before mutation',()=>{for(const bad of [0,6,2.5,NaN,Infinity,'3'])assert.throws(()=>validateValue('funnyEnglish',bad));assert.equal(validateValue('speechRate',1.1),1.1);assert.throws(()=>validateValue('accent','#fff'));assert.throws(()=>validateValue('language','unknown'));});
-test('appearance migration accepts valid existing choices without importing unrelated fields',()=>{const p=migrateAppearance({theme:'dark',language:'both',density:'bad',password:'excluded'});assert.equal(p.theme,'dark');assert.equal(p.language,'both');assert.equal(p.density,'comfortable');assert.equal(Object.hasOwn(p,'password'),false);});
-test('cross-midnight schedule belongs to starting weekday and date',()=>{const r=validateSchedule(rule({startDate:'2026-10-19',endDate:'2026-10-19'}));assert.equal(scheduleMatches(r,new Date(2026,9,19,23)),true);assert.equal(scheduleMatches(r,new Date(2026,9,20,5,59)),true);assert.equal(scheduleMatches(r,new Date(2026,9,20,6)),false);assert.equal(scheduleMatches(r,new Date(2026,9,19,5)),false);});
-test('equal endpoints mean full day, end boundary is otherwise exclusive',()=>{assert.equal(scheduleMatches(rule({startTime:'08:00',endTime:'08:00'}),new Date(2026,9,19,2)),true);assert.equal(scheduleMatches(rule({startTime:'08:00',endTime:'10:00'}),new Date(2026,9,19,10)),false);});
-test('schedule validation rejects unknown sources, malformed dates and duplicate weekdays',()=>{for(const extra of [{source:'https'},{startDate:'2026-02-30'},{weekdays:[]},{weekdays:[1,1]},{priority:101},{values:{password:'x'}},{values:{}},{startTime:'24:00'}])assert.throws(()=>validateSchedule(rule(extra)));});
-test('priority then stable order wins without modifying base preferences',()=>{const base={...defaults};const rules=[rule({id:'a',priority:5,values:{theme:'light'}}),rule({id:'b',priority:1}),rule({id:'c',priority:5,values:{theme:'dark'}})];const result=effectivePreferences(base,rules,new Date(2026,9,19,23));assert.equal(result.preferences.theme,'dark');assert.equal(base.theme,'light');assert.equal(effectivePreferences(base,rules,new Date(2026,9,20,12)).preferences.theme,'light');});
-test('portable preferences roundtrip and exclude sensitive categories',()=>{const out=exportPreferences(defaults,[rule()]);const parsed=parseImport(JSON.stringify(out));assert.deepEqual(parsed.preferences,defaults);assert.equal(parsed.schedules.length,1);assert.ok(out.omitted.includes('Credentials and vault data'));assert.throws(()=>parseImport(JSON.stringify({...out,wording:{a:'b'}})));assert.throws(()=>parseImport(JSON.stringify({...out,preferences:{...defaults,password:'secret'}})));assert.throws(()=>parseImport(JSON.stringify({...out,schedules:[rule(),rule()]})));});
-test('all supported formats contain complete settings and schedules',()=>{const out=exportPreferences(defaults,[rule()]);for(const f of ['json','jsonl','csv','tsv','md']){const text=formatExport(out,f);assert.ok(text.includes('test-rule'));assert.ok(text.includes('funnyEnglish'));assert.ok(text.endsWith('\n'));}assert.throws(()=>formatExport(out,'zip'));});
-import {readPresentationRecord,preferenceProvenance} from './settings/record.mjs';
-import {styledMessage,selectVoice,narrationAllowed} from './settings/messages.mjs';
-test('field provenance distinguishes migration and untouched defaults',()=>{const r=readPresentationRecord(null,{theme:'dark',language:'invalid'});assert.deepEqual(r.writtenKeys,['theme']);assert.equal(preferenceProvenance(r,'theme',r.preferences).source,'saved-local');assert.equal(preferenceProvenance(r,'density',r.preferences).source,'compiled-default');assert.throws(()=>readPresentationRecord({schemaVersion:1}));});
-test('all message categories preserve exact factual content at all five levels',()=>{for(const kind of ['info','success','warning','error','progress','validation','security','accessibility','destructive'])for(let level=1;level<=5;level++){const p={...defaults,funnyEnglish:level,funnyCantonese:level,language:'both'};const text=styledMessage(kind,'3 items unchanged.','3 個項目未有更改。',p);assert.ok(text.includes('3 items unchanged.'));assert.ok(text.includes('3 個項目未有更改。'));}assert.notEqual(styledMessage('success','Saved.','已儲存。',{...defaults,funnyEnglish:1}),styledMessage('success','Saved.','已儲存。',defaults));});
-test('voice selection uses stable identity and late/missing/local availability honestly',()=>{assert.equal(selectVoice([],'en').voice,null);const a={voiceURI:'a',name:'Same',lang:'en-US',localService:false},b={voiceURI:'b',name:'Same',lang:'en-CA',localService:true},c={voiceURI:'c',lang:'zh-HK',localService:true};assert.equal(selectVoice([a,b,c],'en').voice,b);assert.equal(selectVoice([a,b,c],'en','a').voice,a);assert.equal(selectVoice([a,b,c],'en','missing').missing,true);assert.equal(selectVoice([a,b,c],'yue').voice,c);assert.equal(narrationAllowed({...defaults,narration:true,screenReaderMode:true},'error',false),false);assert.equal(narrationAllowed({...defaults,narration:true},'error',true),true);});
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  definitions,
+  defaults,
+  validateValue,
+  migrateAppearance,
+  validateSchedule,
+  scheduleMatches,
+  effectivePreferences,
+  exportPreferences,
+  parseImport,
+  formatExport,
+} from "./settings/model.mjs";
+const required = [
+  "language",
+  "funnyEnglish",
+  "funnyCantonese",
+  "dialogEmoji",
+  "narration",
+  "narratorLanguage",
+  "voiceEnglish",
+  "voiceCantonese",
+  "speechRate",
+  "speechPitch",
+  "screenReaderMode",
+  "theme",
+  "density",
+  "accent",
+  "fontFamily",
+  "fontScale",
+  "fontWeight",
+  "motion",
+  "logoPreset",
+  "accessibilityVisible",
+  "textScale",
+  "highContrast",
+  "strongFocus",
+  "largeTargets",
+  "focus",
+  "lowStimulation",
+  "timeAwareness",
+  "oneThing",
+  "nextAction",
+  "momentum",
+  "idleMinutes",
+  "snoozeMinutes",
+  "toastSeconds",
+  "quietEnabled",
+  "quietStart",
+  "quietEnd",
+  "paletteSize",
+];
+const rule = (extra = {}) => ({
+  id: "test-rule",
+  label: "Evening",
+  enabled: true,
+  priority: 1,
+  startDate: "",
+  endDate: "",
+  startTime: "22:00",
+  endTime: "06:00",
+  weekdays: [1],
+  source: "local",
+  values: { theme: "dark" },
+  ...extra,
+});
+test("hand-written preference inventory rejects omissions and has unique defaults/help", () => {
+  assert.deepEqual(definitions.map((x) => x.key).sort(), [...required].sort());
+  assert.equal(new Set(definitions.map((x) => x.help)).size, required.length);
+  for (const x of definitions) {
+    assert.ok(x.help.length > 30);
+    assert.equal(validateValue(x.key, x.initial), x.initial);
+  }
+});
+test("independent style and accessibility defaults stay exact", () => {
+  assert.equal(defaults.funnyEnglish, 5);
+  assert.equal(defaults.funnyCantonese, 5);
+  for (const key of [
+    "narration",
+    "focus",
+    "lowStimulation",
+    "timeAwareness",
+    "oneThing",
+    "momentum",
+  ])
+    assert.equal(defaults[key], false);
+  assert.equal(defaults.accessibilityVisible, true);
+});
+test("numeric bounds, steps and nonfinite values reject before mutation", () => {
+  for (const bad of [0, 6, 2.5, NaN, Infinity, "3"])
+    assert.throws(() => validateValue("funnyEnglish", bad));
+  assert.equal(validateValue("speechRate", 1.1), 1.1);
+  assert.throws(() => validateValue("accent", "#fff"));
+  assert.throws(() => validateValue("language", "unknown"));
+});
+test("appearance migration accepts valid existing choices without importing unrelated fields", () => {
+  const p = migrateAppearance({
+    theme: "dark",
+    language: "both",
+    density: "bad",
+    password: "excluded",
+  });
+  assert.equal(p.theme, "dark");
+  assert.equal(p.language, "both");
+  assert.equal(p.density, "comfortable");
+  assert.equal(Object.hasOwn(p, "password"), false);
+});
+test("cross-midnight schedule belongs to starting weekday and date", () => {
+  const r = validateSchedule(
+    rule({ startDate: "2026-10-19", endDate: "2026-10-19" }),
+  );
+  assert.equal(scheduleMatches(r, new Date(2026, 9, 19, 23)), true);
+  assert.equal(scheduleMatches(r, new Date(2026, 9, 20, 5, 59)), true);
+  assert.equal(scheduleMatches(r, new Date(2026, 9, 20, 6)), false);
+  assert.equal(scheduleMatches(r, new Date(2026, 9, 19, 5)), false);
+});
+test("equal endpoints mean full day, end boundary is otherwise exclusive", () => {
+  assert.equal(
+    scheduleMatches(
+      rule({ startTime: "08:00", endTime: "08:00" }),
+      new Date(2026, 9, 19, 2),
+    ),
+    true,
+  );
+  assert.equal(
+    scheduleMatches(
+      rule({ startTime: "08:00", endTime: "10:00" }),
+      new Date(2026, 9, 19, 10),
+    ),
+    false,
+  );
+});
+test("schedule validation rejects unknown sources, malformed dates and duplicate weekdays", () => {
+  for (const extra of [
+    { source: "https" },
+    { startDate: "2026-02-30" },
+    { weekdays: [] },
+    { weekdays: [1, 1] },
+    { priority: 101 },
+    { values: { password: "x" } },
+    { values: {} },
+    { startTime: "24:00" },
+  ])
+    assert.throws(() => validateSchedule(rule(extra)));
+});
+test("priority then stable order wins without modifying base preferences", () => {
+  const base = { ...defaults };
+  const rules = [
+    rule({ id: "a", priority: 5, values: { theme: "light" } }),
+    rule({ id: "b", priority: 1 }),
+    rule({ id: "c", priority: 5, values: { theme: "dark" } }),
+  ];
+  const result = effectivePreferences(base, rules, new Date(2026, 9, 19, 23));
+  assert.equal(result.preferences.theme, "dark");
+  assert.equal(base.theme, "light");
+  assert.equal(
+    effectivePreferences(base, rules, new Date(2026, 9, 20, 12)).preferences
+      .theme,
+    "light",
+  );
+});
+test("portable preferences roundtrip and exclude sensitive categories", () => {
+  const out = exportPreferences(defaults, [rule()]);
+  const parsed = parseImport(JSON.stringify(out));
+  assert.deepEqual(parsed.preferences, defaults);
+  assert.equal(parsed.schedules.length, 1);
+  assert.ok(out.omitted.includes("Credentials and vault data"));
+  assert.throws(() =>
+    parseImport(JSON.stringify({ ...out, wording: { a: "b" } })),
+  );
+  assert.throws(() =>
+    parseImport(
+      JSON.stringify({
+        ...out,
+        preferences: { ...defaults, password: "secret" },
+      }),
+    ),
+  );
+  assert.throws(() =>
+    parseImport(JSON.stringify({ ...out, schedules: [rule(), rule()] })),
+  );
+});
+test("all supported formats contain complete settings and schedules", () => {
+  const out = exportPreferences(defaults, [rule()]);
+  for (const f of ["json", "jsonl", "csv", "tsv", "md"]) {
+    const text = formatExport(out, f);
+    assert.ok(text.includes("test-rule"));
+    assert.ok(text.includes("funnyEnglish"));
+    assert.ok(text.endsWith("\n"));
+  }
+  assert.throws(() => formatExport(out, "zip"));
+});
+import {
+  readPresentationRecord,
+  preferenceProvenance,
+} from "./settings/record.mjs";
+import {
+  styledMessage,
+  selectVoice,
+  narrationAllowed,
+} from "./settings/messages.mjs";
+test("field provenance distinguishes migration and untouched defaults", () => {
+  const r = readPresentationRecord(null, {
+    theme: "dark",
+    language: "invalid",
+  });
+  assert.deepEqual(r.writtenKeys, ["theme"]);
+  assert.equal(
+    preferenceProvenance(r, "theme", r.preferences).source,
+    "saved-local",
+  );
+  assert.equal(
+    preferenceProvenance(r, "density", r.preferences).source,
+    "compiled-default",
+  );
+  assert.throws(() => readPresentationRecord({ schemaVersion: 1 }));
+});
+test("all message categories preserve exact factual content at all five levels", () => {
+  for (const kind of [
+    "info",
+    "success",
+    "warning",
+    "error",
+    "progress",
+    "validation",
+    "security",
+    "accessibility",
+    "destructive",
+  ])
+    for (let level = 1; level <= 5; level++) {
+      const p = {
+        ...defaults,
+        funnyEnglish: level,
+        funnyCantonese: level,
+        language: "both",
+      };
+      const text = styledMessage(
+        kind,
+        "3 items unchanged.",
+        "3 個項目未有更改。",
+        p,
+      );
+      assert.ok(text.includes("3 items unchanged."));
+      assert.ok(text.includes("3 個項目未有更改。"));
+    }
+  assert.notEqual(
+    styledMessage("success", "Saved.", "已儲存。", {
+      ...defaults,
+      funnyEnglish: 1,
+    }),
+    styledMessage("success", "Saved.", "已儲存。", defaults),
+  );
+});
+test("voice selection uses stable identity and late/missing/local availability honestly", () => {
+  assert.equal(selectVoice([], "en").voice, null);
+  const a = { voiceURI: "a", name: "Same", lang: "en-US", localService: false },
+    b = { voiceURI: "b", name: "Same", lang: "en-CA", localService: true },
+    c = { voiceURI: "c", lang: "zh-HK", localService: true };
+  assert.equal(selectVoice([a, b, c], "en").voice, b);
+  assert.equal(selectVoice([a, b, c], "en", "a").voice, a);
+  assert.equal(selectVoice([a, b, c], "en", "missing").missing, true);
+  assert.equal(selectVoice([a, b, c], "yue").voice, c);
+  assert.equal(
+    narrationAllowed(
+      { ...defaults, narration: true, screenReaderMode: true },
+      "error",
+      false,
+    ),
+    false,
+  );
+  assert.equal(
+    narrationAllowed({ ...defaults, narration: true }, "error", true),
+    true,
+  );
+});
+import {
+  defaultTabs,
+  validateTabs,
+  moveTab,
+  previewTabClose,
+  closeTabs,
+  orderedOpenTabs,
+} from "./settings/tab-model.mjs";
+test("tab defaults, pin protection, reorder and explicit reopen retain exact identities", () => {
+  const s = defaultTabs();
+  assert.equal(s.edge, "left");
+  s.pinned = ["language"];
+  assert.deepEqual(previewTabClose(s, ["language", "appearance"]).close, [
+    "appearance",
+  ]);
+  const closed = closeTabs(s, ["language", "appearance"]);
+  assert.deepEqual(closed.excluded, ["language"]);
+  assert.equal(closed.state.closed.includes("language"), false);
+  assert.equal(moveTab(s, "about", -1).order.at(-2), "about");
+  assert.throws(() => validateTabs({ ...s, order: ["language"] }));
+});
+test("collapsed groups remain collapsed while a selected member is revealed", () => {
+  const s = defaultTabs();
+  s.groups = [
+    { id: "group-a", name: "Personal", color: "#123456", collapsed: true },
+  ];
+  s.membership = { appearance: "group-a" };
+  assert.equal(orderedOpenTabs(s, "language").includes("appearance"), false);
+  assert.equal(orderedOpenTabs(s, "appearance").includes("appearance"), true);
+  assert.equal(s.groups[0].collapsed, true);
+  assert.throws(() =>
+    validateTabs({ ...s, membership: { appearance: "missing" } }),
+  );
+});

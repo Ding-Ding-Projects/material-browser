@@ -10,7 +10,11 @@ import "./settings/settings.css";
 import { useSettings } from "./settings/store";
 import { usePresentationEffects, useNarrator } from "./settings/effects";
 import { SettingsWorkspace } from "./settings/SettingsWorkspace";
-import { AccessibilityTools, AttentionStatus, Toasts } from "./settings/LiveTools";
+import {
+  AccessibilityTools,
+  AttentionStatus,
+  Toasts,
+} from "./settings/LiveTools";
 import { styledMessage } from "./settings/messages.mjs";
 import { definitions } from "./settings/model.mjs";
 const read = (key: string, fallback: any) => {
@@ -187,7 +191,7 @@ function App() {
     "Setup",
     "Create profile",
     "Lock vault",
-    ...definitions.map(d => `Settings: ${d.label}`),
+    ...definitions.map((d) => `Settings: ${d.label}`),
   ];
   const profileForm = (
     <>
@@ -214,7 +218,11 @@ function App() {
     <div className={`app-shell palette-${prefs.paletteSize}`}>
       <header>
         <div className="brand-mark" aria-hidden="true">
-          {prefs.logoPreset === "profiles" ? "▤" : prefs.logoPreset === "compass" ? "◇" : "M"}
+          {prefs.logoPreset === "profiles"
+            ? "▤"
+            : prefs.logoPreset === "compass"
+              ? "◇"
+              : "M"}
         </div>
         <div className="identity">
           <strong>Material Browser</strong>
@@ -245,7 +253,10 @@ function App() {
             <button
               key={id}
               className={page === id ? "active" : ""}
-              onClick={() => { setPage(id); if (id === "settings") setShowSetup(false); }}
+              onClick={() => {
+                setPage(id);
+                if (id === "settings") setShowSetup(false);
+              }}
             >
               <span className="nav-icon" aria-hidden="true">
                 {id === "profiles" ? "▤" : id === "sync" ? "⇄" : "⚙"}
@@ -721,14 +732,25 @@ function App() {
               </section>
             </>
           ) : (
-            <SettingsWorkspace controller={settingsController} t={t} narrator={narrator}
+            <SettingsWorkspace
+              controller={settingsController}
+              t={t}
+              narrator={narrator}
               wordingLoaded={Object.keys(entries).length > 0}
               onWordingFile={(file) => void importWording(file)}
-              onClearWording={() => { localStorage.removeItem("wording"); setEntries({}); }} />
+              onClearWording={() => {
+                localStorage.removeItem("wording");
+                setEntries({});
+              }}
+            />
           )}
         </main>
       </div>
-      <AccessibilityTools controller={settingsController} t={t} narrator={narrator} />
+      <AccessibilityTools
+        controller={settingsController}
+        t={t}
+        narrator={narrator}
+      />
       <AttentionStatus controller={settingsController} t={t} />
       <Toasts controller={settingsController} t={t} />
       <footer role="status" aria-live="polite">
@@ -755,9 +777,19 @@ function App() {
               onClick={() => {
                 setPalette(false);
                 if (i >= 6) {
-                  setShowSetup(false); setPage("settings");
-                  const target = definitions[i - 6]; settingsController.selectSection(target.category);
-                  setTimeout(() => window.dispatchEvent(new CustomEvent("settings-reveal", { detail: target.key })), 0);
+                  setShowSetup(false);
+                  setPage("settings");
+                  const target = definitions[i - 6];
+                  settingsController.selectSection(target.category);
+                  setTimeout(
+                    () =>
+                      window.dispatchEvent(
+                        new CustomEvent("settings-reveal", {
+                          detail: target.key,
+                        }),
+                      ),
+                    0,
+                  );
                   return;
                 }
                 if (i < 3) {

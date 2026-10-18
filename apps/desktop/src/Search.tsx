@@ -5,11 +5,13 @@ export function Search({
   label,
   onResults,
   t,
+  onState,
 }: {
   items: string[];
   label: string;
   onResults: (ids: number[]) => void;
   t: (s: string) => string;
+  onState?: (state: { query: string; valid: boolean }) => void;
 }) {
   const [query, setQuery] = useState(""),
     [regex, setRegex] = useState(false),
@@ -21,6 +23,7 @@ export function Search({
   const serialized = JSON.stringify(items);
   useEffect(() => {
     if (!regex) {
+      onState?.({ query, valid: true });
       onResults(
         items.flatMap((x, i) =>
           x.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ? [i] : [],
@@ -28,6 +31,7 @@ export function Search({
       );
       return;
     }
+    onState?.({ query, valid: false });
     if (query.length > 2048 || sample.length > 16384) {
       setResult({ error: "Pattern or sample exceeds limit" });
       onResults([]);
@@ -46,6 +50,7 @@ export function Search({
     worker.onmessage = (e) => {
       clearTimeout(timer);
       setResult(e.data);
+      onState?.({ query, valid: !e.data.error });
       onResults(
         e.data.values?.flatMap((yes: boolean, i: number) => (yes ? [i] : [])) ||
           [],
