@@ -326,7 +326,7 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
-            if p.child.try_wait().map_err(io)?.is_some() || !lifetime::is_alive(&p.identity)? {
+            if !lifetime::is_alive(&p.identity)? {
                 exited.push(id.clone());
             }
         }
@@ -353,7 +353,7 @@ impl Supervisor {
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
         while Instant::now() < until {
-            if p.child.try_wait().map_err(io)?.is_some() {
+            if p.child.try_wait().map_err(io)?.is_some() && !lifetime::is_alive(&p.identity)? {
                 self.processes.remove(id);
                 return Ok(());
             }

@@ -12,13 +12,19 @@ function puppeteerOptions(config) {
 module.exports = { puppeteerOptions };
 if (require.main === module) {
 const lines = readline.createInterface({input: process.stdin});
-let browser, driver, service, started = false, closing = false;
+let browser, driver, service, firefoxEndpoint, started = false, closing = false;
 const pins = { 'puppeteer-core': '25.14.0', 'selenium-webdriver': '4.51.0' };
 async function close() {
   if (closing) return;
   closing = true;
-  try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); }
-  finally { process.exit(0); }
+  let exit = 0;
+  try {
+    if (firefoxEndpoint) browser = await require('puppeteer-core').connect({browserWSEndpoint: firefoxEndpoint, protocol: 'webDriverBiDi', protocolTimeout: 10000});
+    if (browser) await browser.close();
+    if (driver) await driver.quit();
+    if (service) await service.kill();
+  } catch (_) { exit = 1; }
+  finally { process.exit(exit); }
 }
 process.on('SIGTERM', close);
 lines.on('close', close);
@@ -39,6 +45,13 @@ lines.on('line', async line => {
       version = (await browser.version()).replace(/^[^/]+\//, '');
       pid = browser.process()?.pid;
       endpoint = {mode:config.mode, protocol:config.engine === 'chromium' ? 'cdp' : 'bidi', url:browser.wsEndpoint(), sessionId:null};
+      if (config.engine === 'firefox') {
+        // Firefox permits only one BiDi session. Release the launch session so
+        // the external client can connect, then reacquire it for graceful close.
+        firefoxEndpoint = endpoint.url;
+        await browser.disconnect();
+        browser = null;
+      }
     } else {
       if (!config.driver || !config.driverSha256 || crypto.createHash('sha256').update(fs.readFileSync(config.driver)).digest('hex') !== config.driverSha256) throw Error('Driver hash mismatch');
       const {Builder} = require('selenium-webdriver');
