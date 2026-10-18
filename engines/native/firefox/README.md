@@ -88,3 +88,6 @@ against the pinned Git objects and verifies every expected receipt hash without
 changing the native source. Omitting `--check` regenerates the receipt after a
 reviewed patch change. Lease identifiers are monotonic across storage instances,
 so replacement storage cannot accidentally accept a stale release.
+`python -B engines/native/firefox/test_cookie_receipt.py` verifies reconstruction
+and rejection of modified source, malformed hunk lengths, changed destinations,
+path escapes and duplicate files. These checks do not open or mutate a profile.

@@ -30,26 +30,32 @@ def patch_files(source, patch_text):
         if lines[1].strip() != f"+++ b/{name}":
             raise ValueError("Cookie patch destination mismatch")
         while index < len(lines):
-            header = re.fullmatch(r"@@ -(\d+)(?:,\d+)? \+\d+(?:,\d+)? @@[^\n]*\n", lines[index])
+            header = re.fullmatch(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@[^\n]*\n", lines[index])
             if not header:
                 raise ValueError(f"Malformed patch hunk: {name}")
             start = int(header[1]) - 1
-            if start < cursor:
-                raise ValueError("Overlapping patch hunks")
+            if start < cursor or start > len(old_lines):
+                raise ValueError("Overlapping or out-of-range patch hunks")
             output.extend(old_lines[cursor:start])
             cursor = start
             index += 1
+            old_count = 0
+            new_count = 0
             while index < len(lines) and not lines[index].startswith("@@"):
                 line = lines[index]
                 if line[0] in " -":
                     if cursor >= len(old_lines) or old_lines[cursor] != line[1:]:
                         raise ValueError(f"Cookie patch source context mismatch: {name}")
                     cursor += 1
+                    old_count += 1
                 if line[0] in " +":
                     output.append(line[1:])
+                    new_count += 1
                 if line[0] not in " +-":
                     raise ValueError(f"Unsupported patch content: {name}")
                 index += 1
+            if old_count != int(header[2] or 1) or new_count != int(header[4] or 1):
+                raise ValueError("Cookie patch hunk length mismatch")
         output.extend(old_lines[cursor:])
         results[name] = (original, "".join(output))
     return results
