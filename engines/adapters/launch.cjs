@@ -3,14 +3,13 @@
 const readline = require('node:readline');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
-// Browser subprocesses require Win32 paths, not Rust's extended canonical spelling.
-function browserPath(value, platform = process.platform) {
-  if (platform !== 'win32' || typeof value !== 'string') return value;
-  if (/^\\\\\?\\[A-Za-z]:\\/.test(value)) return value.slice(4);
-  if (value.startsWith('\\\\?\\UNC\\')) return '\\\\' + value.slice(8);
-  return value;
+function puppeteerOptions(config) {
+  return { browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
+    protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
+    userDataDir: config.profile, headless: false, pipe: false,
+    args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : [], timeout: 20000 };
 }
-module.exports = { browserPath };
+module.exports = { puppeteerOptions };
 if (require.main === module) {
 const lines = readline.createInterface({input: process.stdin});
 let browser, driver, service, started = false, closing = false;
@@ -30,17 +29,13 @@ lines.on('line', async line => {
   try {
     if (line.length > 65536) throw Error('Configuration too large');
     const config = JSON.parse(line);
-    for (const field of ['executable', 'profile', 'driver']) config[field] = browserPath(config[field]);
     if (!['chromium','firefox'].includes(config.engine) || !['selenium','puppeteer'].includes(config.mode)) throw Error('Invalid adapter');
     const pkg = config.mode === 'puppeteer' ? 'puppeteer-core' : 'selenium-webdriver';
     if (require(`${pkg}/package.json`).version !== pins[pkg]) throw Error('Adapter version mismatch');
     let version, pid, endpoint;
     if (config.mode === 'puppeteer') {
       const puppeteer = require('puppeteer-core');
-      browser = await puppeteer.launch({ browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
-        protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
-        userDataDir: config.profile, headless: false, pipe: false,
-        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : [], timeout: 20000 });
+      browser = await puppeteer.launch(puppeteerOptions(config));
       version = (await browser.version()).replace(/^[^/]+\//, '');
       pid = browser.process()?.pid;
       endpoint = {mode:config.mode, protocol:config.engine === 'chromium' ? 'cdp' : 'bidi', url:browser.wsEndpoint(), sessionId:null};
