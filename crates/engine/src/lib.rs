@@ -188,6 +188,13 @@ struct OwnedProcess {
     identity: lifetime::ProcessIdentity,
 }
 impl OwnedProcess {
+    fn helper_only(&mut self) -> Result<bool> {
+        if let Some(child) = self.child.as_mut() {
+            Ok(child.try_wait().map_err(io)?.is_none()
+                && !lifetime::is_alive(&self.identity)?
+                && self._job.process_ids()? == vec![child.id()])
+        } else { Ok(false) }
+    }
     fn reap_child(&mut self) -> Result<bool> {
         let exited = match self.child.as_mut() {
             Some(child) => child.try_wait().map_err(io)?.is_some(),
@@ -356,12 +363,11 @@ impl Supervisor {
             .processes
             .get_mut(id)
             .ok_or_else(|| err("PROFILE_NOT_RUNNING", "No owned process"))?;
+        let mut helper_settled = false;
         if p.adapter {
             use std::io::Write;
-            let helper_only = if let Some(child) = p.child.as_mut() {
-                child.try_wait().map_err(io)?.is_none()
-                    && !lifetime::is_alive(&p.identity)? && p._job.process_ids()? == vec![child.id()]
-            } else { false };
+            let helper_only = p.helper_only()?;
+            helper_settled = helper_only;
             let command: &[u8] = if helper_only {
                 // This trusted stdin command is permitted only after native
                 // browser exit and complete job membership prove no child remains.
@@ -381,6 +387,16 @@ impl Supervisor {
             if p.reap_child()? && !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
                 self.processes.remove(id);
                 return Ok(());
+            }
+            if p.adapter && !helper_settled && p.helper_only()? {
+                use std::io::Write;
+                let sent = p.child.as_mut().and_then(|child| child.stdin.as_mut())
+                    .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
+                    .write_all(b"{\"command\":\"shutdown-browser-exited\"}\n");
+                match sent {
+                    Ok(()) => helper_settled = true,
+                    Err(error) => if !p.reap_child()? { return Err(io(error)); },
+                }
             }
             if !p.adapter {
                 // Launch can return before Chromium creates its first top-level window.

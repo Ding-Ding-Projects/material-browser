@@ -236,11 +236,12 @@ mod tests {
             .creation_flags(0x08000004).spawn().unwrap();
         let job = ProcessJob::attach(&mut child, true).unwrap();
         assert!(child.wait().unwrap().success());
-        assert!(!job.is_empty().unwrap(), "Retaining the exited Child keeps it accounted in the job");
-        drop(child);
+        // Native accounting may settle asynchronously after exit. The retained
+        // Child handle is not proof that a process remains live.
         let deadline = Instant::now() + Duration::from_secs(2);
         while !job.is_empty().unwrap() && Instant::now() < deadline { std::thread::sleep(Duration::from_millis(25)); }
         assert!(job.is_empty().unwrap(), "Exited process objects must not count as active job members");
+        drop(child);
     }
     #[test]
     fn owned_job_remains_active_after_launcher_exits_with_a_contained_child() {
