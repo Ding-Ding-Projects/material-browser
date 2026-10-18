@@ -46,3 +46,26 @@ The workflow created a vault and profile, skipped optional synchronization, save
 
 Settings currently implements appearance and personal wording only. The complete required-feature
 settings inventory and its missing working controls are the current implementation priority.
+
+## Portable handbook evidence
+
+The single-file offline handbook was built and exercised at source
+`1cd196ba829f65d17c5a95bdf2ea5f6078f0009e` through
+`build-installer.bat -Component DocsCompanion`. These original page captures use an explicitly
+emulated 1280 by 1000 viewport at scale 1, not a physical display-scale matrix.
+
+![Offline handbook overview in English](docs/evidence/handbook/portable-home.png)
+
+![Bundled handbook wiki and internal article links](docs/evidence/handbook/portable-wiki.png)
+
+![Offline automation guide with saved reading progress and simulation](docs/evidence/handbook/portable-guide.png)
+
+![Offline handbook reading settings in Cantonese and dark theme](docs/evidence/handbook/portable-settings.png)
+
+All 21 bundled article/wiki routes rendered; guides, search and local preferences worked.
+Separate runtime observations confirmed persistence across a full process restart. These images
+do not establish updater behavior, installation, native browser operations or complete Settings
+acceptance. The restart image is excluded because its diagnostic interval was not enabled.
+See the [full evidence and limitations](docs/evidence/handbook/README.md),
+[image inventory](docs/evidence/handbook/inventory.json) and
+[public build/capture summary](docs/evidence/handbook/receipts.json).

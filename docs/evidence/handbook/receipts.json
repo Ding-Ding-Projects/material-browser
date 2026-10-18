@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "1cd196ba829f65d17c5a95bdf2ea5f6078f0009e",
+  "productVersion": "0.1.0",
+  "artifact": {
+    "name": "Material-Browser-Handbook-0.1.0-x64.exe",
+    "bytes": 100494041,
+    "sha256": "dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49",
+    "archiveSha256": "ce8313bb585c182685215e5d361f8d1e30a529306420c368318d1d6203d3b848"
+  },
+  "build": {
+    "command": "build-installer.bat -Component DocsCompanion",
+    "startedAt": "2026-10-18T07:39:22.0224037Z",
+    "finishedAt": "2026-10-18T07:41:44.9510726Z",
+    "exitCode": 0
+  },
+  "captureMethod": "Isolated background Windows desktop; page-only CDP capture",
+  "viewportEvidence": "Explicitly emulated 1280 by 1000, scale 1; no physical display-scale claim",
+  "records": [
+    {
+      "path": "docs/evidence/handbook/portable-home.png",
+      "sha256": "d72af2104bf4fca9cee5db7f41d01afaec4593f930ea1eaa22aa15f0bae919e2",
+      "startedAt": "2026-10-18T07:42:37.896Z",
+      "capturedAt": "2026-10-18T07:42:37.983Z",
+      "width": 1280,
+      "height": 1000,
+      "theme": "light",
+      "language": "en"
+    },
+    {
+      "path": "docs/evidence/handbook/portable-wiki.png",
+      "sha256": "00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140",
+      "startedAt": "2026-10-18T07:42:43.790Z",
+      "capturedAt": "2026-10-18T07:42:43.880Z",
+      "width": 1280,
+      "height": 1000,
+      "theme": "light",
+      "language": "en"
+    },
+    {
+      "path": "docs/evidence/handbook/portable-guide.png",
+      "sha256": "ee4ff864ad45b26f6169153dae1dae75e818d05b035b5f5747cebaf7a9c4efff",
+      "startedAt": "2026-10-18T07:42:45.665Z",
+      "capturedAt": "2026-10-18T07:42:45.722Z",
+      "width": 1280,
+      "height": 1000,
+      "theme": "light",
+      "language": "en"
+    },
+    {
+      "path": "docs/evidence/handbook/portable-settings.png",
+      "sha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79",
+      "startedAt": "2026-10-18T07:42:46.565Z",
+      "capturedAt": "2026-10-18T07:42:46.639Z",
+      "width": 1280,
+      "height": 1000,
+      "theme": "dark",
+      "language": "yue-Hant"
+    }
+  ],
+  "verification": {
+    "articleRoutes": 21,
+    "embeddedFiles": 8,
+    "approvedImages": 3,
+    "consoleErrorCount": 0,
+    "unhandledExceptionCount": 0,
+    "pageErrorCount": 0,
+    "externalNavigation": "One intentional navigation attempt was canceled; no unexpected network request was observed",
+    "restart": "Separate runtime observations confirmed preserved reading state; the restart image is excluded because its diagnostic observation interval was not enabled"
+  },
+  "limits": [
+    "Not an installer, updater, native browser or complete settings acceptance test",
+    "Not a complete language, accessibility or display-scale matrix",
+    "Captures and package remain bound to the recorded source, not the later evidence commit",
+    "Full private operational receipts are retained separately and are not published"
+  ]
+}
