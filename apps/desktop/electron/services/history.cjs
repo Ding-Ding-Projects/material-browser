@@ -18,7 +18,7 @@ function createHistoryService(options) {
     if (!path.isAbsolute(appDataRoot || '') || historyRoot !== path.join(appDataRoot, 'settings-history') || !path.isAbsolute(gitExecutable || '') || !/^[a-f0-9]{64}$/.test(gitSha256 || '') || typeof credentialStore?.withKey !== 'function' || typeof validatePreferences !== 'function' || typeof validateSchedule !== 'function')
         throw new Error('INVALID_HISTORY_OPTIONS');
     const repo = path.join(historyRoot, 'repository'), events = path.join(repo, 'events'), authFile = path.join(historyRoot, 'auth.json'), journal = path.join(historyRoot, 'pending.json');
-    let unlockedUntil = 0, queue = Promise.resolve(), lease;
+    let unlockedUntil = 0, sessionGeneration = null, queue = Promise.resolve(), lease;
     const lockIdentity = async () => {
         if (!await checkedPath(appDataRoot, 'directory')) {
             await verifyManagedPaths();
@@ -33,9 +33,25 @@ function createHistoryService(options) {
         lease.assertHeld();
     };
     const { noLinks, checkedPath, directory, boundedRead, verifyManagedPaths, atomic, git, init } = createHistoryStorage({ appDataRoot, historyRoot, gitExecutable, gitSha256, assertHeld, onTransition });
-    const active = () => {
+    async function readAuth() {
+        const auth = JSON.parse((await boundedRead(authFile, 8192)).toString('utf8'));
+        const keys = auth.version === 1 ? ['version', 'salt', 'verifier'] : ['version', 'generation', 'salt', 'verifier'];
+        if (![1, 2].includes(auth.version) || Object.keys(auth).some(key => !keys.includes(key)) ||
+            typeof auth.salt !== 'string' || typeof auth.verifier !== 'string' ||
+            Buffer.from(auth.salt, 'base64').length !== 16 || Buffer.from(auth.verifier, 'base64').length !== 32 ||
+            (auth.version === 2 && (!Number.isSafeInteger(auth.generation) || auth.generation < 1))) {
+            throw new Error('INVALID_HISTORY_AUTH');
+        }
+        return { ...auth, generation: auth.version === 1 ? 0 : auth.generation };
+    }
+    const active = async () => {
         if (Date.now() >= unlockedUntil)
             throw new Error('HISTORY_LOCKED');
+        if ((await readAuth()).generation !== sessionGeneration) {
+            unlockedUntil = 0;
+            sessionGeneration = null;
+            throw new Error('HISTORY_SESSION_REVOKED');
+        }
     };
     const serial = fn => {
         const result = queue.then(fn);
@@ -132,7 +148,7 @@ function createHistoryService(options) {
     }
     async function rows() {
         await requireAuth();
-        active();
+        await active();
         const diskFiles = await fs.readdir(events);
         if (diskFiles.length > 2000)
             throw new Error('HISTORY_CAPACITY_REACHED');
@@ -159,7 +175,12 @@ function createHistoryService(options) {
             }
             catch {
             }
-            return { configured: await configured(), unlocked: Date.now() < unlockedUntil, recoveryPending, abandonedTempCount, physicalPruneAvailable: false };
+            const isConfigured = await configured();
+            if (isConfigured && Date.now() < unlockedUntil && (await readAuth()).generation !== sessionGeneration) {
+                unlockedUntil = 0;
+                sessionGeneration = null;
+            }
+            return { configured: isConfigured, unlocked: Date.now() < unlockedUntil, recoveryPending, abandonedTempCount, physicalPruneAvailable: false };
         },
         async setup(secret) {
             return serial(async () => {
@@ -172,7 +193,8 @@ function createHistoryService(options) {
                 try {
                     await credentialStore.withKey(() => {
                     }, { create: true });
-                    await atomic(authFile, { version: 1, salt: salt.toString('base64'), verifier: derived.toString('base64') });
+                    await atomic(authFile, { version: 2, generation: 1, salt: salt.toString('base64'), verifier: derived.toString('base64') });
+                    sessionGeneration = 1;
                     unlockedUntil = Date.now() + 10 * 60 * 1000;
                     return { configured: true, unlocked: true };
                 }
@@ -185,9 +207,7 @@ function createHistoryService(options) {
             await requireAuth();
             if (typeof secret !== 'string' || secret.length > 256)
                 throw new Error('INVALID_HISTORY_PASSWORD');
-            const auth = JSON.parse((await boundedRead(authFile, 8192)).toString('utf8'));
-            if (auth.version !== 1 || Buffer.from(auth.salt, 'base64').length !== 16 || Buffer.from(auth.verifier, 'base64').length !== 32)
-                throw new Error('INVALID_HISTORY_AUTH');
+            const auth = await readAuth();
             const derived = await scrypt(secret, Buffer.from(auth.salt, 'base64'), 32);
             try {
                 if (!crypto.timingSafeEqual(derived, Buffer.from(auth.verifier, 'base64')))
@@ -202,11 +222,33 @@ function createHistoryService(options) {
         },
         async unlock(secret) {
             await methods.verify(secret);
+            sessionGeneration = (await readAuth()).generation;
             unlockedUntil = Date.now() + 10 * 60 * 1000;
             return { unlocked: true };
         },
+        async changePassword(oldSecret, newSecret) {
+            await methods.verify(oldSecret);
+            if (typeof newSecret !== 'string' || newSecret.length < 6 || newSecret.length > 256)
+                throw new Error('INVALID_HISTORY_PASSWORD');
+            const auth = await readAuth();
+            if (auth.generation >= Number.MAX_SAFE_INTEGER)
+                throw new Error('INVALID_HISTORY_AUTH');
+            const generation = auth.generation + 1;
+            const salt = crypto.randomBytes(16);
+            const derived = await scrypt(newSecret, salt, 32);
+            try {
+                await atomic(authFile, { version: 2, generation, salt: salt.toString('base64'), verifier: derived.toString('base64') });
+                sessionGeneration = generation;
+                unlockedUntil = Date.now() + 10 * 60 * 1000;
+                return { changed: true, unlocked: true, otherSessionsRevoked: true };
+            }
+            finally {
+                derived.fill(0);
+            }
+        },
         async lock() {
             unlockedUntil = 0;
+            sessionGeneration = null;
             return { unlocked: false };
         },
         async recordSettings({ before, after, action = 'settings-changed', protectedMutation = false }) {
@@ -232,7 +274,7 @@ function createHistoryService(options) {
         async transactDisplayName({ before, after, action = 'updated' }, apply) {
             return serial(async () => {
                 await requireAuth();
-                active();
+                await active();
                 if (typeof apply !== 'function')
                     throw new Error('TRUSTED_APPLY_REQUIRED');
                 if (!['created', 'updated', 'deleted', 'reset'].includes(action))
@@ -287,7 +329,7 @@ function createHistoryService(options) {
         },
         async diff(revision) {
             await requireAuth();
-            active();
+            await active();
             const row = await read(revision);
             if (!row.snapshot)
                 throw new Error('INVALID_REVISION');
@@ -300,7 +342,7 @@ function createHistoryService(options) {
         async label(revision, label) {
             return serial(async () => {
                 await requireAuth();
-                active();
+                await active();
                 await read(revision);
                 if (typeof label !== 'string' || label.length > 120 || /[\x00-\x1f]/.test(label))
                     throw new Error('INVALID_HISTORY_LABEL');
@@ -310,7 +352,7 @@ function createHistoryService(options) {
         async restore(revision, apply) {
             return serial(async () => {
                 await requireAuth();
-                active();
+                await active();
                 if (typeof apply !== 'function')
                     throw new Error('TRUSTED_APPLY_REQUIRED');
                 try {
@@ -350,7 +392,7 @@ function createHistoryService(options) {
         async recover(decision, apply) {
             return serial(async () => {
                 await requireAuth();
-                active();
+                await active();
                 if (!['retry', 'discard'].includes(decision))
                     throw new Error('INVALID_RECOVERY_DECISION');
                 const pending = await read('pending');
@@ -380,7 +422,7 @@ function createHistoryService(options) {
         async setRetention({ visibleDays }) {
             return serial(async () => {
                 await requireAuth();
-                active();
+                await active();
                 if (!Number.isInteger(visibleDays) || visibleDays < 1 || visibleDays > 36500)
                     throw new Error('INVALID_RETENTION');
                 return { ...await append({ action: 'retention-changed', visibleDays }), logicalOnly: true, physicalPruneAvailable: false };
