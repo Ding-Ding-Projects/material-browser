@@ -17,7 +17,7 @@ const select = (key, category, label, initial, options, help) => ({
   category,
   label,
   initial,
-  type: "select",
+  type: key === "fontFamily" ? "font" : "select",
   options,
   help,
 });
@@ -398,12 +398,14 @@ export function validateValue(key, value) {
   if (d.type === "select" && !d.options.some(([v]) => v === value))
     throw new Error("Choose an available option");
   if (
-    ["text", "voice", "time", "color"].includes(d.type) &&
+    ["text", "voice", "time", "color", "font"].includes(d.type) &&
     (typeof value !== "string" ||
       value.length > (d.maxLength || 512) ||
       /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value))
   )
     throw new Error("Text is invalid or too long");
+  if (d.type === "font" && (!value.trim() || value.length > 256))
+    throw new Error("Choose a bounded font family name");
   if (d.type === "time" && !/^([01]\d|2[0-3]):[0-5]\d$/.test(value))
     throw new Error("Use a complete local time");
   if (d.type === "color" && !/^#[0-9a-f]{6}$/i.test(value))

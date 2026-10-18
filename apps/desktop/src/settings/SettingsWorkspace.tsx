@@ -7,6 +7,7 @@ import { SettingsTabs } from "./SettingsTabs";
 import { Schedules } from "./sections/Schedules";
 import { HistoryTransfer } from "./sections/HistoryTransfer";
 import { NotificationCenter } from "./sections/NotificationCenter";
+import { EditorIntegration } from "./sections/EditorIntegration";
 import type { SettingsController } from "./store";
 const unavailable = [
   [
@@ -78,6 +79,45 @@ export function SettingsWorkspace({
   const [matches, setMatches] = useState<number[]>([]),
     [globalMatches, setGlobalMatches] = useState<number[]>([]),
     [capRows, setCapRows] = useState<number[]>([]);
+  const [fonts, setFonts] = useState<
+    Array<{ id: string; family: string; style: string }>
+  >([]);
+  const [fontStatus, setFontStatus] = useState("Loading installed fonts");
+  useEffect(() => {
+    let active = true;
+    window.materialBrowser
+      ?.settingsService("fonts")
+      .then((result) => {
+        if (!active) return;
+        if (result?.ok) {
+          setFonts(result.fonts);
+          setFontStatus("Installed fonts loaded");
+        } else
+          setFontStatus(
+            result?.error?.message || "Installed fonts are unavailable.",
+          );
+      })
+      .catch(() => {
+        if (active) setFontStatus("Installed fonts are unavailable.");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const fontOptions: [string, string][] = [
+    ["system", t("System interface")],
+    ["sans-serif", t("Generic sans-serif")],
+    ["serif", t("Generic serif")],
+    ["monospace", t("Generic monospace")],
+    ...[...new Set(fonts.map((f) => f.family))].map(
+      (f) => [f, f] as [string, string],
+    ),
+  ];
+  if (!fontOptions.some(([id]) => id === c.record.preferences.fontFamily))
+    fontOptions.push([
+      c.record.preferences.fontFamily,
+      c.record.preferences.fontFamily + " (unavailable)",
+    ]);
   const section = c.record.section;
   const local = definitions.filter((d) => d.category === section);
   const caps = unavailable.filter((r) => r[0] === section);
@@ -196,10 +236,24 @@ export function SettingsWorkspace({
                   definition={d}
                   controller={c}
                   t={t}
-                  voices={d.type === "voice" ? voiceOptions(d.key) : undefined}
+                  voices={
+                    d.type === "voice"
+                      ? voiceOptions(d.key)
+                      : d.type === "font"
+                        ? fontOptions
+                        : undefined
+                  }
                 />
               ))}
           </div>
+          {section === "appearance" && (
+            <p role="status">
+              {t(fontStatus)} ·{" "}
+              {[...new Set(fonts.map((f) => f.family))].length}{" "}
+              {t("font families")}
+            </p>
+          )}
+          {section === "tools" && <EditorIntegration controller={c} t={t} />}
           {section === "language" && (
             <>
               <section className="setting-card">

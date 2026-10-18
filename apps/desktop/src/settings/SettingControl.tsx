@@ -158,13 +158,13 @@ export function SettingInput({
     return (
       <NumericInput definition={d} value={value} onChange={onChange} t={t} />
     );
-  if (d.type === "select" || d.type === "voice")
+  if (d.type === "select" || d.type === "voice" || d.type === "font")
     return (
       <Choice
         label={t(d.label)}
         value={value}
         options={
-          d.type === "voice"
+          d.type === "voice" || d.type === "font"
             ? voices
             : d.options.map(([v, l]: [string, string]) => [v, t(l)])
         }

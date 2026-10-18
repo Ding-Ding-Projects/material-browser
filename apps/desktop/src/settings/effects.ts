@@ -22,7 +22,9 @@ export function usePresentationEffects(prefs: Preferences) {
       serif: 'Georgia,"Microsoft JhengHei",serif',
       monospace: 'Consolas,"Microsoft JhengHei",monospace',
     };
-    const font = families[prefs.fontFamily] || families.system;
+    const font =
+      families[prefs.fontFamily] ||
+      `${JSON.stringify(prefs.fontFamily)},"Microsoft JhengHei",sans-serif`;
     root.style.setProperty("--interface-font", font);
     root.style.setProperty("--md-ref-typeface-plain", font);
     root.style.setProperty("--md-ref-typeface-brand", font);
