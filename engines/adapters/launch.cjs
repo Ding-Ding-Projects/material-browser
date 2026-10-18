@@ -35,7 +35,13 @@ async function close() {
 process.on('SIGTERM', close);
 lines.on('close', close);
 lines.on('line', async line => {
-  if (started) { if (line === '{"command":"shutdown"}') await close(); return; }
+  if (started) {
+    if (line === '{"command":"shutdown"}') await close();
+    // Only the native supervisor may send this after proving browser exit and
+    // that the helper is the sole remaining member of its private process job.
+    if (line === '{"command":"shutdown-browser-exited"}') process.exit(0);
+    return;
+  }
   started = true;
   let timer = setTimeout(() => { process.stderr.write('Adapter startup timeout\n'); close(); }, 25000);
   try {

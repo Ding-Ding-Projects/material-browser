@@ -358,13 +358,21 @@ impl Supervisor {
             .ok_or_else(|| err("PROFILE_NOT_RUNNING", "No owned process"))?;
         if p.adapter {
             use std::io::Write;
+            let helper_only = if let Some(child) = p.child.as_ref() {
+                !lifetime::is_alive(&p.identity)? && p._job.process_ids()? == vec![child.id()]
+            } else { false };
+            let command: &[u8] = if helper_only {
+                // This trusted stdin command is permitted only after native
+                // browser exit and complete job membership prove no child remains.
+                b"{\"command\":\"shutdown-browser-exited\"}\n"
+            } else { b"{\"command\":\"shutdown\"}\n" };
             p.child
                 .as_mut()
                 .ok_or_else(|| err("ADAPTER_IO", "Adapter has already exited"))?
                 .stdin
                 .as_mut()
                 .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
-                .write_all(b"{\"command\":\"shutdown\"}\n")
+                .write_all(command)
                 .map_err(io)?;
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
