@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "path": "docs/evidence/desktop/onboarding.png",
+    "sha256": "7af317ca751cbad08313821107d22b11da8d302d21f2d777c55fd1f84fc35d9c",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/automation-saved.png",
+    "sha256": "0b60ceeadd1be9af130f7de71c4a9e5cf4a72a6ea3fc85ee6bc378b19158d253",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/settings-dark-bilingual.png",
+    "sha256": "9a385b1ad9c40e05b1ecd476482691ec721493a682007e532fa4f6212c165350",
+    "reviewedForPublication": true
+  }
+]
