@@ -14,8 +14,12 @@ absolute `gitExecutable` and its independently verified SHA-256 `gitSha256`,
 `shared/settings-model.mjs`. Never accept these options from renderer input.
 The executable hash is checked before every bounded Git invocation; shell
 execution, hooks, global/system configuration and network protocols are disabled.
-Paths are checked for symbolic links. Main owns and serializes this service;
-concurrent independent application processes are not supported.
+Paths are checked for symbolic links. Every service call holds the same
+application-scoped kernel mutex across processes, including authentication,
+recording and trusted apply callbacks. A fixed local helper holds the mutex until
+its input pipe closes. Process termination releases it through normal pipe and
+kernel abandonment handling, without guessing whether a PID is stale. Credential
+creation has its own app-owned mutex, preventing simultaneous key replacement.
 
 The exact v1 snapshot is `{schemaVersion:1, preferences, schedules}`. Unknown
 fields are rejected, not silently imported. The shared model validates all
@@ -72,7 +76,7 @@ Retention is logical visibility only. Its policy is itself a new revision;
 physical pruning remains unavailable and is explicitly reported as unfinished.
 The service caps storage at 2,000 event files and list/export at 500 entries per
 request. A complete paginated export, freeform search, password reset/change,
-multi-process locking and physical pruning remain unfinished.
+and physical pruning remain unfinished.
 
 Secret, authenticator and display-name mutations are outside this snapshot schema.
 `protectedMutation:true` returns `PROTECTED_TRANSACTION_REQUIRED`; main must not
