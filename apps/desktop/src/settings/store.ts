@@ -6,7 +6,8 @@ import {
   validateSchedule,
   effectivePreferences,
 } from "./model.mjs";
-import { readPresentationRecord } from "./record.mjs";
+import { historyTransition } from "./history-model.mjs";
+import { readPresentationRecord, readStoredPresentation } from "./record.mjs";
 export type Preferences = Record<string, any>;
 export type Revision = {
   id: string;
@@ -30,6 +31,8 @@ export type SettingsRecord = {
   writtenKeys: string[];
   schedules: any[];
   revisions: Revision[];
+  undoStack: Array<{ preferences: Preferences; schedules: any[] }>;
+  redoStack: Array<{ preferences: Preferences; schedules: any[] }>;
   notices: Notice[];
   section: string;
   snoozeUntil: number;
@@ -37,9 +40,9 @@ export type SettingsRecord = {
 const KEY = "presentation.v1";
 function initial(): SettingsRecord {
   try {
-    return readPresentationRecord(
+    return readStoredPresentation(
       localStorage.getItem(KEY),
-      JSON.parse(localStorage.getItem("appearance") || "null"),
+      localStorage.getItem("appearance"),
     ) as SettingsRecord;
   } catch {
     const empty = readPresentationRecord(null) as SettingsRecord;
@@ -125,45 +128,19 @@ export function useSettings() {
         );
       if (validSchedules.length > 200)
         throw Error("At most 200 local schedules are supported");
-      persist((old) => {
-        if (
-          JSON.stringify(old.preferences) === JSON.stringify(validated) &&
-          JSON.stringify(old.schedules) === JSON.stringify(validSchedules)
-        )
-          return old;
-        const keys = Object.keys(validated).filter(
-          (k) => old.preferences[k] !== validated[k],
-        );
-        const baseline = old.revisions.length
-          ? old.revisions
-          : [
-              {
-                id: crypto.randomUUID(),
-                at: new Date().toISOString(),
-                action: "Initial preferences",
-                keys: [],
-                preferences: { ...old.preferences },
-                schedules: old.schedules,
-              },
-            ];
-        return {
-          ...old,
-          preferences: validated,
-          writtenKeys: [...new Set([...old.writtenKeys, ...(written ?? keys)])],
-          schedules: validSchedules,
-          revisions: [
-            ...baseline,
+      persist(
+        (old) =>
+          historyTransition(
+            old,
+            { preferences: validated, schedules: validSchedules },
             {
+              action,
               id: crypto.randomUUID(),
               at: new Date().toISOString(),
-              action,
-              keys,
-              preferences: { ...validated },
-              schedules: validSchedules,
+              written,
             },
-          ],
-        };
-      });
+          ) as SettingsRecord,
+      );
     },
     [persist],
   );
@@ -207,6 +184,26 @@ export function useSettings() {
     storageError,
     update,
     transact,
+    undo: () =>
+      persist(
+        (old) =>
+          historyTransition(old, null, {
+            mode: "undo",
+            action: "Undid latest change",
+            id: crypto.randomUUID(),
+            at: new Date().toISOString(),
+          }) as SettingsRecord,
+      ),
+    redo: () =>
+      persist(
+        (old) =>
+          historyTransition(old, null, {
+            mode: "redo",
+            action: "Redid change",
+            id: crypto.randomUUID(),
+            at: new Date().toISOString(),
+          }) as SettingsRecord,
+      ),
     notify,
     persist,
     reset: (key: string) => update(key, (defaults as Preferences)[key]),

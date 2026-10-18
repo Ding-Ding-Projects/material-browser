@@ -32,10 +32,10 @@ export function SettingsTabs({
         return defaultTabs();
       }
     }),
-    [rows, setRows] = useState<number[]>([]),
-    [master, setMaster] = useState<number[]>([]),
-    [groupRows, setGroupRows] = useState<number[]>([]),
-    [memberRows, setMemberRows] = useState<number[]>([]),
+    [rows, setRows] = useState<string[]>([]),
+    [master, setMaster] = useState<string[]>([]),
+    [groupRows, setGroupRows] = useState<string[]>([]),
+    [memberRows, setMemberRows] = useState<string[]>([]),
     [selectedGroup, setSelectedGroup] = useState(""),
     [groupName, setGroupName] = useState(""),
     [groupColor, setGroupColor] = useState("#475f99"),
@@ -45,7 +45,7 @@ export function SettingsTabs({
     [catalogRows, setCatalogRows] = useState<number[]>([]),
     [error, setError] = useState(""),
     [bulk, setBulk] = useState(false),
-    [bulkRows, setBulkRows] = useState<number[]>([]),
+    [bulkRows, setBulkRows] = useState<string[]>([]),
     [inverse, setInverse] = useState(false),
     [includePinned, setIncludePinned] = useState(false),
     [bulkQuery, setBulkQuery] = useState(""),
@@ -98,7 +98,7 @@ export function SettingsTabs({
     "Close this tab",
     "Close other tabs",
   ];
-  const bulkMatches = bulkRows.map((i) => all[i]).filter(Boolean),
+  const bulkMatches = bulkRows.filter((id) => all.includes(id)),
     preview = previewTabClose(
       state,
       inverse
@@ -127,7 +127,8 @@ export function SettingsTabs({
             key={`${instance}:strip`}
             label={t("Search current tabs")}
             items={visible.map(label)}
-            onResults={setRows}
+            itemKeys={visible}
+            onKeys={setRows}
             t={t}
           />
           <Button secondary onClick={() => setCatalog(!catalog)}>
@@ -143,15 +144,17 @@ export function SettingsTabs({
           {
             vertical: vertical ? "" : undefined,
             "aria-orientation": vertical ? "vertical" : "horizontal",
-            activeTabIndex: rows.map((i) => visible[i]).indexOf(value),
+            activeTabIndex: rows
+              .filter((id) => visible.includes(id))
+              .indexOf(value),
             onChange: (e: any) => {
-              const ids = rows.map((i) => visible[i]);
+              const ids = rows.filter((id) => visible.includes(id));
               if (ids[e.target.activeTabIndex])
                 onChange(ids[e.target.activeTabIndex]);
             },
           },
           rows
-            .map((i) => visible[i])
+            .filter((id) => visible.includes(id))
             .filter(Boolean)
             .map((id) =>
               React.createElement(
@@ -256,23 +259,27 @@ export function SettingsTabs({
               (id: string) =>
                 `${label(id)} ${state.groups.find((g: any) => g.id === state.membership[id])?.name || ""} ${state.pinned.includes(id) ? t("Pinned") : ""}`,
             )}
-            onResults={setMaster}
+            itemKeys={all}
+            onKeys={setMaster}
             t={t}
           />
-          {master.map((i) => (
-            <Button secondary key={all[i]} onClick={() => activate(all[i])}>
-              {label(all[i])}
-            </Button>
-          ))}
+          {master
+            .filter((id) => all.includes(id))
+            .map((id) => (
+              <Button secondary key={id} onClick={() => activate(id)}>
+                {label(id)}
+              </Button>
+            ))}
           <Search
             key={`${instance}:groups`}
             label={t("Search groups")}
             items={state.groups.map((g: any) => g.name)}
-            onResults={setGroupRows}
+            itemKeys={state.groups.map((g: any) => g.id)}
+            onKeys={setGroupRows}
             t={t}
           />
           {groupRows
-            .map((i) => state.groups[i])
+            .map((id) => state.groups.find((g: any) => g.id === id))
             .filter(Boolean)
             .map((g: any) => (
               <div key={g.id} className="tab-group-tools">
@@ -308,18 +315,17 @@ export function SettingsTabs({
             key={`${instance}:group-members:${selectedGroup}`}
             label={t("Search selected group tabs")}
             items={members.map(label)}
-            onResults={setMemberRows}
+            itemKeys={members}
+            onKeys={setMemberRows}
             t={t}
           />
-          {memberRows.map((i) => (
-            <Button
-              secondary
-              key={members[i]}
-              onClick={() => activate(members[i])}
-            >
-              {label(members[i])}
-            </Button>
-          ))}
+          {memberRows
+            .filter((id) => members.includes(id))
+            .map((id) => (
+              <Button secondary key={id} onClick={() => activate(id)}>
+                {label(id)}
+              </Button>
+            ))}
           <Field
             label={t("Group name")}
             value={groupName}
@@ -425,7 +431,8 @@ export function SettingsTabs({
                 key={`${instance}:bulk`}
                 label={t("Text in tab labels")}
                 items={all.map(label)}
-                onResults={setBulkRows}
+                itemKeys={all}
+                onKeys={setBulkRows}
                 onState={(s) => {
                   setBulkQuery(s.query);
                   setBulkValid(s.valid);

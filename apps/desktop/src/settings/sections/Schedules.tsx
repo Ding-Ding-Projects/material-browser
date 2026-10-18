@@ -3,6 +3,8 @@ import { Button, Field } from "../../components";
 import { Search } from "../../Search";
 import { Choice, SettingInput } from "../SettingControl";
 import { ConfirmAction } from "../ConfirmAction";
+import { preserveScheduleEdit } from "../history-model.mjs";
+import { resolveSearchRecords } from "../interaction-model.mjs";
 import { definitions, validateSchedule } from "../model.mjs";
 import type { SettingsController } from "../store";
 const days = [
@@ -31,25 +33,28 @@ export function Schedules({
     [weekdays, setWeekdays] = useState([0, 1, 2, 3, 4, 5, 6]),
     [priority, setPriority] = useState("1"),
     [error, setError] = useState(""),
-    [rows, setRows] = useState<number[]>([]),
+    [rows, setRows] = useState<string[]>([]),
     [editing, setEditing] = useState<string | null>(null),
     [remove, setRemove] = useState<string | null>(null);
   const d = definitions.find((x) => x.key === key)!;
   function save() {
     try {
-      const rule = validateSchedule({
-        id: editing || crypto.randomUUID(),
-        label,
-        enabled: true,
-        priority: Number(priority),
-        startDate: from,
-        endDate: to,
-        startTime: start,
-        endTime: end,
-        weekdays,
-        values: { [key]: value },
-        source: "local",
-      });
+      const previous = c.record.schedules.find((r) => r.id === editing);
+      const rule = validateSchedule(
+        preserveScheduleEdit(previous, {
+          id: editing || crypto.randomUUID(),
+          label,
+          enabled: previous?.enabled ?? true,
+          priority: Number(priority),
+          startDate: from,
+          endDate: to,
+          startTime: start,
+          endTime: end,
+          weekdays,
+          values: { ...previous?.values, [key]: value },
+          source: "local",
+        }),
+      );
       const rules = editing
         ? c.record.schedules.map((r) => (r.id === editing ? rule : r))
         : [...c.record.schedules, rule];
@@ -194,15 +199,16 @@ export function Schedules({
             (r) =>
               `${r.label} ${r.startTime} ${r.endTime} ${Object.keys(r.values).join(" ")}`,
           )}
-          onResults={setRows}
+          itemKeys={c.record.schedules.map((r) => r.id)}
+          onKeys={setRows}
           t={t}
         />
         <p>
           {t("Active rules")}: {c.activeSchedules.join(", ") || t("None")}
         </p>
         {!c.record.schedules.length && <p>{t("No schedules")}</p>}
-        {rows.map((i) => {
-          const r = c.record.schedules[i];
+        {resolveSearchRecords(rows, c.record.schedules).map((r: any) => {
+          const i = c.record.schedules.findIndex((item) => item.id === r.id);
           return (
             <article className="settings-record" key={r.id}>
               <h3>{r.label}</h3>
@@ -244,7 +250,7 @@ export function Schedules({
                       {
                         ...r,
                         id: crypto.randomUUID(),
-                        label: r.label + " (copy)",
+                        label: r.label.slice(0, 113) + " (copy)",
                       },
                     ])
                   }

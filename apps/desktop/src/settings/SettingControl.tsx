@@ -2,6 +2,12 @@ import React, { useState, useId, useRef, useEffect } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
 import { validateValue } from "./model.mjs";
+import {
+  settingInstanceId,
+  choiceAccessibleName,
+  parseNumericDraft,
+  resolveSearchRecords,
+} from "./interaction-model.mjs";
 import { preferenceProvenance } from "./record.mjs";
 import type { SettingsController } from "./store";
 import "@material/web/switch/switch.js";
@@ -13,17 +19,24 @@ export function Choice({
   options,
   onChange,
   t,
+  previewFont = false,
 }: {
   label: string;
   value: string;
   options: [string, string][];
   onChange: (v: string) => void;
   t: (s: string) => string;
+  previewFont?: boolean;
 }) {
   const [open, setOpen] = useState(false),
-    [matches, setMatches] = useState<number[]>([]);
+    [matches, setMatches] = useState<string[]>([]),
+    [page, setPage] = useState(0);
   const id = useId();
   const opener = useRef<HTMLElement | null>(null);
+  const choices = resolveSearchRecords(
+    matches,
+    options.map(([id, label]) => ({ id, label })),
+  );
   return (
     <div className="settings-choice">
       <span className="field-label">{label}</span>
@@ -32,6 +45,12 @@ export function Choice({
         {
           ref: opener,
           id,
+          "aria-label": choiceAccessibleName(
+            label,
+            value,
+            options,
+            t("Choose automatically"),
+          ),
           onClick: () => setOpen(!open),
           "aria-expanded": open,
           "aria-controls": `${id}-options`,
@@ -57,27 +76,63 @@ export function Choice({
             key={id}
             label={t("Search options")}
             items={options.map((x) => x[1])}
-            onResults={setMatches}
+            itemKeys={options.map(([id]) => id)}
+            onKeys={(ids) => {
+              setMatches(ids);
+              setPage(0);
+            }}
             t={t}
           />
           <div className="choice-options">
-            {matches.map((i) => (
+            {choices.slice(page * 50, (page + 1) * 50).map((option: any) => (
               <Button
                 secondary
-                key={options[i][0]}
+                key={option.id}
                 onClick={() => {
-                  onChange(options[i][0]);
+                  onChange(option.id);
                   setOpen(false);
                   opener.current?.focus();
                 }}
               >
-                {options[i][1]}
+                <span
+                  style={
+                    previewFont
+                      ? {
+                          fontFamily: `${JSON.stringify(option.id)},sans-serif`,
+                        }
+                      : undefined
+                  }
+                >
+                  {option.label}
+                </span>
               </Button>
             ))}
-            {matches.length === 0 && (
+            {choices.length === 0 && (
               <p role="status">{t("No matching options")}</p>
             )}
           </div>
+          {choices.length > 50 && (
+            <div className="actions">
+              <Button
+                secondary
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                {t("Previous")}
+              </Button>
+              <span role="status">
+                {page * 50 + 1}–{Math.min((page + 1) * 50, choices.length)} /{" "}
+                {choices.length}
+              </span>
+              <Button
+                secondary
+                disabled={(page + 1) * 50 >= choices.length}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                {t("Next")}
+              </Button>
+            </div>
+          )}
           <Button
             secondary
             onClick={() => {
@@ -124,13 +179,41 @@ function NumericInput({
       <Field
         label={t(d.label)}
         value={draft}
-        type="number"
+        type="text"
+        inputMode="decimal"
+        clearLabel={`${t("Clear field")}: ${t(d.label)}`}
         onChange={(text) => {
           setDraft(text);
-          onChange(text.trim() === "" ? Number.NaN : Number(text));
+          onChange(parseNumericDraft(text));
         }}
       />
     </div>
+  );
+}
+function DraftField({
+  definition: d,
+  value,
+  onChange,
+  t,
+}: {
+  definition: any;
+  value: string;
+  onChange: (value: string) => void;
+  t: (s: string) => string;
+}) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  return (
+    <Field
+      label={t(d.label)}
+      value={draft}
+      type={d.type === "time" ? "time" : "text"}
+      clearLabel={`${t("Clear field")}: ${t(d.label)}`}
+      onChange={(text) => {
+        setDraft(text);
+        onChange(text);
+      }}
+    />
   );
 }
 export function SettingInput({
@@ -170,6 +253,7 @@ export function SettingInput({
         }
         onChange={onChange}
         t={t}
+        previewFont={d.type === "font"}
       />
     );
   if (d.type === "color")
@@ -181,17 +265,10 @@ export function SettingInput({
           aria-label={t(d.label)}
           onChange={(e) => onChange(e.target.value)}
         />
-        <Field label={t(d.label)} value={value} onChange={onChange} />
+        <DraftField definition={d} value={value} onChange={onChange} t={t} />
       </div>
     );
-  return (
-    <Field
-      label={t(d.label)}
-      value={value}
-      onChange={onChange}
-      type={d.type === "time" ? "time" : "text"}
-    />
-  );
+  return <DraftField definition={d} value={value} onChange={onChange} t={t} />;
 }
 export function SettingControl({
   definition: d,
@@ -209,8 +286,9 @@ export function SettingControl({
     [sampleResult, setSampleResult] = useState(""),
     [error, setError] = useState(""),
     [resetVersion, setResetVersion] = useState(0);
+  const instance = useId();
   const info = useRef<HTMLElement | null>(null),
-    id = `setting-${d.key}`;
+    id = settingInstanceId(d.key, instance);
   const p = preferenceProvenance(c.record, d.key, c.preferences);
   const apply = (value: any) => {
     try {

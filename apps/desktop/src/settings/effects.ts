@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Preferences } from "./store";
 import { selectVoice, narrationAllowed } from "./messages.mjs";
+import { enqueueSpeechGroups, takeSpeechPart } from "./speech-queue.mjs";
 import { timeWindowMatches } from "./model.mjs";
 export function usePresentationEffects(prefs: Preferences) {
   useEffect(() => {
@@ -41,7 +42,9 @@ export function useNarrator(prefs: Preferences) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const prefsRef = useRef(prefs);
   prefsRef.current = prefs;
-  const queue = useRef<Array<{ text: string; language: string }>>([]),
+  const [speechStatus, setSpeechStatus] = useState("");
+  const activeGroup = useRef<string | null>(null);
+  const queue = useRef<any[]>([]),
     cooldown = useRef<Record<string, number>>({}),
     active = useRef(false);
   const supported =
@@ -66,7 +69,11 @@ export function useNarrator(prefs: Preferences) {
   }, [supported, prefs.narration, prefs.screenReaderMode]);
   function drain() {
     if (!supported || active.current || !queue.current.length) return;
-    const next = queue.current.shift()!;
+    const taken = takeSpeechPart(queue.current);
+    queue.current = taken.queue;
+    const next = taken.part;
+    if (!next) return;
+    activeGroup.current = taken.groupId;
     const p = prefsRef.current;
     const selection = selectVoice(
       window.speechSynthesis.getVoices(),
@@ -113,16 +120,34 @@ export function useNarrator(prefs: Preferences) {
     cooldown.current[kind] = now;
     const langs =
       p.narratorLanguage === "both" ? ["en", "yue"] : [p.narratorLanguage];
-    queue.current = langs.map((language) => ({
-      text: language === "en" ? en : yue,
-      language,
-    }));
+    const appended = enqueueSpeechGroups(
+      queue.current,
+      {
+        id: crypto.randomUUID(),
+        category: kind,
+        critical: kind === "error" || kind === "warning",
+        parts: langs.map((language) => ({
+          text: language === "en" ? en : yue,
+          language,
+        })),
+      },
+      activeGroup.current,
+    );
+    queue.current = appended.queue;
+    if (!appended.accepted) {
+      setSpeechStatus(
+        "The speech queue is full. Messages remain available in the notification centre.",
+      );
+      return false;
+    }
+    setSpeechStatus("");
     drain();
     return true;
   }
   return {
     supported,
     voices,
+    speechStatus,
     speak,
     stop: () => {
       if (supported) window.speechSynthesis.cancel();

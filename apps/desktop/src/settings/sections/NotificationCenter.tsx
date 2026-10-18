@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "../../components";
+import { resolveSearchRecords } from "../interaction-model.mjs";
 import { Search } from "../../Search";
 import type { SettingsController } from "../store";
 import { downloadText } from "./HistoryTransfer";
@@ -10,24 +11,27 @@ export function NotificationCenter({
   controller: SettingsController;
   t: (s: string) => string;
 }) {
-  const [rows, setRows] = useState<number[]>([]),
+  const [rows, setRows] = useState<string[]>([]),
     [selected, setSelected] = useState<string[]>([]),
     [undo, setUndo] = useState<string[]>([]),
     [unread, setUnread] = useState(false),
-    [last, setLast] = useState<number | null>(null);
+    [last, setLast] = useState<string | null>(null);
   const items = c.record.notices.filter((n) => !unread || !n.dismissed);
-  function select(index: number, checked: boolean, shift: boolean) {
-    let ids = [items[index].id];
-    if (shift && last !== null)
-      ids = items
-        .slice(Math.min(last, index), Math.max(last, index) + 1)
-        .map((x) => x.id);
+  const visibleRecords = resolveSearchRecords(rows, items);
+  function select(id: string, checked: boolean, shift: boolean) {
+    const index = visibleRecords.findIndex((item) => item.id === id);
+    const previous = visibleRecords.findIndex((item) => item.id === last);
+    let ids = [id];
+    if (shift && previous >= 0 && index >= 0)
+      ids = visibleRecords
+        .slice(Math.min(previous, index), Math.max(previous, index) + 1)
+        .map((item) => item.id);
     setSelected((old) =>
       checked
         ? [...new Set([...old, ...ids])]
-        : old.filter((id) => !ids.includes(id)),
+        : old.filter((key) => !ids.includes(key)),
     );
-    setLast(index);
+    setLast(id);
   }
   return (
     <section className="setting-card">
@@ -48,13 +52,14 @@ export function NotificationCenter({
       <Search
         label={t("Search notifications")}
         items={items.map((x) => `${x.kind} ${x.message} ${x.at}`)}
-        onResults={setRows}
+        itemKeys={items.map((n) => n.id)}
+        onKeys={setRows}
         t={t}
       />
       <div className="actions">
         <Button
           secondary
-          onClick={() => setSelected(rows.map((i) => items[i].id))}
+          onClick={() => setSelected(visibleRecords.map((n) => n.id))}
         >
           {t("Select all matches")}
         </Button>
@@ -62,8 +67,8 @@ export function NotificationCenter({
           secondary
           onClick={() =>
             setSelected(
-              rows
-                .map((i) => items[i].id)
+              visibleRecords
+                .map((n) => n.id)
                 .filter((id) => !selected.includes(id)),
             )
           }
@@ -120,11 +125,10 @@ export function NotificationCenter({
         </Button>
       </div>
       {!rows.length && <p>{t("No notifications")}</p>}
-      {rows
+      {visibleRecords
         .slice()
         .reverse()
-        .map((i) => {
-          const n = items[i];
+        .map((n: any) => {
           return (
             <article className="settings-record" key={n.id}>
               <label>
@@ -132,7 +136,7 @@ export function NotificationCenter({
                   type="checkbox"
                   checked={selected.includes(n.id)}
                   onClick={(e) =>
-                    select(i, !selected.includes(n.id), e.shiftKey)
+                    select(n.id, !selected.includes(n.id), e.shiftKey)
                   }
                   onChange={() => {}}
                 />

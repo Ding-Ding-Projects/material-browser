@@ -31,12 +31,16 @@ export function Field({
   onChange,
   type = "text",
   required = false,
+  clearLabel,
+  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (s: string) => void;
   type?: string;
   required?: boolean;
+  clearLabel?: string;
+  inputMode?: string;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const mode = document.documentElement.dataset.language;
@@ -50,14 +54,15 @@ export function Field({
       value,
       type,
       required,
+      inputMode,
       onInput: (e: Event) => onChange((e.target as HTMLInputElement).value),
     },
     React.createElement(
       "md-icon-button",
       {
         slot: "trailing-icon",
-        "aria-label": `${clear} ${label}`,
-        title: `${clear} ${label}`,
+        "aria-label": clearLabel || `${clear} ${label}`,
+        title: clearLabel || `${clear} ${label}`,
         onClick: () => {
           onChange("");
           ref.current?.focus();

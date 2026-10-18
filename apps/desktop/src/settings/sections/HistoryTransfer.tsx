@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Field } from "../../components";
 import { Search } from "../../Search";
+import { resolveSearchRecords } from "../interaction-model.mjs";
 import { Choice } from "../SettingControl";
 import { ConfirmAction } from "../ConfirmAction";
 import {
@@ -32,7 +33,7 @@ export function HistoryTransfer({
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
     [action, setAction] = useState(""),
-    [rows, setRows] = useState<number[]>([]),
+    [rows, setRows] = useState<string[]>([]),
     [selected, setSelected] = useState<string[]>([]);
   const filtered = c.record.revisions.filter(
     (r) =>
@@ -40,12 +41,13 @@ export function HistoryTransfer({
       (!to || r.at.slice(0, 10) <= to) &&
       (!action || r.action === action),
   );
+  const visibleRecords = resolveSearchRecords(rows, filtered);
   const actions = [...new Set(c.record.revisions.map((r) => r.action))];
   async function importFile(file: File) {
     try {
       if (file.size > 262144) throw Error("Import exceeds 256 KiB");
       const next = parseImport(await file.text());
-      setPending(next);
+      setPending({ ...next, action: "Imported preferences" });
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid import");
@@ -117,7 +119,7 @@ export function HistoryTransfer({
             <Button
               onClick={() => {
                 c.transact(
-                  "Imported preferences",
+                  pending.action || "Imported preferences",
                   pending.preferences,
                   pending.schedules,
                   Object.keys(pending.preferences),
@@ -142,22 +144,16 @@ export function HistoryTransfer({
         </p>
         <div className="actions">
           <Button
-            disabled={c.record.revisions.length < 2}
+            disabled={!c.record.undoStack.length}
             secondary
-            onClick={() => {
-              const r = c.record.revisions[c.record.revisions.length - 2];
-              c.transact("Undid latest change", r.preferences, r.schedules);
-            }}
+            onClick={c.undo}
           >
             {t("Undo latest change")}
           </Button>
           <Button
-            disabled={c.record.revisions.length < 2}
+            disabled={!c.record.redoStack.length}
             secondary
-            onClick={() => {
-              const r = c.record.revisions[c.record.revisions.length - 2];
-              c.transact("Restored previous state", r.preferences, r.schedules);
-            }}
+            onClick={c.redo}
           >
             {t("Redo previous state")}
           </Button>
@@ -195,13 +191,14 @@ export function HistoryTransfer({
         <Search
           label={t("Search history")}
           items={filtered.map((r) => `${r.at} ${r.action} ${r.keys.join(" ")}`)}
-          onResults={setRows}
+          itemKeys={filtered.map((r) => r.id)}
+          onKeys={setRows}
           t={t}
         />
         <div className="actions">
           <Button
             secondary
-            onClick={() => setSelected(rows.map((i) => filtered[i].id))}
+            onClick={() => setSelected(visibleRecords.map((r) => r.id))}
           >
             {t("Select all matches")}
           </Button>
@@ -209,8 +206,8 @@ export function HistoryTransfer({
             secondary
             onClick={() =>
               setSelected(
-                rows
-                  .map((i) => filtered[i].id)
+                visibleRecords
+                  .map((r) => r.id)
                   .filter((id) => !selected.includes(id)),
               )
             }
@@ -240,11 +237,10 @@ export function HistoryTransfer({
           </Button>
         </div>
         {!filtered.length && <p>{t("No recorded changes")}</p>}
-        {rows
+        {visibleRecords
           .slice()
           .reverse()
-          .map((i) => {
-            const r = filtered[i];
+          .map((r: any) => {
             return (
               <article key={r.id} className="settings-record">
                 <label>
@@ -264,7 +260,7 @@ export function HistoryTransfer({
                 <p>{new Date(r.at).toLocaleString()}</p>
                 <details>
                   <summary>{t("Changes")}</summary>
-                  {r.keys.map((k) => (
+                  {r.keys.map((k: string) => (
                     <p key={k}>
                       {k}: {String(r.preferences[k])}
                     </p>
@@ -276,6 +272,7 @@ export function HistoryTransfer({
                     setPending({
                       preferences: r.preferences,
                       schedules: r.schedules,
+                      action: "Restored revision",
                     })
                   }
                 >

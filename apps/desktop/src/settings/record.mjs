@@ -1,3 +1,4 @@
+import { validatedSnapshot } from "./history-model.mjs";
 import { validatePreferences, validateSchedule, defaults } from "./model.mjs";
 export function readPresentationRecord(raw, legacy = null) {
   const blank = {
@@ -7,6 +8,8 @@ export function readPresentationRecord(raw, legacy = null) {
     writtenKeys: [],
     schedules: [],
     revisions: [],
+    undoStack: [],
+    redoStack: [],
     notices: [],
     section: "language",
     snoozeUntil: 0,
@@ -94,6 +97,12 @@ export function readPresentationRecord(raw, legacy = null) {
     writtenKeys: data.writtenKeys,
     schedules,
     revisions,
+    undoStack:
+      data.undoStack === undefined
+        ? revisions.slice(0, -1).map(validatedSnapshot)
+        : data.undoStack.map(validatedSnapshot),
+    redoStack:
+      data.redoStack === undefined ? [] : data.redoStack.map(validatedSnapshot),
     notices,
     section: data.section,
     snoozeUntil: data.snoozeUntil,
@@ -109,4 +118,9 @@ export function preferenceProvenance(record, key, effective) {
     effectiveValue: effective[key],
     temporarilyOverridden: record.preferences[key] !== effective[key],
   };
+}
+
+export function readStoredPresentation(currentRaw, legacyRaw) {
+  if (currentRaw) return readPresentationRecord(currentRaw);
+  return readPresentationRecord(null, JSON.parse(legacyRaw || "null"));
 }

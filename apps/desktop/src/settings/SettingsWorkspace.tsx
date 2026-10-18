@@ -3,6 +3,7 @@ import { Button, Tabs } from "../components";
 import { Search } from "../Search";
 import { definitions, categories } from "./model.mjs";
 import { SettingControl } from "./SettingControl";
+import { revealSettingKeys } from "./interaction-model.mjs";
 import { SettingsTabs } from "./SettingsTabs";
 import { Schedules } from "./sections/Schedules";
 import { HistoryTransfer } from "./sections/HistoryTransfer";
@@ -76,9 +77,10 @@ export function SettingsWorkspace({
   onWordingFile: (f: File) => void;
   onClearWording: () => void;
 }) {
-  const [matches, setMatches] = useState<number[]>([]),
+  const [matches, setMatches] = useState<string[]>([]),
     [globalMatches, setGlobalMatches] = useState<number[]>([]),
-    [capRows, setCapRows] = useState<number[]>([]);
+    [capRows, setCapRows] = useState<number[]>([]),
+    [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [fonts, setFonts] = useState<
     Array<{ id: string; family: string; style: string }>
   >([]);
@@ -126,10 +128,13 @@ export function SettingsWorkspace({
       const key = (e as CustomEvent).detail;
       const d = definitions.find((x) => x.key === key);
       if (d) {
+        setRevealedKey(key);
         c.selectSection(d.category);
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
-            const el = document.getElementById(`setting-${key}`);
+            const el = document.querySelector<HTMLElement>(
+              `.settings-workspace [data-setting-id="${key}"]`,
+            );
             el?.scrollIntoView({ block: "center", behavior: "auto" });
             el?.focus();
             el?.classList.add("setting-highlight");
@@ -220,16 +225,29 @@ export function SettingsWorkspace({
               (d) =>
                 `${t(d.label)} ${t(d.help)} ${String(c.record.preferences[d.key])}`,
             )}
-            onResults={setMatches}
+            itemKeys={local.map((d) => d.key)}
+            onKeys={setMatches}
             t={t}
           />
           {local.length > 0 && !matches.length && (
             <p role="status">{t("No matching settings")}</p>
           )}
+          {revealedKey &&
+            !matches.includes(revealedKey) &&
+            local.some((d) => d.key === revealedKey) && (
+              <p role="status">
+                {t(
+                  "The requested setting is shown outside the current filter.",
+                )}{" "}
+                <Button secondary onClick={() => setRevealedKey(null)}>
+                  {t("Clear reveal")}
+                </Button>
+              </p>
+            )}
           <div className="settings-control-grid">
-            {matches
-              .map((i) => local[i])
-              .filter(Boolean)
+            {revealSettingKeys(matches, local, revealedKey)
+              .map((key: string) => local.find((d) => d.key === key))
+              .filter((d): d is NonNullable<typeof d> => d !== undefined)
               .map((d) => (
                 <SettingControl
                   key={d.key}
@@ -258,6 +276,9 @@ export function SettingsWorkspace({
             <>
               <section className="setting-card">
                 <h2>{t("Narration")}</h2>
+                {narrator.speechStatus && (
+                  <p role="status">{t(narrator.speechStatus)}</p>
+                )}
                 {!narrator.supported ? (
                   <p>
                     {t("Speech synthesis is unavailable on this platform.")}
