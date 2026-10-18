@@ -31,3 +31,16 @@ export function bindTabChanges(element, ids, onSelect) {
   element.addEventListener("change", changed);
   return () => element.removeEventListener("change", changed);
 }
+export async function initializeTabSelection(
+  element,
+  ids,
+  value,
+  isCurrent = () => true,
+) {
+  await element.updateComplete;
+  if (!isCurrent()) return false;
+  const index = ids.indexOf(value);
+  if (index < 0) return false;
+  element.activeTabIndex = index;
+  return true;
+}

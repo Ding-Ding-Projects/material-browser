@@ -1,7 +1,10 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
-import { bindTabChanges } from "./interaction-model.mjs";
+import {
+  bindTabChanges,
+  initializeTabSelection,
+} from "./interaction-model.mjs";
 import { Choice } from "./SettingControl";
 import { categories } from "./model.mjs";
 import {
@@ -67,6 +70,15 @@ export function SettingsTabs({
     if (!element) return;
     return bindTabChanges(element, displayedIds, onChange);
   }, [JSON.stringify(displayedIds), onChange]);
+  useEffect(() => {
+    const element = strip.current;
+    if (!element) return;
+    let current = true;
+    void initializeTabSelection(element, displayedIds, value, () => current);
+    return () => {
+      current = false;
+    };
+  }, [JSON.stringify(displayedIds), value]);
   function save(next: any) {
     try {
       const valid = validateTabs(next);
@@ -165,6 +177,7 @@ export function SettingsTabs({
                 "md-primary-tab",
                 {
                   key: id,
+                  onClick: () => onChange(id),
                   "aria-controls": `panel-${id}`,
                   style: state.membership[id]
                     ? {

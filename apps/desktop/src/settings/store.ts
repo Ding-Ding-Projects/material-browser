@@ -207,7 +207,8 @@ export function useSettings() {
     notify,
     persist,
     reset: (key: string) => update(key, (defaults as Preferences)[key]),
-    selectSection: (section: string) => persist((old) => ({ ...old, section })),
+    selectSection: (section: string) =>
+      persist((old) => (old.section === section ? old : { ...old, section })),
     dismiss: (ids: string[]) =>
       persist((old) => ({
         ...old,

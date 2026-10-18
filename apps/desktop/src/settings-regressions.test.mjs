@@ -214,3 +214,22 @@ test("R10 explicit custom-element change binding selects the workspace and detac
   element.dispatchEvent(new Event("change"));
   assert.deepEqual(selected, ["history"]);
 });
+import { initializeTabSelection } from "./settings/interaction-model.mjs";
+test("R11 deferred tab children receive the selected value before the first change", async () => {
+  const element = { activeTabIndex: -1, updateComplete: Promise.resolve() };
+  assert.equal(
+    await initializeTabSelection(element, ["language", "history"], "language"),
+    true,
+  );
+  assert.equal(element.activeTabIndex, 0);
+  assert.equal(
+    await initializeTabSelection(
+      element,
+      ["language", "history"],
+      "history",
+      () => false,
+    ),
+    false,
+  );
+  assert.equal(element.activeTabIndex, 0);
+});
