@@ -30,6 +30,10 @@ async function close() {
     process.stderr.write('Graceful adapter shutdown is unavailable\n');
     return;
   }
+  // A reconnecting BiDi client has no native process wait in browser.close().
+  // Keep the original launch process and its exit hooks alive until the native
+  // supervisor proves that the browser and all descendants have actually exited.
+  if (firefoxEndpoint) return;
   process.exit(0);
 }
 process.on('SIGTERM', close);
