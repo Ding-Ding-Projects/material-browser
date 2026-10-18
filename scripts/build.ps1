@@ -4,10 +4,25 @@ param(
   [switch]$AcquireOnly
 )
 $ErrorActionPreference='Stop'
+# A batch launch can inherit module paths for a different PowerShell edition.
+# Resolve the built-in utility manifest from this host before invoking helpers.
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -Global -Force -ErrorAction Stop
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
-  if($Component -eq 'DocsCompanion') { & (Join-Path $root 'apps/docs-companion/scripts/ensure-node.ps1') }
+  if($Component -in @('All','Desktop','DocsCompanion')) {
+    & (Join-Path $root 'apps/docs-companion/scripts/ensure-node.ps1')
+  }
+  if($Component -in @('All','Desktop')) {
+    $historyRuntimeJson = & (Join-Path $root 'scripts/ensure-history-git.ps1') | Out-String
+    $historyRuntime = $historyRuntimeJson | ConvertFrom-Json
+    if($historyRuntime.schemaVersion -ne 1 -or $historyRuntime.payloadFileCount -ne 373 -or
+       $historyRuntime.version -cne '2.56.0.windows.2' -or
+       -not [IO.Path]::IsPathRooted($historyRuntime.gitExecutable)) {
+      throw 'The verified history runtime descriptor is invalid.'
+    }
+    Write-Host 'Verified portable history runtime: Git for Windows 2.56.0.windows.2, 373 files.'
+  }
   if($Component -in @('All','Core','Engine','Host')) {
     if(-not (Get-Command cargo -ErrorAction SilentlyContinue)){throw 'Rust is required. Bootstrap is not yet available on this host.'}
     $packages=@{Core='material-browser-core';Engine='material-browser-engine';Host='material-browser'}

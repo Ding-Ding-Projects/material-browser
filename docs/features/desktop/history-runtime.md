@@ -60,8 +60,14 @@ runtime. It is not a version-command or installation proof.
 
 ## Integration boundary
 
-The owning build should call the acquisition script before Desktop compilation or
-packaging, parse its descriptor and retain the complete verified payload. Forge's
+Root `build.bat -Component Desktop` and the Desktop portion of `All` now call the
+acquisition script, validate its descriptor and retain the complete verified payload
+before compilation. Desktop installer production reaches the same route through
+`build-installer.bat`. The root build also reuses the verified Node bootstrap.
+It explicitly loads the current PowerShell host's built-in utility manifest, so
+a batch launch inheriting another PowerShell edition's module paths does not lose
+the hashing command. This route passed on the current supported host; it is not a
+fresh-operating-system or installed-product claim. Forge's
 `packagerConfig.extraResource` accepts paths, not builder-style `{from,to}` objects.
 For example, adding the verified version directory and the lock JSON as resource
 paths preserves the directory basename `v2.56.0.windows.2` in the packaged resources.
@@ -78,9 +84,8 @@ inventory verification does not replace it. Filesystem checks and later executio
 are separate operations, so this alone does not prove resistance to concurrent
 same-user payload replacement.
 
-This slice intentionally does not modify the root build, Forge configuration,
-main process or preload. Their wiring, packaged-resource verification, built
-Settings interactions and installed-package acceptance remain separate work.
+Forge resources, trusted main-process resolution, packaged-resource verification,
+built Settings interactions and installed-package acceptance remain separate work.
 
 ## Verification
 
