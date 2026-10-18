@@ -40,7 +40,7 @@ lines.on('line', async line => {
       browser = await puppeteer.launch({ browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
         protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
         userDataDir: config.profile, headless: false, pipe: false,
-        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1'] : [], timeout: 20000 });
+        args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : [], timeout: 20000 });
       version = (await browser.version()).replace(/^[^/]+\//, '');
       pid = browser.process()?.pid;
       endpoint = {mode:config.mode, protocol:config.engine === 'chromium' ? 'cdp' : 'bidi', url:browser.wsEndpoint(), sessionId:null};
