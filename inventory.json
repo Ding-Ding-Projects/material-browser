@@ -1,0 +1,26 @@
+{
+  "source": "b9b892bd495ae736b6c84d4bd844c1025e71a52b",
+  "articles": [
+    "docs/architecture.md",
+    "docs/evidence/desktop/README.md",
+    "docs/evidence/storage-wizard/README.md",
+    "docs/features/api/README.md",
+    "docs/features/desktop/README.md",
+    "docs/features/desktop/native-settings-services.md",
+    "docs/features/documentation/README.md",
+    "docs/features/engines/README.md",
+    "docs/features/engines/native-automation-verification.md",
+    "docs/features/storage/README.md",
+    "docs/features/storage/api.md",
+    "docs/features/storage/dashboard.md",
+    "docs/features/storage/hosting.md",
+    "docs/features/vault/README.md",
+    "wiki/API-and-CLI.md",
+    "wiki/Automation.md",
+    "wiki/Getting-started.md",
+    "wiki/Home.md",
+    "wiki/Snapshots-and-conflicts.md",
+    "wiki/Storage.md",
+    "wiki/Vault-and-computers.md"
+  ]
+}
