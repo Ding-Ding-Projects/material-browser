@@ -87,3 +87,11 @@ test('display-name mutations require independent authentication, reject stale st
   const files=await fs.readdir(path.join(f.options.historyRoot,'repository/events'));for(const name of files)assert.ok(!(await fs.readFile(path.join(f.options.historyRoot,'repository/events',name),'utf8')).includes('A private display name'));
  }finally{await f.dispose();}
 });
+test('protected write and recovery never apply before a successful preparation commit',async()=>{
+ const f=await fixture();try{
+  await f.service.setup('fixture-only-password');const broken=createHistoryService({...f.options,gitSha256:'0'.repeat(64)});await broken.unlock('fixture-only-password');let applies=0;
+  const result=await broken.transactDisplayName({before:null,after:'Protected fixture name',action:'created'},()=>{applies++;});assert.equal(result.ok,false);assert.equal(applies,0);
+  assert.equal((await broken.recover('retry',()=>{applies++;})).ok,false);assert.equal(applies,0);
+  assert.equal((await f.service.recover('retry',()=>{applies++;})).recovered,true);assert.equal(applies,1);
+ }finally{await f.dispose();}
+});
