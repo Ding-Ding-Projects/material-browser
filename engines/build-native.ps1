@@ -65,6 +65,35 @@ function ChromiumProviderOverlay([string]$Path) {
   }
   Write-Output 'Staged Chromium v2 profile key provider. Production broker and portability remain unverified and disabled.'
 }
+function EnsureChromiumSdk {
+  $sdk=Join-Path ${env:ProgramFiles(x86)} 'Windows Kits/10'
+  $required=@('Include/10.0.28000.0/um/Windows.h','Include/10.0.28000.0/ucrt/stdio.h','Lib/10.0.28000.0/um/x64/kernel32.lib','Lib/10.0.28000.0/um/x86/kernel32.lib','Lib/10.0.28000.0/ucrt/x64/ucrt.lib','Debuggers/x64/dbghelp.dll')
+  $missing=@($required | Where-Object {-not (Test-Path (Join-Path $sdk $_))})
+  if(-not $missing.Count){Write-Output 'Required Windows SDK 28000 headers, libraries and debugging tools are present.';return}
+  Write-Output "Required SDK inputs missing: $($missing -join ', ')"
+  $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+  $principal=[Security.Principal.WindowsPrincipal]::new($identity)
+  if(-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
+    Write-Output 'The verified SDK requires native elevation. Relaunching the exact root entrypoint; the owner supplies UAC consent.'
+    $rootBuild=Join-Path (Split-Path $PSScriptRoot -Parent) 'build.bat'
+    $elevated=Start-Process -FilePath $rootBuild -Verb RunAs -ArgumentList @('-Component','BrowserNative','-NativeEngine','chromium') -WindowStyle Hidden -PassThru -Wait
+    if($elevated.ExitCode -ne 0){throw "Elevated native root entrypoint did not complete: $($elevated.ExitCode)"}
+    exit 0
+  }
+  $sdkCache=Join-Path $base 'windows-sdk-28000.2957'
+  New-Item -ItemType Directory -Path $sdkCache -Force | Out-Null
+  $installer=Join-Path $sdkCache 'winsdksetup.exe'
+  if(-not (Test-Path $installer)){Invoke-WebRequest -UseBasicParsing 'https://download.microsoft.com/download/e6cfffdc-0d3e-4c6c-96d7-d491da459a07/KIT_BUNDLE_WINDOWSSDK_MEDIACREATION/winsdksetup.exe' -OutFile $installer}
+  if((FileSha256 $installer) -ne 'e8e264aca8bc34abdf592352bf09f986a85cdb96db0efba405ca9e149181fe61'){throw 'Windows SDK installer hash mismatch'}
+  $signature=Get-AuthenticodeSignature $installer
+  if($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'CN=Microsoft Corporation,'){throw 'Windows SDK installer publisher verification failed'}
+  if((Get-Item $installer).VersionInfo.ProductVersion -ne '10.1.28000.2957'){throw 'Windows SDK installer version mismatch'}
+  $installation=Start-Process -FilePath $installer -ArgumentList @('/quiet','/norestart','/ceip','off','/features','OptionId.WindowsDesktopSoftwareDevelopmentKit','OptionId.WindowsDesktopDebuggers') -WindowStyle Hidden -PassThru -Wait
+  if($installation.ExitCode -in @(3010,1641)){throw "Windows SDK installation requires a restart; native build remains incomplete ($($installation.ExitCode)). No restart was initiated."}
+  if($installation.ExitCode -ne 0){throw "Windows SDK installation did not complete: $($installation.ExitCode)"}
+  foreach($relative in $required){if(-not (Test-Path (Join-Path $sdk $relative))){throw "SDK installer exited zero but required input is missing: $relative"}}
+  Write-Output "Verified required Windows SDK inputs and debugging tools. Debugger version: $((Get-Item (Join-Path $sdk 'Debuggers/x64/dbghelp.dll')).VersionInfo.FileVersion)"
+}
 function FirefoxBackendOverlay([string]$Path,[switch]$CheckOnly) {
   $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-build-backend.json') -Raw | ConvertFrom-Json
   $patchPath=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
@@ -202,6 +231,7 @@ if($Engine -eq 'chromium'){
   $vs=& $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
   if(-not $vs){throw 'Visual Studio C++ tools are required.'}
   $env:vs2026_install=$vs
+  if(-not $AcquireOnly){EnsureChromiumSdk}
   Push-Location $nativeRoot
   try {
     # These optional branded x86 updater test fixtures are not used by x64 chrome.
