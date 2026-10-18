@@ -358,8 +358,9 @@ impl Supervisor {
             .ok_or_else(|| err("PROFILE_NOT_RUNNING", "No owned process"))?;
         if p.adapter {
             use std::io::Write;
-            let helper_only = if let Some(child) = p.child.as_ref() {
-                !lifetime::is_alive(&p.identity)? && p._job.process_ids()? == vec![child.id()]
+            let helper_only = if let Some(child) = p.child.as_mut() {
+                child.try_wait().map_err(io)?.is_none()
+                    && !lifetime::is_alive(&p.identity)? && p._job.process_ids()? == vec![child.id()]
             } else { false };
             let command: &[u8] = if helper_only {
                 // This trusted stdin command is permitted only after native
