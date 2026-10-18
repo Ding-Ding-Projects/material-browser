@@ -7,9 +7,10 @@ const dataArguments = process.argv.filter((value) => value.startsWith("--materia
 if (dataArguments.length > 1) throw new Error("INVALID_DATA_DIRECTORY");
 if (dataArguments.length === 1) {
   const directory = dataArguments[0].slice("--material-data-dir=".length);
-  if (!path.isAbsolute(directory) || directory.includes("\0") || path.parse(directory).root === directory)
+  const resolved = path.resolve(directory);
+  if (!path.isAbsolute(directory) || directory.includes("\0") || path.parse(resolved).root === resolved)
     throw new Error("INVALID_DATA_DIRECTORY");
-  app.setPath("userData", path.resolve(directory));
+  app.setPath("userData", resolved);
 }
 const allowed = new Set([
   "system.status",

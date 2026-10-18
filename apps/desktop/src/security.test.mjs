@@ -5,15 +5,15 @@ import vm from 'node:vm';
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
 
-function fixture({ argv = [], destroyed = false } = {}) {
+function fixture({ argv = [], destroyed = false, contentsDestroyed = destroyed } = {}) {
   const handlers = new Map();
   let options;
   let dataDirectory;
   let sent = 0;
   const contents = {
     mainFrame: {},
-    isDestroyed: () => destroyed,
-    send() { if (destroyed) throw new Error('Object has been destroyed'); sent++; },
+    isDestroyed: () => contentsDestroyed,
+    send() { if (destroyed || contentsDestroyed) throw new Error('Object has been destroyed'); sent++; },
     setWindowOpenHandler(fn) { this.popup = fn; },
     on() {},
   };
@@ -73,6 +73,9 @@ test('late host exit never sends into a destroyed window', () => {
   const closed = fixture({ destroyed: true });
   assert.doesNotThrow(() => closed.host.emit('exit', 0));
   assert.equal(closed.sent(), 0);
+  const contentsOnly = fixture({ contentsDestroyed: true });
+  assert.doesNotThrow(() => contentsOnly.host.emit('exit', 0));
+  assert.equal(contentsOnly.sent(), 0);
   const live = fixture();
   live.host.emit('exit', 1);
   assert.equal(live.sent(), 1);
@@ -84,6 +87,8 @@ test('explicit data directory accepts only one absolute non-root directory', () 
   for (const argv of [
     ['--material-data-dir=relative'], ['--material-data-dir='],
     [`--material-data-dir=${path.parse(directory).root}`],
+    [`--material-data-dir=${path.join(path.parse(directory).root, 'unused')}\\..`],
+    ...(process.platform === 'win32' ? [['--material-data-dir=\\\\server\\share\\child\\..'], ['--material-data-dir=C:/unused/..']] : []),
     [`--material-data-dir=${directory}`, `--material-data-dir=${directory}`],
   ]) assert.throws(() => fixture({ argv }), /INVALID_DATA_DIRECTORY/);
 });
