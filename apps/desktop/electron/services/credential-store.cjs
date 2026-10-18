@@ -2,6 +2,29 @@
 const {spawn} = require('node:child_process');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const LOCK_HELPER=String.raw`
+$ErrorActionPreference='Stop'
+$r=[Console]::In.ReadLine()|ConvertFrom-Json
+if($r.id -notmatch '^[a-f0-9]{64}$' -or $r.timeout -lt 50 -or $r.timeout -gt 30000){exit 2}
+$mutex=New-Object System.Threading.Mutex($false,('Local\MaterialBrowser.SettingsHistory.'+$r.id))
+$held=$false
+try {try{$held=$mutex.WaitOne([int]$r.timeout)}catch [System.Threading.AbandonedMutexException]{$held=$true};if(-not $held){exit 3};[Console]::Out.WriteLine('LOCKED');[Console]::Out.Flush();[void][Console]::In.ReadLine()}finally{if($held){$mutex.ReleaseMutex()};$mutex.Dispose()}
+`;
+async function withNativeLock(id,callback,{timeoutMs=30000}={}) {
+  if(process.platform!=='win32'||!/^[a-f0-9]{64}$/.test(id)||typeof callback!=='function')throw new Error('HISTORY_LOCK_UNAVAILABLE');
+  if(!Number.isInteger(timeoutMs)||timeoutMs<50||timeoutMs>30000)throw new Error('INVALID_LOCK_TIMEOUT');
+  const child=spawn(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',LOCK_HELPER],{windowsHide:true,shell:false,stdio:['pipe','pipe','ignore']});
+  let held=false,lost=false,output='';
+  child.on('exit',()=>{lost=true;});child.stdin.on('error',()=>{lost=true;});
+  try {
+    await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(new Error('HISTORY_LOCK_TIMEOUT'));},timeoutMs+2000);const fail=()=>{clearTimeout(timer);reject(new Error('HISTORY_LOCK_UNAVAILABLE'));};child.once('error',fail);child.once('exit',()=>{if(!held)fail();});child.stdout.on('data',chunk=>{output+=chunk.toString('utf8');if(output.length>128){child.kill();fail();}else if(output==='LOCKED\r\n'||output==='LOCKED\n'){held=true;clearTimeout(timer);resolve();}});child.stdin.write(JSON.stringify({id,timeout:timeoutMs})+'\n');});
+    const assertHeld=()=>{if(lost||!held)throw new Error('HISTORY_LOCK_LOST');};assertHeld();
+    return await callback({assertHeld});
+  } finally {
+    held=false;child.stdin.end('\n');
+    if(!lost)await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill();resolve();},2000);child.once('exit',()=>{clearTimeout(timer);resolve();});});
+  }
+}
 // The helper accepts only this application's targets and exchanges values over pipes.
 const HELPER = String.raw`
 $ErrorActionPreference='Stop'
@@ -50,8 +73,10 @@ function createCredentialStore(options = {}) {
   return Object.freeze({
     async withKey(callback, {create = false} = {}) {
       if(typeof callback!=='function')throw new Error('INVALID_KEY_CALLBACK');
-      let response=await execute('read');
-      if(response.missing && create) {const generated=crypto.randomBytes(32);try{await execute('write',generated);}finally{generated.fill(0);}response=await execute('read');}
+      let response=await withNativeLock(crypto.createHash('sha256').update('credential:'+target).digest('hex'),async lease=>{
+        let found=await execute('read');lease.assertHeld();
+        if(found.missing&&create){const generated=crypto.randomBytes(32);try{lease.assertHeld();await execute('write',generated);}finally{generated.fill(0);}found=await execute('read');lease.assertHeld();}return found;
+      });
       if(response.missing)throw new Error('HISTORY_KEY_MISSING');
       const key=Buffer.from(response.value || '', 'base64');response.value='';
       if(key.length!==32){key.fill(0);throw new Error('HISTORY_KEY_INVALID');}
@@ -61,4 +86,4 @@ function createCredentialStore(options = {}) {
     async deleteTestKey(){if(!namespace.startsWith('test-'))throw new Error('INVALID_CREDENTIAL_OPERATION');await execute('delete');}
   });
 }
-module.exports={createCredentialStore};
+module.exports={createCredentialStore,withNativeLock};
