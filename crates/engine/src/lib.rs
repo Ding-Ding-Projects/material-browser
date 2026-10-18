@@ -179,13 +179,26 @@ pub struct ProcessStatus {
     pub engine_version: String,
 }
 struct OwnedProcess {
-    child: Child,
+    child: Option<Child>,
     status: ProcessStatus,
     _lock: File,
     adapter: bool,
     endpoint: Option<AutomationEndpoint>,
     _job: process_job::ProcessJob,
     identity: lifetime::ProcessIdentity,
+}
+impl OwnedProcess {
+    fn reap_child(&mut self) -> Result<bool> {
+        let exited = match self.child.as_mut() {
+            Some(child) => child.try_wait().map_err(io)?.is_some(),
+            None => true,
+        };
+        if exited {
+            // Close only the exact owned child handle after its exit is proven.
+            drop(self.child.take());
+        }
+        Ok(exited)
+    }
 }
 /// Keep this lease alive for the entire snapshot, restore, or removal operation.
 pub struct ProfileLease {
@@ -308,7 +321,7 @@ impl Supervisor {
         self.processes.insert(
             request.profile_id,
             OwnedProcess {
-                child,
+                child: Some(child),
                 status: status.clone(),
                 _lock: lock,
                 adapter,
@@ -326,6 +339,7 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
+            p.reap_child()?;
             if !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
                 exited.push(id.clone());
             }
@@ -345,6 +359,8 @@ impl Supervisor {
         if p.adapter {
             use std::io::Write;
             p.child
+                .as_mut()
+                .ok_or_else(|| err("ADAPTER_IO", "Adapter has already exited"))?
                 .stdin
                 .as_mut()
                 .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
@@ -353,7 +369,7 @@ impl Supervisor {
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
         while Instant::now() < until {
-            if p.child.try_wait().map_err(io)?.is_some() && !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
+            if p.reap_child()? && !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
                 self.processes.remove(id);
                 return Ok(());
             }
@@ -361,7 +377,7 @@ impl Supervisor {
                 // Launch can return before Chromium creates its first top-level window.
                 // Keep requesting graceful close within the caller's bound rather than
                 // treating the first empty enumeration as a terminal failure.
-                match request_close(p.child.id()) {
+                match request_close(p.status.pid) {
                     Ok(()) => {}
                     Err(e) if e.code == "GRACEFUL_STOP_UNAVAILABLE" => {}
                     Err(e) => return Err(e),
@@ -478,17 +494,17 @@ mod tests {
             let job = process_job::ProcessJob::attach(&mut helper, true).unwrap();
             lifetime::persist(&root, id, &lifetime::Journal::Running { identity: identity.clone() }).unwrap();
             supervisor.processes.insert(id.into(), OwnedProcess {
-                child: helper, status: ProcessStatus { profile_id: id.into(), pid: native.id(), engine: EngineKind::Chromium,
+                child: Some(helper), status: ProcessStatus { profile_id: id.into(), pid: native.id(), engine: EngineKind::Chromium,
                     effective_mode: AutomationMode::Puppeteer, engine_version: "synthetic".into() },
                 _lock: lease._lock, adapter: true, endpoint: None, _job: job, identity,
             });
             assert_eq!(supervisor.stop(id, Duration::from_millis(500)).unwrap_err().code, "GRACEFUL_STOP_UNAVAILABLE");
             // The helper read shutdown and exited, while the native identity is still alive.
             let until = Instant::now() + Duration::from_secs(5);
-            while supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_none() && Instant::now() < until {
+            while !supervisor.processes.get_mut(id).unwrap().reap_child().unwrap() && Instant::now() < until {
                 std::thread::sleep(Duration::from_millis(25));
             }
-            assert!(supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_some());
+            assert!(supervisor.processes.get(id).unwrap().child.is_none());
             assert_eq!(supervisor.status().unwrap().len(), 1);
             assert!(supervisor.acquire_profile_idle(id).is_err());
         }));

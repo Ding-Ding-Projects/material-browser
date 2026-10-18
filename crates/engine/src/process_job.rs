@@ -143,6 +143,19 @@ mod tests {
     use super::*;
     use std::os::windows::process::CommandExt;
     #[test]
+    fn owned_job_is_empty_after_native_exit_with_retained_child_handle() {
+        let mut child = Command::new("cmd.exe").args(["/d", "/c", "exit", "0"])
+            .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
+            .creation_flags(0x08000004).spawn().unwrap();
+        let job = ProcessJob::attach(&mut child, true).unwrap();
+        assert!(child.wait().unwrap().success());
+        assert!(!job.is_empty().unwrap(), "Retaining the exited Child keeps it accounted in the job");
+        drop(child);
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !job.is_empty().unwrap() && Instant::now() < deadline { std::thread::sleep(Duration::from_millis(25)); }
+        assert!(job.is_empty().unwrap(), "Exited process objects must not count as active job members");
+    }
+    #[test]
     fn owned_job_remains_active_after_launcher_exits_with_a_contained_child() {
         let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
             .join("System32/WindowsPowerShell/v1.0/powershell.exe");
@@ -152,6 +165,9 @@ mod tests {
             .creation_flags(0x08000004).spawn().unwrap();
         let job = ProcessJob::attach(&mut launcher, true).unwrap();
         assert!(launcher.wait().unwrap().success());
+        drop(launcher);
+        // Unlike a retained launcher object, this must still hold a live child.
+        std::thread::sleep(Duration::from_millis(100));
         assert!(!job.is_empty().unwrap(), "Launcher exit cannot prove contained child exit");
         // The exact private test job owns the remaining child and closes it on drop.
         drop(job);
