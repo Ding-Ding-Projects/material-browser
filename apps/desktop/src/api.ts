@@ -11,6 +11,10 @@ export type Profile = {
 export type Bridge = {
   request: (method: string, params?: Record<string, unknown>) => Promise<any>;
   chooseDirectory: () => Promise<string | null>;
+  settingsService: (
+    operation: string,
+    params?: Record<string, unknown>,
+  ) => Promise<any>;
   onEvent: (listener: (event: unknown) => void) => () => void;
 };
 declare global {

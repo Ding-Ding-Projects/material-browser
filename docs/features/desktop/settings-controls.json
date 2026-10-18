@@ -1,0 +1,1475 @@
+{
+  "schemaVersion": 1,
+  "baseline": "193861b",
+  "complete": false,
+  "controls": [
+    {
+      "id": "language",
+      "section": "language",
+      "label": "Language",
+      "purpose": "Choose the language used throughout the workspace. Technical values and stored records are not translated.",
+      "type": "select",
+      "default": "en",
+      "options": [
+        [
+          "en",
+          "English"
+        ],
+        [
+          "yue",
+          "廣東話"
+        ],
+        [
+          "both",
+          "English · 廣東話"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.language",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-language",
+        "entry": "info-language",
+        "placement": "above-control",
+        "example": "en",
+        "playground": "sample-language",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-language",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "funnyEnglish",
+      "section": "language",
+      "label": "English message style",
+      "purpose": "Level 1 is direct and serious. Level 5 adds playful context. Actions, counts and errors retain the same facts.",
+      "type": "number",
+      "default": 5,
+      "options": null,
+      "bounds": {
+        "min": 1,
+        "max": 5,
+        "step": 1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.funnyEnglish",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-funnyEnglish",
+        "entry": "info-funnyEnglish",
+        "placement": "above-control",
+        "example": 5,
+        "playground": "sample-funnyEnglish",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-funnyEnglish",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "funnyCantonese",
+      "section": "language",
+      "label": "Cantonese message style",
+      "purpose": "This controls Cantonese messages independently from English. Both style levels start at 5.",
+      "type": "number",
+      "default": 5,
+      "options": null,
+      "bounds": {
+        "min": 1,
+        "max": 5,
+        "step": 1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.funnyCantonese",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-funnyCantonese",
+        "entry": "info-funnyCantonese",
+        "placement": "above-control",
+        "example": 5,
+        "playground": "sample-funnyCantonese",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-funnyCantonese",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "dialogEmoji",
+      "section": "language",
+      "label": "Show dialog decorations",
+      "purpose": "Add one relevant decorative symbol to dialog messages. Action labels and accessible names stay factual.",
+      "type": "boolean",
+      "default": true,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.dialogEmoji",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-dialogEmoji",
+        "entry": "info-dialogEmoji",
+        "placement": "above-control",
+        "example": true,
+        "playground": "sample-dialogEmoji",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-dialogEmoji",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "narration",
+      "section": "language",
+      "label": "Narrate application messages",
+      "purpose": "Speak non-sensitive application status messages only after you enable this. Passwords and imported wording are never read aloud.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.narration",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-narration",
+        "entry": "info-narration",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-narration",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-narration",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "narratorLanguage",
+      "section": "language",
+      "label": "Narration language",
+      "purpose": "Both languages are spoken in order, never simultaneously. Missing voices are reported rather than substituted with an unrelated language.",
+      "type": "select",
+      "default": "en",
+      "options": [
+        [
+          "en",
+          "English"
+        ],
+        [
+          "yue",
+          "廣東話"
+        ],
+        [
+          "both",
+          "English then Cantonese"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.narratorLanguage",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-narratorLanguage",
+        "entry": "info-narratorLanguage",
+        "placement": "above-control",
+        "example": "en",
+        "playground": "sample-narratorLanguage",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-narratorLanguage",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "voiceEnglish",
+      "section": "language",
+      "label": "English voice",
+      "purpose": "Choose a voice reported by this computer. Automatic selection uses an available local English voice when possible.",
+      "type": "voice",
+      "default": "",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.voiceEnglish",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-voiceEnglish",
+        "entry": "info-voiceEnglish",
+        "placement": "above-control",
+        "example": "",
+        "playground": "sample-voiceEnglish",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-voiceEnglish",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "voiceCantonese",
+      "section": "language",
+      "label": "Cantonese voice",
+      "purpose": "Choose a Hong Kong Cantonese voice reported by this computer. A saved but missing voice remains selected and its fallback is stated.",
+      "type": "voice",
+      "default": "",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.voiceCantonese",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-voiceCantonese",
+        "entry": "info-voiceCantonese",
+        "placement": "above-control",
+        "example": "",
+        "playground": "sample-voiceCantonese",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-voiceCantonese",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "speechRate",
+      "section": "language",
+      "label": "Speech rate",
+      "purpose": "Adjust the platform speech rate. One is normal delivery; unavailable speech synthesis remains explicitly unavailable.",
+      "type": "number",
+      "default": 1,
+      "options": null,
+      "bounds": {
+        "min": 0.1,
+        "max": 2,
+        "step": 0.1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.speechRate",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-speechRate",
+        "entry": "info-speechRate",
+        "placement": "above-control",
+        "example": 1,
+        "playground": "sample-speechRate",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-speechRate",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "speechPitch",
+      "section": "language",
+      "label": "Speech pitch",
+      "purpose": "Adjust the platform speech pitch between zero and two. One is the normal voice pitch.",
+      "type": "number",
+      "default": 1,
+      "options": null,
+      "bounds": {
+        "min": 0,
+        "max": 2,
+        "step": 0.1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.speechPitch",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-speechPitch",
+        "entry": "info-speechPitch",
+        "placement": "above-control",
+        "example": 1,
+        "playground": "sample-speechPitch",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-speechPitch",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "screenReaderMode",
+      "section": "language",
+      "label": "Yield narration to a screen reader",
+      "purpose": "Suppress automatic application narration while using assistive speech. Browser rendering cannot reliably detect every screen reader, so this explicit choice is preserved.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.screenReaderMode",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts and settings/messages.ts"
+      },
+      "guide": {
+        "id": "help-screenReaderMode",
+        "entry": "info-screenReaderMode",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-screenReaderMode",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-screenReaderMode",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "theme",
+      "section": "appearance",
+      "label": "Theme",
+      "purpose": "Apply a light or dark palette immediately. A matching schedule can temporarily override this base choice.",
+      "type": "select",
+      "default": "light",
+      "options": [
+        [
+          "light",
+          "Light"
+        ],
+        [
+          "dark",
+          "Dark"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.theme",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-theme",
+        "entry": "info-theme",
+        "placement": "above-control",
+        "example": "light",
+        "playground": "sample-theme",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-theme",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "density",
+      "section": "appearance",
+      "label": "Density",
+      "purpose": "Change spacing without removing controls. Larger accessibility targets still take precedence.",
+      "type": "select",
+      "default": "comfortable",
+      "options": [
+        [
+          "comfortable",
+          "Comfortable"
+        ],
+        [
+          "compact",
+          "Compact"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.density",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-density",
+        "entry": "info-density",
+        "placement": "above-control",
+        "example": "comfortable",
+        "playground": "sample-density",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-density",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "accent",
+      "section": "appearance",
+      "label": "Accent",
+      "purpose": "Choose the primary accent with the continuous native color selector or exact hexadecimal entry. Full multi-space color conversion remains incomplete.",
+      "type": "color",
+      "default": "#475f99",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.accent",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-accent",
+        "entry": "info-accent",
+        "placement": "above-control",
+        "example": "#475f99",
+        "playground": "sample-accent",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": "clear-accent",
+      "reset": "reset-accent",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "fontFamily",
+      "section": "appearance",
+      "label": "Interface font",
+      "purpose": "Select a platform font family with a CJK-safe fallback. Installed-font enumeration and variable-axis editing are not yet available.",
+      "type": "select",
+      "default": "system",
+      "options": [
+        [
+          "system",
+          "System interface"
+        ],
+        [
+          "sans-serif",
+          "Generic sans-serif"
+        ],
+        [
+          "serif",
+          "Generic serif"
+        ],
+        [
+          "monospace",
+          "Generic monospace"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.fontFamily",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-fontFamily",
+        "entry": "info-fontFamily",
+        "placement": "above-control",
+        "example": "system",
+        "playground": "sample-fontFamily",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-fontFamily",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "fontScale",
+      "section": "appearance",
+      "label": "Interface text scale",
+      "purpose": "Scale interface typography immediately. Accessibility text scaling combines with this value.",
+      "type": "number",
+      "default": 1,
+      "options": null,
+      "bounds": {
+        "min": 0.8,
+        "max": 1.6,
+        "step": 0.05
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.fontScale",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-fontScale",
+        "entry": "info-fontScale",
+        "placement": "above-control",
+        "example": 1,
+        "playground": "sample-fontScale",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-fontScale",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "fontWeight",
+      "section": "appearance",
+      "label": "Interface font weight",
+      "purpose": "Choose the standard interface weight. A font without the exact weight uses its platform-supported nearest weight.",
+      "type": "number",
+      "default": 400,
+      "options": null,
+      "bounds": {
+        "min": 300,
+        "max": 700,
+        "step": 100
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.fontWeight",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-fontWeight",
+        "entry": "info-fontWeight",
+        "placement": "above-control",
+        "example": 400,
+        "playground": "sample-fontWeight",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-fontWeight",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "motion",
+      "section": "appearance",
+      "label": "Motion preference",
+      "purpose": "Reduced motion suppresses nonessential animation. The operating system preference is always respected, even when this choice follows the system.",
+      "type": "select",
+      "default": "system",
+      "options": [
+        [
+          "system",
+          "Follow operating system"
+        ],
+        [
+          "reduced",
+          "Reduced motion"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.motion",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-motion",
+        "entry": "info-motion",
+        "placement": "above-control",
+        "example": "system",
+        "playground": "sample-motion",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-motion",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "logoPreset",
+      "section": "appearance",
+      "label": "Workspace mark",
+      "purpose": "Choose a built-in presentation mark. This never changes the executable, data directory or installed identity. Custom-image processing remains unavailable.",
+      "type": "select",
+      "default": "monogram",
+      "options": [
+        [
+          "monogram",
+          "Letter mark"
+        ],
+        [
+          "profiles",
+          "Profile stack"
+        ],
+        [
+          "compass",
+          "Navigation mark"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.logoPreset",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-logoPreset",
+        "entry": "info-logoPreset",
+        "placement": "above-control",
+        "example": "monogram",
+        "playground": "sample-logoPreset",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-logoPreset",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "accessibilityVisible",
+      "section": "accessibility",
+      "label": "Show accessibility button",
+      "purpose": "Keep accessibility controls reachable in the persistent shell. Hiding requires a separate confirmation and does not reset preferences.",
+      "type": "boolean",
+      "default": true,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.accessibilityVisible",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-accessibilityVisible",
+        "entry": "info-accessibilityVisible",
+        "placement": "above-control",
+        "example": true,
+        "playground": "sample-accessibilityVisible",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-accessibilityVisible",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "textScale",
+      "section": "accessibility",
+      "label": "Accessibility text scale",
+      "purpose": "Increase readable interface text while preserving the base appearance scale. The layout must remain scrollable at larger values.",
+      "type": "number",
+      "default": 1,
+      "options": null,
+      "bounds": {
+        "min": 1,
+        "max": 2,
+        "step": 0.1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.textScale",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-textScale",
+        "entry": "info-textScale",
+        "placement": "above-control",
+        "example": 1,
+        "playground": "sample-textScale",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-textScale",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "highContrast",
+      "section": "accessibility",
+      "label": "Higher contrast",
+      "purpose": "Strengthen text, panel boundaries and control outlines in the current theme. This changes the live workspace immediately.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.highContrast",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-highContrast",
+        "entry": "info-highContrast",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-highContrast",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-highContrast",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "strongFocus",
+      "section": "accessibility",
+      "label": "Stronger keyboard focus",
+      "purpose": "Increase the visible focus outline for keyboard navigation. It does not move focus or change tab order.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.strongFocus",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-strongFocus",
+        "entry": "info-strongFocus",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-strongFocus",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-strongFocus",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "largeTargets",
+      "section": "accessibility",
+      "label": "Larger interaction targets",
+      "purpose": "Increase minimum control hit areas and spacing. Compact density never overrides the accessible target size.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.largeTargets",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-largeTargets",
+        "entry": "info-largeTargets",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-largeTargets",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-largeTargets",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "focus",
+      "section": "focus",
+      "label": "Focus on the active workspace",
+      "purpose": "Dim inactive navigation while keeping it visible and immediately usable. Focused or hovered navigation returns to full emphasis.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.focus",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-focus",
+        "entry": "info-focus",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-focus",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-focus",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "lowStimulation",
+      "section": "focus",
+      "label": "Low stimulation",
+      "purpose": "Remove nonessential animation and suppress routine transient messages. Warnings and errors remain visible.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.lowStimulation",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-lowStimulation",
+        "entry": "info-lowStimulation",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-lowStimulation",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-lowStimulation",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "timeAwareness",
+      "section": "focus",
+      "label": "Show elapsed session time",
+      "purpose": "Display elapsed time in the workspace. This is a factual timer without a score, deadline or productivity judgement.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.timeAwareness",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-timeAwareness",
+        "entry": "info-timeAwareness",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-timeAwareness",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-timeAwareness",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "oneThing",
+      "section": "focus",
+      "label": "Keep one next action visible",
+      "purpose": "Show the action you enter below in the workspace so it survives navigation and restart. The application never chooses it for you.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.oneThing",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-oneThing",
+        "entry": "info-oneThing",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-oneThing",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-oneThing",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "nextAction",
+      "section": "focus",
+      "label": "Your next action",
+      "purpose": "Write a short action you want to keep in view. Empty text shows an honest prompt to choose an action. It is local personal content.",
+      "type": "text",
+      "default": "",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.nextAction",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-nextAction",
+        "entry": "info-nextAction",
+        "placement": "above-control",
+        "example": "",
+        "playground": "sample-nextAction",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": "clear-nextAction",
+      "reset": "reset-nextAction",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "momentum",
+      "section": "focus",
+      "label": "Offer an idle reminder",
+      "purpose": "Offer one dismissible reminder after the chosen idle interval. Not now suppresses further reminders for the stated snooze period.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.momentum",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-momentum",
+        "entry": "info-momentum",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-momentum",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-momentum",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "idleMinutes",
+      "section": "focus",
+      "label": "Idle interval in minutes",
+      "purpose": "Count time since the last pointer or keyboard activity. The reminder says only what happened and never grades your work.",
+      "type": "number",
+      "default": 40,
+      "options": null,
+      "bounds": {
+        "min": 5,
+        "max": 180,
+        "step": 5
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.idleMinutes",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-idleMinutes",
+        "entry": "info-idleMinutes",
+        "placement": "above-control",
+        "example": 40,
+        "playground": "sample-idleMinutes",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-idleMinutes",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "snoozeMinutes",
+      "section": "focus",
+      "label": "Reminder snooze in minutes",
+      "purpose": "Not now keeps the reminder quiet for this interval. The deadline persists across a reload.",
+      "type": "number",
+      "default": 30,
+      "options": null,
+      "bounds": {
+        "min": 5,
+        "max": 180,
+        "step": 5
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.snoozeMinutes",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-snoozeMinutes",
+        "entry": "info-snoozeMinutes",
+        "placement": "above-control",
+        "example": 30,
+        "playground": "sample-snoozeMinutes",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-snoozeMinutes",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "toastSeconds",
+      "section": "notifications",
+      "label": "Routine notification duration",
+      "purpose": "Routine messages auto-dismiss after this many seconds. Warnings and errors remain until explicitly dismissed.",
+      "type": "number",
+      "default": 6,
+      "options": null,
+      "bounds": {
+        "min": 3,
+        "max": 30,
+        "step": 1
+      },
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.toastSeconds",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-toastSeconds",
+        "entry": "info-toastSeconds",
+        "placement": "above-control",
+        "example": 6,
+        "playground": "sample-toastSeconds",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-toastSeconds",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "quietEnabled",
+      "section": "notifications",
+      "label": "Quiet hours",
+      "purpose": "During the local time window, suppress routine narration and transient messages. Errors remain available and all messages remain in the centre.",
+      "type": "boolean",
+      "default": false,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.quietEnabled",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-quietEnabled",
+        "entry": "info-quietEnabled",
+        "placement": "above-control",
+        "example": false,
+        "playground": "sample-quietEnabled",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-quietEnabled",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "quietStart",
+      "section": "notifications",
+      "label": "Quiet hours start",
+      "purpose": "Start quiet hours in this computer’s local timezone. A window may cross midnight.",
+      "type": "time",
+      "default": "22:00",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.quietStart",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-quietStart",
+        "entry": "info-quietStart",
+        "placement": "above-control",
+        "example": "22:00",
+        "playground": "sample-quietStart",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": "clear-quietStart",
+      "reset": "reset-quietStart",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "quietEnd",
+      "section": "notifications",
+      "label": "Quiet hours end",
+      "purpose": "End quiet hours in local time. Equal start and end means quiet all day.",
+      "type": "time",
+      "default": "08:00",
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.quietEnd",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-quietEnd",
+        "entry": "info-quietEnd",
+        "placement": "above-control",
+        "example": "08:00",
+        "playground": "sample-quietEnd",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": "clear-quietEnd",
+      "reset": "reset-quietEnd",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "paletteSize",
+      "section": "appearance",
+      "label": "Command palette size",
+      "purpose": "Choose the presentation of the command palette opened with Ctrl+Shift+F. Its search state remains independent.",
+      "type": "select",
+      "default": "card",
+      "options": [
+        [
+          "card",
+          "Bounded card"
+        ],
+        [
+          "full",
+          "Full window"
+        ]
+      ],
+      "bounds": null,
+      "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
+      "persistence": "presentation.v1.preferences.paletteSize",
+      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
+      "implementation": "descriptor-and-validator-only",
+      "consumer": {
+        "status": "planned",
+        "route": "settings/effects.ts"
+      },
+      "guide": {
+        "id": "help-paletteSize",
+        "entry": "info-paletteSize",
+        "placement": "above-control",
+        "example": "card",
+        "playground": "sample-paletteSize",
+        "lifetime": "per-open-session, no production writes",
+        "status": "planned"
+      },
+      "clear": null,
+      "reset": "reset-paletteSize",
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": []
+    }
+  ],
+  "workflows": [
+    {
+      "id": "schedule-create",
+      "label": "Local schedule editor",
+      "purpose": "Validate dates, times, weekdays, priority and setting value before appending a real rule.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "schedule-update",
+      "label": "Local schedule modification",
+      "purpose": "Edit an existing stable rule without writing scheduled values into base preferences.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "schedule-remove",
+      "label": "Schedule removal",
+      "purpose": "Preview the rule and remove it through reversible local history.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "notification-select",
+      "label": "Notification selection",
+      "purpose": "Select current matches, ranges or inverse selection without changing unread state.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "notification-dismiss",
+      "label": "Notification dismissal",
+      "purpose": "Dismiss selected messages, reporting count and preserving history.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "notification-export",
+      "label": "Notification export",
+      "purpose": "Export only the selected or filtered non-sensitive messages.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "history-filter",
+      "label": "History date and action filter",
+      "purpose": "Compose actual action categories, date bounds and text search.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "history-restore",
+      "label": "Settings restore",
+      "purpose": "Preview differences and record restore as a new revision.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "preference-import",
+      "label": "Preference import",
+      "purpose": "Validate the complete versioned file before changing any live setting.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "preference-export",
+      "label": "Preference export",
+      "purpose": "Choose a supported complete format, naming omitted private categories.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "preferences-reset",
+      "label": "Preferences reset",
+      "purpose": "Preview affected settings, preserve undo, and restore exact defaults.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "narration-sample",
+      "label": "Voice sample",
+      "purpose": "Speak synthetic factual sample through the selected actual platform voice.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "narration-stop",
+      "label": "Speech stop and pause",
+      "purpose": "Operate the actual speech queue, never simulated playback.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "accessibility-hide",
+      "label": "Hide accessibility entry",
+      "purpose": "Require explicit confirmation with Cancel initially focused; retain preferences.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "accessibility-restore",
+      "label": "Restore accessibility entry",
+      "purpose": "Restore immediately from reachable Settings without resetting preferences.",
+      "status": "planned",
+      "implementation": [],
+      "persistence": [],
+      "tests": [],
+      "runtimeEvidence": []
+    }
+  ]
+}

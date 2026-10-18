@@ -6,6 +6,17 @@ import { request, Profile } from "./api";
 import { translate, Language } from "./i18n";
 import { parseVocabulary, replaceLabel } from "./vocabulary.mjs";
 import "./style.css";
+import "./settings/settings.css";
+import { useSettings } from "./settings/store";
+import { usePresentationEffects, useNarrator } from "./settings/effects";
+import { SettingsWorkspace } from "./settings/SettingsWorkspace";
+import {
+  AccessibilityTools,
+  AttentionStatus,
+  Toasts,
+} from "./settings/LiveTools";
+import { styledMessage } from "./settings/messages.mjs";
+import { definitions } from "./settings/model.mjs";
 const read = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -14,14 +25,10 @@ const read = (key: string, fallback: any) => {
   }
 };
 function App() {
-  const [prefs, setPrefs] = useState(() =>
-    read("appearance", {
-      language: "en",
-      theme: "light",
-      density: "comfortable",
-      accent: "#475f99",
-    }),
-  );
+  const settingsController = useSettings();
+  const prefs = settingsController.preferences;
+  usePresentationEffects(prefs);
+  const narrator = useNarrator(prefs);
   const [entries, setEntries] = useState<Record<string, string>>(() => {
     try {
       return parseVocabulary(localStorage.getItem("wording") || "").entries;
@@ -36,9 +43,6 @@ function App() {
     [profiles, setProfiles] = useState<Profile[]>([]),
     [selected, setSelected] = useState(""),
     [detail, setDetail] = useState("overview"),
-    [settingsTab, setSettingsTab] = useState(() =>
-      read("settingsTab", "appearance"),
-    ),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(""),
     [celebration, setCelebration] = useState(""),
@@ -57,7 +61,6 @@ function App() {
   const [profileRows, setProfileRows] = useState<number[]>([]),
     [revisionRows, setRevisionRows] = useState<number[]>([]),
     [conflictRows, setConflictRows] = useState<number[]>([]),
-    [settingRows, setSettingRows] = useState<number[]>([]),
     [commandRows, setCommandRows] = useState<number[]>([]),
     [automationRows, setAutomationRows] = useState<number[]>([]);
   const profile = profiles.find((p) => p.id === selected);
@@ -72,12 +75,19 @@ function App() {
   const perform = async (fn: () => Promise<any>) => {
     if (busy) return;
     setBusy(true);
-    setNotice(t("Working"));
+    setNotice(styledMessage("progress", "Working", "處理中", prefs));
     try {
       await fn();
-      setNotice(t("Completed"));
+      const message = styledMessage("success", "Completed", "已完成", prefs);
+      setNotice(message);
+      settingsController.notify(message, "success");
+      narrator.speak("Completed", "已完成", "success");
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : "OPERATION_FAILED");
+      const fact = e instanceof Error ? e.message : "OPERATION_FAILED";
+      const message = styledMessage("error", fact, fact, prefs);
+      setNotice(message);
+      settingsController.notify(message, "error");
+      narrator.speak(fact, fact, "error");
     } finally {
       setBusy(false);
     }
@@ -90,21 +100,8 @@ function App() {
     return off;
   }, []);
   useEffect(() => {
-    localStorage.setItem("appearance", JSON.stringify(prefs));
-    document.documentElement.dataset.theme = prefs.theme;
-    document.documentElement.dataset.density = prefs.density;
-    document.documentElement.style.setProperty(
-      "--md-sys-color-primary",
-      prefs.accent,
-    );
-    document.documentElement.lang = prefs.language === "yue" ? "zh-HK" : "en";
-  }, [prefs]);
-  useEffect(() => {
     localStorage.setItem("setup", JSON.stringify(setup));
   }, [setup]);
-  useEffect(() => {
-    localStorage.setItem("settingsTab", JSON.stringify(settingsTab));
-  }, [settingsTab]);
   useEffect(() => {
     setAutomation(profile?.automation || "off");
     setRevisions([]);
@@ -194,13 +191,7 @@ function App() {
     "Setup",
     "Create profile",
     "Lock vault",
-  ];
-  const settings = [
-    "Language",
-    "Theme",
-    "Density",
-    "Accent",
-    "Personal wording",
+    ...definitions.map((d) => `Settings: ${d.label}`),
   ];
   const profileForm = (
     <>
@@ -224,10 +215,14 @@ function App() {
     </>
   );
   return (
-    <div className="app-shell">
+    <div className={`app-shell palette-${prefs.paletteSize}`}>
       <header>
         <div className="brand-mark" aria-hidden="true">
-          M
+          {prefs.logoPreset === "profiles"
+            ? "▤"
+            : prefs.logoPreset === "compass"
+              ? "◇"
+              : "M"}
         </div>
         <div className="identity">
           <strong>Material Browser</strong>
@@ -258,7 +253,10 @@ function App() {
             <button
               key={id}
               className={page === id ? "active" : ""}
-              onClick={() => setPage(id)}
+              onClick={() => {
+                setPage(id);
+                if (id === "settings") setShowSetup(false);
+              }}
             >
               <span className="nav-icon" aria-hidden="true">
                 {id === "profiles" ? "▤" : id === "sync" ? "⇄" : "⚙"}
@@ -734,130 +732,27 @@ function App() {
               </section>
             </>
           ) : (
-            <>
-              <div className="page-heading">
-                <h1>{t("Settings")}</h1>
-              </div>
-              <section className="surface">
-                <Tabs
-                  items={[
-                    ["appearance", t("Appearance")],
-                    ["wording", t("Personal wording")],
-                  ]}
-                  value={settingsTab}
-                  onChange={setSettingsTab}
-                />
-                <Search
-                  label={t("Search")}
-                  items={settings.map(t)}
-                  onResults={setSettingRows}
-                  t={t}
-                />
-                <div
-                  role="tabpanel"
-                  id={`panel-${settingsTab}`}
-                  className="settings-grid"
-                >
-                  {settingsTab === "appearance" ? (
-                    <>
-                      {settingRows.includes(0) && (
-                        <Select
-                          label={t("Language")}
-                          value={prefs.language}
-                          onChange={(v) => setPrefs({ ...prefs, language: v })}
-                          options={[
-                            ["en", "English"],
-                            ["yue", "廣東話"],
-                            ["both", "English · 廣東話"],
-                          ]}
-                        />
-                      )}{" "}
-                      {settingRows.includes(1) && (
-                        <Select
-                          label={t("Theme")}
-                          value={prefs.theme}
-                          onChange={(v) => setPrefs({ ...prefs, theme: v })}
-                          options={[
-                            ["light", t("Light")],
-                            ["dark", t("Dark")],
-                          ]}
-                        />
-                      )}{" "}
-                      {settingRows.includes(2) && (
-                        <Select
-                          label={t("Density")}
-                          value={prefs.density}
-                          onChange={(v) => setPrefs({ ...prefs, density: v })}
-                          options={[
-                            ["comfortable", t("Comfortable")],
-                            ["compact", t("Compact")],
-                          ]}
-                        />
-                      )}{" "}
-                      {settingRows.includes(3) && (
-                        <label>
-                          {t("Accent")}
-                          <input
-                            type="color"
-                            value={prefs.accent}
-                            onChange={(e) =>
-                              setPrefs({ ...prefs, accent: e.target.value })
-                            }
-                          />
-                        </label>
-                      )}
-                      <p>
-                        Local settings. Initial defaults: English, light theme,
-                        comfortable density, blue accent. Each change is saved
-                        on this device.
-                      </p>
-                    </>
-                  ) : (
-                    settingRows.includes(4) && (
-                      <>
-                        <h2>{t("Personal wording")}</h2>
-                        <p>
-                          {t(
-                            Object.keys(entries).length
-                              ? "Personal wording loaded"
-                              : "No personal wording loaded",
-                          )}
-                        </p>
-                        <label className="file-control">
-                          {t("Upload")}
-                          <input
-                            type="file"
-                            accept=".json,application/json"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) void importWording(file);
-                              e.target.value = "";
-                            }}
-                          />
-                        </label>
-                        <Button
-                          secondary
-                          onClick={() => {
-                            localStorage.removeItem("wording");
-                            setEntries({});
-                          }}
-                        >
-                          {t("Clear")}
-                        </Button>
-                        <p>
-                          Drop one JSON file anywhere in this window, or choose
-                          it here. Only validated wording is cached locally. It
-                          is excluded from synchronized settings and exports.
-                        </p>
-                      </>
-                    )
-                  )}
-                </div>
-              </section>
-            </>
+            <SettingsWorkspace
+              controller={settingsController}
+              t={t}
+              narrator={narrator}
+              wordingLoaded={Object.keys(entries).length > 0}
+              onWordingFile={(file) => void importWording(file)}
+              onClearWording={() => {
+                localStorage.removeItem("wording");
+                setEntries({});
+              }}
+            />
           )}
         </main>
       </div>
+      <AccessibilityTools
+        controller={settingsController}
+        t={t}
+        narrator={narrator}
+      />
+      <AttentionStatus controller={settingsController} t={t} />
+      <Toasts controller={settingsController} t={t} />
       <footer role="status" aria-live="polite">
         <span className={busy ? "pulse" : ""}>{busy ? "●" : "○"}</span>
         {notice || t("Local settings")}
@@ -881,6 +776,22 @@ function App() {
               secondary
               onClick={() => {
                 setPalette(false);
+                if (i >= 6) {
+                  setShowSetup(false);
+                  setPage("settings");
+                  const target = definitions[i - 6];
+                  settingsController.selectSection(target.category);
+                  setTimeout(
+                    () =>
+                      window.dispatchEvent(
+                        new CustomEvent("settings-reveal", {
+                          detail: target.key,
+                        }),
+                      ),
+                    0,
+                  );
+                  return;
+                }
                 if (i < 3) {
                   setShowSetup(false);
                   setPage(["profiles", "sync", "settings"][i]);
