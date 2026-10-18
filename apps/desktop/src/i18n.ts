@@ -1,3 +1,4 @@
+import { settingsZh } from "./settings/locale.mjs";
 export type Language = "en" | "yue" | "both";
 export const zh: Record<string, string> = {
   Profiles: "設定檔",
@@ -84,6 +85,7 @@ export const zh: Record<string, string> = {
   Configuration: "設定內容",
   "Setup progress": "設定進度",
 };
+Object.assign(zh, settingsZh);
 export function translate(s: string, l: Language) {
   return l === "en"
     ? s
