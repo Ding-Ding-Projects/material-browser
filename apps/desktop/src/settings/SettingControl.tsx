@@ -92,6 +92,47 @@ export function Choice({
     </div>
   );
 }
+function NumericInput({
+  definition: d,
+  value,
+  onChange,
+  t,
+}: {
+  definition: any;
+  value: number;
+  onChange: (v: number) => void;
+  t: (s: string) => string;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(
+    () => setDraft(Number.isFinite(value) ? String(value) : ""),
+    [value],
+  );
+  return (
+    <div className="range-control">
+      {React.createElement("md-slider", {
+        min: d.min,
+        max: d.max,
+        step: d.step,
+        value: Number.isFinite(value) ? value : d.initial,
+        onInput: (e: any) => {
+          setDraft(String(e.target.value));
+          onChange(Number(e.target.value));
+        },
+        "aria-label": t(d.label),
+      })}
+      <Field
+        label={t(d.label)}
+        value={draft}
+        type="number"
+        onChange={(text) => {
+          setDraft(text);
+          onChange(text.trim() === "" ? Number.NaN : Number(text));
+        }}
+      />
+    </div>
+  );
+}
 export function SettingInput({
   definition: d,
   value,
@@ -115,24 +156,7 @@ export function SettingInput({
     });
   if (d.type === "number")
     return (
-      <div className="range-control">
-        {React.createElement("md-slider", {
-          min: d.min,
-          max: d.max,
-          step: d.step,
-          value,
-          onInput: (e: any) => onChange(Number(e.target.value)),
-          "aria-label": t(d.label),
-        })}
-        <Field
-          label={t(d.label)}
-          value={String(value)}
-          onChange={(v) => {
-            if (v !== "") onChange(Number(v));
-          }}
-          type="number"
-        />
-      </div>
+      <NumericInput definition={d} value={value} onChange={onChange} t={t} />
     );
   if (d.type === "select" || d.type === "voice")
     return (
@@ -183,7 +207,8 @@ export function SettingControl({
   const [help, setHelp] = useState(false),
     [sample, setSample] = useState(d.initial),
     [sampleResult, setSampleResult] = useState(""),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [resetVersion, setResetVersion] = useState(0);
   const info = useRef<HTMLElement | null>(null),
     id = `setting-${d.key}`;
   const p = preferenceProvenance(c.record, d.key, c.preferences);
@@ -287,6 +312,7 @@ export function SettingControl({
         </div>
       )}
       <SettingInput
+        key={resetVersion}
         definition={d}
         value={c.record.preferences[d.key]}
         onChange={apply}
@@ -295,7 +321,20 @@ export function SettingControl({
       />
       <p className="provenance">
         {t(p.source === "saved-local" ? "Saved locally" : "Compiled default")} ·{" "}
-        {t("Default")}: <code>{String(d.initial)}</code>
+        {t("Default")}:{" "}
+        <code>
+          {d.type === "voice" && !d.initial
+            ? t("Choose automatically")
+            : d.type === "boolean"
+              ? t(d.initial ? "On" : "Off")
+              : d.options
+                ? t(
+                    d.options.find(
+                      ([v]: [string, string]) => v === d.initial,
+                    )?.[1] || String(d.initial),
+                  )
+                : String(d.initial)}
+        </code>
         {p.temporarilyOverridden && (
           <>
             {" "}
@@ -313,6 +352,7 @@ export function SettingControl({
         onClick={() => {
           c.reset(d.key);
           setError("");
+          setResetVersion((v) => v + 1);
         }}
       >
         {t("Reset this setting")}
