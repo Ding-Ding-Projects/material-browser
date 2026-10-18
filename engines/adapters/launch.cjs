@@ -3,6 +3,15 @@
 const readline = require('node:readline');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
+// Browser subprocesses require Win32 paths, not Rust's extended canonical spelling.
+function browserPath(value, platform = process.platform) {
+  if (platform !== 'win32' || typeof value !== 'string') return value;
+  if (/^\\\\\?\\[A-Za-z]:\\/.test(value)) return value.slice(4);
+  if (value.startsWith('\\\\?\\UNC\\')) return '\\\\' + value.slice(8);
+  return value;
+}
+module.exports = { browserPath };
+if (require.main === module) {
 const lines = readline.createInterface({input: process.stdin});
 let browser, driver, service, started = false, closing = false;
 const pins = { 'puppeteer-core': '25.14.0', 'selenium-webdriver': '4.51.0' };
@@ -21,6 +30,7 @@ lines.on('line', async line => {
   try {
     if (line.length > 65536) throw Error('Configuration too large');
     const config = JSON.parse(line);
+    for (const field of ['executable', 'profile', 'driver']) config[field] = browserPath(config[field]);
     if (!['chromium','firefox'].includes(config.engine) || !['selenium','puppeteer'].includes(config.mode)) throw Error('Invalid adapter');
     const pkg = config.mode === 'puppeteer' ? 'puppeteer-core' : 'selenium-webdriver';
     if (require(`${pkg}/package.json`).version !== pins[pkg]) throw Error('Adapter version mismatch');
@@ -64,4 +74,5 @@ lines.on('line', async line => {
     try { if (browser) await browser.close(); if (driver) await driver.quit(); if (service) await service.kill(); } finally { process.exit(1); }
   }
 });
+}
 
