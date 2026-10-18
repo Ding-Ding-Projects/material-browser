@@ -243,7 +243,7 @@
  #include "CookieStorage.h"
  #include "TestCommon.h"
  #include "gtest/gtest.h"
-@@ -1460,6 +1461,48 @@
+@@ -1460,6 +1461,55 @@
  
  namespace mozilla::net {
  
@@ -263,6 +263,13 @@
 +
 +  uint64_t second = queue.TryPauseForSnapshot();
 +  EXPECT_GT(second, first);
++  queue.mPending.InsertOrUpdate(
++      "queued"_ns,
++      CookieDBWriteQueue::PendingOp{nullptr, CookieDBWriteQueue::OpType::Remove});
++  queue.MaybeScheduleFlush();
++  EXPECT_FALSE(queue.mTimer);
++  queue.Flush();
++  EXPECT_EQ(queue.mPending.Count(), 1u);
 +  queue.Clear();
 +  EXPECT_FALSE(queue.SnapshotPauseValid(second));
 +  EXPECT_FALSE(queue.ResumeAfterSnapshot(second));
@@ -300,8 +307,8 @@
    void RemoveAll();
 +
 +  virtual uint64_t TryPauseWritesForSnapshot() { return 0; }
-+  virtual bool SnapshotWritePauseValid(uint64_t aLease) const { return false; }
-+  virtual bool ResumeWritesAfterSnapshot(uint64_t aLease) { return false; }
++  virtual bool SnapshotWritePauseValid(uint64_t) const { return false; }
++  virtual bool ResumeWritesAfterSnapshot(uint64_t) { return false; }
  
    void NotifyChanged(nsISupports* aSubject,
                       nsICookieNotification::Action aAction,
