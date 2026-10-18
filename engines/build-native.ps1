@@ -76,7 +76,15 @@ function EnsureChromiumSdk {
   if(-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
     Write-Output 'The verified SDK requires native elevation. Relaunching the exact root entrypoint; the owner supplies UAC consent.'
     $rootBuild=Join-Path (Split-Path $PSScriptRoot -Parent) 'build.bat'
-    $elevated=Start-Process -FilePath $rootBuild -Verb RunAs -ArgumentList @('-Component','BrowserNative','-NativeEngine','chromium') -WindowStyle Hidden -PassThru -Wait
+    $elevationRoot=Join-Path $base 'windows-sdk-28000.2957'
+    New-Item -ItemType Directory -Path $elevationRoot -Force | Out-Null
+    $runId=Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+    $childLog=Join-Path $elevationRoot "native-root-$runId.log"
+    $childScript=Join-Path $elevationRoot "native-root-$runId.cmd"
+    [IO.File]::WriteAllLines($childScript,@('@echo off',('call "{0}" -Component BrowserNative -NativeEngine chromium >"{1}" 2>&1' -f $rootBuild,$childLog),'exit /b %errorlevel%'),[Text.ASCIIEncoding]::new())
+    Write-Output "Elevated native root diagnostic log: $childLog"
+    $elevated=Start-Process -FilePath $env:ComSpec -Verb RunAs -ArgumentList @('/d','/c',('"{0}"' -f $childScript)) -WindowStyle Hidden -PassThru -Wait
+    if(Test-Path $childLog){Get-Content -LiteralPath $childLog -Tail 30 | Write-Output}
     if($elevated.ExitCode -ne 0){throw "Elevated native root entrypoint did not complete: $($elevated.ExitCode)"}
     exit 0
   }
