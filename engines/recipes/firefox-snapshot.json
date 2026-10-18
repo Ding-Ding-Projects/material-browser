@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "revision": "3c71aeacdb296402e41fb2084b13e797d1770642",
+  "liveSnapshotVerified": false,
+  "nativeControlEndpointEnabled": false,
+  "status": "coordinator-only-no-storage-barrier-providers",
+  "files": [
+    {
+      "path": "netwerk/cookie/CookiePersistentStorage.cpp",
+      "sha256": "44bdad57e5f256464453d4805f20cc92662618fd378ac478c5ad9aa2e0c5300a"
+    },
+    {
+      "path": "netwerk/cookie/CookieDBWriteQueue.cpp",
+      "sha256": "427d88180b23f259c28e3ac82b0a1c248ce96f939c31c73514d093022cffc97d"
+    },
+    {
+      "path": "browser/components/backup/resources/CookiesBackupResource.sys.mjs",
+      "sha256": "50fe7828e142a223fd2089054c7ff2f1da21c40fd309233a83cb9c67fce6507a"
+    },
+    {
+      "path": "dom/localstorage/ActorsParent.cpp",
+      "sha256": "0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5"
+    },
+    {
+      "path": "dom/quota/ActorsParent.cpp",
+      "sha256": "ad9a16546aa031cf5b0eb466b5703f5a25e62f43ed2a8e19e4b0b031b31fdee7"
+    },
+    {
+      "path": "toolkit/components/passwordmgr/storage-json.sys.mjs",
+      "sha256": "92f511b7504c532fc9f67973273374f6174cecd5e5922ba4f6f139d48fb2d886"
+    },
+    {
+      "path": "browser/components/sessionstore/SessionFile.sys.mjs",
+      "sha256": "7dbe4ba2adea97146b9a7c6f9cf2bbe44670cb033944c00e3047a5982ecd4e35"
+    },
+    {
+      "path": "browser/components/moz.build",
+      "sha256": "d15845a77e18aa0c21d3725f8abab0c2a42b9493893ebf169f88bdc8e9269371"
+    }
+  ]
+}

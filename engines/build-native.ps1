@@ -4,7 +4,11 @@ $pins=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/native-pins.jso
 $pin=$pins.$Engine
 $base=Join-Path ([Environment]::GetFolderPath('UserProfile')) '.material-browser/native'
 if($base -match '\s'){throw 'The supported native source path must contain no spaces.'}
-$nativeRoot=Join-Path $base "$Engine-$($pin.revision.Substring(0,12))"
+$sourceName=if($Engine -eq 'firefox'){'ff'}else{$Engine}
+$nativeRoot=Join-Path $base "$sourceName-$($pin.revision.Substring(0,12))"
+if($Engine -eq 'firefox' -and (Join-Path $nativeRoot 'src').Length -gt 62){
+  throw 'The managed Firefox source path exceeds the upstream Windows limit of 62 characters.'
+}
 New-Item -ItemType Directory -Path $nativeRoot -Force | Out-Null
 function Run([string]$Exe,[string[]]$Arguments) {
   & $Exe @Arguments
@@ -16,7 +20,34 @@ function FileSha256([string]$FilePath) {
   try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant() }
   finally { $stream.Dispose(); $sha.Dispose() }
 }
-function Checkout([string]$Path,[string]$Url,[string]$Revision) {
+function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
+  $moduleName='MaterialSnapshotBarrier.sys.mjs'
+  $relativeModule="browser/components/$moduleName"
+  $manifestPath=Join-Path $Path 'browser/components/moz.build'
+  $modulePath=Join-Path $Path $relativeModule
+  $moduleSource=Join-Path $PSScriptRoot "native/firefox/$moduleName"
+  $baseline=(& git -C $Path show HEAD:browser/components/moz.build) -join "`n"
+  if($LASTEXITCODE -ne 0){throw 'Cannot read Firefox source manifest'}
+  $anchor='MOZ_SRC_FILES += ['
+  if(($baseline.Split(@($anchor),[StringSplitOptions]::None)).Count -ne 2){throw 'Firefox module manifest anchor mismatch'}
+  $expected=$baseline.Replace($anchor,"$anchor`n    `"$moduleName`",")
+  $existing=(Get-Content -LiteralPath $manifestPath -Raw).Replace("`r`n","`n").TrimEnd("`n")
+  $changes=@(& git -C $Path status --porcelain --untracked-files=all)
+  foreach($change in $changes){
+    if($change.Length -lt 4 -or $change.Substring(3) -notin @('browser/components/moz.build',$relativeModule)){
+      throw 'Native Firefox source has unrelated changes; preserving it.'
+    }
+  }
+  if($existing -ne $baseline -and $existing -ne $expected){throw 'Existing Firefox module manifest differs from the managed overlay'}
+  if((Test-Path -LiteralPath $modulePath) -and (FileSha256 $modulePath) -ne (FileSha256 $moduleSource)){
+    throw 'Existing Firefox snapshot module differs from the managed overlay; preserving it.'
+  }
+  if($CheckOnly){return}
+  [IO.File]::WriteAllText($manifestPath,"$expected`n",[Text.UTF8Encoding]::new($false))
+  Copy-Item -LiteralPath $moduleSource -Destination $modulePath
+  Write-Output 'Staged privileged Firefox snapshot coordinator. No storage providers or external control endpoint are enabled.'
+}
+function Checkout([string]$Path,[string]$Url,[string]$Revision,[bool]$ManagedFirefox=$false) {
   if(-not (Test-Path -LiteralPath (Join-Path $Path '.git'))){
     New-Item -ItemType Directory -Path $Path -Force | Out-Null
     Run 'git' @('-C',$Path,'init')
@@ -25,7 +56,10 @@ function Checkout([string]$Path,[string]$Url,[string]$Revision) {
   $origin=& git -C $Path remote get-url origin
   if($LASTEXITCODE -ne 0 -or $origin -ne $Url){throw 'Native source origin mismatch'}
   $changes=& git -C $Path status --porcelain
-  if($changes){throw 'Native source has changes; preserving it instead of replacing it.'}
+  if($changes){
+    if($ManagedFirefox){FirefoxOverlay $Path -CheckOnly}
+    else {throw 'Native source has changes; preserving it instead of replacing it.'}
+  }
   $current=& git -C $Path rev-parse --verify --quiet HEAD
   if($current -ne $Revision){
     Run 'git' @('-C',$Path,'fetch','--depth','1','origin',$Revision)
@@ -73,7 +107,7 @@ if($Engine -eq 'chromium'){
     } finally { Pop-Location }
   } finally { Pop-Location }
 } else {
-  Checkout (Join-Path $nativeRoot 'src') $pin.url $pin.revision
+  Checkout (Join-Path $nativeRoot 'src') $pin.url $pin.revision $true
   if($AcquireOnly){Write-Output "Acquired pinned Firefox source at $nativeRoot"; exit 0}
   # MozillaBuild's supported installer selects this directory. Reuse and verify it.
   $mozbuild=Join-Path $env:SystemDrive 'mozilla-build'
@@ -94,6 +128,7 @@ if($Engine -eq 'chromium'){
   try {
     # The supported option prevents bootstrap's antivirus-exclusion and host-configuration changes.
     Run $python @('mach','--no-interactive','bootstrap','--application-choice','browser','--no-system-changes')
+    FirefoxOverlay (Join-Path $nativeRoot 'src')
     Run $python @('mach','build')
     $built=Get-ChildItem -Path (Join-Path $nativeRoot 'src/obj-*/dist/bin/firefox.exe') -ErrorAction SilentlyContinue
     if(-not $built){throw 'Firefox build did not produce firefox.exe'}
