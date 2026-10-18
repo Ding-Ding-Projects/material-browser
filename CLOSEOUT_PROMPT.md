@@ -16,10 +16,20 @@ The attempted custom dependency override was ineffective. Do not repeat retrieva
 host protection. A future reviewed optional-fixture source filter must first prove exclusion
 offline and preserve the required x64 browser build graph.
 
-Firefox source acquisition succeeded. The existing root build operation is still bootstrapping
-its private toolchain; its exit result is pending. Do not start a duplicate operation. Native
-browser compilation, authenticated key delivery, Firefox key integration, frame/worker identity
-and consistent whole-profile live snapshots remain unfinished and disabled.
+Firefox source acquisition and the supported baseline build succeeded at pinned upstream
+revision `3c71aeacdb296402e41fb2084b13e797d1770642`. Source commit
+`b7930673bf49d10571ed257cf987c7acef4a172d` then passed the exact root command
+`build.bat -Component BrowserNative -NativeEngine firefox -NativeCookieSnapshotTests`
+on a named hidden desktop: production compilation succeeded, and the native cookie queue
+regression passed one test with zero unexpected results. The root exit was zero.
+The packaged privileged-module smoke passed separately against the preceding baseline.
+See `engines/native/firefox/native-verification.json` for hashes, timing and limitations.
+The wrapper exited normally and its hidden desktop was absent afterward. No producer remains
+active from that run. Preserve the source cache and reviewed patches. The native cookie queue
+lease is concrete compiled code, but no storage providers or external snapshot endpoint are
+registered. Authenticated key delivery, Firefox key integration, frame/worker identity and
+consistent whole-profile live snapshots remain unfinished and disabled. The root coordinator
+owns integration; this lane does not modify the default branch.
 
 The Chromium 155 key-provider patch has production registration and build-source ownership,
 but only patch application has been verified. It is not runtime proof. Preserve baseline browser

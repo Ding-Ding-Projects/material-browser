@@ -112,7 +112,9 @@ against normalized SHA-256 hashes of the reviewed baseline and patched result,
 then verifies each staged result. It resumes partial application only when all
 files still match one of those two admitted states. The running baseline is
 immutable and does not receive this candidate halfway through compilation.
-Patch application and current-source admission were checked, not native compilation or execution. It remains
+The candidate compiled through the root entrypoint, and the opt-in native
+`TestCookieDBWriteQueue.SnapshotPause` regression passed (one test, zero unexpected
+results) on the supported hidden desktop. It remains
 unregistered and does not complete the cookie provider: session cookies need
 their own consistent state, WAL/connection durability and direct-writer coverage
 need runtime validation, and the provider must propagate invalidation and thaw
@@ -143,3 +145,11 @@ components, engines, acquisition-only and baseline-only diagnostic combinations
 reject this option before acquisition or compilation. Run native execution only
 on the supported isolated hidden desktop; the option itself is not desktop
 isolation or whole-profile consistency evidence.
+
+The source-bound result is recorded in `native-verification.json`. The packaged
+privileged-module smoke also passed using the baseline source-built xpcshell.
+Its default control reported all missing barriers and emitted no success receipt.
+The cookie regression tests queue lease behavior without opening a production
+profile. Neither result completes a native datastore provider or enables live
+snapshot capabilities. The hidden wrapper exited normally, and the named
+desktop was absent afterward; no process termination was needed.
