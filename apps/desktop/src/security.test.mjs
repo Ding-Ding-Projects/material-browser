@@ -87,7 +87,7 @@ test('explicit data directory accepts only one absolute non-root directory', () 
   for (const argv of [
     ['--material-data-dir=relative'], ['--material-data-dir='],
     [`--material-data-dir=${path.parse(directory).root}`],
-    [`--material-data-dir=${path.join(path.parse(directory).root, 'unused')}\\..`],
+    [`--material-data-dir=${path.join(path.parse(directory).root, 'unused')}${path.sep}..`],
     ...(process.platform === 'win32' ? [['--material-data-dir=\\\\server\\share\\child\\..'], ['--material-data-dir=C:/unused/..']] : []),
     [`--material-data-dir=${directory}`, `--material-data-dir=${directory}`],
   ]) assert.throws(() => fixture({ argv }), /INVALID_DATA_DIRECTORY/);
