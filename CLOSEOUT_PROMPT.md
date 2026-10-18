@@ -2,129 +2,90 @@
 
 ## Objective and latest direction
 
-Implement the approved Windows x64 browser-profile manager, shared Rust core, managed
-Chromium/Firefox integrations, encrypted synchronization, API/CLI/automation, optional encrypted
-storage, full interfaces, documentation and verified delivery. The product is incomplete.
+Continue the approved Windows x64 browser-profile manager with shared Rust core, managed
+Chromium/Firefox engines, encrypted profile transfer, persistent opt-in automation, API/CLI,
+optional encrypted remote storage and verified delivery. The product remains incomplete.
+The latest correction prioritizes missing required features in Settings. Its inventory has
+109 rows, 65 desktop-applicable, none claimed complete. Implement real workflows and proof.
 
-The latest user correction prioritizes the missing required features in Settings. The current
-screen contains appearance and personal wording only. Complete the applicable inventory,
-reviewed design and real controls/workflows, with persistence, explanations, localization,
-accessibility and runtime evidence. A list of unavailable switches is not implementation.
+## Durable source and ownership
 
-## Source and ownership
+Public repository: https://github.com/Ding-Ding-Projects/material-browser . Default branch: main.
+This prompt records state up to its own commit; `HANDOFF.md` carries the detailed evidence.
+Main was verified on the remote through `02bf0b247038bf3831a26c27bd16c78d32a7e4d1` before
+this prompt update. Never infer later remote state from this statement.
 
-Public repository: https://github.com/Ding-Ding-Projects/material-browser
-Default branch: main. This prompt records state up to its own commit.
+Retain these active task-owned branches and their worktrees:
 
-Retain these task-owned branches and their worktrees:
+- `feature/desktop-workspace`: native preference persistence and async-save corrections are
+  independently source-approved through `b8bd4fb`. Coupled history GUI candidate `d5ecc5c`
+  needs independent review and real runtime proof; it is not integrated into main.
+- `feature/encrypted-core`: strict history context candidate `53a6598` is integrated as
+  `02bf0b2`. Earlier filesystem/execution hardening and auth-generation changes are integrated.
+- `feature/native-host`: lifecycle proof and the pinned portable Git helper are integrated.
+- `feature/browser-engines`: Firefox queue/lease native proof at `58864e1`, standalone Chromium
+  protected-channel proof at `90c2af7`, active pinned Chromium compile at `499a20f`.
+- `feature/storage-service`: offline handbook proof at `1cd196b`, promoted evidence `28fdbfe`
+  integrated into main. Storage positive deployment remains unfinished.
+- `gh-pages`: generated, load-bearing publication branch. Do not merge its generated root into
+  source main or remove it as redundant task state.
 
-- feature/desktop-workspace: Settings inventory/design/model and subsequent implementation.
-  Design handoff 2316d16 is under independent review; 109 neutral obligation rows include
-  65 desktop-applicable items, with none claimed complete.
-- feature/native-host: final candidate 7031adb and documentation 7856399 are integrated
-  in main 7df4e81 after six actual hidden-desktop runs and independent review.
-- feature/browser-engines: native source/build recipes, disabled snapshot coordinator and
-  unapplied cookie-pause candidates. Last verified remote preservation was 8186a1f;
-  local 3ebb68c corrects Windows build object references. Baseline build is in progress,
-  with xul.dll and xpcshell.exe produced but no terminal success or native snapshot proof.
-- feature/storage-service: offline companion 3a59755 has actual one-file runtime proof;
-  cache hardening 6c0a836 is independently approved and integrated in main 2196857.
-- feature/encrypted-core: fonts/editor services integrated in main 1d5a210. Protected
-  history safety/recovery/readability work is preserved on the remote through ddec069;
-  later forced-overlap correction b15a247 awaits independent review and integration.
+Do not delete unfinished branches, worktrees, ignored evidence, private announcements or
+retained documentation profiles. The latter deletion was rejected by automatic approval review.
 
-Do not delete active or unfinished branches, worktrees, ignored evidence or private announcements.
+## Verified progress and current failures
 
-## Current integrated evidence
+Main includes categorized Settings with 37 local validated controls. Its exact Desktop build,
+33 source tests and three IPC tests passed at the recorded integration. Eleven reviewed
+renderer repairs and genuine navigation/Undo/Redo proof are recorded. Native preference and
+coupled protected-history candidates still need their own integration/runtime verdicts.
 
-Core has 12 focused tests. Native integration bf1d305 passed 39 Rust workspace tests and two
-adapter launch-option tests. Desktop integration 98d6eea passed the exact Desktop build and
-seven focused tests. Three genuine packaged desktop images are in docs/evidence/desktop,
-bound to production source 7257d22, with validated hashes and precise limits.
+Protected history passed 21 integrated safety/concurrency/storage checks at `590592a` and
+four independent-authentication checks at `5179045`. The strict restore run at `02bf0b2`
+passed four cases but failed one existing display-name case with `HISTORY_LOCK_TIMEOUT`
+instead of `HISTORY_LOCKED`, duration 572640.6127 ms. Host CPU was observed at 100% with
+32 native compiler children. Do not claim that load is the proven cause, weaken the timeout,
+or rerun unchanged checks until the relevant condition changes.
 
-Documentation 193861b built 19 articles. Actual hidden-runtime checks verified all article
-links, the three approved images with exact delivered bytes, guided progress/search and
-language/theme persistence. The three repaired controls have English/Cantonese accessible
-names and persisted state. The inline favicon produced no missing-resource request.
-Documentation deployment, installer acceptance and overall product acceptance are unverified.
+Main `ebba6fd` passed the exact Desktop entrypoint with pinned, full-inventory portable Git
+acquisition. Fresh Rust toolchain bootstrap and packaged GUI admission remain unfinished.
 
-The restricted snapshot command field correction uses camelCase consistently. Its two focused
-Rust checks passed. It enables no native snapshot capability.
+Native lifecycle `7031adb` passed six actual hidden-desktop runs; integrated main passed
+45 Rust workspace tests and two adapter checks. Old launcher-only stop evidence is superseded.
+Firefox native queue test passed one fixture, not all-store durability or live snapshot proof.
+Chromium channel fixture passed, not a production broker, first-creation portable credential
+provider or cross-computer proof. Platform encryption still initializes before the proposed
+replacement-provider handoff. Keep portability/live capabilities disabled.
 
-## Critical correction to historical browser proof
+The real Chromium build at `499a20f` is active after successful verified SDK 28000.2957 setup
+and GN generation. Keep its inputs fixed. Observation bound: 2026-10-18 09:35:17 UTC.
+Record the actual terminal result or timeout separately from successful acquisition/fixtures.
+Never retrieve the host-blocked optional x86 updater payload again or weaken protection.
 
-Earlier candidates 4434a65 and bfd4fb5 passed fixtures that observed root/helper exit.
-Stronger owned-job checks confirmed Firefox's launcher can exit while the actual browser
-survives. Those historical results do not prove graceful browser closure. Dropping an owned
-job could terminate surviving descendants. Keep all historical receipts, mark the verdict
-superseded, and require exact owned-process/window proof plus complete job exit before
-reporting stopped or releasing the profile lease.
+Public handbook source `b9b892b`, publication `fa7557312906abcd956b3478e19112b6158dda35`,
+is live at https://ding-ding-projects.github.io/material-browser/ . Its 21 routes, eight
+file hashes, bounded interactions and exact About homepage were verified. Newer source is
+not yet deployed. Offline handbook proof at `1cd196b` covers actual single-file launch/restart;
+executable SHA-256 `dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49`.
+Four approved captures are in `docs/evidence/handbook/`; excluded restart pixels remain private.
+Main `62ba5de` built 24 articles. Separate hosted-wiki Git endpoint remains unavailable.
 
-The strengthened native candidate also covers the paired WebSocket Host authority, active
-Firefox BiDi clients, and a browser already closed normally. The final six runs passed at
-7031adb, with exact job-empty proof and hidden-desktop teardown. Main 7df4e81 passed its exact
-Host build, 45 Rust workspace tests and two adapter tests. Earlier weak results stay superseded.
+## Remaining work and safe continuation
 
-Main 2196857 passed the exact DocsCompanion build (20 articles, eight files). Companion
-security tests: three passed. Bootstrap integrity checks: six passed. Font/editor tests:
-five passed, including actual installed-font enumeration. The older portable executable
-and its runtime receipts remain bound to 3a59755, not the newer source.
+Integrate the approved Settings tranche; review and drive the coupled history interface,
+main-owned semantic/native CAS, idempotent recovery, independent authentication and lock order.
+Verify packaged fixed-runtime inventory admission. Complete missing Settings workflows and
+personal-wording outcome sounds. Personal wording stays local and outside exports/history.
 
-Settings progress on feature/desktop-workspace includes ten categories, 37 local controls,
-help/practice, schedules, notifications, local history, export and explicit tab workflows.
-Three real progress images and restart-persistence proof belong to fea7da5. Nine reviewed
-state/accessibility defects are under repair before main integration. The 109-row inventory
-has 65 desktop-applicable rows, none complete. This is progress, not full required-feature proof.
-All nine repairs passed independent source review at 60ef5da, which is remotely preserved.
-Actual runtime then caught docked-tab change events not reaching React; b90318b repairs the
-binding and repeats the same built transitions before integration.
+Complete protected early-startup key delivery, actual all-store snapshot barriers, stable
+identity and a real second-computer restoration. Complete positive storage hosting, published
+image, both host modes, portable wizard, current documentation publication, Squirrel installer,
+normal release, installed update and remaining per-surface acceptance. Existing tests, source
+approval or successful publication never substitute for those runtime outcomes.
 
-Public handbook deployment is verified at https://ding-ding-projects.github.io/material-browser/ :
-source b9b892b, publication fa7557312906abcd956b3478e19112b6158dda35. All 21 article/wiki routes
-rendered and all eight live files matched published hashes. Guides/search/preferences,
-keyboard focus and inspected 390/320 px layouts passed real browser checks. Deployment run
-39108839843 succeeded; the exact repository homepage was read back. Full required-feature
-acceptance remains incomplete. The enabled hosted wiki has no available Git endpoint;
-local wiki articles are included in the handbook, but separate hosted-wiki sync is unverified.
-
-Current offline handbook proof at 1cd196b verifies actual one-file launch and full restart,
-21 routes, bundled images, isolated runtime security and reading-state persistence.
-Unsigned executable SHA-256 dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49.
-Raw captures remain unpromoted pending receipt validation. No downloadable release is claimed.
-
-## Unfinished central features
-
-Portable Chromium credential encryption, protected native key delivery, consistent whole-profile
-live snapshots and advanced identity are not implemented and verified. Never count copying a
-live directory or a hidden restart as live snapshot proof. Firefox cookie-pause candidates
-require native compilation and focused tests after the active baseline build settles.
-A second physical Windows computer is still needed for restoration acceptance.
-
-A Chromium optional test package was blocked by host protection. Do not weaken protection or
-repeat retrieval of that same blocked payload. Preserve actual build inputs and raw receipts.
-
-Required Settings coverage, remaining product workflows, bootstrap/build companion, updater,
-remote storage integration, real container publication/LAN setup, hosted documentation/wiki,
-About homepage and verified normal releases remain unfinished.
-
-## Safety and recovery
-
-Keep personal browsers and credentials outside management. Secrets never enter arguments,
-environment variables, logs, public source or server storage. Private wording stays local
-unless the explicit product-specific encrypted preference opt-in is implemented and verified.
-No unrelated backlog, Internet exposure, host power actions, security weakening, force pushes
-or deletion of unfinished work is authorized.
-
-Documentation browsers, listeners and hidden desktops were closed. Temporary documentation
-profiles remain ignored after automatic approval review rejected their scoped deletion. Do not
-retry deletion through another route. Earlier wizard images lack contemporaneous build receipts
-and remain private. Generated announcement images are never runtime evidence.
-
-## Next actions
-
-1. Review the Settings design/inventory and implement its real missing workflows.
-2. Fix the nine Settings defects and protected-history security findings; independently review.
-3. Verify a current-source offline documentation executable and remaining delivery paths.
-4. Complete native engine integrations and cross-computer proof before portability claims.
-5. Finish delivery requirements, publish only verified outputs, integrate completed work into
-   main, verify remote references and clean up only proven task-owned redundant state.
+Keep personal browsers, credentials and unrelated host state untouched. No Internet exposure,
+security weakening, host power/login actions, force pushes or unfinished-state deletion.
+Use exact root build/installer entrypoints. Run tests locally; CI builds/publishes without tests
+or lint. Preserve coherent milestones promptly, verify remote refs and retain honest failures.
+Integrate completed task work into main; unfinished recovery remains inactive on its owning
+branch. Cleanup requires complete preservation and remote ancestry proof first.
