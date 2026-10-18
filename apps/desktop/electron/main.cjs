@@ -3,6 +3,14 @@ const { spawn } = require("node:child_process");
 const path = require("node:path");
 const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
+const dataArguments = process.argv.filter((value) => value.startsWith("--material-data-dir="));
+if (dataArguments.length > 1) throw new Error("INVALID_DATA_DIRECTORY");
+if (dataArguments.length === 1) {
+  const directory = dataArguments[0].slice("--material-data-dir=".length);
+  if (!path.isAbsolute(directory) || directory.includes("\0") || path.parse(directory).root === directory)
+    throw new Error("INVALID_DATA_DIRECTORY");
+  app.setPath("userData", path.resolve(directory));
+}
 const allowed = new Set([
   "system.status",
   "vault.create",
