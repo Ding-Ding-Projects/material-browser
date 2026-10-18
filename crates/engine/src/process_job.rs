@@ -40,6 +40,7 @@ mod native {
     }
     #[link(name = "kernel32")]
     unsafe extern "system" {
+        fn QueryInformationJobObject(job: *mut c_void, class: i32, info: *mut c_void, length: u32, returned: *mut u32) -> i32;
         fn CreateJobObjectW(attributes: *const c_void, name: *const u16) -> *mut c_void;
         fn SetInformationJobObject(
             job: *mut c_void,
@@ -59,6 +60,22 @@ mod native {
     // The job handle is owned, never accessed concurrently, and only closes on Drop.
     unsafe impl Send for ProcessJob {}
     impl ProcessJob {
+        pub fn is_empty(&self) -> Result<bool> {
+            #[repr(C)]
+            #[derive(Default)]
+            struct Accounting {
+                total_user: i64, total_kernel: i64, period_user: i64, period_kernel: i64,
+                page_faults: u32, total_processes: u32, active_processes: u32, terminated_processes: u32,
+            }
+            let mut accounting = Accounting::default();
+            let mut returned = 0;
+            let success = unsafe { QueryInformationJobObject(self.0, 1, &mut accounting as *mut _ as *mut c_void,
+                std::mem::size_of::<Accounting>() as u32, &mut returned) };
+            if success == 0 || returned != std::mem::size_of::<Accounting>() as u32 {
+                return Err(err("PROCESS_JOB", "Cannot verify owned process job completion"));
+            }
+            Ok(accounting.active_processes == 0)
+        }
         pub fn attach(child: &mut Child, suspended: bool) -> Result<Self> {
             let mut limits = ExtendedLimits::default();
             limits.basic.flags = 0x2000; // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
@@ -108,6 +125,9 @@ pub(super) use native::ProcessJob;
 pub(super) struct ProcessJob;
 #[cfg(not(windows))]
 impl ProcessJob {
+    pub fn is_empty(&self) -> Result<bool> {
+        Err(err("PROCESS_JOB_UNSUPPORTED", "Native process containment is only implemented on Windows"))
+    }
     pub fn attach(child: &mut Child, _suspended: bool) -> Result<Self> {
         let _ = child.kill();
         let _ = child.wait();
@@ -122,6 +142,20 @@ impl ProcessJob {
 mod tests {
     use super::*;
     use std::os::windows::process::CommandExt;
+    #[test]
+    fn owned_job_remains_active_after_launcher_exits_with_a_contained_child() {
+        let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+            .join("System32/WindowsPowerShell/v1.0/powershell.exe");
+        let script = "$p=New-Object System.Diagnostics.ProcessStartInfo; $p.FileName=(Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'); $p.Arguments='-NoProfile -NonInteractive -Command Start-Sleep -Seconds 30'; $p.UseShellExecute=$false; $p.CreateNoWindow=$true; [System.Diagnostics.Process]::Start($p) | Out-Null";
+        let mut launcher = Command::new(executable).args(["-NoProfile", "-NonInteractive", "-Command", script])
+            .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
+            .creation_flags(0x08000004).spawn().unwrap();
+        let job = ProcessJob::attach(&mut launcher, true).unwrap();
+        assert!(launcher.wait().unwrap().success());
+        assert!(!job.is_empty().unwrap(), "Launcher exit cannot prove contained child exit");
+        // The exact private test job owns the remaining child and closes it on drop.
+        drop(job);
+    }
     #[test]
     fn closing_owned_job_terminates_contained_process() {
         let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
