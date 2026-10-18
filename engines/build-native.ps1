@@ -28,7 +28,7 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
   $moduleSource=Join-Path $PSScriptRoot "native/firefox/$moduleName"
   $baseline=(& git -C $Path show HEAD:browser/components/moz.build) -join "`n"
   if($LASTEXITCODE -ne 0){throw 'Cannot read Firefox source manifest'}
-  $anchor='MOZ_SRC_FILES += ['
+  $anchor='    "DesktopActorRegistry.sys.mjs",'
   if(($baseline.Split(@($anchor),[StringSplitOptions]::None)).Count -ne 2){throw 'Firefox module manifest anchor mismatch'}
   $expected=$baseline.Replace($anchor,"$anchor`n    `"$moduleName`",")
   $existing=(Get-Content -LiteralPath $manifestPath -Raw).Replace("`r`n","`n").TrimEnd("`n")
@@ -38,7 +38,8 @@ function FirefoxOverlay([string]$Path,[switch]$CheckOnly) {
       throw 'Native Firefox source has unrelated changes; preserving it.'
     }
   }
-  if($existing -ne $baseline -and $existing -ne $expected){throw 'Existing Firefox module manifest differs from the managed overlay'}
+  $previous=$baseline.Replace('MOZ_SRC_FILES += [',"MOZ_SRC_FILES += [`n    `"$moduleName`",")
+  if($existing -ne $baseline -and $existing -ne $expected -and $existing -ne $previous){throw 'Existing Firefox module manifest differs from the managed overlay'}
   if((Test-Path -LiteralPath $modulePath) -and (FileSha256 $modulePath) -ne (FileSha256 $moduleSource)){
     throw 'Existing Firefox snapshot module differs from the managed overlay; preserving it.'
   }

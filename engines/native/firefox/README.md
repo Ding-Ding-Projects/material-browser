@@ -60,3 +60,22 @@ quiescence, IPC authentication, browser recovery or snapshot restoration.
 
 `engines/recipes/firefox-snapshot.json` records inspected upstream source hashes.
 Native compilation and built-browser acceptance must be recorded separately.
+
+## Cookie write-pause implementation candidate
+
+`engines/recipes/firefox-158-cookie-pause.patch` implements a native cookie
+write-queue pause with monotonically increasing leases. Acquisition first drains
+earlier batches and remains unavailable while a batch or delete-all operation is
+in flight. A lease prevents future queue dispatch while keeping in-memory
+mutations buffered. Reset, corruption and close invalidate the lease; stale
+release requests cannot thaw a newer lease. Write errors permanently disable
+snapshot acquisition for that storage instance without stopping normal recovery.
+
+The patch also adds native cookie tests, but is not automatically applied by the
+build recipe. Preserve the current baseline producer, then review and apply this
+candidate to the exact pinned source and rebuild through the root entrypoint.
+Patch application was checked, not native compilation or execution. It remains
+unregistered and does not complete the cookie provider: session cookies need
+their own consistent state, WAL/connection durability and direct-writer coverage
+need runtime validation, and the provider must propagate invalidation and thaw
+through the authenticated native transaction before any output is published.

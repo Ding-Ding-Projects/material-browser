@@ -1,7 +1,12 @@
 //! Restricted native snapshot messages. This is not a debugging transport.
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
-#[serde(tag = "command", rename_all = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "command",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 pub enum SnapshotCommand {
     Begin {
         protocol: u32,
@@ -51,6 +56,47 @@ impl BarrierReceipt {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn restricted_commands_use_exact_camel_case_wire_fields() {
+        let commands = [
+            (
+                SnapshotCommand::Begin {
+                    protocol: 1,
+                    request_id: "r".into(),
+                    profile_id: "p".into(),
+                },
+                serde_json::json!({"command":"begin","protocol":1,"requestId":"r","profileId":"p"}),
+            ),
+            (
+                SnapshotCommand::Commit {
+                    protocol: 1,
+                    request_id: "r".into(),
+                    generation: 7,
+                },
+                serde_json::json!({"command":"commit","protocol":1,"requestId":"r","generation":7}),
+            ),
+            (
+                SnapshotCommand::Abort {
+                    protocol: 1,
+                    request_id: "r".into(),
+                },
+                serde_json::json!({"command":"abort","protocol":1,"requestId":"r"}),
+            ),
+        ];
+        for (command, expected) in commands {
+            assert_eq!(serde_json::to_value(command).unwrap(), expected);
+            let decoded: SnapshotCommand = serde_json::from_value(expected.clone()).unwrap();
+            assert_eq!(serde_json::to_value(decoded).unwrap(), expected);
+        }
+        for invalid in [
+            serde_json::json!({"command":"begin","protocol":1,"request_id":"r","profile_id":"p"}),
+            serde_json::json!({"command":"commit","protocol":1,"request_id":"r","generation":7}),
+            serde_json::json!({"command":"abort","protocol":1,"request_id":"r"}),
+            serde_json::json!({"command":"abort","protocol":1,"requestId":"r","extra":true}),
+        ] {
+            assert!(serde_json::from_value::<SnapshotCommand>(invalid).is_err());
+        }
+    }
     #[test]
     fn missing_writer_barrier_is_rejected() {
         let mut r = BarrierReceipt {

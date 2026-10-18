@@ -1,0 +1,281 @@
+--- a/netwerk/cookie/CookieDBWriteQueue.h
++++ b/netwerk/cookie/CookieDBWriteQueue.h
+@@ -45,10 +45,18 @@
+ 
+   void FlushNow();
+ 
+-  void OnFlushCompleted();
++  void OnFlushCompleted(bool aSucceeded);
++
++  // Returns zero until earlier queued writes have drained successfully. A valid
++  // lease blocks future queue dispatch, not in-memory cookie changes. Direct
++  // storage reset/close invalidates the lease through Clear()/FlushNow().
++  uint64_t TryPauseForSnapshot();
++  bool SnapshotPauseValid(uint64_t aLease) const;
++  bool ResumeAfterSnapshot(uint64_t aLease);
+ 
+  private:
+   FRIEND_TEST(TestCookieDBWriteQueue, Coalesce);
++  friend class TestCookieDBWriteQueue_SnapshotPause_Test;
+ 
+   enum class OpType : uint8_t {
+     Insert,           // the row must exist with these values
+@@ -78,6 +86,9 @@
+   // FlushNow() dispatches unconditionally, because at shutdown a deferred
+   // flush would come after the connection is already closing.
+   uint32_t mFlushesInFlight = 0;
++  bool mSnapshotPaused = false;
++  bool mWriteFailed = false;
++  uint64_t mSnapshotLease = 0;
+ };
+ 
+ }  // namespace net
+--- a/netwerk/cookie/CookieDBWriteQueue.cpp
++++ b/netwerk/cookie/CookieDBWriteQueue.cpp
+@@ -9,6 +9,7 @@
+ #include "CookiePersistentStorage.h"
+ #include "mozilla/StaticPrefs_network.h"
+ #include "nsITimer.h"
++#include "nsThreadUtils.h"
+ 
+ namespace mozilla {
+ namespace net {
+@@ -113,24 +114,56 @@
+ }
+ 
+ void CookieDBWriteQueue::Clear() {
++  mSnapshotPaused = false;
+   mPending.Clear();
+   CancelTimer();
+ }
+ 
+ void CookieDBWriteQueue::FlushNow() {
++  mSnapshotPaused = false;
+   CancelTimer();
+   Flush();
+ }
+ 
+-void CookieDBWriteQueue::OnFlushCompleted() {
++void CookieDBWriteQueue::OnFlushCompleted(bool aSucceeded) {
++  mWriteFailed |= !aSucceeded;
+   MOZ_ASSERT(mFlushesInFlight > 0);
+   --mFlushesInFlight;
+ 
+   MaybeScheduleFlush();
+ }
+ 
++uint64_t CookieDBWriteQueue::TryPauseForSnapshot() {
++  MOZ_ASSERT(NS_IsMainThread());
++  if (mSnapshotPaused || mWriteFailed || mSnapshotLease == UINT64_MAX) {
++    return 0;
++  }
++  FlushNow();
++  if (!IsIdle() || mWriteFailed) {
++    return 0;
++  }
++  mSnapshotPaused = true;
++  return ++mSnapshotLease;
++}
++
++bool CookieDBWriteQueue::SnapshotPauseValid(uint64_t aLease) const {
++  MOZ_ASSERT(NS_IsMainThread());
++  return aLease != 0 && mSnapshotPaused && !mWriteFailed &&
++         aLease == mSnapshotLease;
++}
++
++bool CookieDBWriteQueue::ResumeAfterSnapshot(uint64_t aLease) {
++  MOZ_ASSERT(NS_IsMainThread());
++  if (!SnapshotPauseValid(aLease)) {
++    return false;
++  }
++  mSnapshotPaused = false;
++  MaybeScheduleFlush();
++  return true;
++}
++
+ void CookieDBWriteQueue::MaybeScheduleFlush() {
+-  if (mPending.IsEmpty() || mTimer || mFlushesInFlight > 0) {
++  if (mSnapshotPaused || mPending.IsEmpty() || mTimer || mFlushesInFlight > 0) {
+     return;
+   }
+ 
+@@ -153,7 +186,7 @@
+ }
+ 
+ void CookieDBWriteQueue::Flush() {
+-  if (mPending.IsEmpty()) {
++  if (mSnapshotPaused || mPending.IsEmpty()) {
+     return;
+   }
+ 
+@@ -187,6 +220,7 @@
+   if (mStorage->ExecuteWriteBatch(removals, insertions, updates)) {
+     ++mFlushesInFlight;
+   } else {
++    mWriteFailed = true;
+     // Dispatching only fails when the connection or the statements are gone,
+     // which never recovers on its own. Retrying would spin the timer forever.
+     COOKIE_LOGSTRING(LogLevel::Warning,
+--- a/netwerk/cookie/CookiePersistentStorage.h
++++ b/netwerk/cookie/CookiePersistentStorage.h
+@@ -63,6 +63,11 @@
+ 
+   void OnWriteBatchCompleted(uint16_t aReason);
+ 
++  void OnRemoveAllCompleted(uint16_t aReason);
++  uint64_t TryPauseWritesForSnapshot();
++  bool SnapshotWritePauseValid(uint64_t aLease) const;
++  bool ResumeWritesAfterSnapshot(uint64_t aLease);
++
+  protected:
+   const char* NotificationTopic() const override { return "cookie-changed"; }
+ 
+@@ -79,6 +84,7 @@
+ 
+  private:
+   friend class CookieDBWriteQueue;
++  friend class TestCookieDBWriteQueue_SnapshotPause_Test;
+ 
+   CookiePersistentStorage();
+   ~CookiePersistentStorage();
+@@ -113,6 +119,8 @@
+   void CollectCookieJarSizeData() override;
+ 
+   UniquePtr<CookieDBWriteQueue> mWriteQueue;
++  uint32_t mRemovalsInFlight = 0;
++  bool mSnapshotStorageFailed = false;
+ 
+   nsCOMPtr<nsIThread> mThread;
+   nsCOMPtr<mozIStorageService> mStorageService;
+--- a/netwerk/cookie/CookiePersistentStorage.cpp
++++ b/netwerk/cookie/CookiePersistentStorage.cpp
+@@ -434,7 +434,10 @@
+         "RemoveCookieDBListener::HandleResult");
+     return NS_OK;
+   }
+-  NS_IMETHOD HandleCompletion(uint16_t /*aReason*/) override { return NS_OK; }
++  NS_IMETHOD HandleCompletion(uint16_t aReason) override {
++    mStorage->OnRemoveAllCompleted(aReason);
++    return NS_OK;
++  }
+ };
+ 
+ NS_IMPL_ISUPPORTS(RemoveCookieDBListener, mozIStorageStatementCallback)
+@@ -545,6 +548,35 @@
+   }
+ }
+ 
++uint64_t CookiePersistentStorage::TryPauseWritesForSnapshot() {
++  MOZ_ASSERT(NS_IsMainThread());
++  if (!mInitialized || !mInitializedDBConn || !mDBConn ||
++      mCorruptFlag != OK || mRemovalsInFlight || mSnapshotStorageFailed) {
++    return 0;
++  }
++  return mWriteQueue->TryPauseForSnapshot();
++}
++
++bool CookiePersistentStorage::SnapshotWritePauseValid(uint64_t aLease) const {
++  MOZ_ASSERT(NS_IsMainThread());
++  return mDBConn && mInitializedDBConn && mCorruptFlag == OK &&
++         !mRemovalsInFlight && !mSnapshotStorageFailed &&
++         mWriteQueue->SnapshotPauseValid(aLease);
++}
++
++bool CookiePersistentStorage::ResumeWritesAfterSnapshot(uint64_t aLease) {
++  MOZ_ASSERT(NS_IsMainThread());
++  return mWriteQueue->ResumeAfterSnapshot(aLease);
++}
++
++void CookiePersistentStorage::OnRemoveAllCompleted(uint16_t aReason) {
++  MOZ_ASSERT(NS_IsMainThread());
++  MOZ_ASSERT(mRemovalsInFlight);
++  --mRemovalsInFlight;
++  mSnapshotStorageFailed |=
++      aReason != mozIStorageStatementCallback::REASON_FINISHED;
++}
++
+ void CookiePersistentStorage::RemoveAllInternal() {
+   // clear the cookie file
+   if (mDBConn) {
+@@ -556,6 +588,11 @@
+     if (NS_SUCCEEDED(rv)) {
+       nsCOMPtr<mozIStoragePendingStatement> handle;
+       rv = stmt->ExecuteAsync(mRemoveListener, getter_AddRefs(handle));
++      if (NS_SUCCEEDED(rv)) {
++        ++mRemovalsInFlight;
++      } else {
++        mSnapshotStorageFailed = true;
++      }
+       MOZ_ASSERT(NS_SUCCEEDED(rv));
+     } else {
+       // Recreate the database.
+@@ -568,6 +605,7 @@
+ }
+ 
+ void CookiePersistentStorage::HandleCorruptDB() {
++  mSnapshotStorageFailed = true;
+   COOKIE_LOGSTRING(
+       LogLevel::Debug,
+       ("HandleCorruptDB(): CookieStorage %p has mCorruptFlag %u", this,
+@@ -783,7 +821,8 @@
+     mCorruptFlag = OK;
+   }
+ 
+-  mWriteQueue->OnFlushCompleted();
++  mWriteQueue->OnFlushCompleted(
++      aReason == mozIStorageStatementCallback::REASON_FINISHED);
+ 
+   // This notification is just for testing. It means "every change made so far
+   // is on disk", so it must not fire for a failed batch, nor while more
+--- a/netwerk/test/gtest/TestCookie.cpp
++++ b/netwerk/test/gtest/TestCookie.cpp
+@@ -5,6 +5,7 @@
+ #include "Cookie.h"
+ #include "CookieDBWriteQueue.h"
+ #include "CookieParser.h"
++#include "CookiePersistentStorage.h"
+ #include "CookieStorage.h"
+ #include "TestCommon.h"
+ #include "gtest/gtest.h"
+@@ -1460,6 +1461,41 @@
+ 
+ namespace mozilla::net {
+ 
++TEST(TestCookieDBWriteQueue, SnapshotPause)
++{
++  // No profile, database or production service is opened by this constructor.
++  RefPtr<CookiePersistentStorage> storage = new CookiePersistentStorage();
++  CookieDBWriteQueue queue(storage);
++  uint64_t first = queue.TryPauseForSnapshot();
++  ASSERT_NE(first, 0u);
++  EXPECT_TRUE(queue.SnapshotPauseValid(first));
++  EXPECT_EQ(queue.TryPauseForSnapshot(), 0u);
++  EXPECT_FALSE(queue.ResumeAfterSnapshot(first + 1));
++  EXPECT_TRUE(queue.SnapshotPauseValid(first));
++  EXPECT_TRUE(queue.ResumeAfterSnapshot(first));
++  EXPECT_FALSE(queue.SnapshotPauseValid(first));
++
++  uint64_t second = queue.TryPauseForSnapshot();
++  EXPECT_GT(second, first);
++  queue.Clear();
++  EXPECT_FALSE(queue.SnapshotPauseValid(second));
++  EXPECT_FALSE(queue.ResumeAfterSnapshot(second));
++
++  uint64_t third = queue.TryPauseForSnapshot();
++  queue.FlushNow();
++  EXPECT_FALSE(queue.SnapshotPauseValid(third));
++
++  queue.mFlushesInFlight = 1;
++  EXPECT_EQ(queue.TryPauseForSnapshot(), 0u);
++  queue.OnFlushCompleted(true);
++  EXPECT_NE(queue.TryPauseForSnapshot(), 0u);
++  queue.Clear();
++
++  queue.mFlushesInFlight = 1;
++  queue.OnFlushCompleted(false);
++  EXPECT_EQ(queue.TryPauseForSnapshot(), 0u);
++}
++
+ TEST(TestCookieDBWriteQueue, Coalesce)
+ {
+   using OpType = CookieDBWriteQueue::OpType;
