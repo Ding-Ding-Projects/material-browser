@@ -1,0 +1,72 @@
+{
+  "records": [
+    {
+      "id": "handbook-home-light-1280",
+      "active": true,
+      "path": "docs/evidence/handbook/portable-home.png",
+      "sourceCommit": "1cd196ba829f65d17c5a95bdf2ea5f6078f0009e",
+      "artifactSha256": "dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49",
+      "captureSha256": "d72af2104bf4fca9cee5db7f41d01afaec4593f930ea1eaa22aa15f0bae919e2",
+      "screen": "home",
+      "state": "English default reading overview",
+      "theme": "light",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "loaded",
+      "interactionReceiptSha256": "7d6ad72a31393dd07dcfaf2de1aecfcce85a043eb38f55d80e9136c7009cad2d",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "handbook-wiki-light-1280",
+      "active": true,
+      "path": "docs/evidence/handbook/portable-wiki.png",
+      "sourceCommit": "1cd196ba829f65d17c5a95bdf2ea5f6078f0009e",
+      "artifactSha256": "dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49",
+      "captureSha256": "00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140",
+      "screen": "wiki-home",
+      "state": "English bundled wiki home",
+      "theme": "light",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "wiki",
+      "interactionReceiptSha256": "7d6ad72a31393dd07dcfaf2de1aecfcce85a043eb38f55d80e9136c7009cad2d",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "handbook-guide-light-1280",
+      "active": true,
+      "path": "docs/evidence/handbook/portable-guide.png",
+      "sourceCommit": "1cd196ba829f65d17c5a95bdf2ea5f6078f0009e",
+      "artifactSha256": "dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49",
+      "captureSha256": "ee4ff864ad45b26f6169153dae1dae75e818d05b035b5f5747cebaf7a9c4efff",
+      "screen": "automation-guide",
+      "state": "English second reading step with the simulated Selenium mode applied",
+      "theme": "light",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "guide-persistence",
+      "interactionReceiptSha256": "7d6ad72a31393dd07dcfaf2de1aecfcce85a043eb38f55d80e9136c7009cad2d",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "handbook-settings-dark-1280",
+      "active": true,
+      "path": "docs/evidence/handbook/portable-settings.png",
+      "sourceCommit": "1cd196ba829f65d17c5a95bdf2ea5f6078f0009e",
+      "artifactSha256": "dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49",
+      "captureSha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79",
+      "screen": "reading-settings",
+      "state": "Cantonese dark reading settings after reload",
+      "theme": "dark",
+      "viewportWidth": 1280,
+      "viewportHeight": 1000,
+      "scale": 1,
+      "interactionProofId": "preferences",
+      "interactionReceiptSha256": "7d6ad72a31393dd07dcfaf2de1aecfcce85a043eb38f55d80e9136c7009cad2d",
+      "inspectionStatus": "inspected"
+    }
+  ]
+}

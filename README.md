@@ -44,5 +44,34 @@ These genuine captures show the packaged desktop at source `7257d2238a6c6a495c84
 
 The workflow created a vault and profile, skipped optional synchronization, saved automation from Off to Selenium, and changed language/theme through the interface. Effective automation remains unavailable: no managed browser was launched in this capture run. The updated-at value remains unavailable. Native installation, restart persistence, keyboard-only input, a complete scale/language matrix and overall accessibility acceptance remain unverified. [Evidence inventory](docs/evidence/desktop/inventory.json).
 
-Settings currently implements appearance and personal wording only. The complete required-feature
-settings inventory and its missing working controls are the current implementation priority.
+Settings now contains ten categories and 37 validated local preferences, with contextual help,
+practice values, schedules, notifications, history/export workflows, installed-font discovery
+and bounded external-editor handoff. Eleven reviewed state-transition repairs are integrated.
+The native preference and protected-history GUI integration remains in progress. The
+[required-feature inventory](docs/features/desktop/settings-acceptance.json) still records
+65 desktop-applicable rows with none claimed comprehensively complete. Explanatory localization,
+actual audio, deeper appearance controls, complete regex parity and the full layout matrix
+remain among the explicit gaps.
+
+## Portable handbook evidence
+
+The single-file offline handbook was built and exercised at source
+`1cd196ba829f65d17c5a95bdf2ea5f6078f0009e` through
+`build-installer.bat -Component DocsCompanion`. These original page captures use an explicitly
+emulated 1280 by 1000 viewport at scale 1, not a physical display-scale matrix.
+
+![Offline handbook overview in English](docs/evidence/handbook/portable-home.png)
+
+![Bundled handbook wiki and internal article links](docs/evidence/handbook/portable-wiki.png)
+
+![Offline automation guide with saved reading progress and simulation](docs/evidence/handbook/portable-guide.png)
+
+![Offline handbook reading settings in Cantonese and dark theme](docs/evidence/handbook/portable-settings.png)
+
+All 21 bundled article/wiki routes rendered; guides, search and local preferences worked.
+Separate runtime observations confirmed persistence across a full process restart. These images
+do not establish updater behavior, installation, native browser operations or complete Settings
+acceptance. The restart image is excluded because its diagnostic interval was not enabled.
+See the [full evidence and limitations](docs/evidence/handbook/README.md),
+[image inventory](docs/evidence/handbook/inventory.json) and
+[public build/capture summary](docs/evidence/handbook/receipts.json).
