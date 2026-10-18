@@ -70,10 +70,15 @@ and output wiping. A passing fixture does not prove Chromium provider compilatio
 
 Upstream DEPS references `chromium/third_party/updater/chrome_win_x86` through both
 `chrome_win_x86/cipd` and `chrome_win_x86_sans_iid/cipd`. The managed acquisition
-configuration excludes both with supported `custom_deps: None` entries. The
+configuration retains both `custom_deps: None` entries, but they are not proof
+of exclusion: the pinned client's package registration precedes its ordinary
+path override. The exact reviewed DEPS source patch instead disables only
+these two optional fixture conditions. Before acquisition, the recipe verifies
+its baseline/result hashes and uses the pinned `gclient_eval` implementation to
+prove every reference to that package has a false condition. The
 first path is data in `chrome/updater:updater_test_sources`, a test-only target,
 and only in its x86 branch. Neither payload is required by the requested
 unbranded x64 browser target. Preserve the host scanner verdict and do not
 retrieve either excluded payload or weaken protection. Complete acquisition,
-GN graph validation and Chromium compilation remain unverified until their
+full GN graph validation and Chromium compilation remain unverified until their
 actual root build receipts exist.

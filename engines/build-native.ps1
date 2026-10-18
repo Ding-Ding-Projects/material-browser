@@ -32,6 +32,39 @@ function NormalizedSha256([string]$FilePath) {
   try { return ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($text)))).Replace('-','').ToLowerInvariant() }
   finally { $sha.Dispose() }
 }
+function ChromiumSourceFilter([string]$Path,[string]$Depot) {
+  $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/chromium-source-filter.json') -Raw | ConvertFrom-Json
+  $patch=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
+  $target=Join-Path $Path 'DEPS'
+  $actualRevision=& git -C $Path rev-parse HEAD
+  if($LASTEXITCODE -ne 0 -or $actualRevision -ne $recipe.revision -or $recipe.revision -ne $pins.chromium.revision){throw 'Chromium optional source filter revision mismatch'}
+  if((NormalizedSha256 $patch) -ne $recipe.patchSha256){throw 'Chromium optional source filter patch hash mismatch'}
+  $actual=NormalizedSha256 $target
+  if($actual -notin @($recipe.baselineSha256,$recipe.patchedSha256)){throw 'Chromium DEPS differs from the reviewed baseline/filter; preserving it.'}
+  if($actual -eq $recipe.baselineSha256){Run 'git' @('-C',$Path,'apply','--whitespace=error-all',$patch)}
+  if((NormalizedSha256 $target) -ne $recipe.patchedSha256){throw 'Chromium optional source filter readback mismatch'}
+  Run 'python' @('-B',(Join-Path $PSScriptRoot 'native/chromium/check_source_filter.py'),'--source',$Path,'--depot',$Depot)
+}
+function ChromiumProviderOverlay([string]$Path) {
+  $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/chromium-provider.json') -Raw | ConvertFrom-Json
+  $patch=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
+  $actualRevision=& git -C $Path rev-parse HEAD
+  if($LASTEXITCODE -ne 0 -or $actualRevision -ne $recipe.revision -or $recipe.revision -ne $pins.chromium.revision){throw 'Chromium provider revision mismatch'}
+  if((NormalizedSha256 $patch) -ne $recipe.patchSha256){throw 'Chromium provider patch receipt mismatch'}
+  foreach($entry in $recipe.files){
+    $target=Join-Path $Path $entry.path
+    if(Test-Path $target){
+      $actual=NormalizedSha256 $target
+      if($actual -ne $entry.baselineSha256 -and $actual -ne $entry.patchedSha256){throw "Chromium provider input differs: $($entry.path)"}
+    } elseif($entry.baselineSha256){throw "Chromium provider baseline missing: $($entry.path)"}
+  }
+  foreach($entry in $recipe.files){
+    $target=Join-Path $Path $entry.path
+    if(-not (Test-Path $target) -or (NormalizedSha256 $target) -ne $entry.patchedSha256){Run 'git' @('-C',$Path,'apply','--whitespace=error-all',"--include=$($entry.path)",$patch)}
+    if((NormalizedSha256 $target) -ne $entry.patchedSha256){throw "Chromium provider output mismatch: $($entry.path)"}
+  }
+  Write-Output 'Staged Chromium v2 profile key provider. Production broker and portability remain unverified and disabled.'
+}
 function FirefoxBackendOverlay([string]$Path,[switch]$CheckOnly) {
   $recipe=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'recipes/firefox-build-backend.json') -Raw | ConvertFrom-Json
   $patchPath=Join-Path $PSScriptRoot "recipes/$($recipe.patch)"
@@ -164,8 +197,12 @@ if($Engine -eq 'chromium'){
   $env:vs2026_install=$vs
   Push-Location $nativeRoot
   try {
-    # This branded x86 updater test fixture is not used by the unbranded x64 chrome target.
-    # Preserve the scanner verdict; do not retrieve or alter the excluded payload.
+    # These optional branded x86 updater test fixtures are not used by x64 chrome.
+    # Path-only custom_deps does not exclude CIPD registrations in this client.
+    # Admit the exact source condition filter before any dependency acquisition.
+    $chromiumSource=Join-Path $nativeRoot 'src'
+    if(-not (Test-Path (Join-Path $chromiumSource '.git'))){Checkout $chromiumSource $pin.url $pin.revision}
+    ChromiumSourceFilter $chromiumSource $depot
     $oldConfig="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': {}, 'custom_vars': {} }]`ntarget_os = ['win']`n"
     $previousConfig="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
     $config="solutions = [{ 'name': 'src', 'url': '$($pin.url)', 'managed': False, 'custom_deps': { 'src/third_party/updater/chrome_win_x86/cipd': None, 'src/third_party/updater/chrome_win_x86_sans_iid/cipd': None }, 'custom_vars': {} }]`ntarget_os = ['win']`n"
@@ -179,6 +216,7 @@ if($Engine -eq 'chromium'){
     $actual=& git -C (Join-Path $nativeRoot 'src') rev-parse HEAD
     if($actual -ne $pin.revision){throw 'Chromium checkout revision mismatch'}
     if($AcquireOnly){Write-Output "Acquired pinned Chromium source at $nativeRoot"; exit 0}
+    ChromiumProviderOverlay (Join-Path $nativeRoot 'src')
     Run (Join-Path $depot 'gclient.bat') @('runhooks')
     Push-Location (Join-Path $nativeRoot 'src')
     try {

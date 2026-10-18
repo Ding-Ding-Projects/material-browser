@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "revision": "0e66b94549a8bd85f03fbdf189b752d6e7b63c32",
+  "path": "DEPS",
+  "patch": "chromium-155-optional-updater-tests.patch",
+  "baselineSha256": "23ef1ed90785da130901961e4f4179b4fc10adac957eee5622d7e67fe4b82ec5",
+  "patchedSha256": "bc261669c1fc462920814d7863f9d84fb1b9840c02d5ea49ad8a1904c6b5a634",
+  "patchSha256": "bbffcbc7140f87c221348ff39931b8303d87db48f26385ad01af23013f8d124a",
+  "excludedPackage": "chromium/third_party/updater/chrome_win_x86",
+  "excludedPaths": [
+    "src/third_party/updater/chrome_win_x86/cipd",
+    "src/third_party/updater/chrome_win_x86_sans_iid/cipd"
+  ],
+  "scope": "Optional x86 updater test fixtures, not unbranded x64 chrome target"
+}
