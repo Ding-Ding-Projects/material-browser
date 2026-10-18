@@ -1,79 +1,87 @@
 # Implementation handoff
 
-## Current state
+## Current priority
 
-The full approved design remains incomplete. Source foundations have been integrated, but
-the combined tree has not completed release verification. Existing personal browser profiles
-remain outside scope. The server never receives vault passwords or profile keys.
+The approved product is incomplete. The latest user correction prioritizes the missing
+required features in Settings. The current desktop Settings surface implements appearance
+and personal wording only. A comprehensive per-surface inventory, reviewed design and real
+working settings are in progress on `feature/desktop-workspace`.
 
-## Verified component evidence
+Existing personal browsers, credentials and unrelated services remain outside scope.
 
-- Core: 12 focused tests and component build, including transactional restore recovery,
-  encrypted join and in-process domain-separated browser key derivation.
-- Native host: 14 focused tests, component build and persistent CLI/HTTP/Noise fixtures.
-- Desktop: component build, TypeScript and five focused tests; native desktop acceptance pending.
-- Documentation: component build and six tests on its branch; rebuild the integrated inventory.
-- Storage: six server tests. Portable wizard built and launched on an isolated hidden desktop;
-  missing-runtime handling and preferences across a fresh process were observed.
+## Verified integrated components
 
-The integrated main candidate a41511c also passed the exact Host build entrypoint (21.63s)
-and the Docs build entrypoint (18 complete articles), plus all six documentation tests.
-These checks do not establish deployed documentation or full desktop acceptance.
+- Core: 12 focused tests cover encrypted revisions, folder join, concurrent conflicts,
+  transactional restore recovery and in-process profile-key derivation.
+- Native integration `bf1d305`: exact Host build and 39 Rust workspace tests passed
+  (14 host, 12 core, 13 engine), plus two adapter launch-option tests.
+- Desktop integration `98d6eea`: exact Desktop build and seven focused tests passed.
+  Three genuine captures and their evidence inventory are in `docs/evidence/desktop/`.
+  They are bound to production source `7257d22`, not the later integrated native host.
+- Documentation `193861b`: exact Docs build and a real local runtime check rendered all
+  19 article routes. The evidence article delivered all three approved images with exact
+  hashes and decoded dimensions. The favicon no longer caused a missing-resource request.
+- Documentation accessibility `e979aa5`: all three repaired controls had English and
+  Cantonese accessible names, with zero unnamed targets across 12 observations. Their
+  state persisted after reload. Baseline search, guides and narrow layouts were exercised.
+- Storage: six server tests passed at their recorded component candidate. The portable
+  setup wizard was built and exercised on a hidden desktop for missing-runtime handling
+  and appearance persistence. Positive container setup remains unverified.
 
-The frozen native binary from a972859d2ea049f1246661e46788e6c912fae782 failed
-Chromium local, Firefox local and Chromium LAN at profiles.stop:GRACEFUL_STOP_UNAVAILABLE.
-Only new-profile-default-off was recorded complete. Automation title, snapshot and forwarding
-checks were not reached. All owned verification processes/desktops were subsequently absent.
-The replacement runtime at 4434a652f44724369345c4cea635c41e7c9f89c8 verified
-Off launch, graceful stop and stopped-profile snapshot in Chromium and Firefox. Chromium
-also passed local Selenium and the paired LAN Selenium title/stop/snapshot path. The complete
-matrix remains failed: Firefox Selenium stop timed out, Chromium local Puppeteer returned
-ADAPTER_START_FAILED, and Chromium LAN Puppeteer returned TUNNEL_CLOSED. The bounded Off-mode
-shutdown repair is integrated in main as d369e75. Advanced native capabilities remain unverified.
-The tested executable SHA-256 is fa09c58628d6172706a14c299a390e5230fe12661215db62946bda4a7a738819.
+These are bounded component results, not release or whole-product acceptance.
 
-The subsequent candidate bfd4fb5 passed all three modes locally in both engines and the
-Chromium paired LAN matrix. Firefox LAN Selenium passed; Firefox LAN Puppeteer returned HTTP
-400 during its WebSocket upgrade and remains under repair. Tests disconnect external BiDi
-clients before requesting stop; stop with a client still attached is not verified.
-Independent lifecycle/endpoint review found no blocking regression. Integration bf1d305
-passed the exact Host build (26.44s), 39 Rust workspace tests (14 host, 12 core, 13 engine)
-and two adapter launch-option tests. Native runtime evidence remains bound to bfd4fb5,
-executable SHA-256 9c0cf62321cfe8f0833d625fa5583e0b356424e8d2a587f7ef8d94a1d369f00d.
+## Corrected browser-runtime verdict
 
-Desktop integration 98d6eea passed the exact Desktop build and seven focused tests. Three
-genuine packaged-desktop captures are retained in docs/evidence/desktop and displayed in the
-README, bound specifically to production source 7257d22. They prove real onboarding/profile
-creation, saved automation preference and bilingual dark settings, not browser execution or
-restart persistence. All three promotion receipts and the bounded layout receipt passed.
+Historical candidates `4434a65` and `bfd4fb5` reached local automation and stopped-profile
+snapshot paths. Stronger native job verification subsequently confirmed that Firefox's
+launcher can exit while the actual browser and its descendants survive. Earlier results
+must not be described as proof of graceful browser shutdown: dropping the owned job could
+terminate surviving descendants.
 
-Documentation candidate e979aa5 passed a real accessibility-tree recheck: the guided checkbox
-and two appearance switches have correct English/Cantonese names, with zero unnamed targets
-across 12 observations. Their state persisted after reload. The earlier 18-article runtime
-inventory, interactive walkthroughs and narrow layouts passed; a favicon resource is missing.
-These are local runtime results, not deployment proof. Raw documentation captures remain
-unpromoted because the original complete build receipt was unavailable.
+The active native-host branch now verifies complete owned-job membership, exact process
+identity and window ownership before requesting normal close, and requires actual job
+completion before releasing the profile lease. These changes still require their final
+runtime matrix. Firefox BiDi active-client contention, browser-already-closed handling and
+the paired WebSocket Host-authority repair are included in that work. Preserve all raw
+candidate evidence and distinguish superseded results from the final verdict.
 
-## Incomplete engine work
+## Native engine work
 
-The engine recovery branch preserves source acquisition, current source pins, process ownership,
-an uncompiled Chromium provider integration and the stop repair. Portable key delivery,
-whole-profile native snapshot barriers and advanced identity remain unfinished. A blocked
-optional Chromium updater test package prevented source synchronization. Existing protection
-was not changed, and the same blocked payload must not simply be retried.
+`feature/browser-engines` preserves pinned source acquisition, an uncompiled Chromium key
+provider and the Firefox snapshot coordinator/cookie-pause candidates. Whole-profile live
+snapshots, protected key delivery and advanced identity remain disabled and unverified.
+The Firefox baseline is compiling. Cookie patches are retained separately until that
+producer settles, then require native compilation and focused runtime checks.
+
+A Chromium optional test payload was blocked by host protection. Do not weaken protection
+or repeat retrieval of that same blocked payload. A second physical Windows computer is
+still required for restoration proof.
+
+## Active delivery work and limits
+
+The offline documentation portable companion is being built and verified separately on
+`feature/storage-service`. Its packaging does not establish complete Settings coverage.
+No public container, LAN deployment, hosted documentation, About homepage or normal release
+has been verified. Bootstrap, build companion, updater and required per-surface acceptance
+remain unfinished.
+
+Raw documentation captures remain unpromoted because complete original build receipts were
+unavailable. Temporary documentation profiles remain ignored after automatic approval review
+rejected their scoped deletion. Do not retry through an alternate deletion route. All
+recorded documentation browsers, listeners and hidden desktops were closed normally.
+
+Five earlier wizard captures remain private because contemporaneous build receipts are
+missing. Generated announcement images are private and never runtime evidence. No task-owned
+branch, worktree or recovery reference has been deleted.
 
 ## Next steps
 
-1. Revalidate retained producer handles and current branch state before changing inputs.
-2. Repair adapter startup/shutdown and rerun the affected hidden fixtures after relevant changes.
-3. Complete and compile native key-channel/provider, snapshot and identity integrations.
-4. Rebuild the assembled desktop/docs/storage, run focused integration checks and genuine UI proof.
-5. Verify restoration on a second physical Windows computer; access details are still needed.
-6. Complete required-feature inventories, bootstrap, offline companion and storage transport integration.
-7. Build/publish the container, verify LAN deployment, publish complete documentation/wiki,
-   verify homepage and ship verified normal releases.
+1. Complete and independently review the Settings inventory and design, then implement and
+   verify the missing working controls and workflows.
+2. Finish native process ownership/shutdown repairs and run the required local and paired matrix.
+3. Complete native key, storage-barrier and identity integrations with decisive engine proof.
+4. Verify the portable documentation companion and remaining packaging/bootstrap paths.
+5. Prove restoration on a second physical Windows computer, then complete storage, hosting,
+   public documentation, release and installation acceptance.
 
-Five raw wizard images remain private and ineligible for publication because contemporaneous
-build-timing receipts are missing. No public evidence gallery was created. No task-owned
-worktree, branch or recovery reference was deleted. See CLOSEOUT_PROMPT.md for continuation.
-
+See `CLOSEOUT_PROMPT.md` for ownership and continuation constraints.

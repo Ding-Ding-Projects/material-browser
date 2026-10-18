@@ -13,10 +13,11 @@ browser integrations and must not be inferred from the interface or profile-file
 
 The encrypted core, desktop workspace, native control transports, interactive documentation,
 storage service and portable hosting wizard have source implementations. Focused checks have
-passed separately, but the combined application is not release-ready. Fresh real Chromium and
-Firefox runs verify Off-mode launch, graceful stop and stopped-profile snapshots. Chromium
-Selenium also passed locally and through paired LAN forwarding; remaining automation paths
-are being repaired and verified. Native credential portability, consistent live
+passed separately, but the combined application is not release-ready. Browser fixtures reached
+local and paired automation, but stronger process-job checks exposed a Firefox launcher that
+can exit while the actual browser survives. Earlier stop results do not establish graceful
+browser shutdown. The supervisor and its runtime fixtures are being corrected. Native
+credential portability, consistent live
 snapshots and advanced identity controls remain incomplete. No published container,
 documentation deployment or end-to-end two-computer proof is claimed.
 
@@ -32,3 +33,6 @@ These genuine captures show the packaged desktop at source `7257d2238a6c6a495c84
 ![Bilingual settings in dark theme](docs/evidence/desktop/settings-dark-bilingual.png)
 
 The workflow created a vault and profile, skipped optional synchronization, saved automation from Off to Selenium, and changed language/theme through the interface. Effective automation remains unavailable: no managed browser was launched in this capture run. The updated-at value remains unavailable. Native installation, restart persistence, keyboard-only input, a complete scale/language matrix and overall accessibility acceptance remain unverified. [Evidence inventory](docs/evidence/desktop/inventory.json).
+
+Settings currently implements appearance and personal wording only. The complete required-feature
+settings inventory and its missing working controls are the current implementation priority.
