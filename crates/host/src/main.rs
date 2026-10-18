@@ -266,7 +266,7 @@ impl Host {
                     .and_then(Value::as_str)
                     .ok_or_else(|| error("INVALID_PARAMS", "Profile id required"))?;
                 self.supervisor
-                    .stop(id, Duration::from_secs(10))
+                    .stop(id, Duration::from_secs(30))
                     .map_err(|e| Error {
                         code: e.code,
                         message: e.message,
