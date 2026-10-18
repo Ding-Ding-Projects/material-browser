@@ -105,6 +105,18 @@ List supports inclusive ISO date and action filters. Diff returns changed settin
 keys and schedule counts, without freeform text or voice identifiers. Labels are
 encrypted; redacted export excludes their contents, snapshot values and user text.
 
+`exportRedacted({revisions})` exports an explicit selection of up to 500 unique
+revision IDs. It checks the independent session again and resolves IDs against
+the full eligible history, not a pre-truncated newest-500 list. Logical retention
+and prepared-record exclusions still apply. Every requested ID must be accounted
+for or the request fails with `HISTORY_EXPORT_SELECTION_INCOMPLETE`, without a
+partial export. Duplicate, malformed and oversized selections are rejected.
+An explicit empty selection returns an empty redacted result. Omitting the
+selection retains the newest-500 default. Only revision identity, date, action
+and stable record identity are projected; labels and freeform values never enter
+the payload. The pure in-memory selector is separate from access: only the service
+loads protected history after authentication under its mutex.
+
 Restore requires main-owned context `{expected, expectedNativeRevision}`. The
 expected semantic snapshot must validate against the same record kind as the
 desired snapshot; the native revision must be a nonnegative safe integer. Missing,

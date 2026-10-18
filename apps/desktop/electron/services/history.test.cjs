@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { execFileSync, spawn } = require('node:child_process');
-const { createHistoryService } = require('./history.cjs');
+const { createHistoryService, selectRedactedHistory } = require('./history.cjs');
 async function fixture() {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'material-history-test-'));
     const gitExecutable = execFileSync(process.platform === 'win32' ? 'where.exe' : 'which', ['git'], { encoding: 'utf8' }).trim().split(/\r?\n/)[0];
@@ -26,6 +26,60 @@ async function fixture() {
         } };
 }
 const snapshot = (theme = 'light') => ({ schemaVersion: 1, preferences: { theme, nextAction: 'local private text' }, schedules: [] });
+
+nativeTest('selected redacted export accounts for older selections beyond the default 500-row window', () => {
+    const now = Date.parse('2026-10-18T12:00:00Z');
+    const all = Array.from({ length: 600 }, (_, index) => ({
+        revision: crypto.randomUUID(), date: new Date(now - index * 1000).toISOString(), action: 'settings-changed',
+        recordId: 'presentation-settings-v1', snapshot: snapshot(), label: 'Private freeform fixture label',
+        extraUserValue: 'Never export this fixture text'
+    }));
+    assert.equal(selectRedactedHistory(all, {}, now).revisions.length, 500);
+    const revisions = [all[599].revision, all[510].revision, all[2].revision];
+    const result = selectRedactedHistory(all, { revisions }, now);
+    assert.deepEqual(result.revisions.map(row => row.revision), revisions);
+    assert.ok(result.revisions.every(row => Object.keys(row).sort().join(',') === 'action,date,recordId,revision'));
+    const text = JSON.stringify(result);
+    for (const omitted of ['Private freeform fixture label', 'Never export this fixture text', 'local private text', 'preferences']) assert.ok(!text.includes(omitted));
+    assert.equal(selectRedactedHistory(all, { revisions: [] }, now).revisions.length, 0);
+});
+nativeTest('selected export rejects missing, ineligible, duplicate and invalid IDs without a partial payload', () => {
+    const now = Date.parse('2026-10-18T12:00:00Z');
+    const current = { revision: crypto.randomUUID(), date: new Date(now).toISOString(), action: 'updated', snapshot: snapshot() };
+    const expired = { ...current, revision: crypto.randomUUID(), date: '2026-10-01T12:00:00Z' };
+    const prepared = { ...current, revision: crypto.randomUUID(), prepared: true };
+    const legacyPrepared = { ...current, revision: crypto.randomUUID(), action: 'transaction-prepared' };
+    const all = [{ action: 'retention-changed', visibleDays: 1 }, current, expired, prepared, legacyPrepared];
+    for (const id of [expired.revision, prepared.revision, legacyPrepared.revision, crypto.randomUUID()])
+        assert.throws(() => selectRedactedHistory(all, { revisions: [current.revision, id] }, now), /HISTORY_EXPORT_SELECTION_INCOMPLETE/);
+    for (const options of [{ revisions: [current.revision, current.revision] }, { revisions: ['not-a-revision'] }, { revisions: Array.from({ length: 501 }, () => crypto.randomUUID()) }, { revisions: undefined }, { revisions: [], extra: true }, null])
+        assert.throws(() => selectRedactedHistory(all, options, now), /INVALID_HISTORY_EXPORT_SELECTION/);
+});
+nativeTest('selected export checks actual service authentication and session generation even for empty selections', async () => {
+    const vm = require('node:vm');
+    let auth;
+    const root = path.join(os.tmpdir(), 'synthetic-history-export');
+    const storage = {
+        checkedPath: async () => ({}), directory: async () => {}, noLinks: async () => {},
+        boundedRead: async () => Buffer.from(JSON.stringify(auth)), verifyManagedPaths: async () => ({ abandonedTempCount: 0 }),
+        atomic: async (_file, value) => { auth = { ...value }; }, git: async () => '', init: async () => {}
+    };
+    const module = { exports: {} };
+    const syntheticFs = { realpath: async target => target, readdir: async () => [], access: async () => {
+        if (!auth) { const error = new Error('missing synthetic auth'); error.code = 'ENOENT'; throw error; }
+    } };
+    const load = id => id === './native-lock.cjs' ? { withNativeLock: async (_id, callback) => callback({ assertHeld() {} }) } :
+        id === './history-storage.cjs' ? { createHistoryStorage: () => storage } : id === 'node:fs/promises' ? syntheticFs : require(id);
+    vm.runInNewContext(await fs.readFile(require.resolve('./history.cjs'), 'utf8'), { module, require: load, Buffer });
+    const service = module.exports.createHistoryService({ appDataRoot: root, historyRoot: path.join(root, 'settings-history'), gitExecutable: path.join(root, 'synthetic-git.exe'), gitSha256: '0'.repeat(64), credentialStore: { withKey: async callback => callback(Buffer.alloc(32)) }, validatePreferences: value => value, validateSchedule: value => value });
+    assert.equal((await service.exportRedacted({ revisions: [] })).error.code, 'HISTORY_NOT_CONFIGURED');
+    await service.setup('synthetic-fixture-password');
+    assert.equal((await service.exportRedacted({ revisions: [] })).ok, true);
+    await service.lock();
+    assert.equal((await service.exportRedacted({ revisions: [] })).error.code, 'HISTORY_LOCKED');
+    await service.unlock('synthetic-fixture-password'); auth.generation++;
+    assert.equal((await service.exportRedacted({ revisions: [] })).error.code, 'HISTORY_SESSION_REVOKED');
+});
 test('real local history authenticates independently, encrypts, records no-ops and restores append-only', async () => {
     const f = await fixture();
     try {
