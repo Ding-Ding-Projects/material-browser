@@ -8,6 +8,7 @@ import "@material/web/dialog/dialog.js";
 import "@material/web/elevation/elevation.js";
 import "@material/web/tabs/tabs.js";
 import "@material/web/tabs/primary-tab.js";
+import "@material/web/iconbutton/icon-button.js";
 export function Button({
   children,
   onClick,
@@ -30,20 +31,53 @@ export function Field({
   onChange,
   type = "text",
   required = false,
+  clearLabel,
+  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (s: string) => void;
   type?: string;
   required?: boolean;
+  clearLabel?: string;
+  inputMode?: string;
 }) {
-  return React.createElement("md-outlined-text-field", {
-    label,
-    value,
-    type,
-    required,
-    onInput: (e: Event) => onChange((e.target as HTMLInputElement).value),
-  });
+  const ref = useRef<HTMLElement | null>(null);
+  const mode = document.documentElement.dataset.language;
+  const clear =
+    mode === "yue" ? "清除" : mode === "both" ? "Clear · 清除" : "Clear";
+  return React.createElement(
+    "md-outlined-text-field",
+    {
+      ref,
+      label,
+      value,
+      type,
+      required,
+      inputMode,
+      onInput: (e: Event) => onChange((e.target as HTMLInputElement).value),
+    },
+    React.createElement(
+      "md-icon-button",
+      {
+        slot: "trailing-icon",
+        "aria-label": clearLabel || `${clear} ${label}`,
+        title: clearLabel || `${clear} ${label}`,
+        onClick: () => {
+          onChange("");
+          ref.current?.focus();
+        },
+      },
+      React.createElement(
+        "svg",
+        { viewBox: "0 0 24 24", width: 24, height: 24, "aria-hidden": true },
+        React.createElement("path", {
+          fill: "currentColor",
+          d: "M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4l-6.3 6.3-1.4-1.4L9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z",
+        }),
+      ),
+    ),
+  );
 }
 export function Select({
   label,
@@ -88,7 +122,14 @@ export function Modal({
   return React.createElement(
     "md-dialog",
     { ref },
-    React.createElement("div", { slot: "headline" }, title),
+    React.createElement(
+      "div",
+      { slot: "headline" },
+      document.documentElement.dataset.dialogEmoji === "true"
+        ? React.createElement("span", { "aria-hidden": true }, "ℹ️ ")
+        : null,
+      title,
+    ),
     React.createElement(
       "div",
       { slot: "content", className: "dialog-content" },
@@ -97,6 +138,16 @@ export function Modal({
     React.createElement(
       "div",
       { slot: "actions" },
+      document.documentElement.dataset.accessibilityVisible !== "false" && (
+        <Button
+          secondary
+          onClick={() =>
+            window.dispatchEvent(new Event("settings-accessibility"))
+          }
+        >
+          Accessibility
+        </Button>
+      ),
       <Button
         secondary
         onClick={() => {

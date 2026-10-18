@@ -578,7 +578,7 @@ impl PairedClient {
         let stream =
             TcpStream::connect_timeout(&address, Duration::from_secs(3)).map_err(io_error)?;
         stream
-            .set_read_timeout(Some(Duration::from_secs(15)))
+            .set_read_timeout(Some(Duration::from_secs(40)))
             .map_err(io_error)?;
         stream
             .set_write_timeout(Some(Duration::from_secs(5)))
@@ -669,6 +669,65 @@ impl PairedClient {
         Ok(value["result"].clone())
     }
 }
+fn forwarded_websocket_request(bytes: &[u8], endpoint: &tungstenite::http::Uri) -> Result<Vec<u8>> {
+    let end = bytes.windows(4).position(|part| part == b"\r\n\r\n")
+        .map(|i| i + 4).ok_or_else(|| error("INVALID_REQUEST", "Incomplete WebSocket upgrade"))?;
+    if end > 16384 {
+        return Err(error("MESSAGE_TOO_LARGE", "WebSocket upgrade exceeds limit"));
+    }
+    let header = std::str::from_utf8(&bytes[..end])
+        .map_err(|_| error("INVALID_REQUEST", "Invalid WebSocket upgrade"))?;
+    let mut lines = header[..header.len() - 4].split("\r\n");
+    let path = endpoint.path_and_query().map(|p| p.as_str()).unwrap_or("/");
+    let first = lines.next().ok_or_else(|| error("INVALID_REQUEST", "Missing upgrade request"))?;
+    if first != format!("GET {path} HTTP/1.1") {
+        return Err(error("INVALID_REQUEST", "Upgrade must target the owned endpoint"));
+    }
+    let authority = endpoint.authority().ok_or_else(|| error("INVALID_ENDPOINT", "Missing endpoint authority"))?;
+    let mut output = format!("{first}\r\n");
+    let mut hosts = 0;
+    let mut upgrade = false;
+    let mut connection = false;
+    for line in lines {
+        let (name, value) = line.split_once(':').ok_or_else(|| error("INVALID_REQUEST", "Invalid upgrade header"))?;
+        if name.is_empty() || !name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-') {
+            return Err(error("INVALID_REQUEST", "Invalid upgrade header name"));
+        }
+        if name.eq_ignore_ascii_case("host") {
+            hosts += 1;
+            output.push_str(&format!("Host: {authority}\r\n"));
+        } else {
+            if name.eq_ignore_ascii_case("upgrade") { upgrade = value.trim().eq_ignore_ascii_case("websocket"); }
+            if name.eq_ignore_ascii_case("connection") { connection = value.split(',').any(|v| v.trim().eq_ignore_ascii_case("upgrade")); }
+            output.push_str(line);
+            output.push_str("\r\n");
+        }
+    }
+    if hosts != 1 || !upgrade || !connection {
+        return Err(error("INVALID_REQUEST", "A single Host and WebSocket upgrade are required"));
+    }
+    output.push_str("\r\n");
+    let mut output = output.into_bytes();
+    output.extend_from_slice(&bytes[end..]);
+    Ok(output)
+}
+fn read_forwarded_websocket_request(local: &mut TcpStream, endpoint: &tungstenite::http::Uri) -> Result<Vec<u8>> {
+    let until = std::time::Instant::now() + Duration::from_secs(5);
+    let mut bytes = Vec::new();
+    loop {
+        let remaining = until.checked_duration_since(std::time::Instant::now())
+            .ok_or_else(|| error("REQUEST_TIMEOUT", "WebSocket upgrade timed out"))?;
+        local.set_read_timeout(Some(remaining)).map_err(io_error)?;
+        let mut chunk = [0; 1024];
+        let count = local.read(&mut chunk).map_err(io_error)?;
+        if count == 0 { return Err(error("INVALID_REQUEST", "Incomplete WebSocket upgrade")); }
+        bytes.extend_from_slice(&chunk[..count]);
+        if bytes.windows(4).any(|part| part == b"\r\n\r\n") {
+            return forwarded_websocket_request(&bytes, endpoint);
+        }
+        if bytes.len() >= 16384 { return Err(error("MESSAGE_TOO_LARGE", "WebSocket upgrade exceeds limit")); }
+    }
+}
 fn relay(
     mut local: TcpStream,
     address: SocketAddr,
@@ -678,17 +737,24 @@ fn relay(
     profile: &str,
 ) -> Result<()> {
     local
-        .set_read_timeout(Some(Duration::from_millis(50)))
-        .map_err(io_error)?;
-    local
         .set_write_timeout(Some(Duration::from_secs(2)))
         .map_err(io_error)?;
     let mut client = PairedClient::connect(address, secret, server, public)?;
     let opened = client.call("tunnel.open", json!({"id":profile}))?;
     let tunnel = opened["tunnelId"].clone();
+    let endpoint: tungstenite::http::Uri = opened["endpoint"]["url"].as_str()
+        .ok_or_else(|| error("INVALID_ENDPOINT", "Missing owned endpoint"))?.parse()
+        .map_err(|_| error("INVALID_ENDPOINT", "Invalid owned endpoint"))?;
+    // Firefox validates the Host authority. A local relay port is not the
+    // authenticated browser's authority, so translate the upgrade before relay.
+    let mut pending = Some(read_forwarded_websocket_request(&mut local, &endpoint)?);
+    local.set_read_timeout(Some(Duration::from_millis(50))).map_err(io_error)?;
     let mut buffer = Zeroizing::new(vec![0; 32768]);
     loop {
-        let n = match local.read(&mut buffer) {
+        let n = if let Some(request) = pending.take() {
+            buffer[..request.len()].copy_from_slice(&request);
+            request.len()
+        } else { match local.read(&mut buffer) {
             Ok(0) => break,
             Ok(n) => n,
             Err(e)
@@ -700,7 +766,7 @@ fn relay(
                 0
             }
             Err(e) => return Err(io_error(e)),
-        };
+        } };
         let reply = client.call(
             "tunnel.exchange",
             json!({"id":profile,"tunnelId":tunnel,"data":B64.encode(&buffer[..n])}),
@@ -837,6 +903,37 @@ fn tunnel(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn forwarded_upgrade_uses_owned_authority_and_preserves_following_bytes() {
+        let endpoint = "ws://127.0.0.1:45678/session".parse().unwrap();
+        let request = b"GET /session HTTP/1.1\r\nHost: 127.0.0.1:12345\r\nUpgrade: websocket\r\nConnection: keep-alive, Upgrade\r\nSec-WebSocket-Key: synthetic\r\n\r\n\x81\x00";
+        let output = forwarded_websocket_request(request, &endpoint).unwrap();
+        assert!(output.starts_with(b"GET /session HTTP/1.1\r\nHost: 127.0.0.1:45678\r\n"));
+        assert!(output.ends_with(b"\r\n\r\n\x81\x00"));
+        for invalid in [
+            b"GET /other HTTP/1.1\r\nHost: local\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n".as_slice(),
+            b"GET /session HTTP/1.1\r\nHost: a\r\nHost: b\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n".as_slice(),
+            b"GET /session HTTP/1.1\r\nHost: a\r\nConnection: Upgrade\r\n\r\n".as_slice(),
+        ] { assert!(forwarded_websocket_request(invalid, &endpoint).is_err()); }
+        let oversized = format!("GET /session HTTP/1.1\r\nHost: a\r\nX-Padding: {}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n", "x".repeat(16384));
+        assert_eq!(forwarded_websocket_request(oversized.as_bytes(), &endpoint).unwrap_err().code, "MESSAGE_TOO_LARGE");
+    }
+    #[test]
+    fn forwarded_upgrade_buffers_split_headers_before_translating_authority() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let client = std::thread::spawn(move || {
+            let mut stream = TcpStream::connect(address).unwrap();
+            stream.write_all(b"GET /session HTTP/1.1\r\nHo").unwrap();
+            std::thread::sleep(Duration::from_millis(10));
+            stream.write_all(b"st: 127.0.0.1:12345\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n").unwrap();
+        });
+        let (mut stream, _) = listener.accept().unwrap();
+        let endpoint = "ws://127.0.0.1:45678/session".parse().unwrap();
+        let request = read_forwarded_websocket_request(&mut stream, &endpoint).unwrap();
+        assert!(String::from_utf8(request).unwrap().contains("Host: 127.0.0.1:45678\r\n"));
+        client.join().unwrap();
+    }
     #[test]
     fn native_paired_client_performs_real_encrypted_rpc() {
         let root =

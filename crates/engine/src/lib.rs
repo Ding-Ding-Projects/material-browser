@@ -179,13 +179,33 @@ pub struct ProcessStatus {
     pub engine_version: String,
 }
 struct OwnedProcess {
-    child: Child,
+    child: Option<Child>,
     status: ProcessStatus,
     _lock: File,
     adapter: bool,
     endpoint: Option<AutomationEndpoint>,
     _job: process_job::ProcessJob,
     identity: lifetime::ProcessIdentity,
+}
+impl OwnedProcess {
+    fn helper_only(&mut self) -> Result<bool> {
+        if let Some(child) = self.child.as_mut() {
+            Ok(child.try_wait().map_err(io)?.is_none()
+                && !lifetime::is_alive(&self.identity)?
+                && self._job.process_ids()? == vec![child.id()])
+        } else { Ok(false) }
+    }
+    fn reap_child(&mut self) -> Result<bool> {
+        let exited = match self.child.as_mut() {
+            Some(child) => child.try_wait().map_err(io)?.is_some(),
+            None => true,
+        };
+        if exited {
+            // Close only the exact owned child handle after its exit is proven.
+            drop(self.child.take());
+        }
+        Ok(exited)
+    }
 }
 /// Keep this lease alive for the entire snapshot, restore, or removal operation.
 pub struct ProfileLease {
@@ -308,7 +328,7 @@ impl Supervisor {
         self.processes.insert(
             request.profile_id,
             OwnedProcess {
-                child,
+                child: Some(child),
                 status: status.clone(),
                 _lock: lock,
                 adapter,
@@ -326,7 +346,8 @@ impl Supervisor {
     fn reap(&mut self) -> Result<()> {
         let mut exited = Vec::new();
         for (id, p) in &mut self.processes {
-            if !lifetime::is_alive(&p.identity)? {
+            p.reap_child()?;
+            if !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
                 exited.push(id.clone());
             }
         }
@@ -342,26 +363,46 @@ impl Supervisor {
             .processes
             .get_mut(id)
             .ok_or_else(|| err("PROFILE_NOT_RUNNING", "No owned process"))?;
+        let mut helper_settled = false;
         if p.adapter {
             use std::io::Write;
+            let helper_only = p.helper_only()?;
+            helper_settled = helper_only;
+            let command: &[u8] = if helper_only {
+                // This trusted stdin command is permitted only after native
+                // browser exit and complete job membership prove no child remains.
+                b"{\"command\":\"shutdown-browser-exited\"}\n"
+            } else { b"{\"command\":\"shutdown\"}\n" };
             p.child
+                .as_mut()
+                .ok_or_else(|| err("ADAPTER_IO", "Adapter has already exited"))?
                 .stdin
                 .as_mut()
                 .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
-                .write_all(b"{\"command\":\"shutdown\"}\n")
+                .write_all(command)
                 .map_err(io)?;
         }
         let until = Instant::now() + timeout.min(Duration::from_secs(30));
         while Instant::now() < until {
-            if p.child.try_wait().map_err(io)?.is_some() && !lifetime::is_alive(&p.identity)? {
+            if p.reap_child()? && !lifetime::is_alive(&p.identity)? && p._job.is_empty()? {
                 self.processes.remove(id);
                 return Ok(());
+            }
+            if p.adapter && !helper_settled && p.helper_only()? {
+                use std::io::Write;
+                let sent = p.child.as_mut().and_then(|child| child.stdin.as_mut())
+                    .ok_or_else(|| err("ADAPTER_IO", "Adapter input is unavailable"))?
+                    .write_all(b"{\"command\":\"shutdown-browser-exited\"}\n");
+                match sent {
+                    Ok(()) => helper_settled = true,
+                    Err(error) => if !p.reap_child()? { return Err(io(error)); },
+                }
             }
             if !p.adapter {
                 // Launch can return before Chromium creates its first top-level window.
                 // Keep requesting graceful close within the caller's bound rather than
                 // treating the first empty enumeration as a terminal failure.
-                match request_close(p.child.id()) {
+                match request_close(&p._job, &p.identity) {
                     Ok(()) => {}
                     Err(e) if e.code == "GRACEFUL_STOP_UNAVAILABLE" => {}
                     Err(e) => return Err(e),
@@ -371,7 +412,7 @@ impl Supervisor {
         }
         Err(err(
             "GRACEFUL_STOP_UNAVAILABLE",
-            "Engine did not acknowledge native shutdown; owned process retained",
+            &format!("Engine did not acknowledge native shutdown; owned process job members: {:?}", p._job.process_ids()?),
         ))
     }
     pub fn snapshot(&self, _id: &str) -> Result<()> {
@@ -478,17 +519,17 @@ mod tests {
             let job = process_job::ProcessJob::attach(&mut helper, true).unwrap();
             lifetime::persist(&root, id, &lifetime::Journal::Running { identity: identity.clone() }).unwrap();
             supervisor.processes.insert(id.into(), OwnedProcess {
-                child: helper, status: ProcessStatus { profile_id: id.into(), pid: native.id(), engine: EngineKind::Chromium,
+                child: Some(helper), status: ProcessStatus { profile_id: id.into(), pid: native.id(), engine: EngineKind::Chromium,
                     effective_mode: AutomationMode::Puppeteer, engine_version: "synthetic".into() },
                 _lock: lease._lock, adapter: true, endpoint: None, _job: job, identity,
             });
             assert_eq!(supervisor.stop(id, Duration::from_millis(500)).unwrap_err().code, "GRACEFUL_STOP_UNAVAILABLE");
             // The helper read shutdown and exited, while the native identity is still alive.
             let until = Instant::now() + Duration::from_secs(5);
-            while supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_none() && Instant::now() < until {
+            while !supervisor.processes.get_mut(id).unwrap().reap_child().unwrap() && Instant::now() < until {
                 std::thread::sleep(Duration::from_millis(25));
             }
-            assert!(supervisor.processes.get_mut(id).unwrap().child.try_wait().unwrap().is_some());
+            assert!(supervisor.processes.get(id).unwrap().child.is_none());
             assert_eq!(supervisor.status().unwrap().len(), 1);
             assert!(supervisor.acquire_profile_idle(id).is_err());
         }));
@@ -539,7 +580,7 @@ mod tests {
 }
 
 #[cfg(windows)]
-fn request_close(pid: u32) -> Result<()> {
+fn request_close(job: &process_job::ProcessJob, identity: &lifetime::ProcessIdentity) -> Result<()> {
     use std::ffi::c_void;
     #[link(name = "user32")]
     unsafe extern "system" {
@@ -550,21 +591,32 @@ fn request_close(pid: u32) -> Result<()> {
         fn GetWindowThreadProcessId(hwnd: *mut c_void, pid: *mut u32) -> u32;
         fn PostMessageW(hwnd: *mut c_void, msg: u32, wparam: usize, lparam: isize) -> i32;
     }
-    struct Close {
-        pid: u32,
+    struct Close<'a> {
+        job: &'a process_job::ProcessJob,
+        identity: &'a lifetime::ProcessIdentity,
+        members: Vec<u32>,
         sent: bool,
+        error: Option<EngineError>,
     }
     unsafe extern "system" fn visit(hwnd: *mut c_void, param: isize) -> i32 {
-        let close = unsafe { &mut *(param as *mut Close) };
+        let close = unsafe { &mut *(param as *mut Close<'_>) };
         let mut owner = 0;
         unsafe { GetWindowThreadProcessId(hwnd, &mut owner) };
-        if owner == close.pid && unsafe { PostMessageW(hwnd, 0x0010, 0, 0) } != 0 {
-            close.sent = true;
+        if close.members.contains(&owner) {
+            match close.job.with_live_member(owner, &close.identity.executable, close.identity.start_time, || {
+                let mut current = 0;
+                unsafe { GetWindowThreadProcessId(hwnd, &mut current) };
+                current == owner && unsafe { PostMessageW(hwnd, 0x0010, 0, 0) } != 0
+            }) {
+                Ok(sent) => close.sent |= sent,
+                Err(error) => { close.error = Some(error); return 0; },
+            }
         }
         1
     }
-    let mut close = Close { pid, sent: false };
-    unsafe { EnumWindows(visit, &mut close as *mut Close as isize) };
+    let mut close = Close { job, identity, members: job.process_ids()?, sent: false, error: None };
+    unsafe { EnumWindows(visit, &mut close as *mut Close<'_> as isize) };
+    if let Some(error) = close.error { return Err(error); }
     if close.sent {
         Ok(())
     } else {
@@ -575,7 +627,7 @@ fn request_close(pid: u32) -> Result<()> {
     }
 }
 #[cfg(not(windows))]
-fn request_close(_pid: u32) -> Result<()> {
+fn request_close(_job: &process_job::ProcessJob, _identity: &lifetime::ProcessIdentity) -> Result<()> {
     Err(err(
         "GRACEFUL_STOP_UNAVAILABLE",
         "Native graceful shutdown is not implemented on this platform",

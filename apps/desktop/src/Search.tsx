@@ -5,11 +5,17 @@ export function Search({
   label,
   onResults,
   t,
+  onState,
+  itemKeys,
+  onKeys,
 }: {
   items: string[];
   label: string;
-  onResults: (ids: number[]) => void;
+  onResults?: (ids: number[]) => void;
+  itemKeys?: string[];
+  onKeys?: (keys: string[]) => void;
   t: (s: string) => string;
+  onState?: (state: { query: string; valid: boolean }) => void;
 }) {
   const [query, setQuery] = useState(""),
     [regex, setRegex] = useState(false),
@@ -19,18 +25,29 @@ export function Search({
     [replacement, setReplacement] = useState(""),
     [result, setResult] = useState<any>(null);
   const serialized = JSON.stringify(items);
+  const keySnapshot = JSON.stringify(itemKeys || []);
   useEffect(() => {
+    const publish = (indices: number[]) => {
+      onResults?.(indices);
+      onKeys?.(
+        indices
+          .map((index) => itemKeys?.[index])
+          .filter((key): key is string => typeof key === "string"),
+      );
+    };
     if (!regex) {
-      onResults(
+      onState?.({ query, valid: true });
+      publish(
         items.flatMap((x, i) =>
           x.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ? [i] : [],
         ),
       );
       return;
     }
+    onState?.({ query, valid: false });
     if (query.length > 2048 || sample.length > 16384) {
       setResult({ error: "Pattern or sample exceeds limit" });
-      onResults([]);
+      publish([]);
       return;
     }
     const worker = new Worker(new URL("./regex.worker.ts", import.meta.url), {
@@ -41,12 +58,13 @@ export function Search({
       setResult({
         error: "Evaluation exceeded 150 ms; simplify the expression",
       });
-      onResults([]);
+      publish([]);
     }, 150);
     worker.onmessage = (e) => {
       clearTimeout(timer);
       setResult(e.data);
-      onResults(
+      onState?.({ query, valid: !e.data.error });
+      publish(
         e.data.values?.flatMap((yes: boolean, i: number) => (yes ? [i] : [])) ||
           [],
       );
@@ -63,11 +81,25 @@ export function Search({
       clearTimeout(timer);
       worker.terminate();
     };
-  }, [query, regex, flags, sample, replacement, serialized]);
+  }, [query, regex, flags, sample, replacement, serialized, keySnapshot]);
   return (
-    <div className="search">
+    <div
+      className="search"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && query) {
+          setQuery("");
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+    >
       <div className="search-line">
-        <Field label={label} value={query} onChange={setQuery} />
+        <Field
+          label={label}
+          value={query}
+          onChange={setQuery}
+          clearLabel={`${t("Clear")} ${label}`}
+        />
         <Button secondary onClick={() => setOpen(!open)}>
           {t("Regex builder")}
         </Button>

@@ -1,0 +1,2101 @@
+{
+  "schemaVersion": 1,
+  "baseline": "193861b",
+  "scope": "Desktop settings and its connected application consumers",
+  "completed": false,
+  "records": [
+    {
+      "id": "language",
+      "title": "Language modes",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Language selector",
+      "stateConsumer": "Language selector",
+      "persistence": "appearance.language",
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "message-style",
+      "title": "Independent message style and dialog decorations",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "personal-wording",
+      "title": "Validated local personal wording",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Personal wording upload and clear",
+      "stateConsumer": "Personal wording upload and clear",
+      "persistence": "wording",
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "wording-drop",
+      "title": "Window-wide personal wording import",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Window file-drop listener",
+      "stateConsumer": "Window file-drop listener",
+      "persistence": "wording",
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "shared-study-mode",
+      "title": "Shared restricted-presentation mode",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "narration",
+      "title": "Local speech and voice selection",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "scheduled-settings",
+      "title": "Scheduled local and external preferences",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "display-name",
+      "title": "Presentation name independent of installed identity",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "attention-modes",
+      "title": "Five independent focus accommodations",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "startup-surprise",
+      "title": "Bounded nonblocking startup surprise",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "photo-provenance",
+      "title": "Approved public image provenance",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "material-components",
+      "title": "Registered Material components",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Material Web fields/buttons/tabs; generic shell remains",
+      "stateConsumer": "Material Web fields/buttons/tabs; generic shell remains",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "workspace-navigation",
+      "title": "Productive navigation and window controls",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "motion",
+      "title": "Configurable and reduced motion",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "OS reduced-motion stylesheet",
+      "stateConsumer": "OS reduced-motion stylesheet",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "element-appearance",
+      "title": "Layered per-element appearance editing",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "color-conversion",
+      "title": "Continuous color selection and translation",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "logo-customization",
+      "title": "Bounded local logo customization",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "overlay-layout",
+      "title": "Bounded resizable overlay surfaces",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "collection-filters",
+      "title": "Persistent collapsible collection filters",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "accessibility",
+      "title": "Everywhere-reachable accessibility tools",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "functional-controls",
+      "title": "Truthful live controls and empty states",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "onboarding",
+      "title": "Practical setup wizard",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Create vault/profile setup",
+      "stateConsumer": "Create vault/profile setup",
+      "persistence": "setupComplete",
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "workspace-tabs",
+      "title": "Persistent complete tab management",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "regex-workbench",
+      "title": "Complete engine-bound regex workbench",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Bounded ECMAScript builder; full parity missing",
+      "stateConsumer": "Bounded ECMAScript builder; full parity missing",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "command-palette",
+      "title": "Searchable live command and settings palette",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Six destination actions only",
+      "stateConsumer": "Six destination actions only",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "context-actions",
+      "title": "Target-specific searchable context menus",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "shortcut-discovery",
+      "title": "Displayed and working context shortcuts",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "embedded-controls",
+      "title": "Shared live controls in results and records",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "guided-controls",
+      "title": "Contextual guided controls and examples",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "control-info",
+      "title": "Per-control accessible info entry",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "setting-provenance",
+      "title": "Unique explanations and default provenance",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Generic defaults paragraph only",
+      "stateConsumer": "Generic defaults paragraph only",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "editor-presets",
+      "title": "Real defaults and reversible presets",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "destructive-confirmation",
+      "title": "Two-key destructive confirmation",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "element-locks",
+      "title": "Independent credential policies per element",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "local-support",
+      "title": "Local support and recovery desk",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "lockout-activities",
+      "title": "Bounded server-graded wait recovery",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "authenticator",
+      "title": "Local standards-exact authenticator",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "qr-registration",
+      "title": "Local QR pairing and confirmation",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "monetization-boundary",
+      "title": "Free protected functions and honest purchase behavior",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "local-history",
+      "title": "Protected append-only local version history",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "portable-export",
+      "title": "Complete disclosed data export",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "bulk-operations",
+      "title": "Scoped selection and bulk actions",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "release-history",
+      "title": "Verified release changelog",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "offline-help",
+      "title": "Complete bundled documentation",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "safe-markup",
+      "title": "Isolated rich text rendering",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "notifications",
+      "title": "Nonblocking messages and history",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Single footer status only",
+      "stateConsumer": "Single footer status only",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "file-conversion",
+      "title": "Bundled bounded file conversion",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "server-management",
+      "title": "Complete four-target server management",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "local-models",
+      "title": "Complete managed local model workflows",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "editor-handoff",
+      "title": "Detected external-editor integration",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "download-workflow",
+      "title": "Real browser download handoff",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "forge-accounts",
+      "title": "Real multi-account publishing",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "operation-recovery",
+      "title": "Progress and recovery at the originating action",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "surface-acceptance",
+      "title": "Per-surface acceptance inventory",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "front-provenance",
+      "title": "Running version and source-bound update time",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "partial",
+      "implementation": [
+        "apps/desktop/src/main.tsx"
+      ],
+      "control": "Version shown; updated-at unavailable",
+      "stateConsumer": "Version shown; updated-at unavailable",
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Full applicable acceptance remains unverified"
+      ],
+      "reason": null
+    },
+    {
+      "id": "capture-evidence",
+      "title": "Real current captures and workflow diagrams",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "screen-recording",
+      "title": "Source-bound end-to-end recording",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "design-parity",
+      "title": "Deterministic design-reference comparison",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "design-sources",
+      "title": "Tracked design sources",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "layout-matrix",
+      "title": "Full supported layout matrix",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "public-gallery",
+      "title": "Reviewed public capture gallery",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "documentation-site",
+      "title": "Separate complete product documentation",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "responsive-docs",
+      "title": "Responsive documentation surfaces",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "verified-download",
+      "title": "Verified installer download",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "feature-articles",
+      "title": "Complete feature articles",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "font-assets",
+      "title": "Complete verified font assets",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "social-preview",
+      "title": "Genuine shared-link preview",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "repository-homepage",
+      "title": "Verified documentation homepage",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "private-rendering",
+      "title": "Authenticated private wording boundary",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "private-docs-package",
+      "title": "Packaged private documentation",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "status-surface",
+      "title": "Real service status and evidence",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "status-bridge",
+      "title": "Status-service reply bridge",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "panic-delivery",
+      "title": "Verified owner-managed alerts",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "physical-status",
+      "title": "Registered display delivery",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "build-entrypoints",
+      "title": "Working build and installer entrypoints",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "fresh-run",
+      "title": "Fresh-machine build and run",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "prerequisite-fetch",
+      "title": "Verified automatic prerequisite acquisition",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "bundled-runtime",
+      "title": "Offline bundled runtime components",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "windows-installer",
+      "title": "Genuine Windows installer format",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "required-signature",
+      "title": "Required-format signatures only",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "automatic-update",
+      "title": "Safe staged automatic updates",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "product-icon",
+      "title": "Original packaged product icon",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "release-publication",
+      "title": "Real normal release publication",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "release-timing",
+      "title": "Measured workflow timing",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "source-counts",
+      "title": "Verified source-count reporting",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "release-photo-links",
+      "title": "Public photo references in releases",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "release-code-name",
+      "title": "Verified unique release naming",
+      "surface": "desktop-settings",
+      "applicability": "applicable",
+      "status": "unimplemented",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": null
+    },
+    {
+      "id": "build-bootstrap",
+      "title": "Workflow prerequisite and output handling",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "runner-capacity",
+      "title": "Verified build runner selection",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "private-build",
+      "title": "Encrypted private-source build route",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "readme-navigation",
+      "title": "Navigable product README",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "human-estimate",
+      "title": "Evidence-based effort estimate",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "instruction-mirror",
+      "title": "Sanitized contributor instructions",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "conversation-boundary",
+      "title": "Private conversation and public-source boundary",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "instruction-currency",
+      "title": "Runtime instruction currency check",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "roadmap",
+      "title": "Factual milestone checklist",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "feature-docs",
+      "title": "Categorized feature documentation",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "api-collections",
+      "title": "Complete relevant API collections",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "wiki-sync",
+      "title": "Complete synchronized documentation and wiki",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "handoff",
+      "title": "Factual implementation handoff",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "continuation",
+      "title": "Durable continuation record",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "progress-record",
+      "title": "Task and release progress records",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "project-tracking",
+      "title": "Linked project tracking",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "operational-guide",
+      "title": "Reusable operational procedure",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "prompt-banner",
+      "title": "Instruction-corpus prompt banner",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "portable-instructions",
+      "title": "Instruction-corpus portable editions",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "project-memory",
+      "title": "Scoped project-memory records",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "shared-game-models",
+      "title": "Required shared game models",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    },
+    {
+      "id": "game-visuals",
+      "title": "Realistic native game visuals",
+      "surface": "product-or-delivery",
+      "applicability": "outside-settings-surface",
+      "status": "not-assessed-here",
+      "implementation": [],
+      "control": null,
+      "stateConsumer": null,
+      "persistence": null,
+      "documentation": [],
+      "localization": [],
+      "tests": [],
+      "runtimeEvidence": [],
+      "missing": [
+        "Complete contract implementation and verification"
+      ],
+      "reason": "This obligation belongs to product delivery or another product surface; this settings lane does not waive or claim it."
+    }
+  ]
+}

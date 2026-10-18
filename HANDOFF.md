@@ -38,12 +38,17 @@ launcher can exit while the actual browser and its descendants survive. Earlier 
 must not be described as proof of graceful browser shutdown: dropping the owned job could
 terminate surviving descendants.
 
-The active native-host branch now verifies complete owned-job membership, exact process
-identity and window ownership before requesting normal close, and requires actual job
-completion before releasing the profile lease. These changes still require their final
-runtime matrix. Firefox BiDi active-client contention, browser-already-closed handling and
-the paired WebSocket Host-authority repair are included in that work. Preserve all raw
-candidate evidence and distinguish superseded results from the final verdict.
+The final native candidate `7031adb`, documented at `7856399`, is integrated in `7df4e81`.
+It verifies complete owned-job membership, exact process identity and window ownership
+before normal close, and requires actual job completion before releasing the profile lease.
+Six hidden-desktop runs passed: Chromium and Firefox locally and over paired LAN, Firefox
+with an attached BiDi client, and Firefox already closed by its external client. Contention
+kept stop incomplete and leases held until disconnect/retry succeeded. Every owned hidden
+desktop was confirmed absent. LAN fixtures explicitly terminated their fixture server;
+their server exit code is not evidence of graceful server shutdown.
+
+The exact integrated Host build passed with 45 Rust workspace tests and two adapter tests.
+See `docs/features/engines/native-automation-verification.md` for source-bound limits.
 
 ## Native engine work
 
@@ -59,11 +64,40 @@ still required for restoration proof.
 
 ## Active delivery work and limits
 
-The offline documentation portable companion is being built and verified separately on
-`feature/storage-service`. Its packaging does not establish complete Settings coverage.
-No public container, LAN deployment, hosted documentation, About homepage or normal release
-has been verified. Bootstrap, build companion, updater and required per-surface acceptance
-remain unfinished.
+The offline documentation companion and hardened Node cache bootstrap are integrated in
+`2196857`. Its exact DocsCompanion build staged 20 articles and eight files. Three security
+tests and six bootstrap checks passed. The actual single-file runtime proof belongs to
+`3a59755`, not the later cache repair or integration; no newer executable is claimed verified.
+Native installed-font discovery and bounded external-editor services are integrated in
+`1d5a210`; five focused tests passed, including real installed-font enumeration.
+
+The Settings branch now has ten categories and 37 validated local controls, control help,
+independent picker searches, schedules, notifications, local history and exports. Three
+genuine progress captures and a process-restart persistence check exist for `fea7da5`.
+This is not comprehensive acceptance. Nine independently reviewed state/accessibility
+corrections are being repaired before integration. The 109-row inventory includes 65
+desktop-applicable rows, none claimed complete. Protected history services remain separate
+until managed-path and local Git execution-configuration hardening pass negative tests.
+The public handbook is now deployed from source `b9b892b`, publication `fa75573`, at
+https://ding-ding-projects.github.io/material-browser/ . All 21 article/wiki routes rendered;
+all eight published file hashes matched, including three approved images. Guides, search,
+preference persistence, keyboard focus and inspected 390/320 px layouts passed bounded real
+browser checks. Deployment run 39108839843 succeeded. The exact About homepage was read back.
+The separate current-source offline handbook passed one-file launch and restart checks at
+`1cd196b`; its unsigned executable hash is
+`dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49`.
+Its new captures remain unpromoted pending complete receipt validation.
+
+Protected history corrections and readable modules are preserved through `ddec069`; a later
+forced-overlap correction is at `b15a247`, pending independent review. The first nine renderer
+repairs passed source review at `60ef5da`. Real runtime then found a docked-tab event binding
+defect, repaired at `b90318b`; the same real transitions are being repeated before integration.
+
+No public container, positive storage LAN deployment or normal release has been verified.
+Bootstrap, build companion, updater and required per-surface acceptance remain unfinished.
+The repository wiki is enabled, but its Git endpoint reports repository not found. Local wiki
+articles are included in the deployed handbook; separate hosted-wiki synchronization remains
+unavailable through that endpoint.
 
 Raw documentation captures remain unpromoted because complete original build receipts were
 unavailable. Temporary documentation profiles remain ignored after automatic approval review
@@ -78,9 +112,9 @@ branch, worktree or recovery reference has been deleted.
 
 1. Complete and independently review the Settings inventory and design, then implement and
    verify the missing working controls and workflows.
-2. Finish native process ownership/shutdown repairs and run the required local and paired matrix.
+2. Repair and independently re-review the nine Settings findings, then verify real workflows.
 3. Complete native key, storage-barrier and identity integrations with decisive engine proof.
-4. Verify the portable documentation companion and remaining packaging/bootstrap paths.
+4. Verify a current-source portable documentation package and remaining delivery paths.
 5. Prove restoration on a second physical Windows computer, then complete storage, hosting,
    public documentation, release and installation acceptance.
 
