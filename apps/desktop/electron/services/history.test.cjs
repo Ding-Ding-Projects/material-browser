@@ -436,3 +436,37 @@ test('legacy authentication records migrate on password change without losing hi
     }
     finally { await f.dispose(); }
 });
+test('password generation revokes an authenticated session in another real process', async () => {
+    const f = await fixture();
+    let child;
+    try {
+        await f.service.setup('fixture-only-password');
+        const code = String.raw`
+const input=JSON.parse(require('node:fs').readFileSync(0,'utf8'));
+const key=Buffer.from(input.key,'base64');
+const service=require(input.module).createHistoryService({...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>v,validateSchedule:v=>v});
+(async()=>{
+ const result=await service.unlock(input.secret);process.send({ready:result.ok});
+ process.once('message',async()=>{const result=await service.list();process.send({code:result.error?.code||'UNEXPECTED_SUCCESS'});key.fill(0);process.disconnect();});
+})().catch(()=>{process.exitCode=1;process.disconnect();});
+`;
+        child = spawn(process.execPath, ['-e', code], { windowsHide: true, stdio: ['pipe', 'ignore', 'ignore', 'ipc'] });
+        const done = new Promise(resolve => child.once('exit', resolve));
+        const nextMessage = () => new Promise((resolve, reject) => {
+            const timer = setTimeout(() => { child.kill(); reject(new Error('SESSION_WORKER_TIMEOUT')); }, 15000);
+            child.once('message', message => { clearTimeout(timer); resolve(message); });
+            child.once('error', error => { clearTimeout(timer); reject(error); });
+        });
+        const ready = nextMessage();
+        child.stdin.end(JSON.stringify({ module: require.resolve('./history.cjs'), options: { appDataRoot: f.root, historyRoot: f.options.historyRoot, gitExecutable: f.options.gitExecutable, gitSha256: f.options.gitSha256 }, key: f.key.toString('base64'), secret: 'fixture-only-password' }));
+        assert.equal((await ready).ready, true);
+        assert.equal((await f.service.changePassword('fixture-only-password', 'new-fixture-password')).changed, true);
+        const response = nextMessage(); child.send({ probe: true });
+        assert.equal((await response).code, 'HISTORY_SESSION_REVOKED');
+        await done;
+    }
+    finally {
+        child?.kill();
+        await f.dispose();
+    }
+});
