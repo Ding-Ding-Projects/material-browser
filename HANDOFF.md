@@ -78,9 +78,26 @@ This is not comprehensive acceptance. Nine independently reviewed state/accessib
 corrections are being repaired before integration. The 109-row inventory includes 65
 desktop-applicable rows, none claimed complete. Protected history services remain separate
 until managed-path and local Git execution-configuration hardening pass negative tests.
-No public container, LAN deployment, hosted documentation, About homepage or normal release
-has been verified. Bootstrap, build companion, updater and required per-surface acceptance
-remain unfinished.
+The public handbook is now deployed from source `b9b892b`, publication `fa75573`, at
+https://ding-ding-projects.github.io/material-browser/ . All 21 article/wiki routes rendered;
+all eight published file hashes matched, including three approved images. Guides, search,
+preference persistence, keyboard focus and inspected 390/320 px layouts passed bounded real
+browser checks. Deployment run 39108839843 succeeded. The exact About homepage was read back.
+The separate current-source offline handbook passed one-file launch and restart checks at
+`1cd196b`; its unsigned executable hash is
+`dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49`.
+Its new captures remain unpromoted pending complete receipt validation.
+
+Protected history corrections and readable modules are preserved through `ddec069`; a later
+forced-overlap correction is at `b15a247`, pending independent review. The first nine renderer
+repairs passed source review at `60ef5da`. Real runtime then found a docked-tab event binding
+defect, repaired at `b90318b`; the same real transitions are being repeated before integration.
+
+No public container, positive storage LAN deployment or normal release has been verified.
+Bootstrap, build companion, updater and required per-surface acceptance remain unfinished.
+The repository wiki is enabled, but its Git endpoint reports repository not found. Local wiki
+articles are included in the deployed handbook; separate hosted-wiki synchronization remains
+unavailable through that endpoint.
 
 Raw documentation captures remain unpromoted because complete original build receipts were
 unavailable. Temporary documentation profiles remain ignored after automatic approval review

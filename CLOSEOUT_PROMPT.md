@@ -30,7 +30,8 @@ Retain these task-owned branches and their worktrees:
 - feature/storage-service: offline companion 3a59755 has actual one-file runtime proof;
   cache hardening 6c0a836 is independently approved and integrated in main 2196857.
 - feature/encrypted-core: fonts/editor services integrated in main 1d5a210. Protected
-  history candidate 7bcddc4 remains withheld for managed-path and Git execution-config fixes.
+  history safety/recovery/readability work is preserved on the remote through ddec069;
+  later forced-overlap correction b15a247 awaits independent review and integration.
 
 Do not delete active or unfinished branches, worktrees, ignored evidence or private announcements.
 
@@ -74,6 +75,22 @@ help/practice, schedules, notifications, local history, export and explicit tab 
 Three real progress images and restart-persistence proof belong to fea7da5. Nine reviewed
 state/accessibility defects are under repair before main integration. The 109-row inventory
 has 65 desktop-applicable rows, none complete. This is progress, not full required-feature proof.
+All nine repairs passed independent source review at 60ef5da, which is remotely preserved.
+Actual runtime then caught docked-tab change events not reaching React; b90318b repairs the
+binding and repeats the same built transitions before integration.
+
+Public handbook deployment is verified at https://ding-ding-projects.github.io/material-browser/ :
+source b9b892b, publication fa7557312906abcd956b3478e19112b6158dda35. All 21 article/wiki routes
+rendered and all eight live files matched published hashes. Guides/search/preferences,
+keyboard focus and inspected 390/320 px layouts passed real browser checks. Deployment run
+39108839843 succeeded; the exact repository homepage was read back. Full required-feature
+acceptance remains incomplete. The enabled hosted wiki has no available Git endpoint;
+local wiki articles are included in the handbook, but separate hosted-wiki sync is unverified.
+
+Current offline handbook proof at 1cd196b verifies actual one-file launch and full restart,
+21 routes, bundled images, isolated runtime security and reading-state persistence.
+Unsigned executable SHA-256 dcdd08b18afb848cb6d6f8020abf43a86ea8d50026f00ee51b891243295e2f49.
+Raw captures remain unpromoted pending receipt validation. No downloadable release is claimed.
 
 ## Unfinished central features
 
