@@ -60,6 +60,18 @@ mod native {
     // The job handle is owned, never accessed concurrently, and only closes on Drop.
     unsafe impl Send for ProcessJob {}
     impl ProcessJob {
+        pub fn process_ids(&self) -> Result<Vec<u32>> {
+            #[repr(C)]
+            struct Members { assigned: u32, listed: u32, ids: [usize; 256] }
+            let mut members = Members { assigned: 0, listed: 0, ids: [0; 256] };
+            let success = unsafe { QueryInformationJobObject(self.0, 3, &mut members as *mut _ as *mut c_void,
+                std::mem::size_of::<Members>() as u32, std::ptr::null_mut()) };
+            if success == 0 || members.assigned != members.listed || members.listed > 256 {
+                return Err(err("PROCESS_JOB", "Cannot enumerate complete owned process job"));
+            }
+            members.ids[..members.listed as usize].iter().map(|pid| u32::try_from(*pid)
+                .ok().filter(|pid| *pid != 0).ok_or_else(|| err("PROCESS_JOB", "Invalid owned process identity"))).collect()
+        }
         pub fn is_empty(&self) -> Result<bool> {
             #[repr(C)]
             #[derive(Default)]
@@ -125,6 +137,9 @@ pub(super) use native::ProcessJob;
 pub(super) struct ProcessJob;
 #[cfg(not(windows))]
 impl ProcessJob {
+    pub fn process_ids(&self) -> Result<Vec<u32>> {
+        Err(err("PROCESS_JOB_UNSUPPORTED", "Native process containment is only implemented on Windows"))
+    }
     pub fn is_empty(&self) -> Result<bool> {
         Err(err("PROCESS_JOB_UNSUPPORTED", "Native process containment is only implemented on Windows"))
     }

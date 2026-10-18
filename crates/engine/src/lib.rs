@@ -387,7 +387,7 @@ impl Supervisor {
         }
         Err(err(
             "GRACEFUL_STOP_UNAVAILABLE",
-            "Engine did not acknowledge native shutdown; owned process retained",
+            &format!("Engine did not acknowledge native shutdown; owned process job members: {:?}", p._job.process_ids()?),
         ))
     }
     pub fn snapshot(&self, _id: &str) -> Result<()> {

@@ -578,7 +578,7 @@ impl PairedClient {
         let stream =
             TcpStream::connect_timeout(&address, Duration::from_secs(3)).map_err(io_error)?;
         stream
-            .set_read_timeout(Some(Duration::from_secs(15)))
+            .set_read_timeout(Some(Duration::from_secs(40)))
             .map_err(io_error)?;
         stream
             .set_write_timeout(Some(Duration::from_secs(5)))
