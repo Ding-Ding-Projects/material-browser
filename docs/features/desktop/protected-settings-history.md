@@ -34,6 +34,11 @@ verified separately.
 Before the first filesystem mutation and on every reuse, the service verifies
 exact managed files and directories plus their ancestors. Links, hardlinks,
 unexpected types and unexpected entries are rejected without deleting them.
+For an existing application-data directory, only its safe canonical identity is
+resolved before the mutex. Mutable repository inventory is checked after lock
+acquisition, so readers wait for an active writer instead of inspecting its
+transient files. A missing data directory still receives the full preflight before
+creation.
 The empty global config is created exclusively and never truncated. Atomic
 updates use random exclusive temporary files, flush them and recheck destination
 paths before rename. Abandoned `auth.json.<UUID>.tmp` and

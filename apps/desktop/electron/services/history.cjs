@@ -20,8 +20,10 @@ function createHistoryService(options) {
     const repo = path.join(historyRoot, 'repository'), events = path.join(repo, 'events'), authFile = path.join(historyRoot, 'auth.json'), journal = path.join(historyRoot, 'pending.json');
     let unlockedUntil = 0, queue = Promise.resolve(), lease;
     const lockIdentity = async () => {
-        await verifyManagedPaths();
-        await directory(appDataRoot);
+        if (!await checkedPath(appDataRoot, 'directory')) {
+            await verifyManagedPaths();
+            await directory(appDataRoot);
+        }
         const resolved = await fs.realpath(appDataRoot);
         return digest('history:' + path.join(resolved, 'settings-history').toLowerCase());
     };
@@ -396,6 +398,7 @@ function createHistoryService(options) {
                 return await withNativeLock(await lockIdentity(), async (held) => {
                     lease = held;
                     try {
+                    await verifyManagedPaths();
                         return { ok: true, ...await method(...args) };
                     }
                     finally {

@@ -71,7 +71,7 @@ test('real local history authenticates independently, encrypts, records no-ops a
 });
 const WORKER = String.raw `
 const fs=require('node:fs');const input=JSON.parse(fs.readFileSync(0,'utf8'));const {createHistoryService}=require(input.module);const key=Buffer.from(input.key,'base64');
-let temps=0;const options={...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>({...v}),validateSchedule:v=>({...v}),onTransition:async phase=>{if(phase==='temp-synced')temps++;if(phase===input.stop&&(!input.tempNumber||temps===input.tempNumber)){process.stdout.write('STOPPED\n');await new Promise(()=>{});}}};
+let temps=0;const options={...input.options,credentialStore:{withKey:async fn=>fn(key)},validatePreferences:v=>({...v}),validateSchedule:v=>({...v}),onTransition:async phase=>{if(phase==='temp-synced')temps++;if(phase===input.stop&&(!input.tempNumber||temps===input.tempNumber)){if(input.overlap)fs.writeFileSync(input.overlap,'transient fixture');process.stdout.write('STOPPED\n');await new Promise(()=>{});}}};
 const service=createHistoryService(options);(async()=>{if(input.restore){await service.unlock('fixture-only-password');console.log(JSON.stringify(await service.restore(input.restore,async()=>{})));}else console.log(JSON.stringify(await service.recordSettings({after:{schemaVersion:1,preferences:{theme:input.theme,nextAction:'worker text'},schedules:[]}})));})().catch(()=>{process.exitCode=1});setInterval(()=>{},1000).unref();
 `;
 function worker(f, extra = {}) {
@@ -112,6 +112,37 @@ test('real concurrent processes serialize local commits without losing either wr
         assert.equal((await f.service.list()).revisions.length, 2);
     }
     finally {
+        await f.dispose();
+    }
+});
+test('a reader waits for an active writer before inspecting changing repository files', async () => {
+    const f = await fixture();
+    let child, timer;
+    const originalLstat = fs.lstat;
+    try {
+        await f.service.setup('fixture-only-password');
+        const first = await f.service.recordSettings({ after: snapshot() });
+        const transient = path.join(f.options.historyRoot, 'repository/.git/objects/transient-overlap');
+        const waiting = worker(f, { restore: first.revision, stop: 'prepared-committed', overlap: transient });
+        child = waiting.child;
+        await waiting.stopped();
+        fs.lstat = async (target, ...args) => {
+            if (target === transient) await fs.unlink(transient).catch(() => {});
+            return originalLstat(target, ...args);
+        };
+        timer = setTimeout(async () => {
+            await fs.unlink(transient).catch(() => {});
+            child.kill();
+        }, 250);
+        const result = await createHistoryService(f.options).status();
+        assert.equal(result.ok, true, 'The reader must wait instead of reporting a transient missing file');
+        assert.equal(result.recoveryPending, true);
+    }
+    finally {
+        clearTimeout(timer);
+        fs.lstat = originalLstat;
+        child?.kill();
+        if (child) await new Promise(resolve => child.exitCode !== null || child.signalCode !== null ? resolve() : child.once('exit', resolve));
         await f.dispose();
     }
 });
