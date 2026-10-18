@@ -13,9 +13,10 @@ browser integrations and must not be inferred from the interface or profile-file
 
 The encrypted core, desktop workspace, native control transports, interactive documentation,
 storage service and portable hosting wizard have source implementations. Focused checks have
-passed separately, but the combined application is not release-ready. Real Chromium and
-Firefox attempts reached normal-mode launch and then failed at graceful stop. A subsequent
-repair needs a newly built runtime matrix. Native credential portability, consistent live
+passed separately, but the combined application is not release-ready. Fresh real Chromium and
+Firefox runs verify Off-mode launch, graceful stop and stopped-profile snapshots. Chromium
+Selenium also passed locally and through paired LAN forwarding; remaining automation paths
+are being repaired and verified. Native credential portability, consistent live
 snapshots and advanced identity controls remain incomplete. No published container,
 documentation deployment or end-to-end two-computer proof is claimed.
 

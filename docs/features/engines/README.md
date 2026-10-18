@@ -68,8 +68,11 @@ is exposed by this helper. Automation is enabled only by the persisted requested
 
 `EngineRegistry::list()` reports configured adapters separately from runtime verification.
 A configured adapter is not runtime proof. A successful `ProcessStatus` effective mode follows
-the helper's exact browser receipt. No browser/driver version combination was launched in this
-session; the adapters remain runtime-unverified. Native-host trusted installation configuration
+the helper's exact browser receipt. Fresh candidate 4434a65 verified Chromium Selenium
+launch, title retrieval, graceful stop and stopped-profile snapshot, including paired LAN
+forwarding. Both engines passed the Off-mode lifecycle. Firefox Selenium shutdown and
+Chromium Puppeteer startup remained unsuccessful at that candidate, so the full automation
+matrix remains incomplete. Native-host trusted installation configuration
 must supply a compatible exact browser and driver pair. Chromium driver compatibility and
 Firefox BiDi compatibility still need real browser acceptance tests.
 

@@ -16,6 +16,10 @@ remain outside scope. The server never receives vault passwords or profile keys.
 - Storage: six server tests. Portable wizard built and launched on an isolated hidden desktop;
   missing-runtime handling and preferences across a fresh process were observed.
 
+The integrated main candidate a41511c also passed the exact Host build entrypoint (21.63s)
+and the Docs build entrypoint (18 complete articles), plus all six documentation tests.
+These checks do not establish deployed documentation or full desktop acceptance.
+
 The frozen native binary from a972859d2ea049f1246661e46788e6c912fae782 failed
 Chromium local, Firefox local and Chromium LAN at profiles.stop:GRACEFUL_STOP_UNAVAILABLE.
 Only new-profile-default-off was recorded complete. Automation title, snapshot and forwarding
