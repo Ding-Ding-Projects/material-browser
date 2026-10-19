@@ -638,6 +638,7 @@ pub mod snapshot_protocol;
 pub mod automation;
 mod lifetime;
 mod process_job;
+mod runtime_paths;
 pub use automation::{AdapterRuntime, AutomationEndpoint};
 fn mode_key(mode: AutomationMode) -> u8 {
     match mode {

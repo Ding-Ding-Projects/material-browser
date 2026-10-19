@@ -197,3 +197,17 @@ individual bounded assets with immediate published digest checks. Five focused J
 checks and four publisher fixture scenarios passed. Updated runtime proof remains pending.
 The completed hidden run's six owned process identities were proven absent and its exact
 desktop closed. Diagnostic images remain private, not current README proof.
+
+## Automation path repair, 2026-10-19
+
+The four packaged automation launch modes returned ADAPTER_START_FAILED at source7af90f7,
+while both Off launches passed. A direct reproduction identified Node26.4.0 rejecting a
+Windows extended helper filename with EISDIR before executing the helper. Equivalent ordinary
+absolute spelling reaches the unchanged helper. The new boundary converter accepts drive/UNC
+paths only, verifies canonical round-trip equality and representability, and leaves canonical
+hash/containment/ownership identities intact. It converts Node/helper/browser/profile/driver
+paths only where passed to external runtimes. Two focused tests passed after the original
+extended-prefix assertion was observed failing. They include spaces, non-ASCII names, file and
+directory identities, namespace rejection, UNC construction and a trailing-dot ambiguity.
+Live UNC-share proof is unavailable. The rebuilt native Host passed before the final input
+namespace assertion; final combined packaging and native automation remain pending.

@@ -107,7 +107,7 @@ impl AdapterRuntime {
                 .as_deref()
                 .filter(|v| !v.is_empty())
                 .ok_or_else(|| err("DRIVER_UNAVAILABLE", "Exact driver version is required"))?;
-            let mut probe = Command::new(driver)
+            let mut probe = Command::new(runtime_paths::external_runtime_path(driver)?)
                 .arg("--version")
                 .stdin(Stdio::null())
                 .stdout(Stdio::piped())
@@ -155,16 +155,23 @@ impl AdapterRuntime {
         process_job::ProcessJob,
     )> {
         self.verify(mode, &engine.manifest.version)?;
-        let mut command = Command::new(&self.node);
+        // Keep canonical identities for verification and process ownership. Node's
+        // entry loader cannot accept Windows extended script path spellings.
+        let node = runtime_paths::external_runtime_path(&self.node)?;
+        let helper = runtime_paths::external_runtime_path(&self.helper)?;
+        let executable = runtime_paths::external_runtime_path(&engine.executable)?;
+        let profile = runtime_paths::external_runtime_path(profile)?;
+        let driver = self.driver.as_deref().map(runtime_paths::external_runtime_path).transpose()?;
+        let mut command = Command::new(node);
         command
-            .arg(&self.helper)
+            .arg(helper)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
         let mut child = command.spawn().map_err(io)?;
         // The helper cannot launch a browser until configuration arrives below.
         let job = process_job::ProcessJob::attach(&mut child, false)?;
-        let config = serde_json::json!({"engine":engine.manifest.engine,"mode":mode,"executable":engine.executable,"profile":profile,"version":engine.manifest.version,"driver":self.driver,"driverSha256":self.driver_sha256});
+        let config = serde_json::json!({"engine":engine.manifest.engine,"mode":mode,"executable":executable,"profile":profile,"version":engine.manifest.version,"driver":driver,"driverSha256":self.driver_sha256});
         let mut wire = serde_json::to_vec(&config)
             .map_err(|_| err("INVALID_ADAPTER", "Invalid adapter configuration"))?;
         wire.push(b'\n');

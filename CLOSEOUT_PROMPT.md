@@ -46,3 +46,10 @@ Five focused JS checks and four publisher fixture scenarios passed. Rebuild, ver
 engine/mode combinations and dialog keyboard/focus behavior, inspect genuine screenshots and
 update README. Installer installation and complete runtime acceptance remain unverified.
 The prior hidden run's six owned process identities were proven absent and its desktop closed.
+
+Current source repairs all four automation startup failures traced to Node rejecting extended
+Windows helper paths. Internal canonical containment/hash/ownership checks remain intact;
+external paths require a same-identity round trip. Two focused tests passed after a deliberate
+red assertion. Rebuild the final combined package and verify the four automation modes, then
+promote current genuine screenshots and record the hosted release. UNC-share execution remains
+unverified; pure UNC construction is tested. Do not claim complete runtime acceptance yet.

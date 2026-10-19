@@ -59,3 +59,12 @@ real desktop controls. Firefox Off launched and stopped through the native proto
 early launcher exit prevented complete live window ancestry proof. The next candidate adds
 Mozilla's -wait-for-browser option in every Firefox mode. Updated Firefox lifetime, both
 automation modes, current screenshots and native installer installation remain unverified.
+
+## External runtime path compatibility
+
+The native host retains canonical paths for containment, hashes and process identities.
+Before invoking Node or serializing browser/profile/driver paths, it derives an ordinary
+absolute drive/UNC spelling and requires it to resolve to exactly the same canonical path.
+Device namespaces, relative paths, unrepresentable strings and changed identities fail closed.
+This avoids Node26.4.0's EISDIR entry-loader failure for extended helper filenames. Pure UNC
+construction is tested; execution on an actual UNC share remains unverified.
