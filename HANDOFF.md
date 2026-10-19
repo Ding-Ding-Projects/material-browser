@@ -2,6 +2,15 @@
 
 ## Current delivery
 
+## Combined source verification
+
+Source04e003fb37fcdc5fecb8ef45806aaae74a69b603 completed build-installer.bat -Component Desktop with exit0. The 809,221,120-byte setup SHA-256 is d19dff36008ee8de9ab7ff57ed3070079873fbdbb26638ca5247b114f48c7686. All87 local desktop tests passed. The real packaged interface saved preferences and protected history, rejected a stale revision and retained dark theme, compact density and a synthetic display name through process restart. History reopened locked and retained its record after unlocking. Both GUI runs proved six complete process identities absent and closed their exact hidden desktops. Three original1920x1500 images passed promotion validation; a deliberate missing-README-link check rejected the omission, then passed after restoration.
+
+The same combined native host passed six engine/mode launch-stop cases, four automation title roundtrips and vault lock/unlock, then exited0. Its separate verification wrapper and desktop are retained because an older unrelated process claims a reused parentPID and complete ancestry verification rejected cleanup. No termination or desktop-close action was attempted. Do not confuse this limit with the separately complete GUI teardown.
+
+All five integrated component worktrees and branches remain retained pending backup access and archive verification. Existing installed0.1.0 remains active; supported update and actual shortcuts await a safe lifecycle boundary. The latest hosted release and refreshed handbook deployment remain separate pending results.
+
+
 All five component branches were integrated into main, with remote ancestry verified at
 6566d71f4279cb27b653739e7fc0a1016af73c7f. This includes revision-checked settings persistence,
 protected history, selected history export, engine/native-host integration and inactive

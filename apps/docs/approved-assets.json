@@ -48,5 +48,20 @@
     "path": "docs/evidence/desktop/settings-dark-bilingual-0.1.1.png",
     "sha256": "4e21d977863937507d4e8ecebbde9e5f9d986fb96a9f85c63ed76b99bffa0c4a",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/persisted-preferences-04e003f.png",
+    "sha256": "1cfd296dae406f2272bccf7a09ce546966053446cd0e2fd8f7c1d86ad75235cb",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/protected-history-04e003f.png",
+    "sha256": "87df3237b05afdd74391c74303ed5072fbf142781e9a040601db756f164a53bb",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/display-name-history-04e003f.png",
+    "sha256": "a80fd03c2b1a2331684ff7ddfa247b628616a2f41e98bb67c92f6117ab45de91",
+    "reviewedForPublication": true
   }
 ]

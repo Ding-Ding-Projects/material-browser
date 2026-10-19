@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "04e003fb37fcdc5fecb8ef45806aaae74a69b603",
+  "nativeSha256": "3d2fdddbb01a30d9af93eddc1ffd577ed5bccd1235dd34d2aa9e512a6a7d4df6",
+  "cases": [
+    {
+      "engine": "chromium",
+      "mode": "off",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "offEndpointRejected": true,
+      "stopped": true,
+      "at": "2026-10-19T06:03:49.810Z"
+    },
+    {
+      "engine": "chromium",
+      "mode": "selenium",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T06:03:55.423Z"
+    },
+    {
+      "engine": "chromium",
+      "mode": "puppeteer",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T06:04:01.299Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "off",
+      "version": "158.0",
+      "launch": true,
+      "offEndpointRejected": true,
+      "stopped": true,
+      "at": "2026-10-19T06:04:12.835Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "selenium",
+      "version": "158.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T06:04:20.782Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "puppeteer",
+      "version": "158.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T06:04:30.068Z"
+    }
+  ],
+  "vaultLockUnlockAfterAllStops": true,
+  "hostExit": 0,
+  "completedAt": "2026-10-19T06:04:30.390Z",
+  "route": "cheap-lowlevel-headless",
+  "teardown": {
+    "nativeHostExited": true,
+    "verificationWrapperRetained": true,
+    "desktopRetained": true,
+    "reason": "Complete ancestry verification rejected an older unrelated process claiming a reused parent PID; no termination or desktop-close action was attempted."
+  },
+  "limitations": [
+    "These results cover the exact recorded native package and synthetic data.",
+    "The independent GUI fixtures have separate complete teardown receipts.",
+    "No native installation/update or advanced identity/snapshot capability proof."
+  ]
+}

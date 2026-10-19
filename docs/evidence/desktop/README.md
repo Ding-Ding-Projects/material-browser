@@ -1,17 +1,17 @@
 # Current desktop evidence
 
-Source: `5922074548f3a79f56b69c25b67826c0be3e209e`. Local package version: 0.1.1. The exact root build-installer.bat -Component Desktop completed with exit 0. The native executable is byte-identical to the `9011b28` host that passed all six bundled engine/mode launch-stop cases.
+Source: `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. Local package: 0.1.1. The exact root desktop installer entrypoint completed with exit 0. The three original 1920 by 1500 PNGs below show the real combined preferences/history workspace after restart, in English and dark theme at logical scale 1.
 
-The images use synthetic data on a named hidden desktop through the Lowlevel route and one exact debugging target. Original PNG bytes were inspected, staged without transformation, hashed and read back. All three prospective observation intervals completed with zero console errors, page errors and unhandled exceptions. The six recorded owned processes were proven absent and the exact desktop closed afterward.
+![Persisted dark theme and compact density after restart](persisted-preferences-04e003f.png)
 
-![Initial encrypted vault setup in Material Browser 0.1.1](onboarding-0.1.1.png)
+![Protected history unlocked after restart with independent access](protected-history-04e003f.png)
 
-![Explicit standard-identity launch consent in Material Browser 0.1.1](launch-consent-0.1.1.png)
+![Persisted workspace display name and recorded settings change](display-name-history-04e003f.png)
 
-![Bilingual dark appearance settings in Material Browser 0.1.1](settings-dark-bilingual-0.1.1.png)
+Visible preference save, stale revision rejection, protected history setup, display-name save, recorded settings change, locked restart and persistence were exercised separately from the pictures. Both GUI fixtures retained complete six-process inventories before close and proved all recorded identities absent before closing the exact named desktops. No PID kill was used.
 
-The 1280 by 1000 viewport uses logical emulated scale 1. Capture dates and UTC timezone come from the producing observation receipts, not filenames or file timestamps. The build timestamp records observed package readiness before launch, with the separate installer completion receipt retained privately. No private vocabulary was imported and no real user data, credential or unrelated window is visible.
+Capture dates and UTC timezone come from the producing receipts. Prospective observation covered all three final images with zero console errors, page errors or unhandled exceptions. This does not observe startup history or native stderr. The synthetic workspace contains no real user information, private wording or credential values. Original bytes were inspected and staged without transformation.
 
-These images do not prove native installation/update, complete physical scale coverage, keyboard-only access, full localization, all feature contracts or current offline-handbook runtime acceptance. Minimum-viewport dialog observations are separate from full workspace layout acceptance.
+Physical display scales, native keyboard behavior, complete localization, history restore/export/recovery/retention and native installation/update remain unverified.
 
-[Inventory](inventory.json) · [Public receipt summary](receipts-0.1.1.json) · [Historical desktop article and original images](archive.md)
+[Inventory](inventory.json) · [Public receipt summary](receipts-04e003f.json) · [Previous source-bound article](archive-5922074.md) · [Older archive](archive.md)

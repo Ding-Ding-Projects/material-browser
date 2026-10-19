@@ -14,23 +14,25 @@ An encrypted browser-profile workspace for Windows x64, with optional self-hoste
 
 The installer includes complete Chromium 158.0.8111.0 (official development snapshot 1721569), Firefox 158.0, matching drivers, Node 26.4.0 and locked automation dependencies. These runtime files live outside the application archive, with pinned vendor archives, complete extracted inventories and retained licenses. Browser startup does not require a separate browser download.
 
-Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop checks in the packaged native host at source `5922074548f3a79f56b69c25b67826c0be3e209e`. All four automation clients also completed real title roundtrips. [Runtime summary](docs/evidence/desktop/bundled-runtime-0.1.1.json). Standard-identity launch requires an explicit per-launch choice because advanced stable identity is unavailable; saved identity metadata is not enforced by these stock engines.
+Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop checks in the combined packaged native host at source `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. All four automation clients completed real title roundtrips. The native host exited successfully; its separate verification wrapper remains retained because complete ancestry verification did not pass. [Runtime summary and limits](docs/evidence/desktop/bundled-runtime-04e003f.json). Standard-identity launch requires an explicit per-launch choice because advanced stable identity is unavailable; saved identity metadata is not enforced by these stock engines.
 
 Builds enter through build.bat; installer production enters through build-installer.bat. Hosted builds run on every branch push and manual dispatch, use increasing package versions and publish normal development releases. Tests and lint run locally, not in the hosted workflow. Each release asset is transferred separately and checked against its published byte count and SHA-256.
 
 ## Current desktop screenshots
 
-These original images show the packaged version 0.1.1 desktop from source `5922074548f3a79f56b69c25b67826c0be3e209e`. They were taken on an isolated hidden desktop with a synthetic vault/profile, inspected, and promoted without changing their bytes. Viewports are 1280 by 1000 at emulated scale 1. This is not physical display-scale or complete accessibility proof.
+These original version 0.1.1 images show the combined packaged desktop at source `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. The exact local desktop installer entrypoint completed with exit 0. Images were taken through an isolated hidden desktop, inspected for private data and promoted without changing their bytes. Viewports are 1920 by 1500 at logical scale 1, in English and dark theme.
 
-![Initial encrypted vault setup in Material Browser 0.1.1](docs/evidence/desktop/onboarding-0.1.1.png)
+![Persisted dark theme and compact density after restart](docs/evidence/desktop/persisted-preferences-04e003f.png)
 
-![Explicit standard-identity launch consent in Material Browser 0.1.1](docs/evidence/desktop/launch-consent-0.1.1.png)
+![Protected history unlocked after restart with independent access](docs/evidence/desktop/protected-history-04e003f.png)
 
-![Bilingual dark appearance settings in Material Browser 0.1.1](docs/evidence/desktop/settings-dark-bilingual-0.1.1.png)
+![Persisted workspace display name and recorded settings change](docs/evidence/desktop/display-name-history-04e003f.png)
 
-The real interface created a vault/profile, skipped optional synchronization, opened and cancelled consent, launched/stopped bundled Chromium, and applied bilingual/dark preferences. Cancel returned focus to the opening control. Separate minimum-viewport observations kept consent actions inside 760 by 580 in Cantonese and bilingual modes. Complete workspace layout, physical scales, keyboard-only use, restart persistence, full localization and native installation/update remain separate acceptance gaps.
+The visible controls saved dark theme, compact density and a synthetic workspace name. A stale native preference write was rejected. Protected history recorded the settings change, reopened locked after a real process restart and retained its records after unlocking. Both GUI launches saved six complete process identities before closing; all were proven absent and both exact hidden desktops closed.
 
-[Current evidence inventory](docs/evidence/desktop/inventory.json) · [Public source/hash summary](docs/evidence/desktop/receipts-0.1.1.json) · [Earlier desktop and handbook presentation archive](docs/evidence/archive.md)
+These observations do not prove physical display-scale coverage, native keyboard behavior, complete localization, history restore/export/recovery or installation/update. Earlier onboarding, consent and bilingual images keep their original provenance in the archive.
+
+[Current evidence inventory](docs/evidence/desktop/inventory.json) · [Source/hash summary](docs/evidence/desktop/receipts-04e003f.json) · [Earlier presentation archive](docs/evidence/archive.md)
 
 ## Documentation and remaining work
 

@@ -25,6 +25,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Selenium and Puppeteer, local and through authenticated LAN transport
 
 ## Storage and delivery
+- [x] Verify combined-source preference/history restart behavior with three inspected README images and complete GUI teardown
 - [x] Preserve and integrate all five component branch tips into main with remote ancestry proof
 - [ ] Verify backup archive and safely retire the five integrated component worktrees and branches
 - [ ] Build and verify Squirrel shortcut maintenance and matching Windows shell identity (14 focused tests passed)
