@@ -1,12 +1,20 @@
 param(
   [ValidateSet('All','Core','Engine','Host','Desktop','Storage','StorageWeb','HostingWizard','BrowserNative','Docs','DocsCompanion')][string]$Component='All',
   [ValidateSet('chromium','firefox')][string]$NativeEngine='chromium',
-  [switch]$AcquireOnly
+  [switch]$AcquireOnly,
+  [switch]$NativeCookieSnapshotTests,
+  [switch]$NativeChromiumChannelTests
 )
 $ErrorActionPreference='Stop'
 # A batch launch can inherit module paths for a different PowerShell edition.
 # Resolve the built-in utility manifest from this host before invoking helpers.
 Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -Global -Force -ErrorAction Stop
+if($NativeChromiumChannelTests -and ($Component -ne 'BrowserNative' -or $NativeEngine -ne 'chromium' -or $AcquireOnly -or $NativeCookieSnapshotTests -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){
+  throw 'NativeChromiumChannelTests requires Chromium BrowserNative without AcquireOnly, NativeCookieSnapshotTests or baseline-only diagnostics.'
+}
+if($NativeCookieSnapshotTests -and ($Component -ne 'BrowserNative' -or $NativeEngine -ne 'firefox' -or $AcquireOnly -or $env:MATERIAL_BROWSER_NATIVE_BASELINE_ONLY -eq '1')){
+  throw 'NativeCookieSnapshotTests requires a Firefox BrowserNative production build without AcquireOnly or baseline-only diagnostics.'
+}
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
@@ -80,6 +88,8 @@ try {
   if($Component -eq 'BrowserNative') {
     $nativeArgs=@{Engine=$NativeEngine}
     if($AcquireOnly){$nativeArgs.AcquireOnly=$true}
+    if($NativeCookieSnapshotTests){$nativeArgs.CookieSnapshotTests=$true}
+    if($NativeChromiumChannelTests){$nativeArgs.ChromiumChannelTests=$true}
     & (Join-Path $root 'engines/build-native.ps1') @nativeArgs
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
   }

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "b7930673bf49d10571ed257cf987c7acef4a172d",
+  "upstreamRevision": "3c71aeacdb296402e41fb2084b13e797d1770642",
+  "platform": "Windows x64",
+  "route": "cheap-lowlevel-headless",
+  "startedUtc": "2026-10-18T07:51:30.6332530Z",
+  "finishedUtc": "2026-10-18T07:55:52.6351388Z",
+  "command": "build.bat -Component BrowserNative -NativeEngine firefox -NativeCookieSnapshotTests",
+  "rootExit": 0,
+  "productionBuildSeconds": 82.17,
+  "testPhaseSeconds": 159.9,
+  "testFilter": "TestCookieDBWriteQueue.SnapshotPause",
+  "tests": 1,
+  "expectedResults": 1,
+  "unexpectedResults": 0,
+  "firefoxSha256": "0a3416514a7dd756ccce5da4d7955e54903a4f53d1331a69715d76f4f4db08e0",
+  "packagedModuleSmoke": {
+    "exit": 0,
+    "result": "PASS: packaged privileged snapshot module remains fail-closed",
+    "testScriptSha256": "f1dd6389c061b1febbe10104df3af7b17d0b05c4d629520e83b4ba24a89ecb54",
+    "moduleSha256": "50118658482209578ffd46184dbe116e77aac6465ff05c97cf3657189f7bda9c",
+    "scope": "Baseline packaged module, before cookie candidate build"
+  },
+  "limitations": [
+    "No native storage providers registered",
+    "No authenticated external control endpoint",
+    "Session cookies and durable cookie/WAL consistency remain unverified",
+    "Remaining profile writer coverage incomplete",
+    "Whole-profile snapshot capability remains disabled",
+    "Upstream Glean warned about missing test event-store paths after passing the test"
+  ],
+  "teardown": "Wrapper exited normally; named hidden desktop absence verified through OpenDesktopW error 2; no process termination attempted"
+}

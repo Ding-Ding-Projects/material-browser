@@ -1,0 +1,20 @@
+--- a/DEPS
++++ b/DEPS
+@@ -1421,7 +1421,7 @@
+ 
+   'src/third_party/updater/chrome_win_x86/cipd': {
+       'dep_type': 'cipd',
+-      'condition': 'checkout_win',
++      'condition': 'checkout_win and False',
+       'packages': [
+         {
+           'package': 'chromium/third_party/updater/chrome_win_x86',
+@@ -1488,7 +1488,7 @@
+ 
+   'src/third_party/updater/chrome_win_x86_sans_iid/cipd': {
+       'dep_type': 'cipd',
+-      'condition': 'checkout_win',
++      'condition': 'checkout_win and False',
+       'packages': [
+         {
+           'package': 'chromium/third_party/updater/chrome_win_x86',
