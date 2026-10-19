@@ -55,3 +55,5 @@ Advanced stable identity, portable browser credentials, consistent live snapshot
 Unrelated internal-maintenance references accidentally entered a086a87 and were removed from current files in 5922074. The affected workflow was cancelled before publication. Historical source still retains that earlier reference; no history rewriting was performed. Issue1 and Discussion2 record the correction.
 
 See docs/evidence/desktop/receipts-0.1.1.json, bundled-runtime-0.1.1.json and the archived presentation for exact public evidence.
+
+Native verification teardown update: after the older unrelated process was independently observed absent, fresh complete ancestry proof passed. The owning wrapper exited normally, both recorded wrapper identities were proven absent and the exact named desktop closed at2026-10-19T06:21:04.275644+00:00. No PID kill or unrelated termination occurred. This supersedes the earlier retained-wrapper state while preserving the initial rejection receipt. The prior separately rejected handbook profile cleanup remains untouched.

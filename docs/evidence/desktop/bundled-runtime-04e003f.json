@@ -63,9 +63,12 @@
   "route": "cheap-lowlevel-headless",
   "teardown": {
     "nativeHostExited": true,
-    "verificationWrapperRetained": true,
-    "desktopRetained": true,
-    "reason": "Complete ancestry verification rejected an older unrelated process claiming a reused parent PID; no termination or desktop-close action was attempted."
+    "verificationWrapperRetained": false,
+    "desktopRetained": false,
+    "recordedWrapperProcessesAbsent": 2,
+    "namedDesktopClosed": true,
+    "verifiedAt": "2026-10-19T06:21:04.275644+00:00",
+    "initialLimit": "Complete ancestry initially rejected an older unrelated process claiming a reused parent PID. No termination was attempted. After that unrelated process was independently observed absent, a fresh full ancestry proof passed, the owning wrapper exited normally and its exact desktop closed."
   },
   "limitations": [
     "These results cover the exact recorded native package and synthetic data.",
