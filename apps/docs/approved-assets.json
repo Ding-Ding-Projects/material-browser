@@ -33,5 +33,20 @@
     "path": "docs/evidence/handbook/portable-settings.png",
     "sha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/onboarding-0.1.1.png",
+    "sha256": "146d6457f95e6fd76ffe3ffb86df42989e77eb03b994138a0ab779ee26e3e761",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/launch-consent-0.1.1.png",
+    "sha256": "2f4b30ea92cf7235f1c545630d21e431d54ffd70c350fd53400a2a3808b02e61",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/settings-dark-bilingual-0.1.1.png",
+    "sha256": "4e21d977863937507d4e8ecebbde9e5f9d986fb96a9f85c63ed76b99bffa0c4a",
+    "reviewedForPublication": true
   }
 ]
