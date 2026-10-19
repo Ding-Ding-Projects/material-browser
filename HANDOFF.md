@@ -161,3 +161,27 @@ Three focused mapper tests pass. Exact candidate build and real consent interact
 Windows build/release automation is verified by green run 39195138374, normal release
 build-3-39195138374-1 and exact source ed7ad0a. Both installers and all five assets were
 read back by the workflow. Earlier setup icon download also matched SHA-256 and byte count.
+
+## Latest bundled-engine implementation, 2026-10-19
+
+The user requires Chromium and Firefox inside the installer and genuine updated screenshots
+in README. The desktop build now verifies five pinned vendor archives plus complete extracted
+inventories, stages full browsers/drivers/Node/locked adapter dependencies outside ASAR, and
+packages `resources/engines`. The host receives that separate engine root; manifest and adapter
+paths remain relocatable and canonically contained. Legacy in-bundle absolute adapter paths
+remain accepted only when contained. Standalone packaged host startup discovers adjacent engines.
+
+Pins: official Chromium development snapshot 158.0.8111.0, revision 1721569/source
+8b90bd52655dcdf5456cda56ae4d53b184c4dbd3; Mozilla Firefox 158.0; matching ChromeDriver;
+geckodriver 0.37.1; Node 26.4.0. Licenses and accurate source notices are retained. Advanced
+identity, portable credentials and live snapshots are still false capabilities.
+
+Verified so far: exact Desktop runtime staging/build, native Host build before its final
+adjacent-discovery correction, nine focused JavaScript checks, and one real adapter path
+containment/relocation test. The earlier Rust test invocation used an over-specific filter
+and ran zero tests; its corrected fully qualified invocation ran one and passed. A synthetic
+pre-bundle UI fixture remained stale and was not promoted. The task-owned window was closed
+through its isolated page; the lifecycle helper then reported UNKNOWN_PROCESS_TREE because
+its saved root had exited. No PID-only termination was attempted. Its private receipt remains
+retained. Fresh combined packaging, actual browser launch/stop, current UI evidence and the
+new hosted release are still pending. No completed runtime or installer acceptance is claimed.

@@ -1,45 +1,38 @@
 # Continuation handoff
 
-Objective: configure Windows build and release automation for Material Browser.
+Objective: finish Windows build/release automation, the application/installer icon, explicit
+profile-launch capability handling, browser engines bundled inside the installer, and genuine
+updated README screenshots. The user's latest steering requires both engines bundled and
+screenshots linked beside source.
 
-The new `.github/workflows/release.yml` builds on every branch push and manual dispatch
-using `windows-2025`, Node 26.4.0 and Rust 1.96.1. It calls the existing root installer
-entrypoints for Desktop and DocsCompanion, publishes uniquely tagged normal development
-releases without changing the accepted latest channel, and retains safe output evidence.
-Tests and lint do not run in Actions. Local builds retain TypeScript checking, while the
-workflow selects Vite bundling directly through `MATERIAL_BROWSER_BUNDLE_ONLY`.
+Verified history: workflow run 39195138374 is green and published normal release
+build-3-39195138374-1 from ed7ad0a68c49af05d9d6f456c58cdfb4050cb7d2. The icon was inspected
+in the local packaged application, local setup and a published setup download; that download
+matched its SHA-256 and byte count. Tests/lint remain local, not in Actions.
 
-`scripts/publish-release.ps1` requires real Squirrel outputs and the portable handbook,
-records SHA-256/size metadata, verifies the published tag and assets, and records workflow
-timing. PowerShell syntax parsing and whitespace validation passed. The first hosted build
-is pending; installer production, publication and fresh-image bootstrap are not yet proven.
-No application runtime or installed update verification is claimed.
+Launch repair f697b38855a18d1307d5308edc0bb714d8355f86 is on main: explicit per-launch
+standard-identity consent, captured profile target, invalidation, duplicate-submit protection
+and approved localized error explanations. Native strict defaults remain unchanged. Source
+review was dry and seven focused security/message checks passed. Its CI run is 39195958871.
 
-Documentation: `docs/features/delivery/windows-automation.md`, README, ROADMAP, HANDOFF and
-the bundled wiki index. The existing public documentation deployment remains unchanged.
+Current candidate adds archive/file-pinned Chromium snapshot 158.0.8111.0 and Firefox 158.0,
+matching drivers, Node 26.4.0 and locked adapter dependencies to resources/engines. Build scripts
+stage them automatically; the desktop and native host use a separate trusted engine root and
+contained relative adapter paths. Full browser directories and vendor notices are retained.
+Advanced identity, portable credentials and live snapshots remain unsupported.
 
-Next: inspect the first Actions run, repair any build/package/publication failure within
-this scope, read back its normal release and expected assets, and update verification state.
-Existing recovery branches and linked working trees belong to other work and remain intact.
-No task-owned branch, linked working tree or stash was created, so no deletion is needed.
+The exact Desktop staging/build passed before final source/notice updates. Native Host build
+and nine JavaScript checks passed; the fully qualified containment test ran one and passed.
+Next: rebuild the exact preserved candidate through build-installer.bat, verify both engines
+in Off/Selenium/Puppeteer from packaged resources, exercise real launch consent using UI-owned
+synthetic setup, inspect genuine screenshots, promote safe evidence into README, and verify a
+new normal hosted release with complete assets and exact source tag.
 
-Latest correction: first hosted run 39193430232 built the desktop installer but failed handbook
-packaging when automatic publication was inferred from credentials. Handbook publication is
-now disabled inside the packager. User steering adds the installed application/installer icon:
-reviewed vector source, PNG and seven-size ICO are wired into executable/window/setup/handbook.
-Syntax and ICO inventory checks passed. Rebuild and release readback remain pending.
+The first isolated UI fixture used direct backend seeding and remained stale; its screenshots
+are not promoted. Its task window was closed; lifecycle cleanup reported UNKNOWN_PROCESS_TREE
+after root exit, so retain the private receipt and treat desktop teardown proof as incomplete.
+Existing recovery branches/worktrees and prior user data remain outside this task's ownership.
+No task-owned linked worktree, branch or stash was created.
 
-Latest state: the second run built both installers and published normal release
-build-2-39194115797-1, but source a6b4a78's publisher readback failed on GitHub's space-to-dot
-asset renaming. Safe upload staging and collision detection now repair that behavior.
-All four focused publisher fixture paths pass, including a filename containing a space.
-The exact local Desktop installer build passed and embedded icons were inspected in both
-application and setup executables. A new hosted run must confirm final publication success.
-
-Latest user steering: repair the desktop Launch IDENTITY_UNAVAILABLE notification shown in
-the user's screenshot. The UI omitted a required capability decision and exposed raw IPC
-text. Source now provides deliberate per-launch standard-identity consent, leaves the native
-strict default intact, binds consent to the selected profile, invalidates stale consent,
-prevents duplicate submissions and localizes approved error messages. Three focused tests
-pass; exact candidate build and real interaction verification remain pending. Automation is
-now independently verified by successful run 39195138374 and release build-3-39195138374-1.
+A separate private instruction update is preserved in the maintainer's instruction repository.
+No private wording, paths or payloads belong in this public source or its release records.

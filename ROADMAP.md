@@ -28,6 +28,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [x] Verify hosted Windows build/release run and downloadable installer assets (run 39195138374)
   - [x] Configure branch-push/manual automation using the supported build entrypoints
 - [ ] Verify explicit standard-identity launch consent and localized capability explanations in the built desktop
+- [ ] Verify the combined installer with both bundled engines, offline launch/stop and current README screenshots
 - [ ] Immutable encrypted revisions and conflict preservation
 - [ ] Optional containerized storage and full administration dashboard
 - [ ] Hosting entrypoints and portable setup wizard

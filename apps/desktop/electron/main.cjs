@@ -65,6 +65,10 @@ function startHost() {
     [
       "--data-dir",
       path.join(app.getPath("userData"), "vault"),
+      "--engine-dir",
+      app.isPackaged
+        ? path.join(process.resourcesPath, "engines")
+        : path.resolve(__dirname, "../../../engines/builds/packaged/engines"),
       "serve",
       "--stdio",
     ],

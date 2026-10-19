@@ -10,6 +10,7 @@ Start with [Getting started](Getting-started.md), then choose the task you need.
 - [Architecture](../docs/architecture.md)
 - [Windows build and release automation](../docs/features/delivery/windows-automation.md)
 - [Profile launch and identity capabilities](../docs/features/desktop/profile-launch.md)
+- [Bundled browser engines](../docs/features/delivery/bundled-engines.md)
 
 ## Evidence boundaries
 

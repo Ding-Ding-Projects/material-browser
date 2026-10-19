@@ -11,6 +11,7 @@ browser integrations and must not be inferred from the interface or profile-file
 - [Handoff](HANDOFF.md)
 - [Continuation state](CLOSEOUT_PROMPT.md)
 - [Windows build and release automation](docs/features/delivery/windows-automation.md)
+- [Browsers and automation runtimes bundled in the installer](docs/features/delivery/bundled-engines.md)
 - [Interactive handbook and complete documentation](https://ding-ding-projects.github.io/material-browser/)
 
 The encrypted core, desktop workspace, native control transports, interactive documentation,

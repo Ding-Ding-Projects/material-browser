@@ -36,6 +36,8 @@ try {
     try {
       if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      & node (Join-Path $root 'engines/prepare-runtime.mjs')
+      if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
       if($env:MATERIAL_BROWSER_BUNDLE_ONLY -eq '1'){ & npm.cmd run build:bundle }
       else { & npm.cmd run build }
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}

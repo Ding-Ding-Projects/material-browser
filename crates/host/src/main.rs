@@ -50,6 +50,12 @@ pub struct Host {
 }
 impl Host {
     fn new(root: &Path) -> Result<Self> {
+        let bundled = std::env::current_exe().ok()
+            .and_then(|exe| exe.parent().map(|parent| parent.join("engines")))
+            .filter(|directory| directory.is_dir());
+        Self::with_engine_root(root, bundled.as_deref())
+    }
+    fn with_engine_root(root: &Path, engine_root: Option<&Path>) -> Result<Self> {
         if !root.is_absolute() {
             return Err(error("INVALID_DATA_DIR", "Data directory must be absolute"));
         }
@@ -73,8 +79,13 @@ impl Host {
             message: e.message,
         })?;
         let mut registry = EngineRegistry::new();
+        let local_engines = root.join("engines");
+        let engine_root = engine_root.unwrap_or(&local_engines);
+        if !engine_root.is_absolute() {
+            return Err(error("INVALID_ENGINE_DIR", "Engine directory must be absolute"));
+        }
         for kind in ["chromium", "firefox"] {
-            let bundle = root.join("engines").join(kind);
+            let bundle = engine_root.join(kind);
             if bundle.join("manifest.json").exists() {
                 registry
                     .register(&bundle, &bundle.join("manifest.json"))
@@ -95,7 +106,13 @@ impl Host {
                         serde_json::from_slice(&bytes).map_err(|_| {
                             error("INVALID_ADAPTER", "Invalid adapter configuration")
                         })?;
-                    for (mode, runtime) in adapters {
+                    for (mode, mut runtime) in adapters {
+                        // Bundled descriptors survive relocation and never resolve
+                        // paths against the caller's working directory.
+                        runtime.node = resolve_adapter_path(&bundle, &runtime.node)?;
+                        runtime.helper = resolve_adapter_path(&bundle, &runtime.helper)?;
+                        runtime.driver = runtime.driver.as_ref()
+                            .map(|path| resolve_adapter_path(&bundle, path)).transpose()?;
                         let mode = match mode.as_str() {
                             "selenium" => AutomationMode::Selenium,
                             "puppeteer" => AutomationMode::Puppeteer,
@@ -409,6 +426,22 @@ fn stopped_lock(active: &Path, id: &str) -> Result<File> {
     lock.try_lock_exclusive()
         .map_err(|_| error("PROFILE_ACTIVE", "Profile is locked by another process"))?;
     Ok(lock)
+}
+fn resolve_adapter_path(bundle: &Path, path: &Path) -> Result<PathBuf> {
+    let root = bundle.canonicalize().map_err(io_error)?;
+    let candidate = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        if path.components().any(|part| !matches!(part, std::path::Component::Normal(_))) {
+            return Err(error("INVALID_ADAPTER_PATH", "Adapter path must stay inside its engine bundle"));
+        }
+        root.join(path)
+    };
+    let candidate = candidate.canonicalize().map_err(io_error)?;
+    if !candidate.starts_with(&root) || !candidate.is_file() {
+        return Err(error("INVALID_ADAPTER_PATH", "Adapter path must stay inside its engine bundle"));
+    }
+    Ok(candidate)
 }
 fn io_error(_: io::Error) -> Error {
     error("HOST_IO", "Native host I/O operation failed")
@@ -826,9 +859,15 @@ fn run() -> Result<()> {
         args.next()
             .ok_or_else(|| error("USAGE", "Data directory required"))?,
     );
-    let command = args
+    let mut command = args
         .next()
         .ok_or_else(|| error("USAGE", "Command required"))?;
+    let engine_root = if command == "--engine-dir" {
+        let path = PathBuf::from(args.next().ok_or_else(|| error("USAGE", "Engine directory required"))?);
+        if !path.is_absolute() { return Err(error("INVALID_ENGINE_DIR", "Engine directory must be absolute")); }
+        command = args.next().ok_or_else(|| error("USAGE", "Command required"))?;
+        Some(path)
+    } else { None };
     if command == "pair-key" {
         return lan::create_key(&root);
     }
@@ -980,7 +1019,10 @@ fn run() -> Result<()> {
         }
         _ => {}
     }
-    let mut host = Host::new(&root)?;
+    let mut host = match engine_root.as_deref() {
+        Some(directory) => Host::with_engine_root(&root, Some(directory))?,
+        None => Host::new(&root)?,
+    };
     match command.as_str() {
         "serve" if args.next().as_deref() == Some("--stdio") => stdio(&mut host),
         "daemon" => daemon(&root, host),
@@ -1010,6 +1052,20 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn adapter_paths_are_bundle_contained_and_relocatable() {
+        let root = std::env::temp_dir().join(format!("browser-bundle-paths-{}-{}", std::process::id(), rand::random::<u64>()));
+        let bundle = root.join("folder with spaces");
+        fs::create_dir_all(bundle.join("automation")).unwrap();
+        fs::write(bundle.join("automation/node.exe"), b"synthetic fixture").unwrap();
+        fs::write(root.join("outside.exe"), b"synthetic fixture").unwrap();
+        let resolved = resolve_adapter_path(&bundle, Path::new("automation/node.exe")).unwrap();
+        assert!(resolved.starts_with(bundle.canonicalize().unwrap()));
+        assert_eq!(resolve_adapter_path(&bundle, &resolved).unwrap(), resolved);
+        assert!(resolve_adapter_path(&bundle, Path::new("../outside.exe")).is_err());
+        assert!(resolve_adapter_path(&bundle, &root.join("outside.exe")).is_err());
+        fs::remove_dir_all(&root).unwrap();
+    }
     #[test]
     fn partial_http_request_does_not_block_authenticated_status() {
         let root =

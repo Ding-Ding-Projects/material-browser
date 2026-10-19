@@ -5,7 +5,7 @@ module.exports = {
     asar: true,
     executableName: "MaterialBrowser",
     icon,
-    extraResource: ["../../target/release/material-browser.exe"],
+    extraResource: ["../../target/release/material-browser.exe", "../../engines/builds/packaged/engines"],
     ignore: [/^\/src($|\/)/, /^\/node_modules($|\/)/],
   },
   makers: [

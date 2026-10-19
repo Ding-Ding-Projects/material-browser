@@ -16,8 +16,10 @@ SDK used by Rust's MSVC linker. Pinned setup actions install Node.js 26.4.0 and 
 The existing entrypoints install locked npm dependencies, acquire the hash-verified portable
 history runtime and invoke Cargo. The workflow invokes `build-installer.bat -Component Desktop`
 and `build-installer.bat -Component DocsCompanion`; those invoke the real `build.bat`.
-Upstream managed Chromium/Firefox source builds and optional storage deployment are outside
-this installer workflow. Managed engines remain separately acquired capabilities.
+The same entrypoint now stages pinned standard Chromium/Firefox binaries, drivers, portable
+Node and locked automation dependencies for inclusion in the installer. Product-patched native
+source builds and optional storage deployment remain outside this workflow. See the separate
+[bundled-engine guide](bundled-engines.md) for versions and unsupported capabilities.
 
 The desktop bundles using `build:bundle` in automation. Normal local `build` retains its
 TypeScript check. No tests, lint or standalone type checks run in Actions. A release can
@@ -56,8 +58,9 @@ the previous tag or assets. Build, packaging or publication failure produces a f
 not a fabricated installer. Native UI, two-computer restoration and installation checks
 remain separate local acceptance work.
 
-The first hosted run is the cache-miss bootstrap proof for this job. Until it finishes,
-fresh-image completeness and published delivery remain unverified. The dedicated portable
+Run 39195138374 verified the original desktop/handbook workflow and published its expected
+assets. Fresh-image completeness for the newly added browser bundles remains pending.
+The dedicated portable
 build interface and storage hosting wizard are not delivered by this workflow yet.
 
 The publisher stages explicit safe asset filenames before uploading and rejects collisions;
