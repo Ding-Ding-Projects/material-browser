@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "sourceCommit": "5922074548f3a79f56b69c25b67826c0be3e209e",
+  "nativeSha256": "6a6ab5e80d5551d574c6a7fe4ab0a26792f1c5cf5ea749d2903717d2aabcfe6b",
+  "route": "cheap-lowlevel-headless",
+  "completedAt": "2026-10-19T05:10:20.762Z",
+  "hostExit": 0,
+  "syntheticDataOnly": true,
+  "events": [
+    {
+      "engine": "chromium",
+      "mode": "off",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "offEndpointRejected": true,
+      "stopped": true,
+      "at": "2026-10-19T05:09:37.086Z"
+    },
+    {
+      "engine": "chromium",
+      "mode": "selenium",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T05:09:44.122Z"
+    },
+    {
+      "engine": "chromium",
+      "mode": "puppeteer",
+      "version": "158.0.8111.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T05:09:50.646Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "off",
+      "version": "158.0",
+      "launch": true,
+      "offEndpointRejected": true,
+      "stopped": true,
+      "at": "2026-10-19T05:10:02.068Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "selenium",
+      "version": "158.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T05:10:09.836Z"
+    },
+    {
+      "engine": "firefox",
+      "mode": "puppeteer",
+      "version": "158.0",
+      "launch": true,
+      "titleRoundtrip": true,
+      "stopped": true,
+      "at": "2026-10-19T05:10:20.518Z"
+    },
+    {
+      "vaultLockUnlockAfterAllStops": true,
+      "at": "2026-10-19T05:10:20.758Z"
+    }
+  ],
+  "ownedProcessesAbsent": true,
+  "ownedDesktopClosed": true,
+  "limitations": [
+    "Local native stdio only in this run; paired LAN and contention evidence belongs to earlier source-bound runs.",
+    "No stable advanced identity, portable browser credentials or consistent live snapshot guarantee."
+  ]
+}

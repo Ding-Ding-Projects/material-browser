@@ -1,70 +1,25 @@
-# Browser engines included in the installer
+# Browser engines bundled in the installer
 
-Desktop builds stage Chromium and Firefox inside `resources/engines`, outside ASAR. The
-installer includes their full browser directories, DLLs, resources and locales, matching
-drivers, portable Node.js and locked production automation dependencies. Launch requires no
-browser or driver download and does not use the user's existing browser installation.
+## Contents and verified acquisition
 
-## Pinned distributions and acquisition
+The desktop installer carries full Chromium 158.0.8111.0 (official development snapshot 1721569), Firefox 158.0, matching ChromeDriver, geckodriver 0.37.1, Node 26.4.0 and locked Selenium/Puppeteer dependencies. Browsers do not need a separate runtime download after installation.
 
-`engines/runtime/browser-binaries.lock.json` records official HTTPS archive URLs, byte counts,
-SHA-256 values and complete extracted-file inventories. The current browser payloads are
-Chromium development snapshot 158.0.8111.0 (revision 1721569) and Mozilla Firefox 158.0.
-ChromeDriver matches the Chromium snapshot; geckodriver is 0.37.1 and portable Node is 26.4.0.
-These binary-distribution pins are distinct from the unfinished product-patched native-source
-recipes in `engines/recipes/native-pins.json`.
+The five official archives are pinned by URL, byte count, SHA-256 and complete extracted file inventories in engines/runtime/browser-binaries.lock.json. Acquisition rejects archive traversal, link entries, duplicate paths and extracted inventory differences. Production adapter dependencies come from their npm lock without install scripts. Downloads and staging are reusable local build data.
 
-The initial Chromium archives were checked against published Google Storage object metadata
-and independently downloaded bytes. Firefox and Node matched their published archive checksums;
-geckodriver matched its published release digest. Subsequent builds require the checked-in
-SHA-256 and byte count before extraction, then compare every extracted file against the lock.
-Changed cached payloads fail without execution. Archive paths, linked files and normalized
-duplicate names are rejected. New generated candidates preserve earlier staging directories.
+## Build and relocation
 
-The exact root `build.bat` installs the desktop's locked packaging dependencies, then invokes
-`engines/prepare-runtime.mjs`. Its 7-Zip executable comes from the locked installer dependency.
-Production adapter dependencies are installed through their own npm lock without install scripts.
-The root `build-installer.bat` packages that staged directory with the real native host.
+The exact root build.bat stages resources/engines; build-installer.bat packages it with the native host. Complete browser directories remain outside the application archive. The desktop passes the separate engine root to its stdio host, and standalone native startup can discover adjacent engines.
 
-## Registration and relocation
+Manifest and adapter paths stay inside their canonical bundle roots. Hash verification and process ownership retain canonical identities. At external-runtime boundaries, an ordinary absolute drive/UNC spelling must round-trip to exactly the same canonical path. Device namespaces, relative paths, unrepresentable text and changed identities fail closed. This avoids Node 26.4.0 rejecting extended helper filenames before executing the adapter. UNC construction is tested; execution on a real UNC share remains unverified.
 
-The desktop passes `--engine-dir <resources/engines>` to its native stdio host. Vault and active
-profile data remain in the user's existing application-data directory. Browser manifests use
-relative paths; adapter Node/helper/driver paths resolve inside their owning engine bundle,
-with canonical containment checks. Installation paths containing spaces are supported.
-Standalone native CLI startup also discovers engines beside its own executable when present.
+## Runtime proof and limitations
 
-Standard-identity launch remains an explicit per-launch choice. Bundling does not implement
-stable identity, portable browser credential encryption or consistent live snapshots. Those
-three capability flags remain false. Browser version, executable/hash, adapter, driver and
-owned-process lifetime checks continue to apply.
+The packaged native host at source 5922074548f3a79f56b69c25b67826c0be3e209e passed all six local combinations: Chromium and Firefox in Off, Selenium and Puppeteer modes. Each launch returned the exact expected engine version and each normal stop left zero active profiles. Off rejected endpoint access. Both Selenium and both Puppeteer clients navigated a synthetic data document and returned its exact title. Vault lock/unlock succeeded after all stops; the host exited with code 0 and owned processes/desktops were proven absent.
 
-## Licensing and verification boundaries
+[Machine-readable runtime summary](../../evidence/desktop/bundled-runtime-0.1.1.json) and [current desktop evidence](../../evidence/desktop/README.md) retain the scope and hashes. These results are local stdio proof. Paired LAN, attached-client contention and already-closed-browser behavior have separate earlier source-bound observations; this run does not reclassify them as current proof.
 
-The bundle retains vendor notices and source links in `resources/engines/NOTICES.md`, browser
-internal licensing pages, driver notices, Node licensing and individual npm package notices.
-Chromium is explicitly identified as a development snapshot. Packaging does not rename it a
-stable release or a product-patched browser.
+Standard-identity launch requires an explicit per-launch choice. Stock engines do not enforce saved advanced identity metadata, portable credential encryption or consistent live snapshots. Those capability flags remain false. Native installer installation/update, two-computer restoration and the full physical-scale matrix remain unverified.
 
-Local verified staging and the native Host build passed, along with nine focused JavaScript
-checks and a relocation/containment test. The combined installer, actual launches/stops and
-fresh screenshots remain pending the candidate-bound verification run. A file inventory alone
-does not prove browser startup, automation or installer behavior.
+## Licenses
 
-## Follow-up verification, 2026-10-19
-
-Source a588bfd passed the full local desktop installer entrypoint and hosted run 39198295866,
-with normal release build-5-39198295866-1. Bundled Chromium Off launched and stopped through
-real desktop controls. Firefox Off launched and stopped through the native protocol, but its
-early launcher exit prevented complete live window ancestry proof. The next candidate adds
-Mozilla's -wait-for-browser option in every Firefox mode. Updated Firefox lifetime, both
-automation modes, current screenshots and native installer installation remain unverified.
-
-## External runtime path compatibility
-
-The native host retains canonical paths for containment, hashes and process identities.
-Before invoking Node or serializing browser/profile/driver paths, it derives an ordinary
-absolute drive/UNC spelling and requires it to resolve to exactly the same canonical path.
-Device namespaces, relative paths, unrepresentable strings and changed identities fail closed.
-This avoids Node26.4.0's EISDIR entry-loader failure for extended helper filenames. Pure UNC
-construction is tested; execution on an actual UNC share remains unverified.
+The package retains vendor notices/source links, Chromium's internal credits, Firefox about:license, driver notices, Node licensing and individual npm package notices. Chromium is described accurately as a development snapshot, not a stable release or a product-patched browser.

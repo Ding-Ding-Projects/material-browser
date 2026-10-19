@@ -27,7 +27,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 ## Storage and delivery
 - [x] Verify hosted Windows build/release run and downloadable installer assets (run 39195138374)
   - [x] Configure branch-push/manual automation using the supported build entrypoints
-- [ ] Verify explicit standard-identity launch consent and localized capability explanations in the built desktop
+- [x] Verify explicit standard-identity launch consent and localized capability explanations in the built desktop
 - [ ] Verify the combined installer with both bundled engines, offline launch/stop and current README screenshots
 - [ ] Immutable encrypted revisions and conflict preservation
 - [ ] Optional containerized storage and full administration dashboard
@@ -45,4 +45,5 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [x] Verify consent Cancel focus in English, Cantonese and bilingual modes
 - [x] Verify wrapped consent action bounds at the760x580 minimum logical viewport
 - [ ] Verify the newer versioned installer and safe update of the existing active installation
-- [ ] Retain current inspected source-bound README screenshots and final release evidence
+- [x] Retain current inspected source-bound README screenshots and archived originals
+- [ ] Verify the final hosted release and safe installed-update outcome

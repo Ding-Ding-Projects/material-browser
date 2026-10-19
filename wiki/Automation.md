@@ -9,3 +9,8 @@ Changing the preference on a running profile persists the requested choice but d
 An unsupported engine/mode combination must return an explicit capability error. A saved selection does not prove that a driver or endpoint exists. In particular, managed engine acquisition, patch integration, live snapshot protocols and automation endpoint availability need their own evidence.
 
 The documentation's mode simulator changes only a local example. It never opens a driver, connects to an endpoint or launches a browser.
+
+
+## Bundled runtime verification
+
+The installer now includes complete Chromium and Firefox runtimes, matching drivers and locked Node adapters. The packaged source5922074 passed Off, Selenium and Puppeteer launches/stops for both engines, plus four real automation title roundtrips. Standard launch requires explicit consent because advanced stable identity remains unavailable. See the bundled-engine delivery article and machine-readable desktop runtime summary for exact source/hash scope. Native installation/update remains separate unverified work.

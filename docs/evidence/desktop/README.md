@@ -1,35 +1,17 @@
-# Desktop capture evidence
+# Current desktop evidence
 
-## Verified candidate
+Source: `5922074548f3a79f56b69c25b67826c0be3e209e`. Local package version: 0.1.1. The exact root build-installer.bat -Component Desktop completed with exit 0. The native executable is byte-identical to the `9011b28` host that passed all six bundled engine/mode launch-stop cases.
 
-The images below were captured from the packaged desktop at source `7257d2238a6c6a495c84321a98bffc283450af9c` after the exact root `build-installer.bat -Component Desktop` completed successfully. The build ran from `2026-10-18T06:27:02.4686499Z` through `2026-10-18T06:28:26.6975690Z`.
+The images use synthetic data on a named hidden desktop through the Lowlevel route and one exact debugging target. Original PNG bytes were inspected, staged without transformation, hashed and read back. All three prospective observation intervals completed with zero console errors, page errors and unhandled exceptions. The six recorded owned processes were proven absent and the exact desktop closed afterward.
 
-The executable SHA-256 is `4fb75974bc9ff0d7e200c5bb4d4b06715a8cf987e12e350963c74cda8a6826a0`; the application archive is `54a7b6c27490140620bad37754f7282c78a2ce921eee226079c5e0d4aab252fe`; the bundled native host is `c0847da83f8f6cfce08f934520387790e2df399495d160af654351f76ef7264d`.
+![Initial encrypted vault setup in Material Browser 0.1.1](onboarding-0.1.1.png)
 
-The captures use a newly created synthetic vault and profile, a named off-screen desktop, an exact single-page debugging target, and complete process ancestry validation. Page dimensions are 1280 by 1000 at explicitly emulated scale 1, not physical display-scale proof. Original PNG bytes were inspected, staged without transformation, independently hashed, read back and validated against the inventory and root README links.
+![Explicit standard-identity launch consent in Material Browser 0.1.1](launch-consent-0.1.1.png)
 
-## Setup and productive workspace
+![Bilingual dark appearance settings in Material Browser 0.1.1](settings-dark-bilingual-0.1.1.png)
 
-![Initial encrypted vault setup](onboarding.png)
+The 1280 by 1000 viewport uses logical emulated scale 1. Capture dates and UTC timezone come from the producing observation receipts, not filenames or file timestamps. The build timestamp records observed package readiness before launch, with the separate installer completion receipt retained privately. No private vocabulary was imported and no real user data, credential or unrelated window is visible.
 
-The real interface created the encrypted vault and one profile. Optional synchronization was skipped and completion opened the profile workspace. No host response was mocked.
+These images do not prove native installation/update, complete physical scale coverage, keyboard-only access, full localization, all feature contracts or current offline-handbook runtime acceptance. Minimum-viewport dialog observations are separate from full workspace layout acceptance.
 
-![Profile workspace with saved automation preference](automation-saved.png)
-
-The profile initially had automation Off. Selecting Selenium and saving updated the native host's stored profile, as observed after refresh. Effective mode remained unavailable because this run did not launch a managed browser. The image deliberately preserves that distinction.
-
-## Appearance
-
-![Bilingual settings in dark theme](settings-dark-bilingual.png)
-
-Language and theme were changed through their rendered controls. The measured dark field-label foreground was `rgb(196, 198, 208)` on `rgb(25, 28, 35)`, a contrast ratio of approximately 10.02:1. This measurement applies to that label and background, not the whole interface. Controls use the installed sans-serif stack rather than an unavailable font.
-
-## Verification and limits
-
-Seven focused desktop security and vocabulary tests passed. The shutdown regression was also run against a private intentionally regressed fixture and failed on the original destroyed-window exception. The repaired packaged window closed normally; its root process and named desktop were subsequently absent. A closing debugging connection is not itself process-exit proof.
-
-All three retained capture intervals reported zero observed console errors, unhandled exceptions and page errors. The layout receipt validated the profile grid, detail panel and automation panel against the actual package and capture hashes. These observations cover only their measured intervals, not startup history or native stderr.
-
-The updated-at value remains unavailable. Complete display-scale/language coverage, native installation/update behavior, keyboard-only input, full localization, restart persistence and overall accessibility acceptance remain unverified. Earlier captures are retained privately as superseded observations; a native diagnostic containing a local path is excluded from publication. No release, engine automation execution or two-computer synchronization claim is made.
-
-See [the machine-readable inventory](inventory.json) for exact image hashes and state tuples.
+[Inventory](inventory.json) · [Public receipt summary](receipts-0.1.1.json) · [Historical desktop article and original images](archive.md)
