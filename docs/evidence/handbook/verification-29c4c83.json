@@ -1,0 +1,48 @@
+{
+  "sourceCommit": "29c4c83caad3e0f78f9d82ae1d7b442784022d8d",
+  "deployment": "4dccbf2674f8900bc86d0de9d61041b3793d23f2",
+  "url": "https://ding-ding-projects.github.io/material-browser/",
+  "articleCount": 37,
+  "publishedFiles": 19,
+  "allPublishedBytesMatched": true,
+  "interactions": {
+    "home": true,
+    "installedShortcutsArticle": true,
+    "currentEvidenceArticle": true,
+    "threeCurrentImagesNaturalWidth": 1920,
+    "threeCurrentImagesNaturalHeight": 1500,
+    "searchInitialResults": 37,
+    "searchFilteredResults": 2,
+    "searchQuery": "shortcuts",
+    "darkPreferencePersistedAfterReload": true,
+    "narrowViewport": {
+      "width": 390,
+      "height": 844,
+      "bodyWidth": 390,
+      "clientWidth": 390
+    },
+    "narrowNavigationExpanded": true
+  },
+  "observation": {
+    "startedAt": "2026-10-19T06:16:50.981Z",
+    "endedAt": "2026-10-19T06:17:19.398Z",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "unhandledExceptions": 0,
+    "failedResources": 0,
+    "badHttpResponses": 0,
+    "thirdPartyRequests": 0
+  },
+  "teardown": {
+    "recordedProcessesAbsent": 8,
+    "listenerAbsent": true,
+    "namedDesktopClosed": true,
+    "pidKillUsed": false,
+    "isolatedProfileRetained": true
+  },
+  "limitations": [
+    "Page-only English fixture, not physical touch, display-scale or native keyboard proof.",
+    "Offline handbook and installed-update proof are separate.",
+    "Prior review fixture remains retained after its separate cleanup rejection."
+  ]
+}

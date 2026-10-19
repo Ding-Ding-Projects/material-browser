@@ -2,6 +2,8 @@
 
 ## Current delivery
 
+The productive repair has a successful hosted run39207217449 and normal release build-17-39207217449-1. The live handbook now serves source29c4c83 through publication4dccbf2, with37 articles and all19 declared file hashes verified. Its home, shortcut/current-evidence articles, all three images, search, dark-preference reload and390px layout checks passed. Eight saved browser identities were proven absent and its exact desktop closed. The later documentation build39208676657 remains a separate pending release result. See docs/evidence/handbook/verification-29c4c83.json.
+
 ## Combined source verification
 
 Source04e003fb37fcdc5fecb8ef45806aaae74a69b603 completed build-installer.bat -Component Desktop with exit0. The 809,221,120-byte setup SHA-256 is d19dff36008ee8de9ab7ff57ed3070079873fbdbb26638ca5247b114f48c7686. All87 local desktop tests passed. The real packaged interface saved preferences and protected history, rejected a stale revision and retained dark theme, compact density and a synthetic display name through process restart. History reopened locked and retained its record after unlocking. Both GUI runs proved six complete process identities absent and closed their exact hidden desktops. Three original1920x1500 images passed promotion validation; a deliberate missing-README-link check rejected the omission, then passed after restoration.
