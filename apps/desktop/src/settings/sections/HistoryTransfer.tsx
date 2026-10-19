@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Field } from "../../components";
-import { Search } from "../../Search";
-import { resolveSearchRecords } from "../interaction-model.mjs";
 import { Choice } from "../SettingControl";
 import { ConfirmAction } from "../ConfirmAction";
+import { ProtectedHistory } from "./ProtectedHistory";
 import {
   defaults,
   exportPreferences,
@@ -29,20 +28,10 @@ export function HistoryTransfer({
   const [format, setFormat] = useState("json"),
     [pending, setPending] = useState<any>(null),
     [error, setError] = useState(""),
-    [reset, setReset] = useState(false),
-    [from, setFrom] = useState(""),
-    [to, setTo] = useState(""),
-    [action, setAction] = useState(""),
-    [rows, setRows] = useState<string[]>([]),
-    [selected, setSelected] = useState<string[]>([]);
-  const filtered = c.record.revisions.filter(
-    (r) =>
-      (!from || r.at.slice(0, 10) >= from) &&
-      (!to || r.at.slice(0, 10) <= to) &&
-      (!action || r.action === action),
-  );
-  const visibleRecords = resolveSearchRecords(rows, filtered);
-  const actions = [...new Set(c.record.revisions.map((r) => r.action))];
+    [reset, setReset] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const applyingRef = useRef(false),
+    errorRef = useRef<HTMLParagraphElement>(null);
   async function importFile(file: File) {
     try {
       if (file.size > 262144) throw Error("Import exceeds 256 KiB");
@@ -50,6 +39,7 @@ export function HistoryTransfer({
       setPending({ ...next, action: "Imported preferences" });
       setError("");
     } catch (e) {
+      setPending(null);
       setError(e instanceof Error ? e.message : "Invalid import");
     }
   }
@@ -101,7 +91,11 @@ export function HistoryTransfer({
             {t("Reset all preferences")}
           </Button>
         </div>
-        {error && <p role="alert">{t(error)}</p>}
+        {error && (
+          <p role="alert" tabIndex={-1} ref={errorRef}>
+            {t(error)}
+          </p>
+        )}
         {pending && (
           <div className="import-preview">
             <h3>{t("Review import")}</h3>
@@ -117,17 +111,43 @@ export function HistoryTransfer({
               {t("Schedules")}: {pending.schedules.length}
             </p>
             <Button
-              onClick={() => {
-                c.transact(
-                  pending.action || "Imported preferences",
-                  pending.preferences,
-                  pending.schedules,
-                  Object.keys(pending.preferences),
-                );
-                setPending(null);
+              disabled={applying}
+              onClick={async () => {
+                if (applyingRef.current) return;
+                applyingRef.current = true;
+                setApplying(true);
+                try {
+                  const result = await c.transact(
+                    pending.action || "Imported preferences",
+                    pending.preferences,
+                    pending.schedules,
+                    Object.keys(pending.preferences),
+                  );
+                  if (result.ok) {
+                    setPending(null);
+                    setError("");
+                  } else {
+                    setError(result.message);
+                    requestAnimationFrame(() => errorRef.current?.focus());
+                  }
+                } catch {
+                  setError(
+                    "The import could not be saved. Review the values and retry.",
+                  );
+                  requestAnimationFrame(() => errorRef.current?.focus());
+                } finally {
+                  applyingRef.current = false;
+                  setApplying(false);
+                }
               }}
             >
-              {t("Apply import")}
+              {t(
+                applying
+                  ? "Saving preferences"
+                  : error
+                    ? "Retry import"
+                    : "Apply import",
+              )}
             </Button>
             <Button secondary onClick={() => setPending(null)}>
               {t("Cancel")}
@@ -136,152 +156,30 @@ export function HistoryTransfer({
         )}
       </section>
       <section className="setting-card">
-        <h2>{t("History")}</h2>
+        <h2>{t("Undo and redo preferences")}</h2>
         <p>
           {t(
-            "Local settings history is not yet the protected native history service.",
+            "Undo and redo change the current preferences and append a new event when protected history is configured. Existing legacy cache records are retained locally, but are not presented as protected history.",
           )}
         </p>
         <div className="actions">
           <Button
-            disabled={!c.record.undoStack.length}
             secondary
+            disabled={c.saving || !c.record.undoStack.length}
             onClick={c.undo}
           >
             {t("Undo latest change")}
           </Button>
           <Button
-            disabled={!c.record.redoStack.length}
             secondary
+            disabled={c.saving || !c.record.redoStack.length}
             onClick={c.redo}
           >
             {t("Redo previous state")}
           </Button>
         </div>
-        <div className="settings-grid">
-          <Field
-            label={t("Start date")}
-            type="date"
-            value={from}
-            onChange={setFrom}
-          />
-          <Field
-            label={t("End date")}
-            type="date"
-            value={to}
-            onChange={setTo}
-          />
-        </div>
-        <Choice
-          label={t("Action")}
-          value={action}
-          options={[
-            ["", t("All actions")],
-            ...actions.map(
-              (a) =>
-                [
-                  a,
-                  `${a} (${c.record.revisions.filter((r) => r.action === a).length})`,
-                ] as [string, string],
-            ),
-          ]}
-          onChange={setAction}
-          t={t}
-        />
-        <Search
-          label={t("Search history")}
-          items={filtered.map((r) => `${r.at} ${r.action} ${r.keys.join(" ")}`)}
-          itemKeys={filtered.map((r) => r.id)}
-          onKeys={setRows}
-          t={t}
-        />
-        <div className="actions">
-          <Button
-            secondary
-            onClick={() => setSelected(visibleRecords.map((r) => r.id))}
-          >
-            {t("Select all matches")}
-          </Button>
-          <Button
-            secondary
-            onClick={() =>
-              setSelected(
-                visibleRecords
-                  .map((r) => r.id)
-                  .filter((id) => !selected.includes(id)),
-              )
-            }
-          >
-            {t("Inverse selection")}
-          </Button>
-          <Button
-            secondary
-            disabled={!selected.length}
-            onClick={() =>
-              downloadText(
-                JSON.stringify(
-                  {
-                    schemaVersion: 1,
-                    omitted: ["Personal wording", "Credentials"],
-                    revisions: filtered.filter((r) => selected.includes(r.id)),
-                  },
-                  null,
-                  2,
-                ) + "\n",
-                "settings-history.json",
-                "application/json",
-              )
-            }
-          >
-            {t("Export selected")}
-          </Button>
-        </div>
-        {!filtered.length && <p>{t("No recorded changes")}</p>}
-        {visibleRecords
-          .slice()
-          .reverse()
-          .map((r: any) => {
-            return (
-              <article key={r.id} className="settings-record">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(r.id)}
-                    onChange={(e) =>
-                      setSelected(
-                        e.target.checked
-                          ? [...selected, r.id]
-                          : selected.filter((id) => id !== r.id),
-                      )
-                    }
-                  />
-                  {r.action}
-                </label>
-                <p>{new Date(r.at).toLocaleString()}</p>
-                <details>
-                  <summary>{t("Changes")}</summary>
-                  {r.keys.map((k: string) => (
-                    <p key={k}>
-                      {k}: {String(r.preferences[k])}
-                    </p>
-                  ))}
-                </details>
-                <Button
-                  secondary
-                  onClick={() =>
-                    setPending({
-                      preferences: r.preferences,
-                      schedules: r.schedules,
-                      action: "Restored revision",
-                    })
-                  }
-                >
-                  {t("Restore revision")}
-                </Button>
-              </article>
-            );
-          })}
       </section>
+      <ProtectedHistory controller={c} t={t} />
       {reset && (
         <ConfirmAction
           title={t("Reset all preferences")}
@@ -290,14 +188,15 @@ export function HistoryTransfer({
           )}
           t={t}
           onCancel={() => setReset(false)}
-          onConfirm={() => {
-            c.transact(
+          onConfirm={async () => {
+            const result = await c.transact(
               "Reset preferences",
               { ...defaults },
               [],
               Object.keys(defaults),
             );
-            setReset(false);
+            if (result.ok) setReset(false);
+            return result;
           }}
         />
       )}

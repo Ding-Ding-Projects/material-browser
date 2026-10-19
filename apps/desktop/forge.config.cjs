@@ -5,7 +5,12 @@ module.exports = {
     asar: true,
     executableName: "MaterialBrowser",
     icon,
-    extraResource: ["../../target/release/material-browser.exe", "../../engines/builds/packaged/engines"],
+    extraResource: [
+      "../../target/release/material-browser.exe",
+      "../../engines/builds/packaged/engines",
+      "../../.cache/history-git/v2.56.0.windows.2",
+      "../../engines/runtime/history-git.lock.json",
+    ],
     ignore: [/^\/src($|\/)/, /^\/node_modules($|\/)/],
   },
   makers: [

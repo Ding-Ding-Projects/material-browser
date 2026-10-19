@@ -27,11 +27,6 @@ const unavailable = [
     "Protected entry storage, local QR registration and standards-vector acceptance are not yet connected. No credential input is collected here.",
   ],
   [
-    "privacy",
-    "Protected native history",
-    "The isolated encrypted Git history and independent access factor are not connected. The local preference revision list is not that service.",
-  ],
-  [
     "tools",
     "File converter",
     "Packaged offline conversion adapters and output validators are missing. No format is offered as working without its adapter.",
@@ -170,12 +165,23 @@ export function SettingsWorkspace({
     <div className="settings-workspace">
       <div className="page-heading">
         <h1>{t("Settings")}</h1>
-        <p>{t("Settings are saved on this device.")}</p>
+        <p role="status">
+          {t(
+            !c.storageReady
+              ? "Loading saved preferences"
+              : c.saving
+                ? "Saving preferences"
+                : "Settings are saved on this device.",
+          )}
+        </p>
       </div>
       {c.storageError && (
         <div className="banner" role="alert">
-          <h2>{t("Save rejected")}</h2>
+          <h2>{t("Preference storage needs attention")}</h2>
           <p>{t(c.storageError)}</p>
+          <Button secondary onClick={() => void c.reloadSaved()}>
+            {t("Reload saved preferences")}
+          </Button>
         </div>
       )}
       <details className="settings-global-finder">

@@ -33,6 +33,7 @@ export function Field({
   required = false,
   clearLabel,
   inputMode,
+  disabled = false,
 }: {
   label: string;
   value: string;
@@ -41,6 +42,7 @@ export function Field({
   required?: boolean;
   clearLabel?: string;
   inputMode?: string;
+  disabled?: boolean;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const mode = document.documentElement.dataset.language;
@@ -55,7 +57,10 @@ export function Field({
       type,
       required,
       inputMode,
-      onInput: (e: Event) => onChange((e.target as HTMLInputElement).value),
+      disabled,
+      onInput: (e: Event) => {
+        if (!disabled) onChange((e.target as HTMLInputElement).value);
+      },
     },
     React.createElement(
       "md-icon-button",
@@ -63,7 +68,9 @@ export function Field({
         slot: "trailing-icon",
         "aria-label": clearLabel || `${clear} ${label}`,
         title: clearLabel || `${clear} ${label}`,
+        disabled,
         onClick: () => {
+          if (disabled) return;
           onChange("");
           ref.current?.focus();
         },

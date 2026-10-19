@@ -20,6 +20,7 @@ import { styledMessage } from "./settings/messages.mjs";
 import { definitions } from "./settings/model.mjs";
 import { ProfileLaunch } from './ProfileLaunch';
 import { operationFailure } from './operation-errors.mjs';
+import { useDisplayName } from "./settings/useDisplayName";
 const read = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -28,6 +29,7 @@ const read = (key: string, fallback: any) => {
   }
 };
 function App() {
+  const displayName = useDisplayName();
   const settingsController = useSettings();
   const prefs = settingsController.preferences;
   usePresentationEffects(prefs);
@@ -103,9 +105,10 @@ function App() {
   };
   useEffect(() => {
     refresh().catch(() => setStatus(null));
-    const off = window.materialBrowser?.onEvent(() =>
-      refresh().catch(() => setStatus(null)),
-    );
+    const off = window.materialBrowser?.onEvent((event: any) => {
+      if (event?.type !== "settings-updated")
+        refresh().catch(() => setStatus(null));
+    });
     return off;
   }, []);
   useEffect(() => {
@@ -234,7 +237,7 @@ function App() {
               : "M"}
         </div>
         <div className="identity">
-          <strong>Material Browser</strong>
+          <strong>{displayName || "Material Browser"}</strong>
           <small>
               {t("Version")} {APP_VERSION} · {t("Updated")}: {t("Unavailable")}
           </small>

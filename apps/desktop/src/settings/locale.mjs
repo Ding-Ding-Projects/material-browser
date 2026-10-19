@@ -67,6 +67,120 @@ const labels = {
   "No matching settings": "沒有符合的設定",
   "Settings are saved on this device.": "設定會儲存在這部電腦。",
   "Save rejected": "未能儲存",
+  "Independent history access": "獨立歷史記錄存取",
+  "Protected native history": "受保護的本機歷史記錄",
+  "Checking protected history": "正在檢查受保護歷史記錄",
+  "Protected history unavailable": "受保護歷史記錄暫時無法使用",
+  "History unlocked": "歷史記錄已解鎖",
+  "History locked": "歷史記錄已鎖定",
+  "History not configured": "歷史記錄尚未設定",
+  "Refresh history status": "重新檢查歷史記錄狀態",
+  "History password or PIN": "歷史記錄密碼或 PIN",
+  "New history password or PIN": "新的歷史記錄密碼或 PIN",
+  "Current history password or PIN": "目前的歷史記錄密碼或 PIN",
+  "Confirm history password or PIN": "確認歷史記錄密碼或 PIN",
+  "Unlock history": "解鎖歷史記錄",
+  "Lock history": "鎖定歷史記錄",
+  "Set up protected history": "設定受保護歷史記錄",
+  "Change history password or PIN": "更改歷史記錄密碼或 PIN",
+  "Use 6–256 characters and enter the same password or PIN twice.":
+    "請使用 6 至 256 個字元，並輸入兩次相同的密碼或 PIN。",
+  "This password or PIN protects history access independently of the browser vault and computer sign-in. It is never saved in preferences or exports.":
+    "這個密碼或 PIN 獨立保護歷史記錄，不同於瀏覽器保險庫及電腦登入。它不會儲存在設定或匯出檔案內。",
+  "History access is active. Each operation rechecks access; sessions expire after ten minutes.":
+    "歷史記錄存取已啟用。每項操作都會重新驗證權限；會話會在十分鐘後到期。",
+  "Changing this password revokes older sessions in other processes. It does not change the encryption key or computer sign-in.":
+    "更改這個密碼會撤銷其他程序的舊會話，但不會更改加密金鑰或電腦登入。",
+  "Encrypted append-only history uses an independent password or PIN. Imported personal wording, credentials and device paths are excluded.":
+    "加密歷史記錄只會追加新事件，並使用獨立密碼或 PIN。匯入的個人用語、憑證及裝置路徑均不會納入。",
+  "Recover an unfinished operation": "復原未完成的操作",
+  "Retry recovery": "重試復原",
+  "Discard pending operation": "放棄待完成的操作",
+  "Retry applies only the recorded expected state. Discard retains existing history and ends the pending operation without applying its target.":
+    "重試只會在目前狀態符合原有記錄時套用。放棄會保留現有歷史記錄，結束待完成的操作，而不套用其目標。",
+  "Application display name": "應用程式顯示名稱",
+  "Display name": "顯示名稱",
+  "Save display name": "儲存顯示名稱",
+  "Reset display name": "重設顯示名稱",
+  "The default is Material Browser. A custom name changes only the workspace header; installed identity, file paths and update identity stay unchanged. Every saved change requires unlocked history.":
+    "預設名稱是 Material Browser。自訂名稱只會更改工作區標題，安裝識別、檔案路徑及更新識別維持不變。每次儲存更改都必須先解鎖歷史記錄。",
+  "Recorded changes": "已記錄的更改",
+  "At most 500 matching records are shown. Dates, action and text filters compose. Exports omit free-text labels and values; physical pruning is not available.":
+    "最多顯示 500 項符合條件的記錄。日期、操作及文字篩選會一同生效。匯出會略過自由文字標籤及數值；暫未提供實際刪除舊記錄的功能。",
+  "History action": "歷史記錄操作",
+  "Search protected history": "搜尋受保護歷史記錄",
+  "Export selected redacted JSON": "匯出所選記錄的遮蔽 JSON",
+  "Review changes": "檢視更改",
+  "Edit history label": "編輯歷史記錄標籤",
+  "History label": "歷史記錄標籤",
+  "Save label": "儲存標籤",
+  "History retention": "歷史記錄保留",
+  "Visible history days": "可見歷史記錄日數",
+  "Save retention visibility": "儲存可見日數",
+  "Default: show all retained records. A limit of 1–36500 days changes visibility only; encrypted records are not physically deleted.":
+    "預設會顯示所有保留的記錄。1 至 36500 日的限制只會改變可見範圍，不會實際刪除加密記錄。",
+  "Labels are limited to 120 characters and are omitted from redacted exports. Clearing removes the visible label.":
+    "標籤最多 120 個字元，遮蔽匯出不會包含標籤。清空會移除可見標籤。",
+  "Review protected revision": "檢視受保護版本",
+  "This revision changes the protected display name.":
+    "這個版本會更改受保護的顯示名稱。",
+  "Changed settings": "已更改設定",
+  "Restore this revision": "還原這個版本",
+  "Restore appends a new history event. It never rewrites earlier records.":
+    "還原會追加新的歷史事件，不會重寫較早的記錄。",
+  "Review the affected protected record. Existing history is retained.":
+    "請檢查受影響的受保護記錄。現有歷史記錄會保留。",
+  "Undo and redo preferences": "復原及重做設定",
+  "Undo and redo change the current preferences and append a new event when protected history is configured. Existing legacy cache records are retained locally, but are not presented as protected history.":
+    "復原及重做會更改目前設定，並在受保護歷史記錄已設定時追加事件。舊有快取記錄會保留在本機，但不會當作受保護歷史記錄顯示。",
+  "Protected history is unavailable in this installation. Repair or update the installation, then retry.":
+    "這個安裝版本暫時無法使用受保護歷史記錄。請修復或更新安裝後再重試。",
+  "The history password or PIN did not match.": "歷史記錄密碼或 PIN 不正確。",
+  "History is locked. Unlock it to continue.":
+    "歷史記錄已鎖定，請先解鎖再繼續。",
+  "This history session expired or was revoked. Unlock it again.":
+    "這個歷史記錄會話已到期或已撤銷，請重新解鎖。",
+  "Saved values changed after this operation began. Review the current values before retrying recovery.":
+    "這項操作開始後，已儲存數值曾經更改。請先檢查目前數值，再重試復原。",
+  "An unfinished history operation needs recovery. Review it before making another protected change.":
+    "有一項未完成的歷史操作需要復原。進行另一項受保護更改前，請先檢查。",
+  "This older recovery record lacks the information needed for a safe retry. Discard the pending operation explicitly; existing history is retained.":
+    "這項舊復原記錄缺少安全重試所需的資料。請明確放棄待完成的操作；現有歷史記錄會保留。",
+  "The local history key is unavailable. Existing history was preserved and no replacement key was created.":
+    "本機歷史金鑰無法使用。現有歷史記錄已保留，亦沒有建立替代金鑰。",
+  "Protected history could not complete this operation. Existing records were preserved.":
+    "受保護歷史記錄未能完成這項操作。現有記錄已保留。",
+  "Preferences were saved, but protected history could not record this change.":
+    "設定已儲存，但受保護歷史記錄未能記錄這項更改。",
+  "Loading saved preferences": "正在載入已儲存的設定",
+  "The operation completed, but its history record could not be saved.":
+    "操作已完成，但未能儲存相關歷史記錄。",
+  "The previous local preferences are invalid. They were preserved and were not migrated.":
+    "原有的本機設定無效。記錄已保留，未有遷移。",
+  "Saving preferences": "正在儲存設定",
+  "Retry save": "重試儲存",
+  "Retry import": "重試匯入",
+  "Retry confirmation": "重試確認",
+  "The change could not be saved. Your confirmation is retained; retry or exit.":
+    "未能儲存更改。確認選項已保留，你可以重試或離開。",
+  "The import could not be saved. Review the values and retry.":
+    "未能儲存匯入設定。請檢查數值後重試。",
+  "The workspace change could not be saved. The previous state was preserved.":
+    "未能儲存工作區更改。原有狀態已保留。",
+  "Preference storage needs attention": "設定儲存需要處理",
+  "Reload saved preferences": "重新載入已儲存的設定",
+  "Preferences changed elsewhere. Reload the saved preferences before editing again.":
+    "設定已在其他位置更改。請先重新載入已儲存的設定，再繼續編輯。",
+  "Preferences could not be saved or loaded. The existing saved record was preserved.":
+    "未能儲存或載入設定。原有的已儲存記錄已保留。",
+  "Preferences were saved, but the local workspace cache could not be updated.":
+    "設定已儲存，但未能更新本機工作區快取。",
+  "Native preference storage is unavailable. Existing saved preferences were preserved.":
+    "本機設定儲存暫時無法使用。原有的已儲存設定已保留。",
+  "Preferences are still loading or unavailable. Reload saved preferences before editing.":
+    "設定仍在載入或暫時無法使用。請先重新載入已儲存的設定，再進行編輯。",
+  "Another preference change completed first. Review the saved values and retry this action.":
+    "另一項設定更改已先完成。請檢查已儲存的數值，再重試這項操作。",
   Select: "選擇",
   On: "開啟",
   Off: "關閉",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Field } from "../../components";
 import { Search } from "../../Search";
 import { Choice, SettingInput } from "../SettingControl";
@@ -37,7 +37,13 @@ export function Schedules({
     [editing, setEditing] = useState<string | null>(null),
     [remove, setRemove] = useState<string | null>(null);
   const d = definitions.find((x) => x.key === key)!;
-  function save() {
+  const errorRef = useRef<HTMLParagraphElement>(null),
+    savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  async function save() {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
     try {
       const previous = c.record.schedules.find((r) => r.id === editing);
       const rule = validateSchedule(
@@ -58,16 +64,25 @@ export function Schedules({
       const rules = editing
         ? c.record.schedules.map((r) => (r.id === editing ? rule : r))
         : [...c.record.schedules, rule];
-      c.transact(
+      const result = await c.transact(
         editing ? "Updated schedule" : "Created schedule",
         c.record.preferences,
         rules,
       );
+      if (!result.ok) {
+        setError(result.message);
+        requestAnimationFrame(() => errorRef.current?.focus());
+        return;
+      }
       setEditing(null);
       setLabel("");
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid schedule");
+      requestAnimationFrame(() => errorRef.current?.focus());
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   }
   function edit(r: any) {
@@ -173,10 +188,22 @@ export function Schedules({
         <p>
           {t("Online schedule sources are not yet supported in this build.")}
         </p>
-        {error && <p role="alert">{t(error)}</p>}
+        {error && (
+          <p role="alert" tabIndex={-1} ref={errorRef}>
+            {t(error)}
+          </p>
+        )}
         <div className="actions">
-          <Button onClick={save}>
-            {t(editing ? "Save changes" : "Add schedule")}
+          <Button onClick={save} disabled={saving}>
+            {t(
+              saving
+                ? "Saving preferences"
+                : error
+                  ? "Retry save"
+                  : editing
+                    ? "Save changes"
+                    : "Add schedule",
+            )}
           </Button>
           {editing && (
             <Button
@@ -288,13 +315,14 @@ export function Schedules({
           }
           t={t}
           onCancel={() => setRemove(null)}
-          onConfirm={() => {
-            c.transact(
+          onConfirm={async () => {
+            const result = await c.transact(
               "Removed schedule",
               c.record.preferences,
               c.record.schedules.filter((r) => r.id !== remove),
             );
-            setRemove(null);
+            if (result.ok) setRemove(null);
+            return result;
           }}
         />
       )}
