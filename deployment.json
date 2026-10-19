@@ -1,7 +1,7 @@
 {
-  "source": "09442f5b03c63136edb066ebcb8804a7fceec887",
-  "articleCount": 31,
-  "observedReadyAt": "2026-10-19T05:16:48.544Z",
+  "source": "29c4c83caad3e0f78f9d82ae1d7b442784022d8d",
+  "builtAt": "2026-10-19T06:14:26.433Z",
+  "publicationBytesFromGit": true,
   "files": [
     {
       "path": ".nojekyll",
@@ -10,8 +10,8 @@
     },
     {
       "path": "app.js",
-      "bytes": 393419,
-      "sha256": "34dad97658408bc40576438741e7013f1d7a5f9bd71844b1c0ebedfeee6a21c6"
+      "bytes": 454148,
+      "sha256": "5d2b96ae776e61626f5e3bae580d7dc01673bf7815e5464e580f3577cb0530d6"
     },
     {
       "path": "assets/00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140.png",
@@ -29,6 +29,11 @@
       "sha256": "146d6457f95e6fd76ffe3ffb86df42989e77eb03b994138a0ab779ee26e3e761"
     },
     {
+      "path": "assets/1cfd296dae406f2272bccf7a09ce546966053446cd0e2fd8f7c1d86ad75235cb.png",
+      "bytes": 181163,
+      "sha256": "1cfd296dae406f2272bccf7a09ce546966053446cd0e2fd8f7c1d86ad75235cb"
+    },
+    {
       "path": "assets/2f4b30ea92cf7235f1c545630d21e431d54ffd70c350fd53400a2a3808b02e61.png",
       "bytes": 77504,
       "sha256": "2f4b30ea92cf7235f1c545630d21e431d54ffd70c350fd53400a2a3808b02e61"
@@ -44,9 +49,19 @@
       "sha256": "7af317ca751cbad08313821107d22b11da8d302d21f2d777c55fd1f84fc35d9c"
     },
     {
+      "path": "assets/87df3237b05afdd74391c74303ed5072fbf142781e9a040601db756f164a53bb.png",
+      "bytes": 164541,
+      "sha256": "87df3237b05afdd74391c74303ed5072fbf142781e9a040601db756f164a53bb"
+    },
+    {
       "path": "assets/9a385b1ad9c40e05b1ecd476482691ec721493a682007e532fa4f6212c165350.png",
       "bytes": 56402,
       "sha256": "9a385b1ad9c40e05b1ecd476482691ec721493a682007e532fa4f6212c165350"
+    },
+    {
+      "path": "assets/a80fd03c2b1a2331684ff7ddfa247b628616a2f41e98bb67c92f6117ab45de91.png",
+      "bytes": 164220,
+      "sha256": "a80fd03c2b1a2331684ff7ddfa247b628616a2f41e98bb67c92f6117ab45de91"
     },
     {
       "path": "assets/ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79.png",
@@ -70,8 +85,8 @@
     },
     {
       "path": "inventory.json",
-      "bytes": 1324,
-      "sha256": "15205580335c2ad903b94f4f8deb3d7a16a82db61dfaeecbf75c6569b522ecda"
+      "bytes": 1658,
+      "sha256": "cf8641b8229f82e5a6e98745533d5581a5129e8a6c9e969bb6e67a764f9994f5"
     },
     {
       "path": "regex.worker.js",
@@ -83,6 +98,5 @@
       "bytes": 6188,
       "sha256": "fa7a51c392e74a7e9a805c0daf01783c33f229156c652bb0ecdab12f387d2057"
     }
-  ],
-  "publicationBytesFromGit": true
+  ]
 }
