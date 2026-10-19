@@ -1,4 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
+if (require("./squirrel-events.cjs").handleSquirrelEvent({
+  app, argv: process.argv, execPath: process.execPath, platform: process.platform,
+})) return;
+if (process.platform === "win32") {
+  app.setAppUserModelId("com.squirrel.MaterialBrowser.MaterialBrowser");
+}
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");

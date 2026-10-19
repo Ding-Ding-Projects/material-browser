@@ -2,6 +2,22 @@
 
 ## Current delivery
 
+All five component branches were integrated into main, with remote ancestry verified at
+6566d71f4279cb27b653739e7fc0a1016af73c7f. This includes revision-checked settings persistence,
+protected history, selected history export, engine/native-host integration and inactive
+native-engine source candidates. Native-engine candidates remain uncompiled and their
+advanced capability flags remain false. Earlier runtime evidence below covers its stated
+source only, not the entire newly combined application.
+
+The follow-up shortcut repair handles Squirrel maintenance before productive startup and
+sets the matching shell identity. Fourteen focused startup/security tests passed after an
+intentional failing regression. An independent source review found no critical concern.
+Built installation, shortcut readback and launch remain unverified.
+
+All five source tips are preserved remotely. Cleanup has not started: backup access and
+archive verification remain pending. Keep the existing documentation publication branch.
+Continue product work on main. Never delete an unverified backup source or active worktree.
+
 Source 5922074548f3a79f56b69c25b67826c0be3e209e completed the exact local build-installer.bat -Component Desktop entrypoint with exit 0. The local package is version 0.1.1. Hosted builds stamp desktop and handbook manifests to 0.1.<workflow run number>, giving the existing 0.1.0 installation a normal newer-version upgrade path. The desktop label reads the actual package version.
 
 The application and Squirrel setup use the same custom multi-size icon. Chromium, Firefox, matching drivers, Node and locked adapters are bundled outside the application archive. The native host retains canonical containment/hash/ownership checks and uses only same-identity ordinary paths at external-runtime boundaries. Firefox retains its launcher through -wait-for-browser.

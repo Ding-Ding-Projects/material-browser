@@ -5,6 +5,8 @@ import vm from "node:vm";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { EventEmitter } from "node:events";
+import { createRequire } from "node:module";
+const desktopRequire = createRequire(import.meta.url);
 
 function fixture({
   argv = [],
@@ -15,6 +17,9 @@ function fixture({
   let options;
   let dataDirectory;
   let sent = 0;
+  let hostSpawns = 0;
+  const exitCodes = [];
+  let appUserModelId;
   const contents = {
     mainFrame: {
       url: pathToFileURL(path.join("/test", "../dist/index.html")).href,
@@ -55,6 +60,8 @@ function fixture({
       whenReady: () => ({ then: (fn) => fn() }),
       on() {},
       quit() {},
+      exit(code) { exitCodes.push(code); },
+      setAppUserModelId(value) { appUserModelId = value; },
     },
     ipcMain: { handle: (name, fn) => handlers.set(name, fn) },
     dialog: { showOpenDialog: async () => ({ canceled: true, filePaths: [] }) },
@@ -66,13 +73,15 @@ function fixture({
     },
   };
   vm.runInNewContext(
-    readFileSync(new URL("../electron/main.cjs", import.meta.url), "utf8"),
+    `(function () {\n${readFileSync(new URL("../electron/main.cjs", import.meta.url), "utf8")}\n})()`,
     {
-      require: (name) =>
+      require: (name) => name === "./squirrel-events.cjs"
+        ? { handleSquirrelEvent: options => desktopRequire('../electron/squirrel-events.cjs').handleSquirrelEvent({ ...options, statFile: () => { throw new Error('fixture updater missing'); }, report() {} }) }
+        :
         ({
           electron,
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
-          "node:child_process": { spawn: () => host },
+          "node:child_process": { spawn: () => { hostSpawns++; return host; } },
           "node:path": path,
           "node:url": { pathToFileURL },
           "node:readline": { createInterface: () => new EventEmitter() },
@@ -82,11 +91,28 @@ function fixture({
       setTimeout,
       clearTimeout,
       Buffer,
-      process: { resourcesPath: "/test", argv },
+      process: { resourcesPath: "/test", argv, platform: "win32", execPath: "C:\\fixture\\MaterialBrowser\\app-0.1.1\\MaterialBrowser.exe" },
     },
   );
-  return { handlers, options, contents, host, dataDirectory, sent: () => sent };
+  return { handlers, options, contents, host, dataDirectory, sent: () => sent, hostSpawns, exitCodes, appUserModelId };
 }
+
+test('Squirrel maintenance never opens a workspace or starts its native host', () => {
+  for (const event of ['--squirrel-install', '--squirrel-updated', '--squirrel-uninstall', '--squirrel-obsolete']) {
+    const f = fixture({ argv: ['MaterialBrowser.exe', event, '0.1.1'] });
+    assert.equal(f.options, undefined);
+    assert.equal(f.hostSpawns, 0);
+    assert.equal(f.handlers.size, 0);
+    assert.deepEqual(f.exitCodes, [event === '--squirrel-obsolete' ? 0 : 1]);
+  }
+});
+
+test('first productive launch retains its workspace and matching shell identity', () => {
+  const f = fixture({ argv: ['MaterialBrowser.exe', '--squirrel-firstrun'] });
+  assert.ok(f.options);
+  assert.equal(f.hostSpawns, 1);
+  assert.equal(f.appUserModelId, 'com.squirrel.MaterialBrowser.MaterialBrowser');
+});
 
 test("main denies arbitrary methods and untrusted frames before dispatch", () => {
   const { handlers, contents } = fixture();

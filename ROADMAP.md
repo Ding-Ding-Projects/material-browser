@@ -5,7 +5,7 @@ product remains unfinished. Integrated native lifecycle work passed the exact Ho
 45 Rust workspace tests and two adapter tests. Six real hidden-desktop runs covered local
 and paired automation, contention and already-closed handling. Earlier launcher-only stop
 results remain superseded. These results do not establish whole-profile live snapshots.
-The source repairs are partly integrated; further engine work remains on the recovery branches;
+All five component branches are integrated into main; native engine source candidates remain inactive;
 no end-to-end completion, release, deployment or two-computer acceptance is claimed.
 
 ## Foundation
@@ -25,6 +25,9 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Selenium and Puppeteer, local and through authenticated LAN transport
 
 ## Storage and delivery
+- [x] Preserve and integrate all five component branch tips into main with remote ancestry proof
+- [ ] Verify backup archive and safely retire the five integrated component worktrees and branches
+- [ ] Build and verify Squirrel shortcut maintenance and matching Windows shell identity (14 focused tests passed)
 - [x] Verify hosted Windows build/release run and downloadable installer assets (run 39195138374)
   - [x] Configure branch-push/manual automation using the supported build entrypoints
 - [x] Verify explicit standard-identity launch consent and localized capability explanations in the built desktop
