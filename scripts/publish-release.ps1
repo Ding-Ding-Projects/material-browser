@@ -12,6 +12,18 @@ try {
   $handbooks=@(Get-ChildItem 'apps/docs-companion/release/Material-Browser-Handbook-*.exe' -File)
   if($handbooks.Count -ne 1){throw 'Expected exactly one portable handbook executable.'}
   $files+= $handbooks
+  # Stage explicit portable names. GitHub otherwise rewrites spaces on upload,
+  # making the uploaded name differ from the local packaging filename.
+  $uploadDirectory=Join-Path $root '.agent/release/upload'
+  New-Item -ItemType Directory -Force $uploadDirectory | Out-Null
+  $names=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+  $files=@($files | ForEach-Object {
+    $name=$_.Name -replace '[^A-Za-z0-9._-]','-'
+    if(-not $names.Add($name)){throw 'Release asset names collide after normalization.'}
+    $destination=Join-Path $uploadDirectory $name
+    Copy-Item -LiteralPath $_.FullName -Destination $destination
+    Get-Item -LiteralPath $destination
+  })
   $manifest=@($files | ForEach-Object { @{name=$_.Name; bytes=$_.Length; sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()} })
   if(@($manifest | Where-Object bytes -le 0).Count){throw 'Empty release asset.'}
   $manifest | ConvertTo-Json -Depth 4 | Set-Content '.agent/release/assets.json'

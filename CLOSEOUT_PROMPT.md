@@ -28,3 +28,10 @@ packaging when automatic publication was inferred from credentials. Handbook pub
 now disabled inside the packager. User steering adds the installed application/installer icon:
 reviewed vector source, PNG and seven-size ICO are wired into executable/window/setup/handbook.
 Syntax and ICO inventory checks passed. Rebuild and release readback remain pending.
+
+Latest state: the second run built both installers and published normal release
+build-2-39194115797-1, but source a6b4a78's publisher readback failed on GitHub's space-to-dot
+asset renaming. Safe upload staging and collision detection now repair that behavior.
+All four focused publisher fixture paths pass, including a filename containing a space.
+The exact local Desktop installer build passed and embedded icons were inspected in both
+application and setup executables. A new hosted run must confirm final publication success.

@@ -59,3 +59,9 @@ remain separate local acceptance work.
 The first hosted run is the cache-miss bootstrap proof for this job. Until it finishes,
 fresh-image completeness and published delivery remain unverified. The dedicated portable
 build interface and storage hosting wizard are not delivered by this workflow yet.
+
+The publisher stages explicit safe asset filenames before uploading and rejects collisions;
+GitHub can otherwise rewrite a packaging filename containing spaces. The first hosted desktop
+and handbook packages were built successfully, but their initial publication readback exposed
+this difference. The local desktop installer build and embedded application/setup icon
+inspection also passed. Native installation remains separate unverified acceptance.

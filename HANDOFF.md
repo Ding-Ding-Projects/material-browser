@@ -133,3 +133,17 @@ The user also requested the installed application and installer icon. The deskto
 window, Squirrel setup and handbook now reference the reviewed browser/globe icon. Seven ICO
 sizes (16 through 256) and JavaScript syntax checks passed. Built executable resources and
 native installed icon display remain unverified until rebuilt and exercised.
+
+## Hosted package delivery and filename correction
+
+Run 39194115797 built both installers and published normal development release
+`build-2-39194115797-1` from a6b4a78e5379fd631083ce97da83a0133559c069. Its final readback
+failed because GitHub replaced a space with a dot in the setup asset name. Publication
+helper staging now gives every upload an explicit safe filename and rejects collisions.
+The matching mocked flow and empty-output, source-mismatch and asset-mismatch checks pass.
+A new hosted run must verify the corrected publication flow. Existing release timing notes
+need a factual correction, and the old asset inventory retains its original local names.
+
+The exact local Desktop installer build passed with its normal TypeScript check. Inspection
+of both the packaged application and setup executable confirmed the requested browser/globe
+icon. This is embedded-resource proof, not native installation or full UI acceptance.
