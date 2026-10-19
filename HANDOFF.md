@@ -121,3 +121,15 @@ that deletion through another route. Recorded documentation browsers/listeners/d
 6. Complete two-computer restoration, storage, packaging, release and installed-update proof.
 
 See `CLOSEOUT_PROMPT.md` for the continuation objective and constraints.
+
+## First hosted run and packaging correction
+
+Run 39193430232 built the real desktop Squirrel installer, then failed handbook packaging
+because the packager inferred an automatic publication target from workflow credentials.
+The handbook now explicitly disables automatic publishing so the release helper is the sole
+publisher. The corrected run remains pending.
+
+The user also requested the installed application and installer icon. The desktop executable,
+window, Squirrel setup and handbook now reference the reviewed browser/globe icon. Seven ICO
+sizes (16 through 256) and JavaScript syntax checks passed. Built executable resources and
+native installed icon display remain unverified until rebuilt and exercised.

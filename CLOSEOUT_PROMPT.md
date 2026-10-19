@@ -22,3 +22,9 @@ Next: inspect the first Actions run, repair any build/package/publication failur
 this scope, read back its normal release and expected assets, and update verification state.
 Existing recovery branches and linked working trees belong to other work and remain intact.
 No task-owned branch, linked working tree or stash was created, so no deletion is needed.
+
+Latest correction: first hosted run 39193430232 built the desktop installer but failed handbook
+packaging when automatic publication was inferred from credentials. Handbook publication is
+now disabled inside the packager. User steering adds the installed application/installer icon:
+reviewed vector source, PNG and seven-size ICO are wired into executable/window/setup/handbook.
+Syntax and ICO inventory checks passed. Rebuild and release readback remain pending.

@@ -26,6 +26,12 @@ or installation acceptance.
 
 ## Outputs and authentication
 
+The desktop executable, application window, Squirrel setup and portable handbook use the
+checked-in browser/globe icon in `apps/desktop/assets`. The editable SVG and reproducible
+Windows drawing script `scripts/generate-icon.ps1` accompany PNG and multi-resolution ICO
+outputs (16 through 256 pixels). Handbook executable resources are edited without signing.
+Its packager has automatic publication explicitly disabled; only the release helper publishes.
+
 Release assets include the unsigned Squirrel.Windows installer, `RELEASES`, full package,
 any produced delta packages, the single-file offline handbook and a SHA-256/size inventory.
 Unsigned executables can show unknown-publisher or SmartScreen warnings.
