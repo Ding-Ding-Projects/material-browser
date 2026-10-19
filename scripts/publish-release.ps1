@@ -4,6 +4,18 @@ foreach($name in @('GITHUB_REPOSITORY','GITHUB_SHA','GITHUB_RUN_ID','GITHUB_RUN_
   if(-not [Environment]::GetEnvironmentVariable($name)){throw "Missing workflow context: $name"}
 }
 if($env:GITHUB_SHA -notmatch '^[a-f0-9]{40}$'){throw 'Invalid source commit.'}
+function Read-PublishedRelease([string]$Tag) {
+  $json=& gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$Tag"
+  if($LASTEXITCODE -ne 0){throw 'Release asset readback failed.'}
+  return $json | ConvertFrom-Json
+}
+function Assert-PublishedAsset($Release,$Expected) {
+  $found=@($Release.assets | Where-Object name -eq $Expected.name)
+  if($found.Count -ne 1 -or $found[0].size -ne $Expected.bytes -or
+     $found[0].digest -cne "sha256:$($Expected.sha256)") {
+    throw "Release asset integrity mismatch: $($Expected.name)"
+  }
+}
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
@@ -26,6 +38,7 @@ try {
   })
   $manifest=@($files | ForEach-Object { @{name=$_.Name; bytes=$_.Length; sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()} })
   if(@($manifest | Where-Object bytes -le 0).Count){throw 'Empty release asset.'}
+  if(@($manifest | Where-Object bytes -ge 1400000000).Count){throw 'A release asset exceeds the bounded single-transfer size.'}
   $manifest | ConvertTo-Json -Depth 4 | Set-Content '.agent/release/assets.json'
   $tag="build-$($env:GITHUB_RUN_NUMBER)-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)"
   $started=[DateTimeOffset]::Parse((Get-Content '.agent/release/started.txt' -Raw).Trim())
@@ -43,9 +56,22 @@ Workflow duration: pending publication readback
 No dim-sum code name is assigned because an unused catalog identity and published photo have not been verified for this build.
 "@
   $notes | Set-Content '.agent/release/notes.txt'
-  $assets=@($files.FullName)+@((Join-Path $root '.agent/release/assets.json'))
-  & gh release create $tag @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Material Browser $tag" --notes-file '.agent/release/notes.txt' --latest=false
+  $setups=@($files | Where-Object Name -match '(?i)setup\.exe$')
+  if($setups.Count -ne 1){throw 'Expected exactly one Squirrel setup executable.'}
+  # Publish the installer first, then upload one bounded asset per operation.
+  # A readback after each upload keeps an oversized aggregate out of one batch.
+  & gh release create $tag $setups[0].FullName --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Material Browser $tag" --notes-file '.agent/release/notes.txt' --latest=false
   if($LASTEXITCODE -ne 0){throw 'Release publication failed.'}
+  Assert-PublishedAsset (Read-PublishedRelease $tag) ($manifest | Where-Object name -eq $setups[0].Name)
+  foreach($file in $files | Where-Object Name -ne $setups[0].Name) {
+    & gh release upload $tag $file.FullName --repo $env:GITHUB_REPOSITORY
+    if($LASTEXITCODE -ne 0){throw "Release upload failed: $($file.Name)"}
+    Assert-PublishedAsset (Read-PublishedRelease $tag) ($manifest | Where-Object name -eq $file.Name)
+  }
+  $inventory=Get-Item '.agent/release/assets.json'
+  & gh release upload $tag $inventory.FullName --repo $env:GITHUB_REPOSITORY
+  if($LASTEXITCODE -ne 0){throw 'Release inventory upload failed.'}
+  Assert-PublishedAsset (Read-PublishedRelease $tag) @{name=$inventory.Name;bytes=$inventory.Length;sha256=(Get-FileHash $inventory.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
   $releaseJson=& gh release view $tag --repo $env:GITHUB_REPOSITORY --json isDraft,isPrerelease,assets,url
   if($LASTEXITCODE -ne 0){throw 'Release readback failed.'}
   $release=$releaseJson | ConvertFrom-Json

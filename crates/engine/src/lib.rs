@@ -690,6 +690,7 @@ fn off_arguments(kind: EngineKind, path: &Path) -> Vec<std::ffi::OsString> {
         ],
         EngineKind::Firefox => vec![
             "-no-remote".into(),
+            "-wait-for-browser".into(),
             "-profile".into(),
             path.as_os_str().to_owned(),
         ],
@@ -703,7 +704,10 @@ mod integrity_tests {
         let path = Path::new("owned-profile");
         for kind in [EngineKind::Chromium, EngineKind::Firefox] {
             let args = off_arguments(kind, path);
-            assert_eq!(args.len(), 3);
+            assert_eq!(args.len(), if kind == EngineKind::Firefox { 4 } else { 3 });
+            if kind == EngineKind::Firefox {
+                assert!(args.iter().any(|arg| arg == "-wait-for-browser"));
+            }
             let text = args
                 .iter()
                 .map(|s| s.to_string_lossy())

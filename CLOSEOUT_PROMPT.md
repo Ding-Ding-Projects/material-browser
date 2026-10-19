@@ -36,3 +36,13 @@ No task-owned linked worktree, branch or stash was created.
 
 A separate private instruction update is preserved in the maintainer's instruction repository.
 No private wording, paths or payloads belong in this public source or its release records.
+
+## Current follow-up candidate
+
+The bundled source a588bfd passed local packaging and hosted run 39198295866. Chromium Off
+launched/stopped through real UI controls; Firefox Off through the protocol. The next candidate
+repairs Firefox launcher lifetime, dialog footer/focus and individual published digest checks.
+Five focused JS checks and four publisher fixture scenarios passed. Rebuild, verify six
+engine/mode combinations and dialog keyboard/focus behavior, inspect genuine screenshots and
+update README. Installer installation and complete runtime acceptance remain unverified.
+The prior hidden run's six owned process identities were proven absent and its desktop closed.

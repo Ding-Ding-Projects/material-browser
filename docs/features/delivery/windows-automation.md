@@ -68,3 +68,10 @@ GitHub can otherwise rewrite a packaging filename containing spaces. The first h
 and handbook packages were built successfully, but their initial publication readback exposed
 this difference. The local desktop installer build and embedded application/setup icon
 inspection also passed. Native installation remains separate unverified acceptance.
+
+## Bounded publication follow-up
+
+Run 39198295866 built the bundled-browser installer and published normal release
+build-5-39198295866-1. The next publisher uploads setup first, then each remaining asset
+separately. Every transfer is smaller than 1,400,000,000 bytes and must pass immediate name,
+byte-count and SHA-256 digest readback. A partial publication returns failure.

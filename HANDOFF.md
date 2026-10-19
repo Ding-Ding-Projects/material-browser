@@ -185,3 +185,15 @@ through its isolated page; the lifecycle helper then reported UNKNOWN_PROCESS_TR
 its saved root had exited. No PID-only termination was attempted. Its private receipt remains
 retained. Fresh combined packaging, actual browser launch/stop, current UI evidence and the
 new hosted release are still pending. No completed runtime or installer acceptance is claimed.
+
+## Follow-up candidate, 2026-10-19
+
+Source a588bfd completed local packaging and hosted run 39198295866, publishing normal release
+build-5-39198295866-1. Chromium Off launched/stopped through real desktop controls. Firefox Off
+launched/stopped through the protocol; its early launcher exit prevented full window ancestry
+proof. The pending repair uses -wait-for-browser in every Firefox mode. Dialog actions now stay
+in a wrapping footer, with deferred focus restoration after removal. Publication transfers
+individual bounded assets with immediate published digest checks. Five focused JavaScript
+checks and four publisher fixture scenarios passed. Updated runtime proof remains pending.
+The completed hidden run's six owned process identities were proven absent and its exact
+desktop closed. Diagnostic images remain private, not current README proof.

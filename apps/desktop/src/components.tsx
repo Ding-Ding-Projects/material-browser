@@ -112,14 +112,24 @@ export function Modal({
   onClose,
   closeLabel = 'Close',
   accessibilityLabel = 'Accessibility',
-}: React.PropsWithChildren<{ title: string; onClose: () => void; closeLabel?: string; accessibilityLabel?: string }>) {
+  actions,
+}: React.PropsWithChildren<{ title: string; onClose: () => void; closeLabel?: string; accessibilityLabel?: string; actions?: React.ReactNode }>) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = ref.current as any;
+    const origin = document.activeElement as HTMLElement | null;
     el?.show();
     const closed = () => onClose();
     el?.addEventListener("closed", closed);
-    return () => el?.removeEventListener("closed", closed);
+    return () => {
+      el?.removeEventListener("closed", closed);
+      queueMicrotask(() => {
+        if (!el?.isConnected && origin?.isConnected &&
+          (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+          origin.focus();
+        }
+      });
+    };
   }, []);
   return React.createElement(
     "md-dialog",
@@ -139,7 +149,7 @@ export function Modal({
     ),
     React.createElement(
       "div",
-      { slot: "actions" },
+      { slot: "actions", className: "dialog-actions" },
       document.documentElement.dataset.accessibilityVisible !== "false" && (
         <Button
           secondary
@@ -158,6 +168,7 @@ export function Modal({
       >
         {closeLabel}
       </Button>,
+      actions,
     ),
   );
 }

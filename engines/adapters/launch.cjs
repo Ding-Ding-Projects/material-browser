@@ -7,7 +7,7 @@ function puppeteerOptions(config) {
   return { browser: config.engine === 'firefox' ? 'firefox' : 'chrome',
     protocol: config.engine === 'firefox' ? 'webDriverBiDi' : 'cdp', executablePath: config.executable,
     userDataDir: config.profile, headless: false, pipe: false,
-    args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : [], timeout: 20000 };
+    args: config.engine === 'chromium' ? ['--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0'] : ['-wait-for-browser'], timeout: 20000 };
 }
 module.exports = { puppeteerOptions };
 if (require.main === module) {
@@ -74,7 +74,7 @@ lines.on('line', async line => {
       const adapter = require(`selenium-webdriver/${config.engine === 'firefox' ? 'firefox' : 'chrome'}`);
       const options = new adapter.Options();
       if (config.engine === 'chromium') options.setChromeBinaryPath(config.executable).addArguments(`--user-data-dir=${config.profile}`, '--no-first-run','--no-default-browser-check');
-      else options.setBinary(config.executable).addArguments('-no-remote','-profile',config.profile);
+      else options.setBinary(config.executable).addArguments('-no-remote','-wait-for-browser','-profile',config.profile);
       const serviceBuilder = new adapter.ServiceBuilder(config.driver).setLoopback(true).setHostname('127.0.0.1');
       serviceBuilder.addArguments(config.engine === 'firefox' ? '--host=127.0.0.1' : '--allowed-ips=127.0.0.1');
       service = serviceBuilder.build();

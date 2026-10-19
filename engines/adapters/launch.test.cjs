@@ -17,5 +17,5 @@ test('Firefox uses its native BiDi protocol without Chromium debugging switches'
   const options = puppeteerOptions({ engine: 'firefox', executable: 'synthetic-firefox.exe', profile: 'synthetic-profile' });
   assert.equal(options.browser, 'firefox');
   assert.equal(options.protocol, 'webDriverBiDi');
-  assert.deepEqual(options.args, []);
+  assert.deepEqual(options.args, ['-wait-for-browser']);
 });

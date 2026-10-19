@@ -50,3 +50,12 @@ Local verified staging and the native Host build passed, along with nine focused
 checks and a relocation/containment test. The combined installer, actual launches/stops and
 fresh screenshots remain pending the candidate-bound verification run. A file inventory alone
 does not prove browser startup, automation or installer behavior.
+
+## Follow-up verification, 2026-10-19
+
+Source a588bfd passed the full local desktop installer entrypoint and hosted run 39198295866,
+with normal release build-5-39198295866-1. Bundled Chromium Off launched and stopped through
+real desktop controls. Firefox Off launched and stopped through the native protocol, but its
+early launcher exit prevented complete live window ancestry proof. The next candidate adds
+Mozilla's -wait-for-browser option in every Firefox mode. Updated Firefox lifetime, both
+automation modes, current screenshots and native installer installation remain unverified.

@@ -499,3 +499,16 @@ pre {
     scroll-behavior: auto !important;
   }
 }
+/* Dialog actions remain reachable while long localized explanations scroll. */
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dialog-actions > * {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  white-space: normal;
+}
