@@ -53,3 +53,12 @@ external paths require a same-identity round trip. Two focused tests passed afte
 red assertion. Rebuild the final combined package and verify the four automation modes, then
 promote current genuine screenshots and record the hosted release. UNC-share execution remains
 unverified; pure UNC construction is tested. Do not claim complete runtime acceptance yet.
+
+Latest state: source9011b28 passed all six bundled engine/mode launch-stop cases. English,
+Cantonese and bilingual consent Cancel restored focus; minimum logical viewport action bounds
+passed. Package version metadata now advances beyond the installed0.1.0 build, with per-run
+hosted stamping and an actual-manifest desktop label. Version fixture passed. Preserve this
+candidate, rebuild, refresh current genuine README evidence, and verify its normal release.
+The existing installation is running; do not close active work or apply a disruptive update.
+The requested shared wording update is fully pushed at78e862ca, with102 passing checks and
+separate known historical/platform limitations. Keep installation and release proof separate.

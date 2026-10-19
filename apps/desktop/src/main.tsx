@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createRoot } from "react-dom/client";
+import { APP_VERSION } from "./build-version";
 import { Button, Field, Select, Modal, Tabs } from "./components";
 import { Search } from "./Search";
 import { request, Profile } from "./api";
@@ -235,7 +236,7 @@ function App() {
         <div className="identity">
           <strong>Material Browser</strong>
           <small>
-            {t("Version")} 0.1.0 · {t("Updated")}: {t("Unavailable")}
+              {t("Version")} {APP_VERSION} · {t("Updated")}: {t("Unavailable")}
           </small>
         </div>
         <span className="connection">

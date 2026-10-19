@@ -38,3 +38,11 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
   - [ ] Publish the documentation website and verify its exact repository homepage
   - [ ] Deliver the dedicated portable build interface and verify real entrypoint actions
 
+
+### Bundled runtime verification, source9011b28
+
+- [x] Launch and normally stop Chromium and Firefox in Off, Selenium and Puppeteer modes
+- [x] Verify consent Cancel focus in English, Cantonese and bilingual modes
+- [x] Verify wrapped consent action bounds at the760x580 minimum logical viewport
+- [ ] Verify the newer versioned installer and safe update of the existing active installation
+- [ ] Retain current inspected source-bound README screenshots and final release evidence

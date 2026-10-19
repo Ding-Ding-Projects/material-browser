@@ -211,3 +211,19 @@ extended-prefix assertion was observed failing. They include spaces, non-ASCII n
 directory identities, namespace rejection, UNC construction and a trailing-dot ambiguity.
 Live UNC-share proof is unavailable. The rebuilt native Host passed before the final input
 namespace assertion; final combined packaging and native automation remain pending.
+
+## Verified runtime and upgrade candidate
+
+The exact9011b28 package passed both engines in Off, Selenium and Puppeteer modes: verified
+version receipts and normal stop with zero active profiles afterward. Chromium Off used the
+real consent/Launch/Stop controls. Strict identity requests remained rejected. One transient
+ancestry-preflight interruption was preserved and a fresh proven Firefox stop succeeded.
+An unsupported desktop-IPC endpoint request in the first fixture was corrected; it was a
+verification error, not an engine startup failure. Dialog Cancel restored opening focus in
+English, Cantonese and bilingual modes. All action controls remained within760x580 in the
+Cantonese and bilingual cases; this is logical viewport proof, not physical display scaling.
+
+The installed0.1.0 application is currently running and remains intact. Local source advances
+to0.1.1; hosted versions increase with workflow run numbers. The actual manifest supplies the
+visible version. Final packaging/current screenshots and safe installed update remain pending.
+The @uh wording task is separately complete at78e862ca with its exact limitations recorded there.

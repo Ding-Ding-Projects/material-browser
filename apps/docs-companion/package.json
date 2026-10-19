@@ -1,6 +1,6 @@
 {
   "name": "material-browser-handbook",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Offline documentation companion for Material Browser",
   "author": "Ding Ding Projects",
   "private": true,
@@ -11,15 +11,39 @@
     "test": "node --test test/*.test.cjs",
     "package": "electron-builder --win portable --x64 --publish never && node scripts/verify-package.mjs"
   },
-  "devDependencies": { "electron": "44.9.0", "electron-builder": "26.15.3" },
+  "devDependencies": {
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3"
+  },
   "build": {
     "publish": null,
     "appId": "org.dingdingprojects.materialbrowser.handbook",
     "productName": "Material Browser Handbook",
-    "directories": { "output": "release" },
-    "files": ["main.cjs", "policy.cjs", "dist/**", "package.json"],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "policy.cjs",
+      "dist/**",
+      "package.json"
+    ],
     "asar": true,
-    "win": { "target": [{ "target": "portable", "arch": ["x64"] }], "icon": "../desktop/assets/material-browser.ico", "signExecutable": false },
-    "portable": { "artifactName": "Material-Browser-Handbook-${version}-${arch}.exe", "requestExecutionLevel": "user" }
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "../desktop/assets/material-browser.ico",
+      "signExecutable": false
+    },
+    "portable": {
+      "artifactName": "Material-Browser-Handbook-${version}-${arch}.exe",
+      "requestExecutionLevel": "user"
+    }
   }
 }

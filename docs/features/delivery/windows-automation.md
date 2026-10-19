@@ -75,3 +75,12 @@ Run 39198295866 built the bundled-browser installer and published normal release
 build-5-39198295866-1. The next publisher uploads setup first, then each remaining asset
 separately. Every transfer is smaller than 1,400,000,000 bytes and must pass immediate name,
 byte-count and SHA-256 digest readback. A partial publication returns failure.
+
+## Upgrade versioning
+
+Local source now uses package version0.1.1. Hosted builds stamp both desktop and handbook
+manifests and their lock metadata to0.1.<workflow run number>, before invoking the retained
+entrypoints. This gives the existing0.1.0 installation a normal newer-version upgrade path.
+The desktop version label comes from its actual package manifest. Dependency resolutions stay
+unchanged. A local fixture verified metadata synchronization, dependency preservation and
+rejection of malformed versions or incomplete input before any file is written.

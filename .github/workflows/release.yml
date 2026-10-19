@@ -41,6 +41,10 @@ jobs:
           rustc --version
           cargo --version
           gh --version
+      - name: Stamp increasing desktop and handbook package version
+        run: |
+          node scripts/set-release-version.mjs "0.1.$env:GITHUB_RUN_NUMBER"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build unsigned desktop installer through supported entrypoint
         run: |
           & .\build-installer.bat -Component Desktop
