@@ -60,5 +60,4 @@ passed. Package version metadata now advances beyond the installed0.1.0 build, w
 hosted stamping and an actual-manifest desktop label. Version fixture passed. Preserve this
 candidate, rebuild, refresh current genuine README evidence, and verify its normal release.
 The existing installation is running; do not close active work or apply a disruptive update.
-The requested shared wording update is fully pushed at78e862ca, with102 passing checks and
-separate known historical/platform limitations. Keep installation and release proof separate.
+Keep installation and release proof separate.

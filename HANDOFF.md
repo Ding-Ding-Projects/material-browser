@@ -226,4 +226,3 @@ Cantonese and bilingual cases; this is logical viewport proof, not physical disp
 The installed0.1.0 application is currently running and remains intact. Local source advances
 to0.1.1; hosted versions increase with workflow run numbers. The actual manifest supplies the
 visible version. Final packaging/current screenshots and safe installed update remain pending.
-The @uh wording task is separately complete at78e862ca with its exact limitations recorded there.
