@@ -8,6 +8,7 @@ Start with [Getting started](Getting-started.md), then choose the task you need.
 - [Optional encrypted storage](Storage.md)
 - [API and CLI](API-and-CLI.md)
 - [Architecture](../docs/architecture.md)
+- [Windows build and release automation](../docs/features/delivery/windows-automation.md)
 
 ## Evidence boundaries
 

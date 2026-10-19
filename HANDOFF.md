@@ -1,5 +1,15 @@
 # Implementation handoff
 
+## Windows automation setup
+
+The branch-push/manual Windows build-and-release workflow invokes the existing desktop and
+offline-handbook installer entrypoints on `windows-2025`, with pinned Node/Rust setup and
+safe output retention. It publishes uniquely tagged normal development releases without
+changing the latest accepted release channel. Tests and lint remain local. Hosted build,
+publication, native installation and fresh-image bootstrap proof are pending the first run.
+See `docs/features/delivery/windows-automation.md` for the complete job dependency inventory
+and boundaries. Existing unrelated recovery branches remain untouched.
+
 ## Current priority
 
 Material Browser remains incomplete. The latest user correction prioritizes the missing
