@@ -12,6 +12,41 @@ const OMITTED = ['Personal wording and file metadata', 'Credentials and vault da
 const stable = value => JSON.stringify(value);
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 const validId = value => typeof value === 'string' && /^[a-f0-9-]{36}$/.test(value);
+function eligibleHistoryRows(all, now = Date.now()) {
+    const policy = all.find(row => row.action === 'retention-changed');
+    const cutoff = policy ? now - policy.visibleDays * 86400000 : 0;
+    return {
+        visibleDays: policy?.visibleDays || null,
+        rows: all.filter(row => row.snapshot && !row.prepared &&
+            !['restore-prepared', 'transaction-prepared'].includes(row.action) &&
+            Date.parse(row.date) >= cutoff)
+    };
+}
+// Pure metadata projection. This never loads history or grants access to it.
+function selectRedactedHistory(all, options = {}, now = Date.now()) {
+    if (!Array.isArray(all) || all.length > 2000 || !options || typeof options !== 'object' || Array.isArray(options) ||
+        Object.keys(options).some(key => key !== 'revisions'))
+        throw new Error('INVALID_HISTORY_EXPORT_SELECTION');
+    const selected = Object.hasOwn(options, 'revisions');
+    if (selected && (!Array.isArray(options.revisions) || options.revisions.length > 500 ||
+        options.revisions.some(id => typeof id !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)) ||
+        new Set(options.revisions).size !== options.revisions.length))
+        throw new Error('INVALID_HISTORY_EXPORT_SELECTION');
+    const eligible = eligibleHistoryRows(all, now).rows;
+    let rows;
+    if (selected) {
+        const byId = new Map(eligible.map(row => [row.revision, row]));
+        if (options.revisions.some(id => !byId.has(id)))
+            throw new Error('HISTORY_EXPORT_SELECTION_INCOMPLETE');
+        rows = options.revisions.map(id => byId.get(id));
+    }
+    else rows = eligible.slice(0, 500);
+    return {
+        schemaVersion: 1,
+        revisions: rows.map(row => ({ revision: row.revision, date: row.date, action: row.action, recordId: row.recordId })),
+        omitted: OMITTED
+    };
+}
 function createHistoryService(options) {
     const { appDataRoot, historyRoot, gitExecutable, gitSha256, credentialStore, validatePreferences, validateSchedule, onTransition = async () => {
     } } = options || {};
@@ -346,9 +381,9 @@ function createHistoryService(options) {
             for (const row of [...all].reverse())
                 if (row.action === 'labelled')
                     labels.set(row.target, row.label);
-            const policy = all.find(row => row.action === 'retention-changed'), cutoff = policy ? Date.now() - policy.visibleDays * 86400000 : 0;
-            const revisions = all.filter(row => row.snapshot && !row.prepared && row.action !== 'restore-prepared' && Date.parse(row.date) >= cutoff && (!actions.length || actions.includes(row.action)) && (!from || row.date.slice(0, 10) >= from) && (!to || row.date.slice(0, 10) <= to)).slice(0, limit).map(row => ({ revision: row.revision, date: row.date, action: row.action, label: labels.get(row.revision) || '', recordId: row.recordId }));
-            return { revisions, omitted: OMITTED, logicalRetentionDays: policy?.visibleDays || null, physicalPruneAvailable: false };
+            const eligible = eligibleHistoryRows(all);
+            const revisions = eligible.rows.filter(row => (!actions.length || actions.includes(row.action)) && (!from || row.date.slice(0, 10) >= from) && (!to || row.date.slice(0, 10) <= to)).slice(0, limit).map(row => ({ revision: row.revision, date: row.date, action: row.action, label: labels.get(row.revision) || '', recordId: row.recordId }));
+            return { revisions, omitted: OMITTED, logicalRetentionDays: eligible.visibleDays, physicalPruneAvailable: false };
         },
         async diff(revision) {
             await requireAuth();
@@ -457,9 +492,9 @@ function createHistoryService(options) {
                 return { ...await append({ action: 'retention-changed', visibleDays }), logicalOnly: true, physicalPruneAvailable: false };
             });
         },
-        async exportRedacted() {
-            const { revisions } = await methods.list({ limit: 500 });
-            return { schemaVersion: 1, revisions: revisions.map(({ label, ...row }) => row), omitted: OMITTED };
+        async exportRedacted(options = {}) {
+            // rows() rechecks independent authentication and session generation.
+            return selectRedactedHistory(await rows(), options);
         }
     };
     const api = {};
@@ -483,4 +518,4 @@ function createHistoryService(options) {
         };
     return Object.freeze(api);
 }
-module.exports = { createHistoryService };
+module.exports = { createHistoryService, selectRedactedHistory };
