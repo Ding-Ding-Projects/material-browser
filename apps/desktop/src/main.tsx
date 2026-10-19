@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { Button, Field, Select, Modal, Tabs } from "./components";
 import { Search } from "./Search";
@@ -17,6 +17,8 @@ import {
 } from "./settings/LiveTools";
 import { styledMessage } from "./settings/messages.mjs";
 import { definitions } from "./settings/model.mjs";
+import { ProfileLaunch } from './ProfileLaunch';
+import { operationFailure } from './operation-errors.mjs';
 const read = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -64,6 +66,12 @@ function App() {
     [commandRows, setCommandRows] = useState<number[]>([]),
     [automationRows, setAutomationRows] = useState<number[]>([]);
   const profile = profiles.find((p) => p.id === selected);
+  const [launchTarget, setLaunchTarget] = useState<Profile | null>(null);
+  const launchInFlight = useRef(false);
+  useEffect(() => {
+    if (!status?.unlocked || !profiles.some(p => p.id === launchTarget?.id)) setLaunchTarget(null);
+  }, [status?.unlocked, profiles]);
+  useEffect(() => setLaunchTarget(null), [selected]);
   const refresh = async () => {
     const s = await request("system.status");
     setStatus({ ...s, exists: s.vaultExists, unlocked: s.locked === false });
@@ -83,11 +91,11 @@ function App() {
       settingsController.notify(message, "success");
       narrator.speak("Completed", "已完成", "success");
     } catch (e) {
-      const fact = e instanceof Error ? e.message : "OPERATION_FAILED";
-      const message = styledMessage("error", fact, fact, prefs);
+      const [english, cantonese] = operationFailure(e);
+      const message = styledMessage("error", english, cantonese, prefs);
       setNotice(message);
       settingsController.notify(message, "error");
-      narrator.speak(fact, fact, "error");
+      narrator.speak(english, cantonese, "error");
     } finally {
       setBusy(false);
     }
@@ -524,7 +532,7 @@ function App() {
                                   disabled={busy}
                                   secondary={label !== "Launch"}
                                   onClick={() =>
-                                    void perform(async () => {
+                                    method === 'profiles.launch' ? setLaunchTarget({ ...profile }) : void perform(async () => {
                                       await request(method, {
                                         id: profile.id,
                                         running: false,
@@ -761,6 +769,21 @@ function App() {
         <Modal title={t("Create profile")} onClose={() => setCreate(false)}>
           {profileForm}
         </Modal>
+      )}
+      {launchTarget && (
+        <ProfileLaunch profile={launchTarget} busy={busy} t={t}
+          onClose={() => setLaunchTarget(null)}
+          onLaunch={(id) => {
+            if (busy || launchInFlight.current) return;
+            launchInFlight.current = true;
+            setLaunchTarget(null);
+            void perform(async () => {
+              if (!status?.unlocked) throw new Error('VAULT_LOCKED');
+              if (!profiles.some(p => p.id === id)) throw new Error('PROFILE_NOT_FOUND');
+              await request('profiles.launch', { id, requireStableIdentity: false });
+              await refresh();
+            }).finally(() => { launchInFlight.current = false; });
+          }} />
       )}
       {palette && (
         <Modal title={t("Command palette")} onClose={() => setPalette(false)}>

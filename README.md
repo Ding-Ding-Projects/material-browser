@@ -2,7 +2,7 @@
 
 An encrypted browser-profile workspace for Windows, with optional self-hosted storage.
 
-**Development status:** source implementation and focused local checks are in progress. There is no verified release yet.
+**Development status:** source implementation and focused local checks are in progress. Automated development installers are [published](https://github.com/Ding-Ding-Projects/material-browser/releases/tag/build-3-39195138374-1); the product is not release-ready and native installation acceptance remains incomplete.
 Live snapshots, portable browser credentials and advanced identity controls require managed
 browser integrations and must not be inferred from the interface or profile-file copying.
 

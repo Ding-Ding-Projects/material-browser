@@ -147,3 +147,17 @@ need a factual correction, and the old asset inventory retains its original loca
 The exact local Desktop installer build passed with its normal TypeScript check. Inspection
 of both the packaged application and setup executable confirmed the requested browser/globe
 icon. This is embedded-resource proof, not native installation or full UI acceptance.
+
+## Latest user-reported launch failure
+
+The user reported wrapped `IDENTITY_UNAVAILABLE` from desktop Launch. The interface omitted
+`requireStableIdentity`, while the host defaults it to true and the native engine correctly
+rejects the unavailable guarantee. The repair adds explicit per-launch standard-identity
+consent, captured profile identity, cancellation/invalidation and duplicate-submission
+protection. Strict backend defaults are unchanged. Known exceptions get localized approved
+copy before footer, toast and narration; arbitrary exception text is never reflected.
+Three focused mapper tests pass. Exact candidate build and real consent interaction are pending.
+
+Windows build/release automation is verified by green run 39195138374, normal release
+build-3-39195138374-1 and exact source ed7ad0a. Both installers and all five assets were
+read back by the workflow. Earlier setup icon download also matched SHA-256 and byte count.

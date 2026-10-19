@@ -110,7 +110,9 @@ export function Modal({
   title,
   children,
   onClose,
-}: React.PropsWithChildren<{ title: string; onClose: () => void }>) {
+  closeLabel = 'Close',
+  accessibilityLabel = 'Accessibility',
+}: React.PropsWithChildren<{ title: string; onClose: () => void; closeLabel?: string; accessibilityLabel?: string }>) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = ref.current as any;
@@ -145,7 +147,7 @@ export function Modal({
             window.dispatchEvent(new Event("settings-accessibility"))
           }
         >
-          Accessibility
+          {accessibilityLabel}
         </Button>
       ),
       <Button
@@ -154,7 +156,7 @@ export function Modal({
           (ref.current as any)?.close();
         }}
       >
-        Close
+        {closeLabel}
       </Button>,
     ),
   );

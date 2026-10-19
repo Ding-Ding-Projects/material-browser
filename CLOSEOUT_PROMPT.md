@@ -35,3 +35,11 @@ asset renaming. Safe upload staging and collision detection now repair that beha
 All four focused publisher fixture paths pass, including a filename containing a space.
 The exact local Desktop installer build passed and embedded icons were inspected in both
 application and setup executables. A new hosted run must confirm final publication success.
+
+Latest user steering: repair the desktop Launch IDENTITY_UNAVAILABLE notification shown in
+the user's screenshot. The UI omitted a required capability decision and exposed raw IPC
+text. Source now provides deliberate per-launch standard-identity consent, leaves the native
+strict default intact, binds consent to the selected profile, invalidates stale consent,
+prevents duplicate submissions and localizes approved error messages. Three focused tests
+pass; exact candidate build and real interaction verification remain pending. Automation is
+now independently verified by successful run 39195138374 and release build-3-39195138374-1.

@@ -25,8 +25,9 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Selenium and Puppeteer, local and through authenticated LAN transport
 
 ## Storage and delivery
-- [ ] Verify the first hosted Windows build/release run and downloadable installer assets
+- [x] Verify hosted Windows build/release run and downloadable installer assets (run 39195138374)
   - [x] Configure branch-push/manual automation using the supported build entrypoints
+- [ ] Verify explicit standard-identity launch consent and localized capability explanations in the built desktop
 - [ ] Immutable encrypted revisions and conflict preservation
 - [ ] Optional containerized storage and full administration dashboard
 - [ ] Hosting entrypoints and portable setup wizard

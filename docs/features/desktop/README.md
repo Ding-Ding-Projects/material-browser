@@ -1,5 +1,7 @@
 # Desktop workspace
 
+- [Profile launch and identity capabilities](profile-launch.md)
+
 The desktop shell provides an isolated React interface backed by the native host. It never seeds demonstration profiles. A standalone web preview cannot operate the vault and explicitly reports that the native host is unavailable.
 
 ## Security and process boundary
