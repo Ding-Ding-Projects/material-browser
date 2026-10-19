@@ -65,8 +65,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 1095,
-      "sha256": "c63f5a18a50997d99ab9b29c331c6013e6359c12d57bdd081439791477eeccbc"
+      "bytes": 1093,
+      "sha256": "b7e5ab51e97c6dfdcc313fc7f150b46a32683d7c2cb4ad8170aaa678cab7e92e"
     },
     {
       "path": "inventory.json",
@@ -75,13 +75,14 @@
     },
     {
       "path": "regex.worker.js",
-      "bytes": 467,
-      "sha256": "4b7966de4a757188580dffdd7ad22d44f541c6f7bbbbf446578f0fc31f77aa8a"
+      "bytes": 466,
+      "sha256": "471d99172a769f274d70035196d74f7e20de1c3798abe5efd383dc52e8258a20"
     },
     {
       "path": "style.css",
-      "bytes": 6190,
-      "sha256": "57d337f44826bb6e281a36795defeaf4e633bcc6c07f0a59755c99ae22913323"
+      "bytes": 6188,
+      "sha256": "fa7a51c392e74a7e9a805c0daf01783c33f229156c652bb0ecdab12f387d2057"
     }
-  ]
+  ],
+  "publicationBytesFromGit": true
 }
