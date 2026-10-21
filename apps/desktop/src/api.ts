@@ -30,10 +30,14 @@ export async function request(
   return window.materialBrowser.request(method, params);
 }
 
+export type PortableBookmark = {name:string;url:string} | {name:string;children:PortableBookmark[]};
 export type SuperProfileSettings = {
   backend: 'wsl2' | 'windows-sandbox';
   launchMode: 'terminal' | 'browser' | 'desktop';
   configurations?: Partial<Record<'wsl2'|'windows-sandbox', Omit<SuperProfileSettings,'configurations'|'backend'>>>;
+  setupDraft?: boolean;
+  draftStep?: number;
+  portableBookmarks?: {version:1;folderName:string;bookmarks:PortableBookmark[]};
   rootfsPath?: string;
   rootfsSha256?: string;
   workspacePath?: string;

@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Field, Select } from './components';
 import { requestSuperProfile as request, SuperProfile, SuperProfileSettings } from './api';
-import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration } from './SuperProfiles.model.mjs';
+import { switchSuperProfileBackend, parsePortableBookmarks, parsePortableBookmarkBytes, superProfileWizardSave } from './SuperProfiles.model.mjs';
 const key = 'super-profile-draft-v1';
 type Draft = { name: string; engine: string; settings: SuperProfileSettings; step: number };
 const initial = (): Draft => ({name:'',engine:'chromium',settings:{backend:'wsl2',launchMode:'terminal',},step:0});
-export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:SuperProfile;t:(s:string)=>string;busy:boolean;onSave:(draft:Omit<Draft,'step'>)=>Promise<void>;onCancel:()=>void}) {
-  const [draft,setDraft] = useState<Draft>(() => profile ? {...profile,step:0} : initial());
+export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:SuperProfile;t:(s:string)=>string;busy:boolean;onSave:(draft:Omit<Draft,'step'>,progress:boolean,identity?:SuperProfile)=>Promise<SuperProfile>;onCancel:()=>void}) {
+  const [draft,setDraft] = useState<Draft>(() => profile ? {...profile,step:profile.settings.setupDraft===true&&Number.isInteger(profile.settings.draftStep)?Math.max(0,Math.min(3,Number(profile.settings.draftStep))):0} : initial());
+  const identity=useRef(profile), pending=useRef(false), mounted=useRef(true), importSequence=useRef(0);
+  const [saving,setSaving]=useState(false),[importing,setImporting]=useState(false);
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;importSequence.current++;};},[]);
+  const locked=busy||saving||importing;
+  const save=async(progress:boolean)=>{if(pending.current||locked)return;pending.current=true;setSaving(true);try{const result=await onSave(superProfileWizardSave(draft,progress,t('Untitled Super Profile')),progress,identity.current);if(mounted.current){identity.current=result;setMessage(progress?'Progress saved in encrypted vault':'Template saved');try{localStorage.removeItem(key);}catch{}}}catch{if(mounted.current)setMessage('Draft could not be saved');}finally{pending.current=false;if(mounted.current)setSaving(false);}};
+  const importBookmarks=async(file?:File)=>{if(!file||locked)return;const sequence=++importSequence.current;setImporting(true);try{if(file.size>65536)throw Error('INVALID_PORTABLE_BOOKMARKS');const parsed=parsePortableBookmarkBytes(await file.arrayBuffer());if(mounted.current&&sequence===importSequence.current){setting({portableBookmarks:parsed.document});setMessage('Bookmarks imported');}}catch{if(mounted.current&&sequence===importSequence.current)setMessage('Invalid bookmark file. Previous bookmarks were kept.');}finally{if(mounted.current&&sequence===importSequence.current)setImporting(false);}};
+  const bookmarkSummary=draft.settings.portableBookmarks?parsePortableBookmarks(JSON.stringify(draft.settings.portableBookmarks)):null;
   const [message,setMessage] = useState('');
   const [checking,setChecking]=useState(false),[check,setCheck]=useState<{backend:string;available:boolean;modes:string[]}|null>(null);
   const update=(value:Partial<Draft>)=>setDraft(d=>({...d,...value}));
@@ -18,12 +25,11 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
     <p>{t('Step')} {draft.step+1} / 4: {t(titles[draft.step])}</p>
     <progress max={4} value={draft.step+1} aria-label={t('Setup progress')}/>
     <div className="super-actions">
-      {!profile && <Button secondary disabled={busy} onClick={()=>{try {const saved=readSuperProfileDraft(localStorage.getItem(key));setDraft(saved);setMessage('Draft restored');}catch {setMessage('No valid saved draft');}}}>{t('Resume draft')}</Button>}
-      <Button secondary disabled={busy} onClick={()=>{try{localStorage.setItem(key,JSON.stringify(superProfileResumeMetadata(draft)));setMessage('Resume metadata saved');}catch{setMessage('Draft could not be saved');}}}>{t('Save progress')}</Button>
+      <Button secondary disabled={locked} onClick={()=>void save(true)}>{t('Save progress')}</Button>
     </div>
-    <p>{t('Resume metadata survives restart on this computer. Paths and commands are excluded; enter them again after resuming. Do not use confidential template names.')}</p>
+    <p>{t('Progress saves all backend settings, paths, commands and bookmarks in the encrypted vault. Open the saved draft to resume after unlocking.')}</p>
     {message && <p role="status">{t(message)}</p>}
-    <fieldset disabled={busy} className="super-fields">
+    <fieldset disabled={locked} className="super-fields">
       <legend>{t(titles[draft.step])}</legend>
       {draft.step===0 && <>
         <Field label={t('Name')} value={draft.name} onChange={name=>update({name})} required/>
@@ -35,7 +41,7 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
         {draft.settings.backend==='wsl2'&&<p>{t('Leave both root filesystem fields empty to use the verified managed base. A custom archive requires its SHA-256.')}</p>}
         {draft.settings.backend==='wsl2' && <Field label={t('Root filesystem archive path')} value={draft.settings.rootfsPath||''} onChange={rootfsPath=>setting({rootfsPath})}/>}
         {draft.settings.backend==='wsl2'&&<Field label={t('Root filesystem SHA-256')} value={draft.settings.rootfsSha256||''} onChange={rootfsSha256=>setting({rootfsSha256})}/>}
-        <Button secondary disabled={busy||checking} onClick={()=>{setChecking(true);setCheck(null);const backend=draft.settings.backend;void request('superProfiles.capabilities').then(c=>{const result=backend==='wsl2'?c.wsl2:c.windowsSandbox;setCheck({backend,available:result?.available===true,modes:Array.isArray(result?.modes)?result.modes:[]});}).catch(()=>setMessage('Environment check unavailable')).finally(()=>setChecking(false));}}>{t(checking?'Checking environment':'Check environment')}</Button>
+        <Button secondary disabled={locked||checking} onClick={()=>{setChecking(true);setCheck(null);const backend=draft.settings.backend;void request('superProfiles.capabilities').then(c=>{const result=backend==='wsl2'?c.wsl2:c.windowsSandbox;setCheck({backend,available:result?.available===true,modes:Array.isArray(result?.modes)?result.modes:[]});}).catch(()=>setMessage('Environment check unavailable')).finally(()=>setChecking(false));}}>{t(checking?'Checking environment':'Check environment')}</Button>
         {check&&<p role="status">{check.backend}: {t(check.available?'Available':'Unavailable')} · {t('Supported modes')}: {check.modes.map(t).join(', ')}. {t('Capability availability is not proof that a session launched successfully.')}</p>}
         <p>{t('Each backend keeps its own configuration. Saving selects the backend shown here for the next launch.')}</p>
         <Field label={t('Workspace folder path')} value={draft.settings.workspacePath||''} onChange={workspacePath=>setting({workspacePath})}/>
@@ -44,6 +50,9 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
         <p>{t('Clipboard sharing and per-session memory limits are not configurable. WSL networking follows the existing host configuration.')}</p><Field disabled label={t('Memory limit (MB)')} type="number" value={String(draft.settings.memoryMb||4096)} onChange={s=>setting({memoryMb:Number(s)})}/>
       </>}
       {draft.step===2 && <>
+        <label>{t(bookmarkSummary?'Replace imported bookmarks':'Portable bookmarks JSON')}<input type="file" accept=".json,application/json" disabled={locked} onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void importBookmarks(file);}}/></label>
+        <p>{t('Import a portable bookmark document, up to 64 KiB and 500 entries. Only HTTP and HTTPS links without credentials are accepted. Imported bookmarks are read-only in the guest.')}</p>
+        {bookmarkSummary&&<><p>{t('Bookmark entries')}: {bookmarkSummary.count} · {t('Links')}: {bookmarkSummary.links}</p><Button secondary disabled={locked} onClick={()=>setting({portableBookmarks:undefined})}>{t('Remove imported bookmarks')}</Button></>}
         {lines('Installer paths, one per line','installers')}
         {lines('Setup commands, one per line','setupCommands')}
         {lines('Startup commands, one per line','startupCommands')}
@@ -56,9 +65,9 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
       </>}
     </fieldset>
     <div className="super-actions">
-      <Button secondary disabled={busy} onClick={onCancel}>{t('Cancel')}</Button>
-      <Button secondary disabled={busy||draft.step===0} onClick={()=>update({step:draft.step-1})}>{t('Back')}</Button>
-      {draft.step<3 ? <Button disabled={busy||!draft.name.trim()} onClick={()=>update({step:draft.step+1})}>{t('Next')}</Button> : <Button disabled={busy||!draft.name.trim()} onClick={()=>void onSave({name:draft.name.trim(),engine:draft.engine,settings:persistSuperProfileConfiguration({...draft.settings,engine:draft.engine})}).then(()=>localStorage.removeItem(key)).catch(()=>{})}>{t('Save template')}</Button>}
+      <Button secondary disabled={locked} onClick={onCancel}>{t('Cancel')}</Button>
+      <Button secondary disabled={locked||draft.step===0} onClick={()=>update({step:draft.step-1})}>{t('Back')}</Button>
+      {draft.step<3 ? <Button disabled={locked||!draft.name.trim()} onClick={()=>update({step:draft.step+1})}>{t('Next')}</Button> : <Button disabled={locked||!draft.name.trim()} onClick={()=>void save(false)}>{t('Save template')}</Button>}
     </div>
   </section>;
 }

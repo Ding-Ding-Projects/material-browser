@@ -11,6 +11,13 @@ template a name, choose a browser engine and environment, then review its config
 Saving a template does not prove that the host can launch that environment. Read the actual
 capability result before launching.
 
+**Save progress** stores the current step and every backend configuration, selected path,
+installer recipe, command and imported bookmark document in the encrypted vault. It keeps
+the wizard open. After a restart, unlock the vault and edit the saved draft to resume its
+step. Drafts cannot launch and create no guest resources. Completing **Save template** clears
+the draft state. Repeated progress saves update the acknowledged immutable revision rather
+than creating another template. Existing plaintext resume metadata is no longer written.
+
 WSL templates offer terminal, Linux browser and desktop modes. A locally supplied root
 filesystem archive requires a matching SHA-256 digest. Browser and desktop modes also need
 the corresponding guest packages and display support. Windows browser binaries cannot run

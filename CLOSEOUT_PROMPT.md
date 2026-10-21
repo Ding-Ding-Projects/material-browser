@@ -65,3 +65,13 @@ launch regression passed. Existing platform/identity-consent ordering is retaine
 native privacy-test lock lifetime is repaired with no skipped files. GUI input/resume wiring
 and high-scale paint diagnosis are still active; the48-tuple matrix uses renderer-page frames
 from the native-launched application, with native geometry/ownership receipts separately.
+
+Wizard completion candidate now includes encrypted Save progress with acknowledged identity
+and revision continuity, current-step resume, launch-disabled draft records, and portable
+bookmark file input/counts/replace/remove. An independently confirmed lone-surrogate mismatch
+was repaired; strict UTF-8 decoding and scalar validation preserve prior input on rejection.
+Two new regressions were observed failing before repair, then13 focused checks passed;
+full desktop101 passed,0 failed,1 Windows-only skip. TypeScript passed. Built callback,
+resume, double-click and lock-lifetime workflows remain next. The earlier native matrix is
+renderer-page evidence with actual native geometry; its incomplete-paint frames remain
+unaccepted despite a successful separate settled native/renderer comparison.

@@ -17,6 +17,7 @@ export function SuperProfiles({t,unlocked}: {t:(s:string)=>string;unlocked:boole
   const [identityConsent,setIdentityConsent]=useState(false);
   const lastSessionStates=useRef<Record<string,string>>({});
   const inFlight=useRef(false), selection=useRef(''),unlockedRef=useRef(unlocked);unlockedRef.current=unlocked;
+  const unlockEpoch=useRef(0),previousUnlock=useRef(unlocked);if(previousUnlock.current!==unlocked){unlockEpoch.current++;previousUnlock.current=unlocked;}
   const profile=profiles.find(p=>p.id===selected);
   const activeSession=sessions.some(s=>s.profileId===selected&&!['stopped','saved','discarded'].includes(s.state));
   const refresh=async()=>{
@@ -47,6 +48,7 @@ export function SuperProfiles({t,unlocked}: {t:(s:string)=>string;unlocked:boole
     if(!profile||!confirm||!unlockedRef.current)return;
     const id=profile.id,expectedRevisionId=profile.revisionId;let result:any;
     if(confirm.kind==='launch'){
+      if(profile.settings.setupDraft===true)throw Error('SETUP_INCOMPLETE');
       if(!identityConsent)throw Error('IDENTITY_CONSENT_REQUIRED');
       result=await request('superProfiles.sessions.launch',{profileId:id,requireStableIdentity:false});
     }else if(confirm.kind==='discard')result=await request('superProfiles.sessions.discard',{sessionId:confirm.session?.id});
@@ -62,22 +64,22 @@ export function SuperProfiles({t,unlocked}: {t:(s:string)=>string;unlocked:boole
     <div className="page-heading"><div><h1>{t('Super Profiles')}</h1><p>{t('Reusable environments with explicit save-back revisions.')}</p></div><Button disabled={busy} onClick={()=>setWizard('new')}>{t('Create Super Profile')}</Button></div>
     <p className="super-notice" role="status" aria-live="polite">{notice||t('Select a template to begin')}</p>
     <div className="super-actions"><Button secondary disabled={busy} onClick={()=>void run(refresh)}>{t('Refresh')}</Button></div>
-    {wizard ? <SuperProfilesWizard key={wizard==='edit'?selected:'new'} profile={wizard==='edit'?profile:undefined} t={t} busy={busy} onCancel={()=>setWizard(null)} onSave={async draft=>{
-      if(inFlight.current)return;
-      inFlight.current=true;setBusy(true);
+    {wizard ? <SuperProfilesWizard key={wizard==='edit'?selected:'new'} profile={wizard==='edit'?profile:undefined} t={t} busy={busy} onCancel={()=>setWizard(null)} onSave={async (draft,progress,identity)=>{
+      if(inFlight.current||!unlockedRef.current)throw Error('BUSY');
+      inFlight.current=true;setBusy(true);const epoch=unlockEpoch.current;
       try{
-        const result=await request(wizard==='edit'?'superProfiles.update':'superProfiles.create',{...draft,...(wizard==='edit'&&profile?{id:profile.id,expectedRevisionId:profile.revisionId}:{})});
-        await refresh();setSelected(result.id);setWizard(null);setNotice(t('Template saved'));
+        const result=await request(identity?'superProfiles.update':'superProfiles.create',{...draft,...(identity?{id:identity.id,expectedRevisionId:identity.revisionId}:{})});
+        if(unlockedRef.current&&epoch===unlockEpoch.current){setProfiles(previous=>[...previous.filter(item=>item.id!==result.id),result]);if(!progress){setSelected(result.id);setWizard(null);}setNotice(t(progress?'Progress saved in encrypted vault':'Template saved'));}return result;
       }catch(e){setNotice(t(operationFailure(e)[0]));throw e;}finally{inFlight.current=false;setBusy(false);}
     }}/> : <div className="super-columns">
       <section className="surface"><Search label={t('Search')} items={profiles.map(p=>`${p.name} ${p.settings.backend}`)} onResults={setRows} t={t}/>
         {!profiles.length&&<p>{t('No Super Profiles yet')}</p>}
-        {rows.map(i=>profiles[i]&&<button className={`profile-row ${selected===profiles[i].id?'selected':''}`} key={profiles[i].id} disabled={busy} onClick={()=>setSelected(profiles[i].id)}><span><strong>{profiles[i].name}</strong><small>{profiles[i].settings.backend} · {t(profiles[i].settings.launchMode||'terminal')}</small></span></button>)}
+        {rows.map(i=>profiles[i]&&<button className={`profile-row ${selected===profiles[i].id?'selected':''}`} key={profiles[i].id} disabled={busy} onClick={()=>setSelected(profiles[i].id)}><span><strong>{profiles[i].name}</strong>{profiles[i].settings.setupDraft===true&&<small>{t('Draft')}</small>}<small>{profiles[i].settings.backend} · {t(profiles[i].settings.launchMode||'terminal')}</small></span></button>)}
       </section>
       <section className="surface">{profile ? <>
         <h2>{profile.name}</h2><dl><dt>{t('Environment')}</dt><dd>{profile.settings.backend}</dd><dt>{t('Engine')}</dt><dd>{profile.engine}</dd><dt>{t('Current revision')}</dt><dd>{profile.revisionId}</dd></dl>
         <div className="super-actions">
-          <Button disabled={busy||activeSession} onClick={()=>ask({kind:'launch'})}>{t('Launch')}</Button>
+          <Button disabled={busy||activeSession||profile.settings.setupDraft===true} onClick={()=>ask({kind:'launch'})}>{t('Launch')}</Button>
           <Button secondary disabled={busy||activeSession} onClick={()=>setWizard('edit')}>{t('Edit template')}</Button>
           <Button secondary disabled={busy} onClick={()=>void run(async()=>{const copy=await request('superProfiles.duplicate',{id:profile.id,name:`${profile.name} (${t('Copy')})`});await refresh();setSelected(copy.id);})}>{t('Duplicate')}</Button>
           <Button secondary disabled={busy||activeSession} onClick={()=>ask({kind:'remove'})}>{t('Delete template')}</Button>

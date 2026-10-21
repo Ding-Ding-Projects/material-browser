@@ -68,3 +68,63 @@ test('retained sessions expose recovery actions without treating output as saved
   assert.equal(view.healthDetail,'Observation state is unavailable');
  }
 });
+
+test('portable bookmarks reject unsafe URLs and unknown fields before replacing data',async()=>{
+ const {parsePortableBookmarks}=await import('./SuperProfiles.model.mjs');
+ const document={version:1,folderName:'Imported',bookmarks:[{name:'Example',url:'https://example.com'}]};
+ let previous=parsePortableBookmarks(JSON.stringify(document)).document;
+ for(const url of ['javascript:alert(1)','file:///x','https://user:pass@example.com','https://@example.com','https:example.com','https://example.com\\x','https://example.com/\u0085']) {
+  assert.throws(()=>{previous=parsePortableBookmarks(JSON.stringify({...document,bookmarks:[{name:'Bad',url}]})).document;});
+  assert.deepEqual(previous,document);
+ }
+ assert.throws(()=>parsePortableBookmarks(JSON.stringify({...document,extra:true})));
+ assert.throws(()=>parsePortableBookmarks(JSON.stringify({...document,bookmarks:[{name:'Bad',url:'https://example.com',children:[]}]})));
+ assert.throws(()=>parsePortableBookmarks(JSON.stringify({...document,bookmarks:Array(501).fill(document.bookmarks[0])})));
+ assert.throws(()=>parsePortableBookmarks(' '.repeat(65537)));
+ let node=document.bookmarks[0];for(let i=0;i<8;i++)node={name:'Folder',children:[node]};
+ assert.throws(()=>parsePortableBookmarks(JSON.stringify({...document,bookmarks:[node]})));
+ assert.deepEqual(parsePortableBookmarks(JSON.stringify({...document,bookmarks:[{name:'Folder',children:document.bookmarks}]})),{document:{...document,bookmarks:[{name:'Folder',children:document.bookmarks}]},count:2,links:1});
+});
+test('encrypted progress preserves all backend inputs and completion removes draft flags without mutation',async()=>{
+ const {superProfileWizardSave}=await import('./SuperProfiles.model.mjs');
+ const bookmarks={version:1,folderName:'Imported',bookmarks:[]};
+ const input={name:'',engine:'firefox',step:2,settings:{backend:'wsl2',launchMode:'terminal',setupCommands:['echo fixture'],portableBookmarks:bookmarks,configurations:{'windows-sandbox':{launchMode:'browser',workspacePath:'C:/fixture',setupDraft:true,draftStep:1}}}};
+ const before=structuredClone(input);
+ const progress=superProfileWizardSave(input,true,'Untitled');
+ assert.equal(progress.name,'Untitled');assert.equal(progress.settings.setupDraft,true);assert.equal(progress.settings.draftStep,2);
+ assert.deepEqual(progress.settings.setupCommands,['echo fixture']);assert.equal(progress.settings.configurations['windows-sandbox'].workspacePath,'C:/fixture');
+ const complete=superProfileWizardSave({...input,settings:progress.settings},false,'Untitled');
+ assert.equal(complete.settings.setupDraft,undefined);assert.equal(complete.settings.draftStep,undefined);
+ for(const config of Object.values(complete.settings.configurations))assert.equal(config.setupDraft,undefined);
+ assert.deepEqual(input,before);
+ const switched=switchSuperProfileBackend(complete.settings,'windows-sandbox');
+ assert.equal(switched.portableBookmarks,undefined);
+ assert.deepEqual(switchSuperProfileBackend(switched,'wsl2').portableBookmarks,bookmarks);
+ const removed=persistSuperProfileConfiguration({...complete.settings,portableBookmarks:undefined});
+ assert.equal(JSON.stringify(removed).includes('portableBookmarks'),false);
+});
+
+test('portable bookmark Unicode validation preserves valid pairs and rejects unpaired surrogates',async()=>{
+ const {parsePortableBookmarks}=await import('./SuperProfiles.model.mjs');
+ const good={version:1,folderName:'Imported 😀',bookmarks:[{name:'Folder 🗂️',children:[{name:'Link 🌐',url:'https://example.com/😀'}]}]};
+ assert.deepEqual(parsePortableBookmarks(JSON.stringify(good)).document,good);
+ let current=good;
+ for(const invalid of ['\ud800','\udfff','\ud800x','x\udfff','\ud800\ud800','\udfff\ud800']) {
+  const documents=[{...good,folderName:invalid},{...good,bookmarks:[{name:invalid,children:[]}]},{...good,bookmarks:[{name:invalid,url:'https://example.com'}]},{...good,bookmarks:[{name:'Link',url:'https://example.com/'+invalid}]}];
+  for(const document of documents){assert.throws(()=>{current=parsePortableBookmarks(JSON.stringify(document)).document;});assert.equal(current,good);}
+ }
+});
+
+test('portable bookmark file decoding rejects malformed UTF-8 without replacement',async()=>{
+ const {parsePortableBookmarkBytes}=await import('./SuperProfiles.model.mjs');
+ const good={version:1,folderName:'Imported 😀',bookmarks:[{name:'Link',url:'https://example.com'}]};
+ const encode=text=>new TextEncoder().encode(text);
+ assert.deepEqual(parsePortableBookmarkBytes(encode(JSON.stringify(good))).document,good);
+ let current=good;
+ for(const invalid of [[0xc3,0x28],[0xed,0xa0,0x80],[0xf0,0x9f,0x98],[0xff]]) {
+  const prefix=encode('{"version":1,"folderName":"'),suffix=encode('","bookmarks":[]}');
+  const bytes=new Uint8Array([...prefix,...invalid,...suffix]);
+  assert.throws(()=>{current=parsePortableBookmarkBytes(bytes).document;});assert.equal(current,good);
+ }
+ assert.throws(()=>parsePortableBookmarkBytes(new Uint8Array(65537)));
+});
