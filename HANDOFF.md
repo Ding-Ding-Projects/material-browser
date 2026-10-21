@@ -6,21 +6,23 @@ Current steering: the user explicitly resumed implementation after the goal serv
 was reported unintended. The service still displays paused and exposes no resume API;
 its record was retained without replacement. Work continues under that resume direction.
 
-Latest preserved source:0049c2d48aa1ddbc31588e544c831d8336cddb22 on
+Latest preserved source:f1816d6b59b5a73bf315c40f13577b626219713e on
 ai/feature/20261021-super-profiles, with exact remote reference verified. Current candidate
 adds bounded owned guest observations, terminal/desktop readiness, managed desktop browser
 launchers, typed client interfaces and explicit UI health/recovery presentation.
 
 The host suite passes51 checks. Desktop passes97, with one Windows-only check skipped on
 Linux; the targeted native platform checks passed14 earlier. Core19 passed at e92b352.
-The latest exact root Host build and unpacked Desktop package belong to0719755. Root
-Desktop installer production passed at77cb8cf. Current candidate native build remains next.
+The exact root Desktop installer production passed at f1816d6 with stable source and exit0.
+Its setup is809554944 bytes, SHA256 0a29f9b5b41aaad857ee2eaf57cb925132560bcbf5dcbeca724c3517030dc086.
 
 Actual runtime proof: Chromium completed two owned headless cycles at0719755 with encrypted
 browser/workspace save and restoration, normal guest user, browser sandboxing enabled,
-owned teardown and unchanged unrelated distro inventory. Firefox rendered but export
-rejected its browser/lock symlink. The scoped anchored-literal exclusion regression passed;
-Firefox native retry remains pending. Default acquisition repair remains unverified.
+owned teardown and unchanged unrelated distro inventory. Firefox completed two headless cycles at f1816d6, restoring browser local storage and workspace
+changes after encrypted save. The root browser/lock link was present before successful export;
+other links remain rejected. Default uncached acquisition downloaded and verified the pinned
+388975696-byte base in6860ms, completed setup and disposed only its owned guest.
+These results supersede the earlier retained Firefox export and default download failures.
 
 Native GUI CRUD/consent/lock proof belongs to77cb8cf. The0719755 minimum760x580 bilingual-dark
 reduced-motion navigation retest passed inspected pixels and bounds. Later successful native

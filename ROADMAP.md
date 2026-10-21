@@ -16,7 +16,10 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Verify actual Windows Sandbox provisioning, guest save action and recovery
 - [x] Verify background provisioning, durable phase events and cancellation with focused host checks
 - [x] Verify background save finalization and bounded observation protocol with focused host checks
+- [x] Verify headless Chromium and Firefox encrypted browser/workspace save and restoration
+- [x] Verify default uncached pinned WSL base acquisition and owned teardown
 - [ ] Verify background save and continuous guest-process health on the native host
+- [ ] Add and verify bounded portable bookmark import through guest-only browser policies
 - [ ] Complete guest installer recipes and native runtime acceptance for every supported engine
 - [ ] Verify built interface accessibility, localization, layout and current screenshots
 - [ ] Verify packaging, documentation publication and supported installed update
