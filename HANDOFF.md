@@ -1,5 +1,13 @@
 # Material Browser handoff
 
+Current steering: implementation resumed explicitly after the goal service pause was
+reported unintended. The service still reports paused and exposes no resume API; no
+replacement goal was created. Work continues under the explicit resume direction.
+
+Firefox export now excludes only the confirmed transient browser-root lock, with
+anchored literal matching. Its GNU tar regression proves nested/workspace lock files
+remain and arbitrary links are still rejected. Native retry remains pending.
+
 ## Super Profiles implementation in progress
 
 Preserved milestones: 07c8702c164379f494c773b6dd0395f541cc76e6 and

@@ -1,5 +1,13 @@
 # Super Profiles continuation
 
+Current steering: the user explicitly resumed implementation; the pause was unintended.
+The goal service still displays paused and has no resume endpoint. Retain its record
+without replacing it, and continue the authorized implementation.
+
+Latest source repair: anchored literal WSL tar exclusion of browser/lock only. A real
+GNU tar regression passes, preserving nested/workspace locks and rejecting other links.
+Native Firefox two-cycle retry is next, after exact Host rebuild and immutable copy.
+
 Implement the approved Super Profiles plan in Ding-Ding-Projects/material-browser.
 Preserve existing browser profiles and all unrelated host environments.
 

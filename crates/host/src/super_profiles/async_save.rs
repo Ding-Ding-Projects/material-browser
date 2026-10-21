@@ -1,6 +1,16 @@
 //! Guest collection runs without vault access. Only the host finalizes encrypted revisions.
 use super::*;
 use sha2::{Digest, Sha256};
+
+fn managed_tar_arguments<'a>(root: &'a str, categories: &[&'a str]) -> Vec<&'a str> {
+    // Firefox may retain this root lock symlink after graceful shutdown. It is
+    // transient process state, never portable browser data. Anchoring and literal
+    // matching preserve similarly named files in nested/browser workspace paths.
+    let mut args = vec!["tar", "-cf", "-", "--no-wildcards", "--anchored",
+        "--exclude=browser/lock", "-C", root];
+    args.extend_from_slice(categories);
+    args
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct SavePlan {
@@ -219,13 +229,8 @@ impl Sessions {
                 "-u",
                 USER,
                 "--exec",
-                "tar",
-                "-cf",
-                "-",
-                "-C",
-                "/home/materialbrowser/.material-browser",
             ];
-            args.extend(categories);
+            args.extend(managed_tar_arguments("/home/materialbrowser/.material-browser", &categories));
             let child = Command::new("wsl.exe")
                 .args(args)
                 .stdin(Stdio::null())
@@ -377,6 +382,40 @@ impl Sessions {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)]
+    #[test]
+    fn export_excludes_only_root_browser_lock_and_still_rejects_other_links() {
+        let root = std::env::temp_dir().join(format!("material-export-{}", crate::random_hex()));
+        for directory in ["browser/nested", "workspace/browser"] {
+            fs::create_dir_all(root.join(directory)).unwrap();
+        }
+        for name in ["browser/state", "browser/nested/lock", "workspace/lock", "workspace/browser/lock"] {
+            fs::write(root.join(name), b"synthetic persisted state").unwrap();
+        }
+        std::os::unix::fs::symlink("synthetic-host:+123", root.join("browser/lock")).unwrap();
+        let unfiltered = Command::new("tar").args(["-cf", "-", "-C", root.to_str().unwrap(), "browser", "workspace"]).output().unwrap();
+        assert!(unfiltered.status.success());
+        let archive_path = root.join("result.tar");
+        fs::write(&archive_path, unfiltered.stdout).unwrap();
+        assert_eq!(validate_archive(&archive_path).unwrap_err().code, "UNSAFE_ARCHIVE");
+        let args = managed_tar_arguments(root.to_str().unwrap(), &["browser", "workspace"]);
+        let filtered = Command::new("tar").args(&args[1..]).output().unwrap();
+        assert!(filtered.status.success());
+        fs::write(&archive_path, filtered.stdout).unwrap();
+        validate_archive(&archive_path).unwrap();
+        let mut archive = tar::Archive::new(fs::File::open(&archive_path).unwrap());
+        let names = archive.entries().unwrap().map(|entry| entry.unwrap().path().unwrap().to_string_lossy().into_owned()).collect::<Vec<_>>();
+        assert!(!names.iter().any(|name| name == "browser/lock"));
+        for name in ["browser/state", "browser/nested/lock", "workspace/lock", "workspace/browser/lock"] {
+            assert!(names.iter().any(|entry| entry == name));
+        }
+        std::os::unix::fs::symlink("/outside/synthetic", root.join("browser/other-link")).unwrap();
+        let linked = Command::new("tar").args(&args[1..]).output().unwrap();
+        assert!(linked.status.success());
+        fs::write(&archive_path, linked.stdout).unwrap();
+        assert_eq!(validate_archive(&archive_path).unwrap_err().code, "UNSAFE_ARCHIVE");
+        fs::remove_dir_all(root).unwrap();
+    }
     fn ready_save_fixture() -> (
         PathBuf,
         material_browser_core::Manager,
