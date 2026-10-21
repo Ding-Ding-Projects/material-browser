@@ -47,3 +47,30 @@ Fresh77cb8cf packaged CRUD/consent/lock proof exists; minimum bilingual dark
 760x580 navigation overflow was observed. CSS repair awaits same-tuple rebuild.
 Root Desktop and portable Handbook installer builds completed for77cb8cf;
 source-bound hashes are in docs/evidence/super-profiles/build-77cb8cf.json.
+
+## Goal service pause observed
+
+The goal service reports status paused. No implementation resume was attempted. New work
+was stopped pending clarification; active owned runtime work was limited to safe stop,
+discard and evidence preservation. The health observer design remains unimplemented,
+with no source writes from that slice. Do not mark the unfinished goal complete.
+
+Current native evidence: Chromium completed two actual headless cycles on0719755 with
+normal guest user and browser sandboxing enabled. Browser local state and workspace
+restored through the encrypted revision; both owned guests and plaintext staging were
+removed, with unrelated distro inventory unchanged. Firefox first headless launch
+worked but export rejected a linked or unsafe archive member. Its changed diagnostic
+was being settled at pause; exact final receipt is required before further repair.
+No new Firefox or default-download attempt is authorized while the pause remains.
+
+The0719755 minimum760x580 bilingual-dark reduced-motion navigation retest passed pixels
+and measured bounds. Successful EnumDesktopsW later proved all four task-owned desktops
+absent, separately from earlier close calls that returned closed:false. The77cb8cf
+portable handbook passed three-step interaction, reload persistence, internal wiki
+and full feature article navigation, with owned processes absent. Its version footer
+was hard-coded0.1.0. The pending source fix derives the footer from the actual desktop
+package version; six documentation tests passed, but a rebuild/runtime check remains.
+
+Current proof directories remain private ignored data under .cache and .agent.
+Do not publish them wholesale. Sanitize selected receipts, inspect genuine images,
+and apply evidence promotion before making current presentation claims.
