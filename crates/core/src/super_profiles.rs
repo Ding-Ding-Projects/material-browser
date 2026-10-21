@@ -55,6 +55,18 @@ fn validate(settings: &Value) -> Result<()> {
     }
     Ok(())
 }
+fn archive_compatible(profile: &SuperProfile, revision: &SuperRevision) -> bool {
+    fn rootfs(settings: &Value) -> Option<(&str, Option<&str>)> {
+        settings
+            .get("rootfsPath")
+            .and_then(Value::as_str)
+            .filter(|path| !path.is_empty())
+            .map(|path| (path, settings.get("rootfsSha256").and_then(Value::as_str)))
+    }
+    profile.engine == revision.engine
+        && profile.settings.get("backend") == revision.settings.get("backend")
+        && rootfs(&profile.settings) == rootfs(&revision.settings)
+}
 impl Manager {
     fn super_id(&self, p: &Value) -> Result<String> {
         let id = text(p, "id")?;
@@ -79,6 +91,38 @@ impl Manager {
             ));
         }
         Ok(())
+    }
+    fn previous_compatible_archive(
+        &self,
+        profile: &SuperProfile,
+        start: &str,
+    ) -> Result<Option<SuperRevision>> {
+        let mut current = Some(start);
+        let mut visited = BTreeSet::new();
+        while let Some(id) = current {
+            if !visited.insert(id) {
+                return Err(err(
+                    "INTEGRITY",
+                    "Template revision history contains a cycle",
+                ));
+            }
+            let revision = self
+                .state
+                .super_revisions
+                .get(id)
+                .ok_or_else(|| err("INTEGRITY", "Missing template revision ancestor"))?;
+            if revision.super_profile_id != profile.id {
+                return Err(err(
+                    "INTEGRITY",
+                    "Template revision history crosses template boundary",
+                ));
+            }
+            if archive_compatible(profile, revision) && !revision.chunks.is_empty() {
+                return Ok(Some(revision.clone()));
+            }
+            current = revision.parent_id.as_deref();
+        }
+        Ok(None)
     }
     fn super_revision(
         &mut self,
@@ -184,18 +228,17 @@ impl Manager {
                         profile.created_at = now();
                     }
                 }
-                let compatible = profile.engine == source.engine
-                    && profile.settings.get("backend") == source.settings.get("backend")
-                    && profile.settings.get("rootfsPath") == source.settings.get("rootfsPath");
-                self.super_revision(
-                    profile,
-                    if compatible {
-                        source.chunks
-                    } else {
-                        Vec::new()
-                    },
-                    if compatible { source.archive_bytes } else { 0 },
-                )
+                let archive = if archive_compatible(&profile, &source) {
+                    Some(source)
+                } else if method == "superProfiles.update" {
+                    self.previous_compatible_archive(&profile, &source.id)?
+                } else {
+                    None
+                };
+                let (chunks, bytes) = archive
+                    .map(|revision| (revision.chunks, revision.archive_bytes))
+                    .unwrap_or_default();
+                self.super_revision(profile, chunks, bytes)
             }
             "superProfiles.remove" => {
                 let id = self.super_id(p)?;
@@ -442,6 +485,111 @@ mod tests {
             m.state.super_revisions[changed["revisionId"].as_str().unwrap()]
                 .chunks
                 .is_empty()
+        );
+    }
+    #[test]
+    fn switching_backends_recovers_separate_archives_from_own_history() {
+        let (root, mut m) = manager();
+        let first = create(&mut m);
+        let id = first["id"].as_str().unwrap();
+        let archive = root.path().join("input.tar");
+        fs::write(&archive, b"WSL browser and workspace").unwrap();
+        let mut current = m
+            .import_super_profile_state(id, first["revisionId"].as_str().unwrap(), &archive)
+            .unwrap();
+        current=m.execute("superProfiles.update",json!({"id":id,"expectedRevisionId":current["revisionId"],"settings":{"backend":"windows-sandbox"}})).unwrap();
+        fs::write(&archive, b"Sandbox browser and workspace").unwrap();
+        current = m
+            .import_super_profile_state(id, current["revisionId"].as_str().unwrap(), &archive)
+            .unwrap();
+        for (index, backend, expected) in [
+            (0, "wsl2", b"WSL browser and workspace".as_slice()),
+            (
+                1,
+                "windows-sandbox",
+                b"Sandbox browser and workspace".as_slice(),
+            ),
+            (2, "wsl2", b"WSL browser and workspace".as_slice()),
+        ] {
+            current=m.execute("superProfiles.update",json!({"id":id,"expectedRevisionId":current["revisionId"],"settings":{"backend":backend}})).unwrap();
+            let output = root.path().join(format!("output-{index}.tar"));
+            m.export_super_profile_state(id, &output).unwrap();
+            assert_eq!(fs::read(output).unwrap(), expected);
+        }
+    }
+    #[test]
+    fn root_filesystem_digest_and_custom_default_identity_isolate_archives() {
+        let (root, mut m) = manager();
+        let mut current = create(&mut m);
+        let id = current["id"].as_str().unwrap().to_string();
+        current=m.execute("superProfiles.update",json!({"id":id,"expectedRevisionId":current["revisionId"],"settings":{"backend":"wsl2","rootfsPath":"approved.tar","rootfsSha256":"first"}})).unwrap();
+        let source = root.path().join("source.tar");
+        fs::write(&source, b"custom rootfs archive").unwrap();
+        current = m
+            .import_super_profile_state(&id, current["revisionId"].as_str().unwrap(), &source)
+            .unwrap();
+        for settings in [
+            json!({"backend":"wsl2","rootfsPath":"approved.tar","rootfsSha256":"second"}),
+            json!({"backend":"wsl2"}),
+        ] {
+            current = m
+                .execute(
+                    "superProfiles.update",
+                    json!({"id":id,"expectedRevisionId":current["revisionId"],"settings":settings}),
+                )
+                .unwrap();
+            assert_eq!(
+                m.export_super_profile_state(&id, &root.path().join("wrong.tar"))
+                    .unwrap_err()
+                    .code,
+                "NOT_FOUND"
+            );
+        }
+        current=m.execute("superProfiles.update",json!({"id":id,"expectedRevisionId":current["revisionId"],"settings":{"backend":"wsl2","rootfsPath":"approved.tar","rootfsSha256":"first"}})).unwrap();
+        let output = root.path().join("right.tar");
+        m.export_super_profile_state(&id, &output).unwrap();
+        assert_eq!(fs::read(output).unwrap(), b"custom rootfs archive");
+        current = m
+            .execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":current["revisionId"],"engine":"firefox"}),
+            )
+            .unwrap();
+        assert_eq!(
+            m.export_super_profile_state(&id, &root.path().join("wrong-engine.tar"))
+                .unwrap_err()
+                .code,
+            "NOT_FOUND"
+        );
+        m.execute(
+            "superProfiles.update",
+            json!({"id":id,"expectedRevisionId":current["revisionId"],"engine":"chromium"}),
+        )
+        .unwrap();
+        m.export_super_profile_state(&id, &root.path().join("right-engine.tar"))
+            .unwrap();
+    }
+    #[test]
+    fn history_lookup_rejects_cycles_and_cross_template_ancestors() {
+        let (_root, mut m) = manager();
+        let current = create(&mut m);
+        let other = create(&mut m);
+        let id = current["id"].as_str().unwrap();
+        let revision = current["revisionId"].as_str().unwrap();
+        m.state.super_revisions.get_mut(revision).unwrap().parent_id = Some(revision.to_string());
+        let update =
+            json!({"id":id,"expectedRevisionId":revision,"settings":{"backend":"windows-sandbox"}});
+        assert_eq!(
+            m.execute("superProfiles.update", update.clone())
+                .unwrap_err()
+                .code,
+            "INTEGRITY"
+        );
+        m.state.super_revisions.get_mut(revision).unwrap().parent_id =
+            Some(other["revisionId"].as_str().unwrap().to_string());
+        assert_eq!(
+            m.execute("superProfiles.update", update).unwrap_err().code,
+            "INTEGRITY"
         );
     }
     #[test]

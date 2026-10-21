@@ -46,6 +46,8 @@ try {
     let setup = format!("set -eu; mkdir -p /run/xrdp; sed -i 's|^port=tcp://127.0.0.1:3389$|port=tcp://127.0.0.1:{port}|' /etc/xrdp/xrdp.ini; grep -Fx 'port=tcp://127.0.0.1:{port}' /etc/xrdp/xrdp.ini >/dev/null; echo 'exec dbus-run-session startxfce4' > /home/materialbrowser/.xsession; chown materialbrowser /home/materialbrowser/.xsession; service xrdp start >/dev/null");
     drop(reservation);
     run(&["-d", &session.distribution, "-u", "root", "--exec", "sh", "-lc", &setup], Duration::from_secs(30))?;
+    let verify = format!("set -eu; ss -H -ltnp 'sport = :{port}' | grep -F '127.0.0.1:{port}' | grep -F '\"xrdp\"' >/dev/null; test \"$(readlink -f /proc/$(cat /run/xrdp/xrdp.pid)/exe)\" = /usr/sbin/xrdp");
+    run(&["-d", &session.distribution, "-u", "root", "--exec", "sh", "-lc", &verify], Duration::from_secs(15))?;
     let address = SocketAddr::from((Ipv4Addr::LOCALHOST, port));
     let started = Instant::now();
     while TcpStream::connect_timeout(&address, Duration::from_millis(300)).is_err() {

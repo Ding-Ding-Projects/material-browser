@@ -1,4 +1,15 @@
 export const superProfilesZh: Record<string,string> = {
+  'starting':'啟動中', 'queued':'等候處理', 'staging-inputs':'準備輸入檔案', 'launching-sandbox':'正在啟動 Sandbox', 'acquiring-base':'取得基礎環境', 'importing-guest':'匯入客體', 'configuring-isolation':'設定隔離', 'installing-runtime':'安裝執行元件', 'installing-selected-inputs':'安裝所選檔案', 'restoring-state':'還原資料', 'starting-workspace':'啟動工作區', 'cancelled':'已取消', 'failed':'未能完成',
+  'Leave both root filesystem fields empty to use the verified managed base. A custom archive requires its SHA-256.':'兩個根檔案系統欄位留空，就會使用已驗證嘅受管理基礎環境。自訂封存檔必須提供 SHA-256。',
+
+  'Check environment':'檢查環境', 'Checking environment':'正在檢查環境', 'Environment check unavailable':'未能檢查環境', 'Supported modes':'支援模式',
+  'Session status unavailable. Retry Refresh.':'未能讀取工作階段狀態，請按重新整理再試。', 'Session progress':'工作階段進度', 'Phase':'階段',
+  'Cancel provisioning':'取消準備', 'Save back and close':'儲存並關閉', 'Discard and close':'捨棄並關閉', 'provisioning':'準備中', 'cancelling':'正在取消', 'cleanup-required':'需要清理',
+  'Data saved. Cleanup is incomplete; retry Discard and close.':'資料已儲存。清理未完成，請重試捨棄並關閉。',
+  'The host will gracefully stop this session, save the selected data as a new encrypted revision, and remove the disposable guest. Existing revisions remain available.':'主機會正常停止工作階段，將所選資料儲存為新加密版本，再移除臨時環境。現有版本會保留。',
+  'Cancel leaves the session unchanged. Saving may include private files stored inside the environment.':'取消唔會改變工作階段。儲存內容可能包含環境內嘅私人檔案。',
+  'Discard gracefully stops and removes the disposable guest without saving changes. Existing revisions are preserved. Cleanup failures remain visible and can be retried.':'捨棄會正常停止並移除臨時環境，唔會儲存更改。現有版本會保留，未完成嘅清理會顯示並可重試。',
+
   'Save categories':'儲存類別',
   'Select at least one category. Unselected categories are excluded from the new revision.':'請至少選擇一個類別。未選類別唔會包含喺新版本。',
 

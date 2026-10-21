@@ -107,7 +107,7 @@ function App() {
   useEffect(() => {
     refresh().catch(() => setStatus(null));
     const off = window.materialBrowser?.onEvent((event: any) => {
-      if (event?.type !== "settings-updated")
+      if (event?.type !== "settings-updated" && event?.type !== "super-profile-session")
         refresh().catch(() => setStatus(null));
     });
     return off;

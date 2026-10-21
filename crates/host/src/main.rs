@@ -237,20 +237,34 @@ impl Host {
         match method {
             "superProfiles.capabilities" => return Ok(super_profiles::Sessions::capabilities()),
             "superProfiles.sessions.launch" => {
-                let profiles = self.core.execute("superProfiles.list", json!({}))
+                let profiles = self
+                    .core
+                    .execute("superProfiles.list", json!({}))
                     .map_err(|e| error(&e.code, &e.message))?;
-                let sandbox = profiles.as_array().and_then(|rows| rows.iter()
-                    .find(|row| row["id"] == params["profileId"]))
+                let sandbox = profiles
+                    .as_array()
+                    .and_then(|rows| rows.iter().find(|row| row["id"] == params["profileId"]))
                     .is_some_and(|row| row["settings"]["backend"] == "windows-sandbox");
                 let browser = if sandbox {
-                    Some(self.registry.get(EngineKind::Chromium)
-                        .map_err(|e| error(&e.code, &e.message))?
-                        .verified_executable_path().map_err(|e| error(&e.code, &e.message))?
-                        .to_path_buf())
-                } else { None };
-                return self.super_sessions.launch(&mut self.core, &params, browser.as_deref());
+                    Some(
+                        self.registry
+                            .get(EngineKind::Chromium)
+                            .map_err(|e| error(&e.code, &e.message))?
+                            .verified_executable_path()
+                            .map_err(|e| error(&e.code, &e.message))?
+                            .to_path_buf(),
+                    )
+                } else {
+                    None
+                };
+                return self
+                    .super_sessions
+                    .launch(&mut self.core, &params, browser.as_deref());
             }
-            "superProfiles.sessions.status" => return Ok(self.super_sessions.status()),
+            "superProfiles.sessions.status" => {
+                self.super_sessions.reconcile_guest_requests(&mut self.core);
+                return Ok(self.super_sessions.status());
+            }
             "superProfiles.sessions.preview" => return self.super_sessions.preview(&params),
             "superProfiles.sessions.discard" => {
                 return self.super_sessions.discard(

@@ -18,13 +18,15 @@ test('persistent resume metadata excludes guest paths and commands',()=>{
 });
 
 test('backend changes keep independent settings and flatten only the selected configuration',()=>{
- const wsl={backend:'wsl2',launchMode:'desktop',rootfsPath:'C:/linux.tar',setupCommands:['apt-get update']};
+ const wsl={backend:'wsl2',launchMode:'desktop',engine:'firefox',rootfsPath:'C:/linux.tar',setupCommands:['apt-get update']};
  const sandbox=switchSuperProfileBackend(wsl,'windows-sandbox');
  assert.equal(sandbox.launchMode,'browser');
  assert.equal(sandbox.rootfsPath,undefined);
  sandbox.networking=false;
  const back=switchSuperProfileBackend(sandbox,'wsl2');
  assert.equal(back.rootfsPath,wsl.rootfsPath);
+ assert.equal(back.engine,'firefox');
+ assert.equal(sandbox.engine,undefined);
  assert.equal(back.networking,undefined);
  const persisted=persistSuperProfileConfiguration(back);
  assert.equal(persisted.configurations['windows-sandbox'].networking,false);

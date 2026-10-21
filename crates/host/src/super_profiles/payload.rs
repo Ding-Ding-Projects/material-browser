@@ -17,6 +17,7 @@ struct Budget {
 }
 impl Budget {
     fn entry(&mut self) -> Result<()> {
+        super::asynchronous::check_cancel()?;
         self.entries += 1;
         if self.entries > MAX_FILES {
             return Err(error("PAYLOAD_LIMIT", "Too many payload entries"));
@@ -24,6 +25,7 @@ impl Budget {
         Ok(())
     }
     fn bytes(&mut self, n: u64) -> Result<()> {
+        super::asynchronous::check_cancel()?;
         self.bytes = self
             .bytes
             .checked_add(n)
@@ -166,6 +168,7 @@ fn copy_file(source: &Path, destination: &Path, budget: &mut Budget) -> Result<(
     let mut count = 0u64;
     let mut buffer = [0u8; 65536];
     loop {
+        super::asynchronous::check_cancel()?;
         let n = input.read(&mut buffer).map_err(io_error)?;
         if n == 0 {
             break;

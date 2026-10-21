@@ -2,23 +2,25 @@
 
 ## Super Profiles implementation in progress
 
-Super Profiles add encrypted templates, immutable revisions, authenticated chunked archives,
-typed desktop workflows, independent backend settings, selected workspace/script staging,
-owned WSL2 lifecycle and a Windows Sandbox bootstrap. Default Linux browser archives and
-the Ubuntu base have pinned digests. The full-desktop source uses a loopback RDP connection.
-Existing browser profiles remain separate; Super Profile archives are local-only.
+Preserved first milestone: 07c8702c164379f494c773b6dd0395f541cc76e6 on
+ai/feature/20261021-super-profiles. Subsequent source adds asynchronous provisioning,
+durable progress/cancellation, separate backend archive history, selected Linux installers,
+explicit save-and-close, guest save/discard controls and decrypted staging disposal.
+The core and scoped archives remain encrypted; browser profiles remain separate.
 
-Verified during this task: 16 core tests; 28 native-host tests on Linux; 89 desktop tests;
-focused draft checks; exact Windows root build entrypoints for Core, Host and Desktop;
-and the documentation build with 39 complete articles. These are source/build checks,
-not guest runtime or installer acceptance. Windows Sandbox is absent on the selected host.
-GitHub Projects discovery lacks read:project and has been skipped without scope changes.
+Current checks: 19 core tests and 36 Linux host tests passed on the current source.
+The earlier preservation milestone passed 28 Windows host tests, 89 desktop tests,
+17 real native stdio protocol checks and exact root Windows builds for Core, Host,
+Desktop and Docs. The native protocol check did not launch guests. New native builds
+and current-source UI proof remain pending. Windows Sandbox is absent on the selected
+host. Projects discovery lacks read:project and was skipped without changing scopes.
 
-Still required: actual WSL launch/save/discard and full desktop authentication, Sandbox
-runtime and in-guest save action, asynchronous progress/cancellation, complete Linux
-installer recipes, reviewed temporary plaintext cleanup, source-bound UI evidence,
-packaging and deployment. Do not mark the whole feature complete from this preservation
-milestone. Continue only with owned session directories and verified WSL registration paths.
+Outstanding acceptance: actual WSL terminal/browser/full-desktop and Sandbox launch,
+setup, installer execution, save-back and disposal; full desktop authentication;
+current-source UI evidence; packaging/deployment and installed update. Save-back and
+guest-request reconciliation remain bounded synchronous operations, while launch
+provisioning runs in a worker. Continuous external guest-process health is unfinished.
+Do not treat source, compilation or protocol checks as complete guest runtime proof.
 
 Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 

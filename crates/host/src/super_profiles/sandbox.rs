@@ -73,6 +73,23 @@ pub(super) fn launch(
     }
     fs::create_dir_all(data.join("browser")).map_err(io_error)?;
     fs::create_dir_all(data.join("workspace")).map_err(io_error)?;
+    fs::write(input.join("controls.ps1"), r#"$ErrorActionPreference='Stop'
+Add-Type -AssemblyName PresentationFramework
+[xml]$markup=@'
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Title="Super Profile" Width="500" Height="280" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
+ <StackPanel Margin="24">
+  <TextBlock Text="Disposable Super Profile" FontSize="22" Margin="0,0,0,16"/>
+  <TextBlock Text="Save stops the browser, exports managed data and asks Material Browser to encrypt a new revision before closing this environment. Check the host for the actual result." TextWrapping="Wrap" Margin="0,0,0,16"/>
+  <Button Name="Save" Content="Save back and close" Padding="12" Margin="0,0,0,8"/>
+  <Button Name="Discard" Content="Discard and close" Padding="12"/>
+ </StackPanel>
+</Window>
+'@
+$window=[Windows.Markup.XamlReader]::Load((New-Object Xml.XmlNodeReader $markup))
+$window.FindName('Save').Add_Click({[IO.File]::WriteAllText('C:\MaterialBrowserOutput\save-requested','save');$window.Close()})
+$window.FindName('Discard').Add_Click({[IO.File]::WriteAllText('C:\MaterialBrowserOutput\discard-requested','discard');$window.Close()})
+$window.ShowDialog() | Out-Null
+"#).map_err(io_error)?;
     let script=r#"$ErrorActionPreference='Stop'
 $inputRoot='C:\MaterialBrowserInput'
 $exchange='C:\MaterialBrowserOutput'
@@ -99,13 +116,17 @@ try {
  $running=Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq $browser -and $_.CommandLine -like '*C:\MaterialBrowser\data\browser*' }
  if (!$running) { throw 'Managed browser readiness not observed' }
  [IO.File]::WriteAllText((Join-Path $exchange 'ready'),'browser-process-ready')
- while (!(Test-Path -LiteralPath (Join-Path $exchange 'stop'))) { Start-Sleep -Milliseconds 500 }
+ $controls=Join-Path $inputRoot 'controls.ps1'
+ Start-Process powershell.exe -ArgumentList @('-NoProfile','-STA','-File',$controls) | Out-Null
+ while (!(Test-Path -LiteralPath (Join-Path $exchange 'stop')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'save-requested')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'discard-requested'))) { Start-Sleep -Milliseconds 500 }
  Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($browser)) -ErrorAction SilentlyContinue | ForEach-Object { $_.CloseMainWindow() | Out-Null }
  Start-Sleep -Seconds 3
  if (Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($browser)) -ErrorAction SilentlyContinue) { throw 'Managed browser remains active; save refused' }
- New-Item -ItemType Directory -Path (Join-Path $exchange 'data') -Force | Out-Null
- Copy-Item -LiteralPath (Join-Path $localRoot 'browser') -Destination (Join-Path $exchange 'data') -Recurse -Force
- Copy-Item -LiteralPath (Join-Path $localRoot 'workspace') -Destination (Join-Path $exchange 'data') -Recurse -Force
+ if (!(Test-Path -LiteralPath (Join-Path $exchange 'discard-requested'))) {
+  New-Item -ItemType Directory -Path (Join-Path $exchange 'data') -Force | Out-Null
+  Copy-Item -LiteralPath (Join-Path $localRoot 'browser') -Destination (Join-Path $exchange 'data') -Recurse -Force
+  Copy-Item -LiteralPath (Join-Path $localRoot 'workspace') -Destination (Join-Path $exchange 'data') -Recurse -Force
+ }
  [IO.File]::WriteAllText((Join-Path $exchange 'stopped'),'browser-exited-and-state-copied')
 } catch { [IO.File]::WriteAllText((Join-Path $exchange 'failed'),'Guest bootstrap or graceful stop failed') }
 "#.replace("__EXECUTABLE__",leaf);

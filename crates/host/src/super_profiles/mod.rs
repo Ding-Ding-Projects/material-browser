@@ -4,9 +4,13 @@ mod base_image;
 #[cfg(test)]
 use archive::safe_member;
 use archive::validate_archive;
+mod asynchronous;
+mod cleanup;
 mod desktop_connection;
+mod guest_installers;
 mod linux_runtime;
 mod payload;
+mod provisioning;
 mod sandbox;
 use crate::{Result, error, io_error};
 use serde::{Deserialize, Serialize};
@@ -33,13 +37,30 @@ struct Session {
     state: String,
     directory: PathBuf,
     message: String,
+    #[serde(default)]
+    operation_id: String,
+    #[serde(default)]
+    phase: String,
+    #[serde(default)]
+    events: Vec<asynchronous::Event>,
+    #[serde(default)]
+    guest_removed: bool,
+    #[serde(default)]
+    guest_created: bool,
+    #[serde(default)]
+    save_requested: bool,
+    #[serde(default)]
+    guest_action_attempts: u8,
 }
 pub struct Sessions {
     root: PathBuf,
     entries: BTreeMap<String, Session>,
     children: BTreeMap<String, Child>,
+    workers:
+        BTreeMap<String, thread::JoinHandle<(BTreeMap<String, Session>, BTreeMap<String, Child>)>>,
 }
 fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
+    asynchronous::check_cancel()?;
     let mut child = Command::new(program)
         .args(args)
         .stdin(Stdio::null())
@@ -51,7 +72,8 @@ fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
         .stdout
         .take()
         .ok_or_else(|| error("IO", "Cannot read command output"))?;
-    let reader = thread::spawn(move || {
+    let (output_tx, output_rx) = std::sync::mpsc::channel();
+    thread::spawn(move || {
         let mut kept = Vec::new();
         let mut buffer = [0; 8192];
         loop {
@@ -65,14 +87,34 @@ fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
                 }
             }
         }
-        kept
+        let _ = output_tx.send(kept);
     });
     let start = Instant::now();
     loop {
+        if let Err(e) = asynchronous::check_cancel() {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(e);
+        }
         if let Some(status) = child.try_wait().map_err(io_error)? {
-            let output = reader
-                .join()
-                .map_err(|_| error("IO", "Command output reader failed"))?;
+            let output = loop {
+                asynchronous::check_cancel()?;
+                match output_rx.recv_timeout(Duration::from_millis(50)) {
+                    Ok(output) => break output,
+                    Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                        return Err(error("IO", "Command output reader failed"));
+                    }
+                    Err(std::sync::mpsc::RecvTimeoutError::Timeout)
+                        if start.elapsed() >= timeout =>
+                    {
+                        return Err(error(
+                            "GUEST_TIMEOUT",
+                            "Guest output did not close before the operation deadline; staging retained",
+                        ));
+                    }
+                    Err(_) => {}
+                }
+            };
             if !status.success() {
                 return Err(error(
                     "GUEST_COMMAND_FAILED",
@@ -128,7 +170,13 @@ impl Sessions {
                             "Session ownership does not match staging directory",
                         ));
                     }
-                    if !matches!(s.state.as_str(), "stopped" | "saved" | "discarded") {
+                    if s.operation_id.is_empty() {
+                        s.operation_id = s.id.clone();
+                    }
+                    if !matches!(
+                        s.state.as_str(),
+                        "stopped" | "saved" | "discarded" | "cleanup-required"
+                    ) {
                         s.state = "recovery-required".into();
                         s.message =
                             "Host restarted; stop and verify the owned guest before saving".into();
@@ -141,6 +189,7 @@ impl Sessions {
             root,
             entries,
             children: BTreeMap::new(),
+            workers: BTreeMap::new(),
         })
     }
     fn persist(&self, s: &Session) -> Result<()> {
@@ -152,6 +201,56 @@ impl Sessions {
         )
         .map_err(io_error)?;
         fs::rename(temp, s.directory.join("ownership.json")).map_err(io_error)
+    }
+    fn progress(&self, s: &mut Session, phase: &str, message: &str) -> Result<()> {
+        asynchronous::check_cancel()?;
+        asynchronous::event(s, phase, message);
+        self.persist(s)
+    }
+    fn refresh_workers(&mut self) {
+        let completed = self
+            .workers
+            .iter()
+            .filter(|(_, worker)| worker.is_finished())
+            .map(|(id, _)| id.clone())
+            .collect::<Vec<_>>();
+        for id in completed {
+            if let Some(worker) = self.workers.remove(&id) {
+                match worker.join() {
+                    Ok((entries, children)) => {
+                        self.entries.extend(entries);
+                        self.children.extend(children);
+                    }
+                    Err(_) => {
+                        if let Some(s) = self.entries.get_mut(&id) {
+                            s.state = "recovery-required".into();
+                            asynchronous::event(
+                                s,
+                                "failed",
+                                "Provisioning worker stopped unexpectedly; inspect retained staging",
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        for id in self.workers.keys() {
+            if let Some(known) = self.entries.get(id) {
+                let path = known.directory.join("ownership.json");
+                if let Ok(bytes) = fs::read(path) {
+                    if bytes.len() <= 1048576 {
+                        if let Ok(updated) = serde_json::from_slice::<Session>(&bytes) {
+                            if updated.id == known.id
+                                && updated.directory == known.directory
+                                && updated.distribution == known.distribution
+                            {
+                                self.entries.insert(id.clone(), updated);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     pub fn capabilities() -> Value {
         let windows = cfg!(windows);
@@ -165,6 +264,7 @@ impl Sessions {
         p: &Value,
         browser_executable: Option<&Path>,
     ) -> Result<Value> {
+        self.refresh_workers();
         if !cfg!(windows) {
             return Err(error(
                 "PLATFORM_UNSUPPORTED",
@@ -241,300 +341,82 @@ impl Sessions {
             state: "staging".into(),
             directory,
             message: String::new(),
+            operation_id: id.clone(),
+            phase: "staging".into(),
+            events: Vec::new(),
+            guest_removed: false,
+            guest_created: false,
+            save_requested: false,
+            guest_action_attempts: 0,
         };
         self.persist(&s)?;
         self.entries.insert(id.clone(), s.clone());
-        let result = (|| {
-            payload::stage(settings, &s.directory)?;
-            let archive = s.directory.join("state.tar");
-            if let Err(e) = core.export_super_profile_state(profile_id, &archive) {
-                if e.code != "NOT_FOUND" {
-                    return Err(error(&e.code, &e.message));
-                }
+        let archive = s.directory.join("state.tar");
+        if let Err(e) = core.export_super_profile_state(profile_id, &archive) {
+            if e.code != "NOT_FOUND" {
+                s.state = "recovery-required".into();
+                s.message = e.message.clone();
+                self.persist(&s)?;
+                self.entries.insert(id, s);
+                return Err(error(&e.code, &e.message));
             }
-            if backend == "windows-sandbox" {
-                let child = sandbox::launch(
-                    &s,
-                    &archive,
-                    browser_executable,
-                    settings["networking"].as_bool().unwrap_or(true),
-                )?;
-                self.children.insert(id.clone(), child);
-                s.state = "starting".into();
-                s.message = "Sandbox launcher started; waiting for guest readiness receipt".into();
-                return Ok(());
-            }
-            if backend != "wsl2" {
-                return Err(error("BACKEND_UNAVAILABLE", "Unknown guest backend"));
-            }
-            let rootfs = base_image::resolve(settings, &self.root.join("base-cache"))?;
-            let install = s.directory.join("distribution");
-            run(
-                &[
-                    "--import",
-                    &s.distribution,
-                    unicode(&install)?,
-                    unicode(&rootfs)?,
-                    "--version",
-                    "2",
-                ],
-                Duration::from_secs(300),
-            )?;
-            // Host filesystem mounting and executable interop are disabled before guest user programs run.
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    "root",
-                    "--exec",
-                    "sh",
-                    "-lc",
-                    "printf '[automount]\nenabled=false\n[interop]\nenabled=false\nappendWindowsPath=false\n' > /etc/wsl.conf",
-                ],
-                Duration::from_secs(20),
-            )?;
-            run(&["--terminate", &s.distribution], Duration::from_secs(30))?;
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    "root",
-                    "--exec",
-                    "sh",
-                    "-lc",
-                    "set -eu; test ! -d /mnt/c/Windows; id -u materialbrowser >/dev/null 2>&1 || useradd -m -s /bin/sh materialbrowser; test \"$(id -u materialbrowser)\" != 0; mkdir -p /home/materialbrowser/.material-browser/browser /home/materialbrowser/.material-browser/workspace; chown -R materialbrowser /home/materialbrowser/.material-browser; chmod 700 /home/materialbrowser/.material-browser",
-                ],
-                Duration::from_secs(30),
-            )?;
-            linux_runtime::provision(
-                &s.distribution,
-                engine,
-                mode,
-                &self.root.join("runtime-cache"),
-            )?;
-            let staged = s.directory.join("input.tar");
-            command(
-                "tar.exe",
-                &[
-                    "-cf",
-                    unicode(&staged)?,
-                    "-C",
-                    unicode(&s.directory.join("input"))?,
-                    ".",
-                ],
-                Duration::from_secs(120),
-            )?;
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    USER,
-                    "--exec",
-                    "mkdir",
-                    "-p",
-                    "/home/materialbrowser/.material-browser/input",
-                ],
-                Duration::from_secs(20),
-            )?;
-            let child = Command::new("wsl.exe")
-                .args([
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    USER,
-                    "--exec",
-                    "tar",
-                    "-xf",
-                    "-",
-                    "-C",
-                    "/home/materialbrowser/.material-browser/input",
-                    "--no-same-owner",
-                    "--no-same-permissions",
-                ])
-                .stdin(Stdio::from(fs::File::open(&staged).map_err(io_error)?))
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .map_err(io_error)?;
-            wait_owned(child, Duration::from_secs(300))?;
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    USER,
-                    "--exec",
-                    "sh",
-                    "-lc",
-                    "set -eu; cp -R /home/materialbrowser/.material-browser/input/state/workspace/. /home/materialbrowser/.material-browser/workspace/; cd /home/materialbrowser/.material-browser/workspace; sh /home/materialbrowser/.material-browser/input/setup.sh",
-                ],
-                Duration::from_secs(300),
-            )?;
-            if fs::read_dir(s.directory.join("input/installers"))
-                .map_err(io_error)?
-                .next()
-                .is_some()
-            {
-                return Err(error(
-                    "INSTALLER_UNSUPPORTED",
-                    "WSL installer execution requires explicit supported package commands in setup; selected installer files remain staged",
-                ));
-            }
-            if archive.is_file() {
-                validate_archive(&archive)?;
-                let child = Command::new("wsl.exe")
-                    .args([
-                        "-d",
-                        &s.distribution,
-                        "-u",
-                        USER,
-                        "--exec",
-                        "tar",
-                        "-xf",
-                        "-",
-                        "-C",
-                        "/home/materialbrowser/.material-browser",
-                        "--no-same-owner",
-                        "--no-same-permissions",
-                    ])
-                    .stdin(Stdio::from(fs::File::open(&archive).map_err(io_error)?))
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .spawn()
-                    .map_err(io_error)?;
-                wait_owned(child, Duration::from_secs(300))?;
-            }
-            let check = match mode {
-                "browser" if engine == "firefox" => {
-                    "test -n \"$DISPLAY$WAYLAND_DISPLAY\" && command -v firefox"
-                }
-                "browser" => "test -n \"$DISPLAY$WAYLAND_DISPLAY\" && command -v chromium",
-                "desktop" => "command -v startxfce4 && command -v xrdp",
-                _ => "command -v sh",
-            };
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    USER,
-                    "--exec",
-                    "sh",
-                    "-lc",
-                    "set -eu; cd /home/materialbrowser/.material-browser/workspace; sh /home/materialbrowser/.material-browser/input/startup.sh",
-                ],
-                Duration::from_secs(300),
-            )?;
-            run(
-                &[
-                    "-d",
-                    &s.distribution,
-                    "-u",
-                    USER,
-                    "--exec",
-                    "sh",
-                    "-lc",
-                    check,
-                ],
-                Duration::from_secs(20),
-            )?;
-            if mode == "terminal" {
-                let child = Command::new("wt.exe")
-                    .args([
-                        "new-window",
-                        "--title",
-                        "Material Browser disposable terminal",
-                        "wsl.exe",
-                        "-d",
-                        &s.distribution,
-                        "-u",
-                        USER,
-                        "--exec",
-                        "sh",
-                    ])
-                    .stdin(Stdio::null())
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .spawn()
-                    .map_err(|_| {
-                        error(
-                            "TERMINAL_UNAVAILABLE",
-                            "Windows Terminal is required for interactive terminal launch",
-                        )
-                    })?;
-                self.children.insert(id.clone(), child);
-                s.state = "launched".into();
-                s.message =
-                    "Terminal launcher started; interactive window readiness remains unverified"
-                        .into();
-            } else if mode == "desktop" {
-                let child = desktop_connection::launch(&s)?;
-                self.children.insert(id.clone(), child);
-                s.state = "launched".into();
-                s.message = "Loopback desktop connection launched; full desktop readiness awaits guest session confirmation".into();
-            } else {
-                let script = if mode == "browser" && engine == "firefox" {
-                    "nohup firefox --no-remote --profile /home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                } else if mode == "browser" {
-                    "nohup chromium --user-data-dir=/home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                } else {
-                    "nohup startxfce4 >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                };
-                run(
-                    &[
-                        "-d",
-                        &s.distribution,
-                        "-u",
-                        USER,
-                        "--exec",
-                        "sh",
-                        "-lc",
-                        script,
-                    ],
-                    Duration::from_secs(20),
-                )?;
-                let probe = if mode == "browser" && engine == "firefox" {
-                    "sleep 2; pgrep -f '[f]irefox.*material-browser' >/dev/null"
-                } else if mode == "browser" {
-                    "sleep 2; pgrep -f '[c]hromium.*material-browser' >/dev/null"
-                } else {
-                    "sleep 2; pgrep -x xfce4-session >/dev/null"
-                };
-                run(
-                    &[
-                        "-d",
-                        &s.distribution,
-                        "-u",
-                        USER,
-                        "--exec",
-                        "sh",
-                        "-lc",
-                        probe,
-                    ],
-                    Duration::from_secs(15),
-                )?;
-                s.state = "running".into();
-                s.message =
-                    "Guest process readiness verified; visual readiness remains unverified".into();
-            }
-            Ok(())
-        })();
-        if let Err(e) = result {
-            s.state = "recovery-required".into();
-            s.message = e.message.clone();
-            self.persist(&s)?;
-            self.entries.insert(id, s);
-            return Err(e);
         }
+        s.state = "provisioning".into();
+        s.phase = "queued".into();
+        s.message = "Guest provisioning queued; observe status for durable progress".into();
+        asynchronous::event(
+            &mut s,
+            "queued",
+            "Guest provisioning queued; observe status for durable progress",
+        );
         self.persist(&s)?;
-        self.entries.insert(id, s.clone());
+        self.entries.insert(id.clone(), s.clone());
+        let settings = settings.clone();
+        let engine = engine.to_string();
+        let browser = browser_executable.map(Path::to_path_buf);
+        let root = self.root.clone();
+        let worker_session = s.clone();
+        let handle = thread::spawn(move || {
+            asynchronous::set_context(&worker_session);
+            let mut runner = Sessions {
+                root,
+                entries: BTreeMap::new(),
+                children: BTreeMap::new(),
+                workers: BTreeMap::new(),
+            };
+            let fallback = worker_session.clone();
+            runner.entries.insert(fallback.id.clone(), fallback.clone());
+            let result = runner.provision(
+                &settings,
+                worker_session,
+                archive,
+                &engine,
+                browser.as_deref(),
+            );
+            if let Err(e) = result {
+                let mut retained = runner
+                    .entries
+                    .get(&fallback.id)
+                    .cloned()
+                    .unwrap_or(fallback);
+                retained.state = "recovery-required".into();
+                if retained.phase != "cancelled" && retained.phase != "failed" {
+                    asynchronous::event(&mut retained, "failed", &e.message);
+                }
+                let _ = runner.persist(&retained);
+                runner.entries.insert(retained.id.clone(), retained);
+            }
+            (runner.entries, runner.children)
+        });
+        self.workers.insert(id, handle);
         Ok(json!(s))
     }
     pub fn status(&mut self) -> Value {
+        self.refresh_workers();
         for s in self.entries.values_mut() {
+            if s.backend == "windows-sandbox" {
+                s.save_requested = s.directory.join("exchange/save-requested").is_file();
+            }
             if s.backend == "windows-sandbox" && s.directory.join("exchange/failed").is_file() {
                 s.state = "recovery-required".into();
                 s.message =
@@ -550,6 +432,53 @@ impl Sessions {
         }
         json!(self.entries.values().collect::<Vec<_>>())
     }
+    pub fn reconcile_guest_requests(&mut self, core: &mut material_browser_core::Manager) {
+        self.refresh_workers();
+        let requests = self
+            .entries
+            .values()
+            .filter(|s| {
+                s.backend == "windows-sandbox"
+                    && !matches!(s.state.as_str(), "discarded" | "saved" | "cleanup-required")
+                    && s.guest_action_attempts < 3
+                    && control_receipt(&s.directory.join("exchange/stopped"))
+            })
+            .filter_map(|s| {
+                let save = control_receipt(&s.directory.join("exchange/save-requested"));
+                let discard = control_receipt(&s.directory.join("exchange/discard-requested"));
+                if save == discard {
+                    None
+                } else {
+                    Some((s.id.clone(), s.revision_id.clone(), save))
+                }
+            })
+            .collect::<Vec<_>>();
+        for (id, revision, save) in requests {
+            if let Some(mut session) = self.entries.get(&id).cloned() {
+                session.guest_action_attempts += 1;
+                if self.persist(&session).is_err() {
+                    continue;
+                }
+                self.entries.insert(id.clone(), session);
+            }
+            let result = if save {
+                self.save(core,&json!({"sessionId":id,"expectedRevisionId":revision,"categories":["browser","workspace"],"closeAfterSave":true}))
+            } else {
+                self.discard(&id)
+            };
+            if let Err(e) = result {
+                if let Some(mut session) = self.entries.get(&id).cloned() {
+                    asynchronous::event(
+                        &mut session,
+                        "guest-action-failed",
+                        &format!("Guest request could not complete: {}", e.message),
+                    );
+                    let _ = self.persist(&session);
+                    self.entries.insert(id, session);
+                }
+            }
+        }
+    }
     pub fn guard_mutation(&self, profile: Option<&str>) -> Result<()> {
         if self
             .entries
@@ -564,16 +493,48 @@ impl Sessions {
         Ok(())
     }
     pub fn stop(&mut self, id: &str) -> Result<Value> {
+        self.refresh_workers();
+        if self.workers.contains_key(id) {
+            let s = self
+                .entries
+                .get(id)
+                .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
+            fs::write(s.directory.join("cancel-requested"), b"cancel").map_err(io_error)?;
+            let mut response = s.clone();
+            response.state = "cancelling".into();
+            response.message =
+                "Cancellation requested; wait for acknowledgement before stopping the guest".into();
+            return Ok(json!(response));
+        }
         let mut s = self
             .entries
             .get(id)
             .cloned()
             .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
-        if !matches!(s.state.as_str(), "stopped" | "saved" | "discarded") {
+        if !matches!(
+            s.state.as_str(),
+            "stopped" | "saved" | "discarded" | "cleanup-required"
+        ) {
             if s.backend == "windows-sandbox" {
-                sandbox::stop(&s, self.children.get_mut(id))?;
+                if s.guest_created || self.children.contains_key(id) {
+                    sandbox::stop(&s, self.children.get_mut(id))?;
+                } else if s.phase == "launching-sandbox" {
+                    return Err(error(
+                        "SANDBOX_RECOVERY_REQUIRED",
+                        "Sandbox creation was interrupted without a process ownership receipt; inspect retained staging before recovery",
+                    ));
+                }
             } else {
-                verify_registration(&s)?;
+                if !registration_present(&s)? {
+                    s.state = "stopped".into();
+                    s.message =
+                        "No owned WSL registration exists; staged input is ready for discard"
+                            .into();
+                    self.persist(&s)?;
+                    self.entries.insert(id.into(), s.clone());
+                    return Ok(json!(s));
+                }
+                s.guest_created = true;
                 run(
                     &[
                         "-d",
@@ -606,6 +567,7 @@ impl Sessions {
         )
     }
     pub fn save(&mut self, core: &mut material_browser_core::Manager, p: &Value) -> Result<Value> {
+        self.refresh_workers();
         let categories = selected_categories(p)?;
         let id = text(p, "sessionId")?;
         let mut s = self
@@ -613,16 +575,49 @@ impl Sessions {
             .get(id)
             .cloned()
             .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
-        if s.state != "stopped" {
-            return Err(error(
-                "SESSION_NOT_STOPPED",
-                "Stop the guest before saving a revision",
-            ));
-        }
         if text(p, "expectedRevisionId")? != s.revision_id {
             return Err(error(
                 "REVISION_CONFLICT",
                 "Save must target the exact template revision used to launch this guest",
+            ));
+        }
+        let current = core
+            .execute("superProfiles.list", json!({}))
+            .map_err(|e| error(&e.code, &e.message))?;
+        if !current.as_array().is_some_and(|profiles| {
+            profiles.iter().any(|profile| {
+                profile["id"] == s.profile_id && profile["revisionId"] == s.revision_id
+            })
+        }) {
+            return Err(error(
+                "REVISION_CONFLICT",
+                "The template changed after this session launched",
+            ));
+        }
+        let close_after_save = match p.get("closeAfterSave") {
+            Some(v) => v
+                .as_bool()
+                .ok_or_else(|| error("INVALID_PARAMS", "closeAfterSave must be a boolean"))?,
+            None => false,
+        };
+        if close_after_save && s.state != "stopped" {
+            let mut stopped = self.stop(id)?;
+            if stopped["state"] == "cancelling" {
+                if let Some(object) = stopped.as_object_mut() {
+                    object.insert("saved".into(), json!(false));
+                }
+                return Ok(stopped);
+            }
+            s = self
+                .entries
+                .get(id)
+                .cloned()
+                .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
+        }
+        if s.state != "stopped" {
+            return Err(error(
+                "SESSION_NOT_STOPPED",
+                "Stop the guest before saving a revision",
             ));
         }
         let archive = s
@@ -663,29 +658,61 @@ impl Sessions {
             terminated?;
         }
         validate_archive(&archive)?;
-        let revision = core
+        let mut revision = core
             .import_super_profile_state(&s.profile_id, text(p, "expectedRevisionId")?, &archive)
             .map_err(|e| error(&e.code, &e.message))?;
         s.state = "saved".into();
         s.message="Managed browser and workspace state encrypted into an immutable revision; staging retained".into();
-        self.persist(&s)?;
-        self.entries.insert(id.into(), s);
+        self.entries.insert(id.into(), s.clone());
+        if let Some(object) = revision.as_object_mut() {
+            object.insert("saved".into(), json!(true));
+            object.insert("sessionId".into(), json!(id));
+            object.insert("cleanupPending".into(), json!(false));
+        }
+        let cleanup = match self.persist(&s) {
+            Err(e) => Err(e),
+            Ok(()) if close_after_save => self.discard(id).map(|_| ()),
+            Ok(()) => Ok(()),
+        };
+        if let Err(e) = cleanup {
+            if let Some(object) = revision.as_object_mut() {
+                object.insert("cleanupPending".into(), json!(true));
+                object.insert(
+                    "cleanupError".into(),
+                    json!({"code":e.code,"message":e.message}),
+                );
+            }
+        }
         Ok(revision)
     }
     pub fn discard(&mut self, id: &str) -> Result<Value> {
+        self.refresh_workers();
         let mut s = self
             .entries
             .get(id)
             .cloned()
             .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
-        if !matches!(s.state.as_str(), "stopped" | "saved") {
+        if s.state == "discarded" {
+            return Ok(json!(s));
+        }
+        if !matches!(s.state.as_str(), "stopped" | "saved" | "cleanup-required") {
+            let stopped = self.stop(id)?;
+            if stopped["state"] == "cancelling" {
+                return Ok(stopped);
+            }
+            s = self
+                .entries
+                .get(id)
+                .cloned()
+                .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
+        }
+        if !matches!(s.state.as_str(), "stopped" | "saved" | "cleanup-required") {
             return Err(error(
                 "SESSION_NOT_STOPPED",
                 "Stop the guest before discarding",
             ));
         }
-        if s.backend == "wsl2" {
-            verify_registration(&s)?;
+        if s.backend == "wsl2" && !s.guest_removed && registration_present(&s)? {
             run(&["--unregister", &s.distribution], Duration::from_secs(60))?;
         }
         if let Some(mut child) = self.children.remove(id) {
@@ -698,9 +725,20 @@ impl Sessions {
         if connection.is_file() {
             fs::remove_file(connection).map_err(io_error)?;
         }
+        s.guest_removed = true;
+        s.state = "cleanup-required".into();
+        s.message = "Owned guest removed; removing decrypted session staging".into();
+        self.persist(&s)?;
+        self.entries.insert(id.into(), s.clone());
+        if let Err(e) = cleanup::wipe(&s.directory) {
+            s.message = e.message.clone();
+            self.persist(&s)?;
+            self.entries.insert(id.into(), s);
+            return Err(e);
+        }
         s.state = "discarded".into();
         s.message =
-            "Owned disposable guest discarded; template revisions and recovery staging retained"
+            "Owned guest and decrypted staging discarded; immutable template revisions retained"
                 .into();
         self.persist(&s)?;
         self.entries.insert(id.into(), s.clone());
@@ -732,9 +770,30 @@ fn selected_categories(p: &Value) -> Result<Vec<&str>> {
     }
     Ok(selected)
 }
+fn control_receipt(path: &Path) -> bool {
+    let Ok(metadata) = fs::symlink_metadata(path) else {
+        return false;
+    };
+    if !metadata.is_file() || metadata.file_type().is_symlink() || metadata.len() > 128 {
+        return false;
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        if metadata.file_attributes() & 0x400 != 0 {
+            return false;
+        }
+    }
+    true
+}
 fn wait_owned(mut child: Child, timeout: Duration) -> Result<()> {
     let start = Instant::now();
     loop {
+        if let Err(e) = asynchronous::check_cancel() {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(e);
+        }
         if let Some(status) = child.try_wait().map_err(io_error)? {
             return if status.success() {
                 Ok(())
@@ -757,8 +816,17 @@ fn wait_owned(mut child: Child, timeout: Duration) -> Result<()> {
     }
 }
 fn verify_registration(s: &Session) -> Result<()> {
+    if !registration_present(s)? {
+        return Err(error(
+            "GUEST_NOT_REGISTERED",
+            "No owned WSL distribution is registered",
+        ));
+    }
+    Ok(())
+}
+fn registration_present(s: &Session) -> Result<bool> {
     let script = format!(
-        "$ErrorActionPreference='Stop'; $d=@(Get-ChildItem 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss' | Get-ItemProperty | Where-Object {{ $_.DistributionName -eq '{}' }}); if ($d.Count -ne 1) {{ exit 2 }}; [Console]::Write($d[0].BasePath)",
+        "$ErrorActionPreference='Stop'; if (!(Test-Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss')) {{ exit 0 }}; $d=@(Get-ChildItem 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss' | Get-ItemProperty | Where-Object {{ $_.DistributionName -eq '{}' }}); if ($d.Count -eq 0) {{ exit 0 }}; if ($d.Count -ne 1) {{ exit 2 }}; [Console]::Write($d[0].BasePath)",
         s.distribution
     );
     let actual = command(
@@ -766,6 +834,9 @@ fn verify_registration(s: &Session) -> Result<()> {
         &["-NoProfile", "-NonInteractive", "-Command", &script],
         Duration::from_secs(15),
     )?;
+    if actual.trim().is_empty() {
+        return Ok(false);
+    }
     let actual = fs::canonicalize(actual.trim()).map_err(io_error)?;
     let expected = fs::canonicalize(s.directory.join("distribution")).map_err(io_error)?;
     if actual != expected {
@@ -774,7 +845,7 @@ fn verify_registration(s: &Session) -> Result<()> {
             "WSL registration path does not match the owned staging directory",
         ));
     }
-    Ok(())
+    Ok(true)
 }
 fn unicode(path: &Path) -> Result<&str> {
     path.to_str()
@@ -787,7 +858,7 @@ fn text<'a>(v: &'a Value, key: &str) -> Result<&'a str> {
         .ok_or_else(|| error("INVALID_PARAMS", &format!("{key} is required")))
 }
 fn valid_id(s: &str) -> bool {
-    s.len() == 32 && s.bytes().all(|b| b.is_ascii_hexdigit())
+    s.len() == 64 && s.bytes().all(|b| b.is_ascii_hexdigit())
 }
 fn verify_hash(path: &Path, expected: &str) -> Result<()> {
     use sha2::{Digest, Sha256};
@@ -798,6 +869,7 @@ fn verify_hash(path: &Path, expected: &str) -> Result<()> {
     let mut hash = Sha256::new();
     let mut buf = [0u8; 65536];
     loop {
+        asynchronous::check_cancel()?;
         let n = f.read(&mut buf).map_err(io_error)?;
         if n == 0 {
             break;
@@ -817,8 +889,47 @@ mod tests {
     use super::*;
     #[test]
     fn ownership_ids_are_strict() {
-        assert!(valid_id("0123456789abcdef0123456789abcdef"));
+        assert!(valid_id(&crate::random_hex()));
+        assert!(!valid_id("0123456789abcdef0123456789abcdef"));
+        assert!(valid_id(
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        ));
         assert!(!valid_id("../real-distribution"));
+    }
+    #[test]
+    fn real_session_identity_survives_journal_recovery() {
+        let root =
+            std::env::temp_dir().join(format!("material-session-recovery-{}", crate::random_hex()));
+        fs::create_dir(&root).unwrap();
+        let mut sessions = Sessions::new(&root).unwrap();
+        let id = crate::random_hex();
+        let directory = sessions.root.join(&id);
+        fs::create_dir(&directory).unwrap();
+        let session = Session {
+            id: id.clone(),
+            profile_id: "profile-a".into(),
+            revision_id: "revision-a".into(),
+            distribution: format!("MaterialBrowser-{id}"),
+            mode: "terminal".into(),
+            backend: "wsl2".into(),
+            state: "provisioning".into(),
+            directory,
+            message: "pending".into(),
+            operation_id: id.clone(),
+            phase: "queued".into(),
+            events: Vec::new(),
+            guest_removed: false,
+            guest_created: false,
+            save_requested: false,
+            guest_action_attempts: 0,
+        };
+        sessions.persist(&session).unwrap();
+        sessions.entries.insert(id.clone(), session);
+        drop(sessions);
+        let recovered = Sessions::new(&root).unwrap();
+        assert_eq!(recovered.entries[&id].state, "recovery-required");
+        assert_eq!(recovered.entries[&id].operation_id, id);
+        fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn archive_scope_rejects_escape_and_unsupported_categories() {
@@ -839,20 +950,30 @@ mod tests {
     #[test]
     fn retained_sessions_block_template_and_vault_mutations() {
         let s = Session {
-            id: "0123456789abcdef0123456789abcdef".into(),
+            id: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef".into(),
             profile_id: "profile-a".into(),
             revision_id: "revision-a".into(),
-            distribution: "MaterialBrowser-0123456789abcdef0123456789abcdef".into(),
+            distribution:
+                "MaterialBrowser-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+                    .into(),
             mode: "browser".into(),
             backend: "wsl2".into(),
             state: "saved".into(),
             directory: PathBuf::from("unused"),
             message: String::new(),
+            operation_id: "test-operation".into(),
+            phase: "test".into(),
+            events: Vec::new(),
+            guest_removed: false,
+            guest_created: false,
+            save_requested: false,
+            guest_action_attempts: 0,
         };
         let mut sessions = Sessions {
             root: PathBuf::from("unused"),
             entries: BTreeMap::from([(s.id.clone(), s)]),
             children: BTreeMap::new(),
+            workers: BTreeMap::new(),
         };
         assert!(sessions.guard_mutation(Some("profile-a")).is_err());
         assert!(sessions.guard_mutation(None).is_err());
