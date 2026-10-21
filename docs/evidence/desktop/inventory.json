@@ -108,7 +108,7 @@
     },
     {
       "id": "persisted-preferences-04e003f",
-      "active": true,
+      "active": false,
       "path": "docs/evidence/desktop/persisted-preferences-04e003f.png",
       "sourceCommit": "04e003fb37fcdc5fecb8ef45806aaae74a69b603",
       "artifactSha256": "cf260c06464e734d4f9eebad6a8c8ec1d8722d2bd22472a5d0ebed7a65fff7c8",
@@ -126,7 +126,7 @@
     },
     {
       "id": "protected-history-04e003f",
-      "active": true,
+      "active": false,
       "path": "docs/evidence/desktop/protected-history-04e003f.png",
       "sourceCommit": "04e003fb37fcdc5fecb8ef45806aaae74a69b603",
       "artifactSha256": "cf260c06464e734d4f9eebad6a8c8ec1d8722d2bd22472a5d0ebed7a65fff7c8",
@@ -144,7 +144,7 @@
     },
     {
       "id": "display-name-history-04e003f",
-      "active": true,
+      "active": false,
       "path": "docs/evidence/desktop/display-name-history-04e003f.png",
       "sourceCommit": "04e003fb37fcdc5fecb8ef45806aaae74a69b603",
       "artifactSha256": "cf260c06464e734d4f9eebad6a8c8ec1d8722d2bd22472a5d0ebed7a65fff7c8",

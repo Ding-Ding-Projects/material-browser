@@ -164,3 +164,6 @@ full desktop101 passed,0 failed,1 Windows-only skip. TypeScript passed. Built ca
 resume, double-click and lock-lifetime workflows remain next. The earlier native matrix is
 renderer-page evidence with actual native geometry; its incomplete-paint frames remain
 unaccepted despite a successful separate settled native/renderer comparison.
+
+
+Current evidence milestone, 2026-10-21: the exact root build-installer.bat -Component Desktop completed at stable source 4e8ff77744ab69bf811c917c9db3932b00c36858. The installer is 809576960 bytes, SHA256 71551e63a50d495bf9d7661b838e204e608778c90af0ef27131203b6af4a167e. The current encrypted-progress image was produced from that built application, inspected again after exact-byte promotion, and linked from README. Removing that link made the evidence validator fail; restoring the exact bytes passed. Historical desktop presentation is retained separately. Nine of ten bounded fresh matrix retakes painted fully; one stopped before interaction at process-ancestry validation. All owned processes and hidden desktops were verified absent. Physical scaling and full accessibility acceptance remain incomplete. The final handbook must be rebuilt with this updated documentation. RDP first-use consent and visible terminal/WSLg decisions remain pending; Sandbox is unavailable on the selected host.

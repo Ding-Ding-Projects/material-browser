@@ -69,3 +69,9 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Verify the newer versioned installer and safe update of the existing active installation
 - [x] Retain current inspected source-bound README screenshots and archived originals
 - [ ] Verify the final hosted release and safe installed-update outcome
+
+### Current Super Profiles evidence
+
+- [x] Produce the desktop installer at stable source 4e8ff77 and promote an inspected encrypted-progress image with a failing missing-link check.
+- [ ] Rebuild and verify the portable handbook with the current approved image and documentation.
+- [ ] Complete physical-scale/accessibility proof and the remaining native backend acceptance; RDP first-use consent, visible terminal/WSLg decisions and unavailable Sandbox remain explicit gaps.

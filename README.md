@@ -23,24 +23,33 @@ Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop check
 
 Builds enter through build.bat; installer production enters through build-installer.bat. Hosted builds run on every branch push and manual dispatch, use increasing package versions and publish normal development releases. Tests and lint run locally, not in the hosted workflow. Each release asset is transferred separately and checked against its published byte count and SHA-256.
 
-## Current desktop screenshots
+## Current Super Profiles screenshot
 
-These original version 0.1.1 images show the combined packaged desktop at source `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. The exact local desktop installer entrypoint completed with exit 0. Images were taken through an isolated hidden desktop, inspected for private data and promoted without changing their bytes. Viewports are 1920 by 1500 at logical scale 1, in English and dark theme.
+This original renderer image shows the packaged desktop at source
+`4e8ff77744ab69bf811c917c9db3932b00c36858`, built through the exact root Desktop installer
+entrypoint. It came from a fresh owned native launch on an isolated hidden desktop and was
+inspected for private data and promoted without changing its bytes. The viewport is 1264 by
+735, English/light, logical scale 1. Native display DPI was 96.
 
-![Persisted dark theme and compact density after restart](docs/evidence/desktop/persisted-preferences-04e003f.png)
+![Super Profile encrypted setup progress in the current desktop](docs/evidence/super-profiles/encrypted-progress-4e8ff77.png)
 
-![Protected history unlocked after restart with independent access](docs/evidence/desktop/protected-history-04e003f.png)
+This fresh workflow saved encrypted setup progress, kept one identity on repeated saves and
+reopened the saved step. The earlier [full wizard workflow](docs/evidence/super-profiles/wizard-50ddbbc.json)
+separately verified restart/unlock, invalid-file retention and backend separation. Its source
+identity is retained. The frontend executable and application archive are byte-identical
+between those two builds; the later native host contains the desktop handoff repairs.
 
-![Persisted workspace display name and recorded settings change](docs/evidence/desktop/display-name-history-04e003f.png)
+The current image proves the visible wizard state. It does not prove a graphical guest,
+physical display scaling, complete keyboard accessibility or installer acceptance. Nine
+fresh targeted layout retakes passed, while one tuple stopped before interaction at its
+process-ownership check. No complete final-source visual matrix is claimed.
 
-The visible controls saved dark theme, compact density and a synthetic workspace name. A stale native preference write was rejected. Protected history recorded the settings change, reopened locked after a real process restart and retained its records after unlocking. Both GUI launches saved six complete process identities before closing; all were proven absent and both exact hidden desktops closed.
-
-These observations do not prove physical display-scale coverage, native keyboard behavior, complete localization, history restore/export/recovery or installation/update. Earlier onboarding, consent and bilingual images keep their original provenance in the archive.
-
-[Current evidence inventory](docs/evidence/desktop/inventory.json) · [Source/hash summary](docs/evidence/desktop/receipts-04e003f.json) · [Earlier presentation archive](docs/evidence/archive.md)
+[Current image inventory](docs/evidence/super-profiles/inventory.json) ·
+[Build and workflow receipts](docs/evidence/super-profiles/wizard-50ddbbc.json) ·
+[Earlier desktop images and provenance](docs/evidence/archive.md)
 
 ## Documentation and remaining work
 
-The hosted handbook retains complete documentation/wiki articles and interactive task guides. Automated releases also include a single-file offline handbook. Earlier source-bound handbook interaction and restart observations remain in the archive; current-source companion runtime acceptance is not inferred from packaging success.
+The hosted handbook retains complete documentation/wiki articles and interactive task guides. Automated releases also include a single-file offline handbook. The source-50ddbbc portable handbook passed one-file launch, internal home/article/wiki navigation, the three-step Super Profiles guide and progress persistence after reload. Current-source companion production and verification remain separate from the desktop build.
 
-The encrypted core, native control transports, settings/history integration, storage service and hosting wizard have source implementations. Their broad required-feature inventories remain incomplete. See the roadmap and categorized documentation for exact limitations. The existing installed 0.1.0 desktop may remain active while a newer installer is prepared; it must reach a safe normal lifecycle boundary before an update is applied.
+The encrypted core, native control transports, settings/history integration, storage service and hosting wizard have source implementations. Their broad required-feature inventories remain incomplete. See the roadmap and categorized documentation for exact limitations. Live installation discovery found no matching installed desktop. Historical installation statements remain in the archive; no installed-update result is claimed.

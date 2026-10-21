@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "super-profiles-encrypted-progress-4e8ff77",
+      "active": true,
+      "path": "docs/evidence/super-profiles/encrypted-progress-4e8ff77.png",
+      "sourceCommit": "4e8ff77744ab69bf811c917c9db3932b00c36858",
+      "artifactSha256": "5fee4c2fa2a6fb199fd2d64a1cf9b07a66bdd913bbc5f1c88ae94b4ba0a3984b",
+      "captureSha256": "eb26dcdbb335741d12df4fd10113f05c4ec6e0dd4fb71764dc93b47d125734cc",
+      "screen": "super-profiles-wizard",
+      "state": "encrypted-draft-step-three",
+      "theme": "light",
+      "viewportWidth": 1264,
+      "viewportHeight": 735,
+      "scale": 1,
+      "interactionProofId": "encrypted-draft-real-native-workflow-4e8ff77",
+      "interactionReceiptSha256": "b11045575d2d2263f6e3383df41f088103e9282669edd419a17ef609794fa17d",
+      "inspectionStatus": "inspected",
+      "limitations": [
+        "Renderer image, not native compositor output",
+        "English/light/normal size only",
+        "No guest launch in this run"
+      ]
+    }
+  ]
+}

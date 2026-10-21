@@ -135,3 +135,26 @@ The encrypted core, native control transports, settings/history integration, sto
 ````
 
 [Previous desktop evidence article](desktop/archive-5922074.md)
+
+## Previous combined desktop presentation, source 04e003f
+
+[Original three images and complete provenance](desktop/archive-04e003f.md). The following README section is preserved verbatim as historical presentation.
+
+````markdown
+## Current desktop screenshots
+
+These original version 0.1.1 images show the combined packaged desktop at source `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. The exact local desktop installer entrypoint completed with exit 0. Images were taken through an isolated hidden desktop, inspected for private data and promoted without changing their bytes. Viewports are 1920 by 1500 at logical scale 1, in English and dark theme.
+
+![Persisted dark theme and compact density after restart](docs/evidence/desktop/persisted-preferences-04e003f.png)
+
+![Protected history unlocked after restart with independent access](docs/evidence/desktop/protected-history-04e003f.png)
+
+![Persisted workspace display name and recorded settings change](docs/evidence/desktop/display-name-history-04e003f.png)
+
+The visible controls saved dark theme, compact density and a synthetic workspace name. A stale native preference write was rejected. Protected history recorded the settings change, reopened locked after a real process restart and retained its records after unlocking. Both GUI launches saved six complete process identities before closing; all were proven absent and both exact hidden desktops closed.
+
+These observations do not prove physical display-scale coverage, native keyboard behavior, complete localization, history restore/export/recovery or installation/update. Earlier onboarding, consent and bilingual images keep their original provenance in the archive.
+
+[Current evidence inventory](docs/evidence/desktop/inventory.json) · [Source/hash summary](docs/evidence/desktop/receipts-04e003f.json) · [Earlier presentation archive](docs/evidence/archive.md)
+
+````

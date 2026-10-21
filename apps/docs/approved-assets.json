@@ -63,5 +63,10 @@
     "path": "docs/evidence/desktop/display-name-history-04e003f.png",
     "sha256": "a80fd03c2b1a2331684ff7ddfa247b628616a2f41e98bb67c92f6117ab45de91",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/super-profiles/encrypted-progress-4e8ff77.png",
+    "sha256": "eb26dcdbb335741d12df4fd10113f05c4ec6e0dd4fb71764dc93b47d125734cc",
+    "reviewedForPublication": true
   }
 ]
