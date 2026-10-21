@@ -1,4 +1,5 @@
 //! Encrypted local vault and immutable revision store. No browser processes are launched here.
+mod super_profiles;
 use argon2::{Algorithm, Argon2, Params, Version};
 use chacha20poly1305::{
     XChaCha20Poly1305, XNonce,
@@ -93,6 +94,10 @@ impl Drop for SecretKey {
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 struct State {
+    #[serde(default)]
+    super_profiles: BTreeMap<String, super_profiles::SuperProfile>,
+    #[serde(default)]
+    super_revisions: BTreeMap<String, super_profiles::SuperRevision>,
     profiles: BTreeMap<String, Profile>,
     keys: BTreeMap<String, SecretKey>,
     revisions: BTreeMap<String, Revision>,
@@ -516,6 +521,9 @@ impl Manager {
         }
     }
     fn dispatch(&mut self, m: &str, p: &Value) -> Result<Value> {
+        if m.starts_with("superProfiles.") {
+            return self.dispatch_super_profiles(m, p);
+        }
         match m {
             "vault.changePassword" => {
                 let old: Header = serde_json::from_slice(&read(&self.root.join("vault.json"))?)?;
@@ -942,6 +950,8 @@ impl Manager {
     fn push(&self) -> Result<Value> {
         let folder = self.sync_folder()?;
         let mut exported = self.state.clone();
+        exported.super_profiles.clear();
+        exported.super_revisions.clear();
         exported.preferences = Value::Null;
         exported.sync_folder = None;
         exported.profiles.retain(|_, p| p.sync);

@@ -1,5 +1,27 @@
 # Material Browser handoff
 
+## Super Profiles implementation in progress
+
+Super Profiles add encrypted templates, immutable revisions, authenticated chunked archives,
+typed desktop workflows, independent backend settings, selected workspace/script staging,
+owned WSL2 lifecycle and a Windows Sandbox bootstrap. Default Linux browser archives and
+the Ubuntu base have pinned digests. The full-desktop source uses a loopback RDP connection.
+Existing browser profiles remain separate; Super Profile archives are local-only.
+
+Verified during this task: 16 core tests; 28 native-host tests on Linux; 89 desktop tests;
+focused draft checks; exact Windows root build entrypoints for Core, Host and Desktop;
+and the documentation build with 39 complete articles. These are source/build checks,
+not guest runtime or installer acceptance. Windows Sandbox is absent on the selected host.
+GitHub Projects discovery lacks read:project and has been skipped without scope changes.
+
+Still required: actual WSL launch/save/discard and full desktop authentication, Sandbox
+runtime and in-guest save action, asynchronous progress/cancellation, complete Linux
+installer recipes, reviewed temporary plaintext cleanup, source-bound UI evidence,
+packaging and deployment. Do not mark the whole feature complete from this preservation
+milestone. Continue only with owned session directories and verified WSL registration paths.
+
+Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
+
 ## Current delivery
 
 The productive repair has a successful hosted run39207217449 and normal release build-17-39207217449-1. The live handbook now serves source29c4c83 through publication4dccbf2, with37 articles and all19 declared file hashes verified. Its home, shortcut/current-evidence articles, all three images, search, dark-preference reload and390px layout checks passed. Eight saved browser identities were proven absent and its exact desktop closed. The later documentation build39208676657 remains a separate pending release result. See docs/evidence/handbook/verification-29c4c83.json.

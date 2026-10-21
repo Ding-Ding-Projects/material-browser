@@ -29,3 +29,27 @@ export async function request(
   if (!window.materialBrowser) throw new Error("BACKEND_UNAVAILABLE");
   return window.materialBrowser.request(method, params);
 }
+
+export type SuperProfileSettings = {
+  backend: 'wsl2' | 'windows-sandbox';
+  launchMode: 'terminal' | 'browser' | 'desktop';
+  configurations?: Partial<Record<'wsl2'|'windows-sandbox', Omit<SuperProfileSettings,'configurations'|'backend'>>>;
+  rootfsPath?: string;
+  rootfsSha256?: string;
+  workspacePath?: string;
+  setupCommands?: string[];
+  startupCommands?: string[];
+  installers?: string[];
+  networking?: boolean;
+  clipboard?: boolean;
+  memoryMb?: number;
+  [key: string]: unknown;
+};
+export type SuperProfile = {
+  id: string; name: string; engine: string; settings: SuperProfileSettings;
+  revisionId: string; createdAt: number; updatedAt: number;
+};
+export type SuperRevision = {
+  id: string; superProfileId: string; parentId?: string; createdAt: number;
+  name: string; engine: string; settings: SuperProfileSettings; archiveBytes: number;
+};

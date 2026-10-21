@@ -2,6 +2,11 @@
 
 An encrypted browser-profile workspace for Windows x64, with optional self-hosted storage.
 
+Super Profiles add encrypted reusable guest templates, revision history and explicit
+browser/workspace save-back. Native WSL2 and Windows Sandbox source is under acceptance;
+template storage and successful compilation do not prove every guest experience works.
+See [the workflow and current limits](docs/features/desktop/super-profiles.md).
+
 **Development status:** unsigned development installers and the portable offline handbook are available through [normal automated releases](https://github.com/Ding-Ding-Projects/material-browser/releases). The product remains incomplete. Native installation/update acceptance, portable browser credentials, stable advanced identity, consistent live snapshots and two-computer restoration remain unverified or unsupported.
 
 - [Interactive handbook and complete documentation](https://ding-ding-projects.github.io/material-browser/)
