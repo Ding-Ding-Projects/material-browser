@@ -109,3 +109,12 @@ settings and immutable revisions. Guest-only managed policy generation preserves
 profile files. Core23 and host52 checks passed; independent source review found no confirmed
 defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
 review and successful policy-file generation do not prove browser recognition.
+
+Managed WSL browser launch diagnosis at f1816d6 showed the detached command returning0,
+then the readiness probe returning1 with no browser left. Identical foreground managed
+Chromium survived10 seconds in the proven guest-local virtual display. Current repair
+retains the foreground WSL child before cancellation/readiness and detects launcher loss.
+Focused launch1 and health8 checks passed. Native repaired readiness remains next. The
+workspace-wide formatting check reports existing unrelated formatting drift; no broad
+formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
+immutable f1816d6, with its final receipt and teardown inventory pending inspection.

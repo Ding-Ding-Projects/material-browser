@@ -17,3 +17,15 @@ Stop and discard are available through the native API while locked; their respon
 template identifiers, revision identifiers and staging paths. A successful encrypted save
 and incomplete cleanup are separate results, so retrying cleanup must not create a second
 revision.
+
+Portable bookmark documents are stored encrypted with each backend's template settings.
+The guest receives a separate managed read-only folder; saved editable browser bookmarks
+remain in their existing profile files. Only bounded neutral JSON with HTTP(S) links is
+accepted. Host browser directories, credentials and authenticated sessions are not imported.
+Exact pinned-browser policy recognition and the wizard's import controls require separate
+runtime proof; source implementation does not establish that acceptance.
+
+Native headless Chromium and Firefox roundtrips now demonstrate browser/workspace restoration.
+Default uncached base acquisition and stable-source installer production also have dedicated
+receipts linked from the complete workflow article. Graphical terminal, WSLg, full desktop,
+Sandbox, accepted installed update and final interface evidence remain separately tracked.

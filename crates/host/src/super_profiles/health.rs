@@ -313,6 +313,16 @@ impl Sessions {
                 continue;
             };
             let mut launcher_ended = false;
+            let mut browser_ownership_error = false;
+            if !observer.sandbox && session.mode == "browser" {
+                match self.children.get_mut(&id).map(Child::try_wait) {
+                    Some(Ok(status)) => launcher_ended = status.is_some(),
+                    Some(Err(_)) | None => {
+                        launcher_ended = true;
+                        browser_ownership_error = true;
+                    }
+                }
+            }
             if observer.sandbox {
                 if let Some(child) = self.children.get_mut(&id) {
                     launcher_ended = child.try_wait().ok().flatten().is_some();
@@ -337,7 +347,7 @@ impl Sessions {
                     }
                 }
             } else if let Some(child) = observer.child.as_mut() {
-                launcher_ended = child.try_wait().ok().flatten().is_some();
+                launcher_ended |= child.try_wait().ok().flatten().is_some();
             }
             let (mut snapshot, closed, absent) = match observer.stream.lock() {
                 Ok(stream) => {
@@ -382,6 +392,14 @@ impl Sessions {
                     false,
                 ),
             };
+            if !observer.sandbox && session.mode == "browser" && launcher_ended {
+                snapshot.status = "exited".into();
+                snapshot.detail = "Managed browser launcher or guest observer ended; explicit recovery is required".into();
+            }
+            if browser_ownership_error {
+                snapshot.status = "unknown".into();
+                snapshot.detail = "Managed browser process ownership is unavailable; explicit recovery is required".into();
+            }
             // A live heartbeat after launcher exit means process ownership was lost, not guest disposal.
             if observer.sandbox && launcher_ended && snapshot.status == "ready" {
                 snapshot.status = "unknown".into();
@@ -554,6 +572,44 @@ mod tests {
             stream,
         )
     }
+    #[test]
+    fn fresh_browser_heartbeat_cannot_mask_missing_launcher_ownership() {
+        let root = std::env::temp_dir().join(format!("material-health-{}", crate::random_hex()));
+        let mut sessions = Sessions::new(&root).unwrap();
+        let mut session = session(&root, "running", "wsl2");
+        session.mode = "browser".into();
+        let id = session.id.clone();
+        let mut observations = stream();
+        let mut ready = record(1);
+        ready["mode"] = json!("browser");
+        assert!(accept(
+            &serde_json::to_vec(&ready).unwrap(),
+            &id,
+            &session.health_nonce,
+            "browser",
+            &mut observations
+        ));
+        sessions.entries.insert(id.clone(), session);
+        sessions.observers.insert(
+            id.clone(),
+            Observer {
+                child: None,
+                stream: Arc::new(Mutex::new(observations)),
+                sandbox: false,
+            },
+        );
+        sessions.refresh_health();
+        assert_eq!(sessions.entries[&id].state, "recovery-required");
+        assert_eq!(
+            sessions.entries[&id].health.as_ref().unwrap().status,
+            "unknown"
+        );
+        sessions.entries.get_mut(&id).unwrap().state = "stopped".into();
+        sessions.refresh_health();
+        assert_eq!(sessions.entries[&id].state, "stopped");
+        fs::remove_dir_all(root).unwrap();
+    }
+
     #[test]
     fn protocol_rejects_wrong_identity_replay_and_oversize_without_refresh() {
         let mut stream = stream();

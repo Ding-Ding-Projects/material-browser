@@ -302,26 +302,14 @@ impl Sessions {
                 s.state = "launched".into();
                 s.message = "Loopback desktop connection launched; full desktop readiness awaits guest session confirmation".into();
             } else {
-                let script = if mode == "browser" && engine == "firefox" {
-                    "nohup firefox --no-remote --profile /home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                } else if mode == "browser" {
-                    "nohup chromium --user-data-dir=/home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                } else {
-                    "nohup startxfce4 >/home/materialbrowser/.material-browser/launch.log 2>&1 </dev/null &"
-                };
-                run(
-                    &[
-                        "-d",
-                        &s.distribution,
-                        "-u",
-                        USER,
-                        "--exec",
-                        "sh",
-                        "-lc",
-                        script,
-                    ],
-                    Duration::from_secs(20),
-                )?;
+                asynchronous::check_cancel()?;
+                verify_registration(&s)?;
+                let child = browser_launch_command(&s, engine)?
+                    .spawn()
+                    .map_err(io_error)?;
+                // Retain ownership before any cancellable readiness operation.
+                self.children.insert(id.clone(), child);
+                asynchronous::check_cancel()?;
                 let probe = if mode == "browser" && engine == "firefox" {
                     "sleep 2; pgrep -f '[f]irefox.*material-browser' >/dev/null"
                 } else if mode == "browser" {
@@ -342,6 +330,19 @@ impl Sessions {
                     ],
                     Duration::from_secs(15),
                 )?;
+                asynchronous::check_cancel()?;
+                let child = self.children.get_mut(&id).ok_or_else(|| {
+                    error(
+                        "BROWSER_OWNERSHIP_LOST",
+                        "Managed browser process ownership is unavailable",
+                    )
+                })?;
+                if child.try_wait().map_err(io_error)?.is_some() {
+                    return Err(error(
+                        "BROWSER_EXITED",
+                        "Managed browser exited before readiness confirmation; staging retained",
+                    ));
+                }
                 s.state = "running".into();
                 s.message =
                     "Guest process readiness verified; visual readiness remains unverified".into();
@@ -370,6 +371,39 @@ impl Sessions {
         self.entries.insert(id, s.clone());
         Ok(json!(s))
     }
+}
+
+fn browser_launch_command(s: &Session, engine: &str) -> Result<Command> {
+    let script = match engine {
+        "chromium" => {
+            "exec chromium --user-data-dir=/home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1"
+        }
+        "firefox" => {
+            "exec firefox --no-remote --profile /home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1"
+        }
+        _ => {
+            return Err(error(
+                "ENGINE_UNSUPPORTED",
+                "Unsupported managed browser engine",
+            ));
+        }
+    };
+    let mut command = Command::new("wsl.exe");
+    command.args([
+        "-d",
+        &s.distribution,
+        "-u",
+        USER,
+        "--exec",
+        "sh",
+        "-lc",
+        script,
+    ]);
+    command
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    Ok(command)
 }
 
 fn desktop_launcher_script(engine: &str) -> Result<String> {
@@ -442,6 +476,50 @@ fn install_desktop_launchers(s: &Session, engine: &str) -> Result<()> {
 #[cfg(test)]
 mod desktop_tests {
     use super::*;
+
+    #[test]
+    fn browser_launch_retains_foreground_managed_process_contract() {
+        let session: Session = serde_json::from_value(json!({
+            "id":"a".repeat(64), "profileId":"p", "revisionId":"r",
+            "distribution":format!("MaterialBrowser-{}", "a".repeat(64)),
+            "mode":"browser", "backend":"wsl2", "state":"provisioning",
+            "directory":"owned-session", "message":"fixture"
+        }))
+        .unwrap();
+        for (engine, profile) in [
+            ("chromium", "--user-data-dir="),
+            ("firefox", "--no-remote --profile "),
+        ] {
+            let command = browser_launch_command(&session, engine).unwrap();
+            assert_eq!(command.get_program(), "wsl.exe");
+            let args = command
+                .get_args()
+                .map(|arg| arg.to_str().unwrap())
+                .collect::<Vec<_>>();
+            assert_eq!(
+                &args[..7],
+                &[
+                    "-d",
+                    session.distribution.as_str(),
+                    "-u",
+                    "materialbrowser",
+                    "--exec",
+                    "sh",
+                    "-lc"
+                ]
+            );
+            assert_eq!(
+                args[7],
+                format!(
+                    "exec {engine} {profile}/home/materialbrowser/.material-browser/browser about:blank >/home/materialbrowser/.material-browser/launch.log 2>&1"
+                )
+            );
+            assert!(!args[7].contains("nohup"));
+            assert!(!args[7].ends_with('&'));
+            assert!(!args[7].contains("--no-sandbox"));
+        }
+        assert!(browser_launch_command(&session, "unknown").is_err());
+    }
 
     #[test]
     fn desktop_entries_bind_each_engine_to_the_managed_profile() {
