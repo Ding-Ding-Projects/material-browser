@@ -4,10 +4,13 @@ mod base_image;
 #[cfg(test)]
 use archive::safe_member;
 use archive::validate_archive;
+mod async_save;
 mod asynchronous;
+mod capabilities;
 mod cleanup;
 mod desktop_connection;
 mod guest_installers;
+mod isolation;
 mod linux_runtime;
 mod payload;
 mod provisioning;
@@ -51,8 +54,15 @@ struct Session {
     save_requested: bool,
     #[serde(default)]
     guest_action_attempts: u8,
+    #[serde(default)]
+    save_plan: Option<async_save::SavePlan>,
+    #[serde(default)]
+    saved_revision_id: Option<String>,
+    #[serde(default)]
+    save_confirmation_required: bool,
 }
 pub struct Sessions {
+    unlock_epoch: String,
     root: PathBuf,
     entries: BTreeMap<String, Session>,
     children: BTreeMap<String, Child>,
@@ -175,7 +185,7 @@ impl Sessions {
                     }
                     if !matches!(
                         s.state.as_str(),
-                        "stopped" | "saved" | "discarded" | "cleanup-required"
+                        "stopped" | "saved" | "discarded" | "cleanup-required" | "save-ready"
                     ) {
                         s.state = "recovery-required".into();
                         s.message =
@@ -190,6 +200,7 @@ impl Sessions {
             entries,
             children: BTreeMap::new(),
             workers: BTreeMap::new(),
+            unlock_epoch: crate::random_hex(),
         })
     }
     fn persist(&self, s: &Session) -> Result<()> {
@@ -253,10 +264,7 @@ impl Sessions {
         }
     }
     pub fn capabilities() -> Value {
-        let windows = cfg!(windows);
-        let wsl = windows && run(&["--status"], Duration::from_secs(10)).is_ok();
-        let sandbox = windows && sandbox::available();
-        json!({"wsl2":{"available":wsl,"requiresRootfs":false,"requiresRootfsSha256":false,"rootfsOverrideRequiresSha256":true,"modes":["terminal","browser","desktop"],"runtimeVerified":false,"reason":"Requires an approved root filesystem with useradd, tar and selected guest programs; WSLg is required for graphical modes"},"windowsSandbox":{"available":sandbox,"modes":["browser"],"runtimeVerified":false,"reason":"Requires Windows Sandbox already enabled; host settings are never changed"},"stableIdentity":false,"supportedConfiguration":["backend","rootfsPath","rootfsSha256","launchMode"],"saveCategories":["browser","workspace"]})
+        capabilities::detect()
     }
     pub fn launch(
         &mut self,
@@ -327,6 +335,7 @@ impl Sessions {
         if !["terminal", "browser", "desktop"].contains(&mode) {
             return Err(error("INVALID_MODE", "Unsupported guest mode"));
         }
+        capabilities::require_mode(&capabilities::detect(), backend, mode)?;
         let id = crate::random_hex();
         let directory = self.root.join(&id);
         fs::create_dir(&directory).map_err(io_error)?;
@@ -348,6 +357,9 @@ impl Sessions {
             guest_created: false,
             save_requested: false,
             guest_action_attempts: 0,
+            save_plan: None,
+            saved_revision_id: None,
+            save_confirmation_required: false,
         };
         self.persist(&s)?;
         self.entries.insert(id.clone(), s.clone());
@@ -374,46 +386,18 @@ impl Sessions {
         let settings = settings.clone();
         let engine = engine.to_string();
         let browser = browser_executable.map(Path::to_path_buf);
-        let root = self.root.clone();
-        let worker_session = s.clone();
-        let handle = thread::spawn(move || {
-            asynchronous::set_context(&worker_session);
-            let mut runner = Sessions {
-                root,
-                entries: BTreeMap::new(),
-                children: BTreeMap::new(),
-                workers: BTreeMap::new(),
-            };
-            let fallback = worker_session.clone();
-            runner.entries.insert(fallback.id.clone(), fallback.clone());
-            let result = runner.provision(
-                &settings,
-                worker_session,
-                archive,
-                &engine,
-                browser.as_deref(),
-            );
-            if let Err(e) = result {
-                let mut retained = runner
-                    .entries
-                    .get(&fallback.id)
-                    .cloned()
-                    .unwrap_or(fallback);
-                retained.state = "recovery-required".into();
-                if retained.phase != "cancelled" && retained.phase != "failed" {
-                    asynchronous::event(&mut retained, "failed", &e.message);
-                }
-                let _ = runner.persist(&retained);
-                runner.entries.insert(retained.id.clone(), retained);
-            }
-            (runner.entries, runner.children)
-        });
-        self.workers.insert(id, handle);
+        self.spawn_worker(s.clone(), move |runner, session| {
+            runner.provision(&settings, session, archive, &engine, browser.as_deref())
+        })?;
         Ok(json!(s))
     }
     pub fn status(&mut self) -> Value {
         self.refresh_workers();
         for s in self.entries.values_mut() {
+            s.save_confirmation_required = s.state == "save-ready"
+                && s.save_plan
+                    .as_ref()
+                    .is_some_and(|p| p.collection_epoch != self.unlock_epoch);
             if s.backend == "windows-sandbox" {
                 s.save_requested = s.directory.join("exchange/save-requested").is_file();
             }
@@ -432,21 +416,28 @@ impl Sessions {
         }
         json!(self.entries.values().collect::<Vec<_>>())
     }
-    pub fn reconcile_guest_requests(&mut self, core: &mut material_browser_core::Manager) {
+    pub fn reconcile_guest_requests(
+        &mut self,
+        core: &mut material_browser_core::Manager,
+        unlocked: bool,
+    ) {
         self.refresh_workers();
         let requests = self
             .entries
             .values()
             .filter(|s| {
                 s.backend == "windows-sandbox"
-                    && !matches!(s.state.as_str(), "discarded" | "saved" | "cleanup-required")
+                    && !matches!(
+                        s.state.as_str(),
+                        "discarded" | "saved" | "cleanup-required" | "save-ready" | "collecting"
+                    )
                     && s.guest_action_attempts < 3
                     && control_receipt(&s.directory.join("exchange/stopped"))
             })
             .filter_map(|s| {
                 let save = control_receipt(&s.directory.join("exchange/save-requested"));
                 let discard = control_receipt(&s.directory.join("exchange/discard-requested"));
-                if save == discard {
+                if save == discard || (save && !unlocked) {
                     None
                 } else {
                     Some((s.id.clone(), s.revision_id.clone(), save))
@@ -565,125 +556,6 @@ impl Sessions {
         Ok(
             json!({"sessionId":s.id,"categories":[{"id":"browser","included":true,"description":"Backend-specific managed browser state"},{"id":"workspace","included":true,"description":"Managed guest workspace files"}],"excluded":["operating-system","external-folders","machine-identity"],"stopped":s.state=="stopped","requiresExpectedRevisionId":true}),
         )
-    }
-    pub fn save(&mut self, core: &mut material_browser_core::Manager, p: &Value) -> Result<Value> {
-        self.refresh_workers();
-        let categories = selected_categories(p)?;
-        let id = text(p, "sessionId")?;
-        let mut s = self
-            .entries
-            .get(id)
-            .cloned()
-            .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
-        if text(p, "expectedRevisionId")? != s.revision_id {
-            return Err(error(
-                "REVISION_CONFLICT",
-                "Save must target the exact template revision used to launch this guest",
-            ));
-        }
-        let current = core
-            .execute("superProfiles.list", json!({}))
-            .map_err(|e| error(&e.code, &e.message))?;
-        if !current.as_array().is_some_and(|profiles| {
-            profiles.iter().any(|profile| {
-                profile["id"] == s.profile_id && profile["revisionId"] == s.revision_id
-            })
-        }) {
-            return Err(error(
-                "REVISION_CONFLICT",
-                "The template changed after this session launched",
-            ));
-        }
-        let close_after_save = match p.get("closeAfterSave") {
-            Some(v) => v
-                .as_bool()
-                .ok_or_else(|| error("INVALID_PARAMS", "closeAfterSave must be a boolean"))?,
-            None => false,
-        };
-        if close_after_save && s.state != "stopped" {
-            let mut stopped = self.stop(id)?;
-            if stopped["state"] == "cancelling" {
-                if let Some(object) = stopped.as_object_mut() {
-                    object.insert("saved".into(), json!(false));
-                }
-                return Ok(stopped);
-            }
-            s = self
-                .entries
-                .get(id)
-                .cloned()
-                .ok_or_else(|| error("SESSION_NOT_FOUND", "Session not found"))?;
-        }
-        if s.state != "stopped" {
-            return Err(error(
-                "SESSION_NOT_STOPPED",
-                "Stop the guest before saving a revision",
-            ));
-        }
-        let archive = s
-            .directory
-            .join(format!("export-{}.tar", crate::random_hex()));
-        if s.backend == "windows-sandbox" {
-            sandbox::archive(&s, &archive, &categories)?;
-        } else {
-            verify_registration(&s)?;
-            let output = fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(&archive)
-                .map_err(io_error)?;
-            let mut arguments = vec![
-                "-d",
-                &s.distribution,
-                "-u",
-                USER,
-                "--exec",
-                "tar",
-                "-cf",
-                "-",
-                "-C",
-                "/home/materialbrowser/.material-browser",
-            ];
-            arguments.extend(categories.iter().copied());
-            let child = Command::new("wsl.exe")
-                .args(arguments)
-                .stdin(Stdio::null())
-                .stdout(Stdio::from(output))
-                .stderr(Stdio::null())
-                .spawn()
-                .map_err(io_error)?;
-            let result = wait_owned(child, Duration::from_secs(300));
-            let terminated = run(&["--terminate", &s.distribution], Duration::from_secs(30));
-            result?;
-            terminated?;
-        }
-        validate_archive(&archive)?;
-        let mut revision = core
-            .import_super_profile_state(&s.profile_id, text(p, "expectedRevisionId")?, &archive)
-            .map_err(|e| error(&e.code, &e.message))?;
-        s.state = "saved".into();
-        s.message="Managed browser and workspace state encrypted into an immutable revision; staging retained".into();
-        self.entries.insert(id.into(), s.clone());
-        if let Some(object) = revision.as_object_mut() {
-            object.insert("saved".into(), json!(true));
-            object.insert("sessionId".into(), json!(id));
-            object.insert("cleanupPending".into(), json!(false));
-        }
-        let cleanup = match self.persist(&s) {
-            Err(e) => Err(e),
-            Ok(()) if close_after_save => self.discard(id).map(|_| ()),
-            Ok(()) => Ok(()),
-        };
-        if let Err(e) = cleanup {
-            if let Some(object) = revision.as_object_mut() {
-                object.insert("cleanupPending".into(), json!(true));
-                object.insert(
-                    "cleanupError".into(),
-                    json!({"code":e.code,"message":e.message}),
-                );
-            }
-        }
-        Ok(revision)
     }
     pub fn discard(&mut self, id: &str) -> Result<Value> {
         self.refresh_workers();
@@ -922,6 +794,9 @@ mod tests {
             guest_created: false,
             save_requested: false,
             guest_action_attempts: 0,
+            save_plan: None,
+            saved_revision_id: None,
+            save_confirmation_required: false,
         };
         sessions.persist(&session).unwrap();
         sessions.entries.insert(id.clone(), session);
@@ -948,7 +823,7 @@ mod tests {
         }
     }
     #[test]
-    fn retained_sessions_block_template_and_vault_mutations() {
+    fn retained_sessions_block_template_mutations_until_discarded() {
         let s = Session {
             id: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef".into(),
             profile_id: "profile-a".into(),
@@ -968,12 +843,16 @@ mod tests {
             guest_created: false,
             save_requested: false,
             guest_action_attempts: 0,
+            save_plan: None,
+            saved_revision_id: None,
+            save_confirmation_required: false,
         };
         let mut sessions = Sessions {
             root: PathBuf::from("unused"),
             entries: BTreeMap::from([(s.id.clone(), s)]),
             children: BTreeMap::new(),
             workers: BTreeMap::new(),
+            unlock_epoch: crate::random_hex(),
         };
         assert!(sessions.guard_mutation(Some("profile-a")).is_err());
         assert!(sessions.guard_mutation(None).is_err());

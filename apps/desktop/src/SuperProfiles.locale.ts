@@ -1,4 +1,13 @@
 export const superProfilesZh: Record<string,string> = {
+  'Cancel save':'取消儲存', 'Saved revision':'已儲存版本',
+  'Data saved. The view could not refresh; retry Refresh.':'資料已儲存。畫面未能更新，請按重新整理再試。', 'Data saved and session closed.':'資料已儲存，工作階段已關閉。',
+  'Save collection started. Watch session progress for the final result.':'已開始收集儲存資料，請留意工作階段進度及最終結果。',
+  'Provisioning started. Watch session progress for readiness.':'已開始準備環境，請留意工作階段進度。',
+  'Cancellation requested. Watch session progress for confirmation.':'已要求取消，請留意工作階段確認結果。',
+  'Action completed. The view could not refresh; retry Refresh.':'操作已完成。畫面未能更新，請按重新整理再試。',
+  'Review collected save':'檢視已收集資料', 'Confirm collected save':'確認儲存已收集資料', 'collecting':'收集資料中', 'save-ready':'資料可供儲存',
+  'This save was collected before the vault was locked or the application restarted. Confirm this exact operation to create its encrypted revision now.':'呢次儲存資料喺保管庫鎖定或程式重啟之前已經收集。確認今次操作，先會建立加密版本。',
+
   'starting':'啟動中', 'queued':'等候處理', 'staging-inputs':'準備輸入檔案', 'launching-sandbox':'正在啟動 Sandbox', 'acquiring-base':'取得基礎環境', 'importing-guest':'匯入客體', 'configuring-isolation':'設定隔離', 'installing-runtime':'安裝執行元件', 'installing-selected-inputs':'安裝所選檔案', 'restoring-state':'還原資料', 'starting-workspace':'啟動工作區', 'cancelled':'已取消', 'failed':'未能完成',
   'Leave both root filesystem fields empty to use the verified managed base. A custom archive requires its SHA-256.':'兩個根檔案系統欄位留空，就會使用已驗證嘅受管理基礎環境。自訂封存檔必須提供 SHA-256。',
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration } from './SuperProfiles.model.mjs';
+import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration, finishSuperProfileMutation } from './SuperProfiles.model.mjs';
 const draft={name:'Work',engine:'chromium',settings:{backend:'wsl2',launchMode:'browser',rootfsPath:'C:\\approved.tar'},step:2};
 test('window draft resumes configuration and bounds the current step',()=>{
  assert.deepEqual(readSuperProfileDraft(JSON.stringify(draft)),draft);
@@ -38,4 +38,14 @@ test('invalid inactive backend draft is rejected before switching',()=>{
  assert.throws(()=>readSuperProfileDraft(JSON.stringify({...draft,settings:{...draft.settings,configurations:{'windows-sandbox':{launchMode:'browser',installers:'invalid'}}}})));
  const persisted=persistSuperProfileConfiguration({...draft.settings,workspacePath:''});
  assert.equal(Object.hasOwn(persisted,'workspacePath'),false);
+});
+
+test('a failed refresh cannot turn an acknowledged save into a failed save',async()=>{
+ const message=await finishSuperProfileMutation({kind:'save',result:{saved:true,cleanupPending:true},clearSelection:()=>{},refresh:async()=>{throw Error('offline')}});
+ assert.equal(message,'Data saved. Cleanup is incomplete; retry Discard and close.');
+});
+test('deletion clears the selected revision owner before reloading',async()=>{
+ let selected='deleted';
+ const message=await finishSuperProfileMutation({kind:'remove',clearSelection:()=>{selected=''},refresh:async()=>{assert.equal(selected,'');throw Error('offline')}});
+ assert.equal(message,'Action completed. The view could not refresh; retry Refresh.');
 });

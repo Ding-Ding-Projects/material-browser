@@ -3,7 +3,8 @@
 Implement the approved Super Profiles plan in Ding-Ding-Projects/material-browser.
 Preserve existing browser profiles and all unrelated host environments.
 
-Preserved milestone: 07c8702c164379f494c773b6dd0395f541cc76e6 is verified on
+Preserved milestones: 07c8702c164379f494c773b6dd0395f541cc76e6 and
+e92b352069a1b2884e15feaa01fe027b705a91bd are verified on
 ai/feature/20261021-super-profiles. Subsequent task changes implement asynchronous
 provisioning, durable progress/cancellation, separate backend archive histories,
 selected guest installers, save-and-close, Sandbox guest controls and explicit
@@ -20,7 +21,16 @@ Verify WSL terminal/browser/full-desktop setup, save and discard using only owne
 distributions, and Windows Sandbox when available. Sandbox is absent on the selected
 host. Do not change host features, power or login state to manufacture acceptance.
 
-Save collection and guest-request reconciliation remain bounded synchronous work;
+New source adds asynchronous save collection, operation-bound confirmation after lock,
+locked stop/discard with redacted responses, host capability preflight and early WSL
+integration configuration. Current desktop checks:95 passed, zero failed, one Windows-only
+test skipped on Linux. The final host suite41 checks passed, including the capability preflight correction.
+The exact current root Host build passed with exit0. Native runtime proof remains pending.
+Two real WSL cycles at e92b352 proved synthetic workspace encrypted save/restore/discard,
+with unrelated distributions unchanged. See docs/evidence/super-profiles/wsl-roundtrip-e92b352.json.
+These canceled before graphical launch and used a separately verified base cache.
+Earlier e92b352 root installer production and packaged native UI CRUD passed, but do not
+prove these latest lifecycle changes. Default acquisition repair requires a fresh check;
 continuous external guest-process health remains unfinished. Packaging, installation,
 current-source screenshots, handbook deployment and default-branch integration
 remain outstanding. Keep roadmap/handoff accurate and retain unverified states.

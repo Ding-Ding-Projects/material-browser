@@ -81,6 +81,7 @@ function fixture({
         ({
           electron,
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
+          "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
           "node:child_process": { spawn: () => { hostSpawns++; return host; } },
           "node:path": path,
           "node:url": { pathToFileURL },

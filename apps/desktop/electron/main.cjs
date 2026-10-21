@@ -62,6 +62,7 @@ const allowed = new Set([
   "superProfiles.sessions.status",
   "superProfiles.sessions.stop",
   "superProfiles.sessions.save",
+  "superProfiles.sessions.finalizeSave",
   "superProfiles.sessions.preview",
   "superProfiles.sessions.discard",
   "engines.list",

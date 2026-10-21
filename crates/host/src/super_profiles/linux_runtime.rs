@@ -44,7 +44,7 @@ fn acquire(cache: &Path, engine: &str) -> Result<PathBuf> {
         .open(&script)
         .map_err(io_error)?;
     use std::io::Write;
-    file.write_all(format!("param([string]$Destination)\n$ErrorActionPreference = 'Stop'\n[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nInvoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile $Destination -TimeoutSec 600\n").as_bytes()).map_err(io_error)?;
+    file.write_all(format!("param([string]$Destination)\n$ErrorActionPreference = 'Stop'\n$ProgressPreference='SilentlyContinue'\n[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\n$curl=Join-Path $env:SystemRoot 'System32\\curl.exe'\nif (Test-Path -LiteralPath $curl) {{ & $curl --fail --silent --show-error --location --max-redirs 3 --proto-redir '=https' --proto '=https' --tlsv1.2 --max-time 600 --output $Destination '{url}'; if ($LASTEXITCODE -ne 0) {{ throw 'Browser download failed' }} }} else {{ Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile $Destination -TimeoutSec 600 }}\n").as_bytes()).map_err(io_error)?;
     drop(file);
     let result = command(
         "powershell.exe",

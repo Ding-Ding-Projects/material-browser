@@ -31,6 +31,17 @@ revision and preserves previous revisions. Restore selects an earlier revision a
 new current revision, so history remains available. Discard must destroy only the positively
 identified owned session. Closing a Sandbox window directly can lose unexported changes.
 
+**Save back and close** first queues browser shutdown and collection of the selected workspace
+and browser categories. Collection reports progress without holding the vault open. A collected
+archive is not yet a saved revision. If the vault locks or the host restarts during collection,
+unlock it and explicitly confirm that operation before encrypted finalization. A changed template
+revision rejects finalization and retains the collected data for recovery. Stop and discard remain
+available while locked, with private template metadata omitted from their responses.
+
+The Sandbox guest includes explicit save-and-close and discard-and-close controls. Save-and-close
+exports stopped-browser state and a complete manifest before asking the host to finalize it.
+Closing the Sandbox window itself cannot export state that has already been destroyed.
+
 ## Storage and compatibility
 
 Template metadata and saved archives use the existing vault encryption. Archive objects are
@@ -47,3 +58,9 @@ objects and restart persistence. Source implementation is separate from native r
 Whole-template provisioning, all guest experiences, save-back, disposal, built-interface
 accessibility and installer verification require their own source-bound acceptance evidence.
 The roadmap and handoff retain outstanding work; this article is not a runtime receipt.
+
+A [native WSL workspace roundtrip receipt](../../evidence/super-profiles/wsl-roundtrip-e92b352.json)
+records two owned guest cycles against source `e92b352`. It proves synthetic workspace restoration,
+encrypted save-back and exact owned-distro removal, with the unrelated distro inventory unchanged.
+It used a separately verified base cache and canceled before graphical launch. It does not prove
+the default download route, browser state, terminal UI, WSLg, desktop connection or Sandbox runtime.

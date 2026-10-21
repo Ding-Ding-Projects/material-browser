@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "20261021T191324Z",
+  "sourceCommit": "e92b352069a1b2884e15feaa01fe027b705a91bd",
+  "sourceManifestMatchesCommit": true,
+  "sourceManifest": {
+    "crates/core/src/lib.rs": "e059ecd396162ed1e43439d80aee8d9a8ebf5e31029445010fe7976185688222",
+    "crates/core/src/super_profiles.rs": "423836858a340f088a89aa92c7886575fa27119992b588418d16341f40034f32",
+    "crates/engine/src/automation.rs": "c3f6a246a42be3aa99eddf795f3d6441edae5800a67b877811bfc92cfdbb97e6",
+    "crates/engine/src/lib.rs": "a715ffd746c5fa1dccfc93323642e8a4f247d4007fa0c98a2224fa2e4c6f619c",
+    "crates/engine/src/lifetime.rs": "641718ef75472bf76c01f592c87697dd8664b32707ca84e8934d140b84fceaa9",
+    "crates/engine/src/process_job.rs": "8f75a3b6736080868472b447b07df8601e372d2086398670db37ba5e8a2c1064",
+    "crates/engine/src/runtime_paths.rs": "4ee36c5359abcda6e5d63be9a94606a63cf2c0bfe9eb8b451ccf51d2126f6f24",
+    "crates/engine/src/snapshot_protocol.rs": "b7c6e81287bdd4c2e771e981b5dbe654b92d8780232ec6bdb62ff55eb12c3216",
+    "crates/host/src/lan.rs": "8273c7dfc834c6afbdd9b6ff2c587227e6a970d34a11c8abf2960a1f15b05321",
+    "crates/host/src/main.rs": "d41e097b0f2ee1da7f920efad93e36e94a93aa07dc3fc2ffd3e9e6e66e32fd4f",
+    "crates/host/src/super_profiles/archive.rs": "7e51dc848d0e211d34c7c6ac5cb05e0307fcb0fd9aaf8d847f89f53e86292801",
+    "crates/host/src/super_profiles/asynchronous.rs": "26269a63a6b4ef0c1d5f2808b50ce703f31fb1badf530b1a1e678a90226f5454",
+    "crates/host/src/super_profiles/base_image.rs": "6f6b3cb43f5c92a4f35db804efeb26e3f7ebe153a92333ac9f325d981b78c27c",
+    "crates/host/src/super_profiles/cleanup.rs": "403b643b012c437e9dcca001e6d0bdd2a25f82a1f63e1e0d8165c2902d9a72de",
+    "crates/host/src/super_profiles/desktop_connection.rs": "4e20c0a28fcb7e22268994d75d643ede5140d59a30666f76a7d3afeab315775b",
+    "crates/host/src/super_profiles/guest_installers.rs": "43c3f7e43627c186df2eb792f1d4a53e1892ef7fd27760e1f5b2a7e68aced7d5",
+    "crates/host/src/super_profiles/linux_runtime.rs": "3a48bb9eeb26ddbd3362064e9697d379e1fcbe608cb4c75101f7c52a3b45007f",
+    "crates/host/src/super_profiles/mod.rs": "3871e0eaa92a2bbe12a3b157cbaecbd2eff2ff9f39b31fe20c46626b1fe9408e",
+    "crates/host/src/super_profiles/payload.rs": "b850196fd958d657a940df6c3ae6aec3259871a5b310fc4812762c68b0fe2190",
+    "crates/host/src/super_profiles/provisioning.rs": "fc0f53fa633ec058060788f789a320a89deedd97962098481fbb63272da3ec8a",
+    "crates/host/src/super_profiles/sandbox.rs": "8e9fc1c3aad07a61869b5b7b537d58fd0a47497c3abd96dc84587b41a8494869",
+    "Cargo.lock": "efc4c7f2b08801d7cc730fb58af83f75c095715e5381b9aa49edbbd38fe16a46",
+    "Cargo.toml": "35f7071f51aec2e4372992efe7679bc4b39badf120bde7ab8b70de14d82df59a"
+  },
+  "executableSha256": "cb701e80db0df98ff5acd37f1de79668436d44b9d8d4dca34b19b03aeca84135",
+  "route": "native-console-stdio-isolated-synthetic-vault",
+  "passed": true,
+  "guiLaunched": false,
+  "events": [
+    {
+      "at": "2026-10-21T19:13:34.553601+00:00",
+      "kind": "profile-created",
+      "details": {}
+    },
+    {
+      "at": "2026-10-21T19:13:34.856599+00:00",
+      "kind": "launch-queued",
+      "details": {
+        "cycle": 1
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:34.870304+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "acquiring-base",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:36.882475+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "importing-guest",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:42.891005+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "configuring-isolation",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:50.899640+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "installing-runtime",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:52.903552+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "starting-workspace",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:55.052447+00:00",
+      "kind": "fixture-observed",
+      "details": {
+        "cycle": 1,
+        "value": "original"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:56.812736+00:00",
+      "kind": "stopped",
+      "details": {
+        "state": "stopped"
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:57.640049+00:00",
+      "kind": "revision-saved",
+      "details": {}
+    },
+    {
+      "at": "2026-10-21T19:13:58.067197+00:00",
+      "kind": "discarded",
+      "details": {}
+    },
+    {
+      "at": "2026-10-21T19:13:58.350595+00:00",
+      "kind": "launch-queued",
+      "details": {
+        "cycle": 2
+      }
+    },
+    {
+      "at": "2026-10-21T19:13:58.366498+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "acquiring-base",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:00.372051+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "importing-guest",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:06.379333+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "configuring-isolation",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:12.385903+00:00",
+      "kind": "phase",
+      "details": {
+        "phase": "starting-workspace",
+        "state": "provisioning"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:14.519765+00:00",
+      "kind": "fixture-observed",
+      "details": {
+        "cycle": 2,
+        "value": "saved-new-value"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:16.142856+00:00",
+      "kind": "stopped",
+      "details": {
+        "state": "stopped"
+      }
+    },
+    {
+      "at": "2026-10-21T19:14:16.672496+00:00",
+      "kind": "discarded",
+      "details": {}
+    },
+    {
+      "at": "2026-10-21T19:14:16.734679+00:00",
+      "kind": "runtime-completed",
+      "details": {
+        "cycles": 2,
+        "guiLaunched": false
+      }
+    }
+  ],
+  "postDiscardChecks": [
+    {
+      "cycle": 1,
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true,
+      "guestRemoved": true
+    },
+    {
+      "cycle": 2,
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true,
+      "guestRemoved": true
+    }
+  ],
+  "unrelatedDistroInventoryPreserved": true,
+  "defaultAcquisitionVerified": false,
+  "limitations": [
+    "Pinned base was independently verified and preseeded in the owned cache.",
+    "The separate first default acquisition attempt hit GUEST_TIMEOUT before guest registration.",
+    "No terminal GUI, browser GUI, full desktop or Windows Sandbox was launched.",
+    "This proves two synthetic workspace save/restore/discard cycles, not all browser or installer behavior."
+  ]
+}

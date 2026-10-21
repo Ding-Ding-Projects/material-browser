@@ -20,9 +20,9 @@ pub(super) fn resolve(settings: &Value, cache: &Path) -> Result<PathBuf> {
         return Ok(path);
     }
     let script = cache.join("download-base.ps1");
-    fs::write(&script, format!("param([string]$Destination)\n$ErrorActionPreference='Stop'\nInvoke-WebRequest -UseBasicParsing -Uri '{URL}' -OutFile $Destination -TimeoutSec 180\n")).map_err(io_error)?;
+    fs::write(&script, format!("param([string]$Destination)\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n$curl=Join-Path $env:SystemRoot 'System32\\curl.exe'\nif (Test-Path -LiteralPath $curl) {{ & $curl --fail --silent --show-error --location --max-redirs 3 --proto-redir '=https' --proto '=https' --tlsv1.2 --max-time 900 --output $Destination '{URL}'; if ($LASTEXITCODE -ne 0) {{ throw 'Base download failed' }} }} else {{ Invoke-WebRequest -UseBasicParsing -Uri '{URL}' -OutFile $Destination -TimeoutSec 900 }}\n")).map_err(io_error)?;
     let partial = cache.join(format!("base-{}.partial", crate::random_hex()));
-    let outcome = command("powershell.exe", &["-NoLogo", "-NoProfile", "-NonInteractive", "-File", unicode(&script)?, unicode(&partial)?], Duration::from_secs(200))
+    let outcome = command("powershell.exe", &["-NoLogo", "-NoProfile", "-NonInteractive", "-File", unicode(&script)?, unicode(&partial)?], Duration::from_secs(920))
         .and_then(|_| verify_hash(&partial, SHA256));
     if let Err(e) = outcome {
         let _ = fs::remove_file(&partial);

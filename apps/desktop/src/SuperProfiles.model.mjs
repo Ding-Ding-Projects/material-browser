@@ -33,3 +33,16 @@ export function persistSuperProfileConfiguration(settings) {
   for (const key of ['rootfsPath','rootfsSha256','workspacePath']) if (current[key] === '') delete current[key];
   return {...current,backend,configurations:{...configurations,[backend]:current}};
 }
+
+export async function finishSuperProfileMutation({kind,result,clearSelection,refresh}) {
+  if (kind === 'remove') clearSelection();
+  let refreshFailed = false;
+  try { await refresh(); } catch { refreshFailed = true; }
+  if (result?.saved === true) return result.cleanupPending
+    ? 'Data saved. Cleanup is incomplete; retry Discard and close.'
+    : refreshFailed ? 'Data saved. The view could not refresh; retry Refresh.' : 'Data saved and session closed.';
+  if (result?.state === 'collecting') return 'Save collection started. Watch session progress for the final result.';
+  if (result?.state === 'provisioning') return 'Provisioning started. Watch session progress for readiness.';
+  if (result?.state === 'cancelling') return 'Cancellation requested. Watch session progress for confirmation.';
+  return refreshFailed ? 'Action completed. The view could not refresh; retry Refresh.' : 'Completed';
+}

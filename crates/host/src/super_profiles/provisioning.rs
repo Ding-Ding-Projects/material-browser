@@ -73,6 +73,7 @@ impl Sessions {
             verify_registration(&s)?;
             s.guest_created = true;
             self.persist(&s)?;
+            isolation::configure(&s.distribution)?;
             self.progress(
                 &mut s,
                 "configuring-isolation",
@@ -255,7 +256,9 @@ impl Sessions {
             if mode == "terminal" {
                 let child = Command::new("wt.exe")
                     .args([
-                        "new-window",
+                        "--window",
+                        "new",
+                        "new-tab",
                         "--title",
                         "Material Browser disposable terminal",
                         "wsl.exe",

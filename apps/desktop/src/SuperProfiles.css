@@ -13,3 +13,5 @@
 .super-workspace .super-notice { padding:1rem; border-inline-start:4px solid var(--md-sys-color-primary,#6750a4); overflow-wrap:anywhere; }
 .super-workspace button.profile-row { width:100%; text-align:start; }
 @media(max-width:850px) { .super-workspace .super-columns { grid-template-columns:1fr; } }
+.super-workspace input[type="checkbox"] { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; }
+.super-workspace md-dialog label { display: flex; align-items: start; gap: .65rem; margin-block: .5rem; }

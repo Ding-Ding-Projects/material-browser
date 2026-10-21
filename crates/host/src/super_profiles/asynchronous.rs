@@ -39,6 +39,66 @@ pub(super) fn event(session: &mut Session, phase: &str, message: &str) {
         session.events.remove(0);
     }
 }
+impl Sessions {
+    pub(super) fn spawn_worker<F>(&mut self, session: Session, task: F) -> Result<()>
+    where
+        F: FnOnce(&mut Sessions, Session) -> Result<Value> + Send + 'static,
+    {
+        let id = session.id.clone();
+        if self.workers.contains_key(&id) {
+            return Err(error(
+                "OPERATION_ACTIVE",
+                "An owned operation is already running",
+            ));
+        }
+        let marker = session.directory.join("cancel-requested");
+        if marker.exists() {
+            fs::remove_file(marker).map_err(io_error)?;
+        }
+        let root = self.root.clone();
+        let epoch = self.unlock_epoch.clone();
+        let child = self.children.remove(&id);
+        let worker_id = id.clone();
+        let handle = thread::spawn(move || {
+            set_context(&session);
+            let fallback = session.clone();
+            let mut runner = Sessions {
+                root,
+                unlock_epoch: epoch,
+                entries: BTreeMap::from([(id.clone(), session.clone())]),
+                children: BTreeMap::new(),
+                workers: BTreeMap::new(),
+            };
+            if let Some(child) = child {
+                runner.children.insert(id, child);
+            }
+            if let Err(e) = task(&mut runner, session) {
+                let mut retained = runner
+                    .entries
+                    .get(&fallback.id)
+                    .cloned()
+                    .unwrap_or(fallback);
+                retained.state = "recovery-required".into();
+                if !matches!(retained.phase.as_str(), "cancelled" | "failed") {
+                    event(
+                        &mut retained,
+                        if e.code == "OPERATION_CANCELLED" {
+                            "cancelled"
+                        } else {
+                            "failed"
+                        },
+                        &e.message,
+                    );
+                }
+                let _ = runner.persist(&retained);
+                runner.entries.insert(retained.id.clone(), retained);
+            }
+            (runner.entries, runner.children)
+        });
+        self.workers.insert(worker_id, handle);
+        Ok(())
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,6 +130,7 @@ mod tests {
             set_context(&session);
             let mut runner = Sessions {
                 root: worker_root,
+                unlock_epoch: crate::random_hex(),
                 entries: BTreeMap::new(),
                 children: BTreeMap::new(),
                 workers: BTreeMap::new(),

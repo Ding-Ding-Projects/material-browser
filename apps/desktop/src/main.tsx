@@ -444,7 +444,7 @@ function App() {
               </div>
             </section>
           ) : page === "super-profiles" ? (
-            <SuperProfiles t={t}/>
+            <SuperProfiles t={t} unlocked={status?.unlocked===true}/>
           ) : page === "profiles" ? (
             <>
               <div className="page-heading">

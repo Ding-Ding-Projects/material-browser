@@ -10,3 +10,10 @@ save-back produces a new revision; browser credentials are not promised to be po
 
 Ordinary browser profiles remain separate. Super Profile archives are local-only and do not
 participate in browser folder synchronization.
+
+Save-back queues collection before encrypted finalization. If the vault locks or the host
+restarts meanwhile, review and confirm that exact collected operation after unlocking.
+Stop and discard are available through the native API while locked; their responses omit
+template identifiers, revision identifiers and staging paths. A successful encrypted save
+and incomplete cleanup are separate results, so retrying cleanup must not create a second
+revision.

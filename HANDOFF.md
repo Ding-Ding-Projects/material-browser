@@ -2,25 +2,38 @@
 
 ## Super Profiles implementation in progress
 
-Preserved first milestone: 07c8702c164379f494c773b6dd0395f541cc76e6 on
-ai/feature/20261021-super-profiles. Subsequent source adds asynchronous provisioning,
+Preserved milestones: 07c8702c164379f494c773b6dd0395f541cc76e6 and
+e92b352069a1b2884e15feaa01fe027b705a91bd on ai/feature/20261021-super-profiles,
+with exact remote references verified. Subsequent source adds asynchronous provisioning,
 durable progress/cancellation, separate backend archive history, selected Linux installers,
 explicit save-and-close, guest save/discard controls and decrypted staging disposal.
 The core and scoped archives remain encrypted; browser profiles remain separate.
 
-Current checks: 19 core tests and 36 Linux host tests passed on the current source.
+Checks against e92b352: 19 core tests and 36 Linux host tests passed.
 The earlier preservation milestone passed 28 Windows host tests, 89 desktop tests,
 17 real native stdio protocol checks and exact root Windows builds for Core, Host,
-Desktop and Docs. The native protocol check did not launch guests. New native builds
+Desktop and Docs. The e92b352 root Desktop installer build also completed successfully.
+The latest host suite reports41 passed, including asynchronous save, lock and capability checks.
+The exact root Host build passed after the final backend-key correction.
+The latest desktop suite reports 95 passed, zero failed and one Windows-only test skipped
+on Linux. The native protocol check did not launch guests. New native builds
 and current-source UI proof remain pending. Windows Sandbox is absent on the selected
 host. Projects discovery lacks read:project and was skipped without changing scopes.
 
 Outstanding acceptance: actual WSL terminal/browser/full-desktop and Sandbox launch,
 setup, installer execution, save-back and disposal; full desktop authentication;
 current-source UI evidence; packaging/deployment and installed update. Save-back and
-guest-request reconciliation remain bounded synchronous operations, while launch
-provisioning runs in a worker. Continuous external guest-process health is unfinished.
+guest-request reconciliation have further lifecycle changes awaiting native verification.
+Launch provisioning runs in a worker. Continuous external guest-process health is unfinished.
 Do not treat source, compilation or protocol checks as complete guest runtime proof.
+
+Two actual WSL cycles against e92b352 verified synthetic workspace save, encrypted revision
+restoration, owned-distro removal and plaintext staging disposal, while unrelated distributions
+were unchanged. See docs/evidence/super-profiles/wsl-roundtrip-e92b352.json. These used a verified
+base cache and cancellation before graphical launch. Default acquisition timed out separately;
+its downloader repair is not yet runtime-verified. Packaged native UI interaction against
+e92b352 covered template CRUD, restore, backend/engine retention and canceled identity consent,
+with zero guest sessions. Later async-save and lock changes need fresh built UI proof.
 
 Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 
