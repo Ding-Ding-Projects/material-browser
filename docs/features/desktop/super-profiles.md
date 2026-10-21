@@ -55,6 +55,27 @@ The Sandbox guest includes explicit save-and-close and discard-and-close control
 exports stopped-browser state and a complete manifest before asking the host to finalize it.
 Closing the Sandbox window itself cannot export state that has already been destroyed.
 
+## Portable bookmark documents
+
+A template can store a user-selected neutral JSON bookmark document in its encrypted backend
+configuration. The native API accepts `portableBookmarks` with this shape:
+
+```json
+{"version":1,"folderName":"Imported bookmarks","bookmarks":[{"name":"Example","url":"https://example.com/"}]}
+```
+
+Folders use `{"name":"Reference","children":[...]}` instead of `url`. Documents are limited
+to64 KiB,500 entries, eight levels,256-character names and4096-character URLs. Unknown fields,
+control characters, credentials, mixed folder/link entries and schemes other than HTTP(S) are
+rejected. Validation makes no network requests and never discovers host browser directories.
+
+The guest receives a generated `ManagedBookmarks` policy containing a separate read-only folder.
+Existing editable bookmark files and restored browser state are not overwritten. Each backend
+retains its own import, and immutable template revisions retain the associated document.
+Removing an import affects the next fresh guest. Credentials and authenticated sessions are
+outside this import format. Wizard input and exact pinned-browser recognition remain pending
+until their separate built-interface and native runtime checks pass.
+
 ## Storage and compatibility
 
 Template metadata and saved archives use the existing vault encryption. Archive objects are
@@ -81,3 +102,16 @@ records two owned guest cycles against source `e92b352`. It proves synthetic wor
 encrypted save-back and exact owned-distro removal, with the unrelated distro inventory unchanged.
 It used a separately verified base cache and canceled before graphical launch. It does not prove
 the default download route, browser state, terminal UI, WSLg, desktop connection or Sandbox runtime.
+
+The [Chromium roundtrip](../../evidence/super-profiles/chromium-roundtrip-0719755.json)
+and [Firefox roundtrip](../../evidence/super-profiles/firefox-roundtrip-f1816d6.json)
+separately verify synthetic browser local storage and workspace restoration across two fresh
+owned guests. Both run as the normal guest user with browser sandboxing enabled. The Firefox
+result also verifies successful export with its transient root lock marker present. These
+headless browser runs do not establish graphical WSLg, terminal or full desktop readiness.
+
+The [default base acquisition](../../evidence/super-profiles/default-acquisition-f1816d6.json)
+started without a cached base or custom override, downloaded the pinned archive, verified its
+checksum, completed setup and removed the exact owned guest. The [installer build receipt](../../evidence/super-profiles/build-f1816d6.json)
+records successful root entrypoint production and package hashes. Package production does not
+prove installation, accepted-channel update or every guest experience.

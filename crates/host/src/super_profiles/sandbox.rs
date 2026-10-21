@@ -109,6 +109,14 @@ try {
  if (!$?) { throw 'Setup commands failed' }
  & (Join-Path $inputRoot 'startup.ps1')
  if (!$?) { throw 'Startup commands failed' }
+ # This registry belongs only to the disposable guest. Never apply this policy on the host.
+ $bookmarkPolicy=Join-Path $inputRoot 'managed-bookmarks.json'
+ if (Test-Path -LiteralPath $bookmarkPolicy) {
+   $policy=Get-Content -LiteralPath $bookmarkPolicy -Raw | ConvertFrom-Json
+   $key='HKCU:\Software\Policies\Chromium'
+   New-Item -Path $key -Force | Out-Null
+   New-ItemProperty -Path $key -Name ManagedBookmarks -PropertyType String -Value (ConvertTo-Json -InputObject @($policy.ManagedBookmarks) -Depth 16 -Compress) -Force | Out-Null
+ }
  $browser='C:\MaterialBrowserEngine\__EXECUTABLE__'
  $profile=Join-Path $localRoot 'browser'
  $process=Start-Process -FilePath $browser -ArgumentList @('--user-data-dir="'+$profile+'"','--no-first-run','about:blank') -PassThru

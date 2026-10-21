@@ -35,3 +35,9 @@ images before publication. Do not publish raw diagnostic archives or private pat
 unfinished work on its owning branch, preserve and verify remote references, never force-push.
 
 Progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
+
+Portable bookmark API slice: strict bounded neutral JSON is encrypted in per-backend template
+settings and immutable revisions. Guest-only managed policy generation preserves editable
+profile files. Core23 and host52 checks passed; independent source review found no confirmed
+defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
+review and successful policy-file generation do not prove browser recognition.

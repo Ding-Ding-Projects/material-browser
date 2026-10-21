@@ -32,6 +32,23 @@ fn validate(settings: &Value) -> Result<()> {
     if !settings.is_object() || serde_json::to_vec(settings)?.len() > 256 * 1024 {
         return Err(err("INVALID_ARGUMENT", "Settings must be a bounded object"));
     }
+    if let Some(document) = settings.get("portableBookmarks") {
+        crate::portable_bookmarks::validate(document)?;
+    }
+    if let Some(configurations) = settings.get("configurations") {
+        let configurations = configurations
+            .as_object()
+            .ok_or_else(|| err("INVALID_ARGUMENT", "Invalid backend configurations"))?;
+        for (backend, configuration) in configurations {
+            if !matches!(backend.as_str(), "wsl2" | "windows-sandbox") || !configuration.is_object()
+            {
+                return Err(err("INVALID_ARGUMENT", "Invalid backend configuration"));
+            }
+            if let Some(document) = configuration.get("portableBookmarks") {
+                crate::portable_bookmarks::validate(document)?;
+            }
+        }
+    }
     if !matches!(
         settings.get("backend").and_then(Value::as_str),
         Some("wsl2" | "windows-sandbox")
@@ -390,6 +407,95 @@ mod tests {
             json!({"name":"Development","settings":{"backend":"wsl2","launchMode":"terminal"}}),
         )
         .unwrap()
+    }
+    #[test]
+    fn portable_bookmarks_are_encrypted_separate_and_revision_restorable() {
+        let (root, mut m) = manager();
+        let document = |name: &str| json!({"version":1,"folderName":name,"bookmarks":[{"name":"Portable fixture","url":"https://portable-fixture.invalid/private-path"}]});
+        let settings = json!({"backend":"wsl2","portableBookmarks":document("Linux import"),"configurations":{"wsl2":{"portableBookmarks":document("Linux import")},"windows-sandbox":{"portableBookmarks":document("Sandbox import")}}});
+        let first = m
+            .execute(
+                "superProfiles.create",
+                json!({"name":"Portable","settings":settings}),
+            )
+            .unwrap();
+        let id = first["id"].as_str().unwrap();
+        let original = first["revisionId"].as_str().unwrap();
+        let mut changed = settings.clone();
+        changed["portableBookmarks"] = document("Changed import");
+        let second = m
+            .execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":original,"settings":changed}),
+            )
+            .unwrap();
+        assert_eq!(
+            second["settings"]["configurations"]["windows-sandbox"]["portableBookmarks"]["folderName"],
+            "Sandbox import"
+        );
+        let restored = m
+            .execute(
+                "superProfiles.revisions.restore",
+                json!({"id":id,"revisionId":original,"expectedRevisionId":second["revisionId"]}),
+            )
+            .unwrap();
+        assert_eq!(restored["settings"], settings);
+        let mut invalid = settings.clone();
+        invalid["configurations"]["windows-sandbox"]["portableBookmarks"]["bookmarks"][0]["url"] =
+            json!("file:///private");
+        assert_eq!(
+            m.execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":restored["revisionId"],"settings":invalid})
+            )
+            .unwrap_err()
+            .code,
+            "INVALID_BOOKMARKS"
+        );
+        m.execute("vault.lock", json!({})).unwrap();
+        fn check(path: &Path) {
+            for entry in fs::read_dir(path).unwrap() {
+                let path = entry.unwrap().path();
+                if path.is_dir() {
+                    check(&path);
+                } else {
+                    let bytes = fs::read(path).unwrap();
+                    assert!(
+                        !bytes
+                            .windows(b"portable-fixture.invalid".len())
+                            .any(|w| w == b"portable-fixture.invalid")
+                    );
+                }
+            }
+        }
+        check(root.path());
+        m.execute("vault.unlock", json!({"password":"test password"}))
+            .unwrap();
+        let listed = m.execute("superProfiles.list", json!({})).unwrap();
+        assert_eq!(listed[0]["settings"], settings);
+        let current = listed[0]["revisionId"].clone();
+        m.state.super_revisions.get_mut(original).unwrap().settings["portableBookmarks"]["version"] =
+            json!(2);
+        assert_eq!(
+            m.execute(
+                "superProfiles.revisions.restore",
+                json!({"id":id,"expectedRevisionId":current,"revisionId":original})
+            )
+            .unwrap_err()
+            .code,
+            "INVALID_BOOKMARKS"
+        );
+        let mut oversized = settings.clone();
+        oversized["unrelated"] = json!("x".repeat(256 * 1024));
+        assert_eq!(
+            m.execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":current,"settings":oversized})
+            )
+            .unwrap_err()
+            .code,
+            "INVALID_ARGUMENT"
+        );
     }
     #[test]
     fn old_metadata_defaults_and_locked_commands() {

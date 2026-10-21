@@ -103,3 +103,9 @@ Unrelated internal-maintenance references accidentally entered a086a87 and were 
 See docs/evidence/desktop/receipts-0.1.1.json, bundled-runtime-0.1.1.json and the archived presentation for exact public evidence.
 
 Native verification teardown update: after the older unrelated process was independently observed absent, fresh complete ancestry proof passed. The owning wrapper exited normally, both recorded wrapper identities were proven absent and the exact named desktop closed at2026-10-19T06:21:04.275644+00:00. No PID kill or unrelated termination occurred. This supersedes the earlier retained-wrapper state while preserving the initial rejection receipt. The prior separately rejected handbook profile cleanup remains untouched.
+
+Portable bookmark API slice: strict bounded neutral JSON is encrypted in per-backend template
+settings and immutable revisions. Guest-only managed policy generation preserves editable
+profile files. Core23 and host52 checks passed; independent source review found no confirmed
+defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
+review and successful policy-file generation do not prove browser recognition.

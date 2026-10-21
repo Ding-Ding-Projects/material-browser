@@ -20,6 +20,7 @@ impl Sessions {
                 "Copying selected inputs into owned staging",
             )?;
             payload::stage(settings, &s.directory)?;
+            portable_bookmarks::stage(settings, &s.directory, engine)?;
             let has_installers = if backend == "wsl2" {
                 guest_installers::prepare(&s.directory)?
             } else {
@@ -234,6 +235,7 @@ impl Sessions {
                 _ => "command -v sh",
             };
             health::prepare_wsl(&mut s, engine)?;
+            portable_bookmarks::install_wsl(&s, engine)?;
             if mode == "desktop" {
                 install_desktop_launchers(&s, engine)?;
             }

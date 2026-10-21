@@ -1,4 +1,5 @@
 //! Encrypted local vault and immutable revision store. No browser processes are launched here.
+pub mod portable_bookmarks;
 mod super_profiles;
 use argon2::{Algorithm, Argon2, Params, Version};
 use chacha20poly1305::{

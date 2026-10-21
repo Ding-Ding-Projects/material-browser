@@ -14,6 +14,7 @@ mod health;
 mod isolation;
 mod linux_runtime;
 mod payload;
+mod portable_bookmarks;
 mod provisioning;
 mod sandbox;
 use crate::{Result, error, io_error};
