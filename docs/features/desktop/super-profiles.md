@@ -115,3 +115,17 @@ started without a cached base or custom override, downloaded the pinned archive,
 checksum, completed setup and removed the exact owned guest. The [installer build receipt](../../evidence/super-profiles/build-f1816d6.json)
 records successful root entrypoint production and package hashes. Package production does not
 prove installation, accepted-channel update or every guest experience.
+
+
+The [portable policy receipt](../../evidence/super-profiles/portable-policy-ac36bb9.json)
+records actual pinned Firefox policy-service and Chromium policy-page recognition. Firefox
+also saved editable bookmarks, removed the managed import and restored the editable bookmark
+in a fresh guest. Sandbox policy recognition and Chromium import removal remain unverified.
+
+The [repaired observer receipt](../../evidence/super-profiles/observer-1ce75f5.json) records
+actual product readiness, exact managed-browser closure recovery and status polls that did not
+wake a stopped guest. It uses guest-local virtual X, not graphical WSLg or a host desktop.
+Concurrent sibling-owned guest changes are explicitly reconciled; raw inventory equality is
+not claimed. The [native interface save receipt](../../evidence/super-profiles/native-ui-save-f1816d6.json)
+records real cancellation, stopped workspace-only preview, asynchronous collection and saved
+revision readback. That interface run did not decrypt or relaunch its new archive.

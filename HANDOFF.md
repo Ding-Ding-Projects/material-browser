@@ -118,3 +118,18 @@ Focused launch1 and health8 checks passed. Native repaired readiness remains nex
 workspace-wide formatting check reports existing unrelated formatting drift; no broad
 formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
 immutable f1816d6, with its final receipt and teardown inventory pending inspection.
+
+Native runtime milestones now have sanitized receipts: observer-1ce75f5.json proves product
+readiness, managed browser closure recovery and three status polls without waking a stopped
+guest, through guest-local virtual X only. portable-policy-ac36bb9.json proves actual pinned
+WSL browser policy recognition and Firefox import removal with editable bookmark restoration.
+native-ui-save-f1816d6.json records real cancellation, stopped workspace-only save and teardown.
+Concurrent sibling guests are explicitly reconciled; full raw inventory equality is not claimed.
+
+Encrypted setup-progress backend is now implemented: setupDraft boolean and draftStep0..3
+are validated in active and inactive settings. Draft launch returns SETUP_INCOMPLETE before
+session resources. Native core25 passed, and the native no-journal/no-worker/no-guest draft
+launch regression passed. Existing platform/identity-consent ordering is retained. The prior
+native privacy-test lock lifetime is repaired with no skipped files. GUI input/resume wiring
+and high-scale paint diagnosis are still active; the48-tuple matrix uses renderer-page frames
+from the native-launched application, with native geometry/ownership receipts separately.

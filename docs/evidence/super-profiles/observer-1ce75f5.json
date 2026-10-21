@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "1ce75f5ef54c0a9a598e47a75a79b1c39d8ded53",
+  "executableSha256": "469daa7d321bde12f0166441b05f09e71d02b24a3583fedf7e5e091ff71dd601",
+  "route": "native-owned-wsl-virtual-x-backend-observer",
+  "hostGuiLaunched": false,
+  "guestBrowserHeadful": true,
+  "visualReadinessVerified": false,
+  "productReadyConfirmed": true,
+  "managedBrowserClosureCausesRecovery": true,
+  "statusPollsAfterGuestTermination": 3,
+  "statusDidNotWakeGuest": true,
+  "postDiscardChecks": [
+    {
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    }
+  ],
+  "fullInventoryEqual": false,
+  "unrelatedInventoryPreservedAfterExactSiblingOwnershipReconciliation": true,
+  "limitations": [
+    "Guest-local virtual X proves process readiness, not graphical WSLg or visible desktop readiness.",
+    "Terminal and full desktop experiences remain unverified."
+  ]
+}

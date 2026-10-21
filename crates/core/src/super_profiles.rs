@@ -28,10 +28,29 @@ pub(crate) struct SuperRevision {
     #[serde(default)]
     archive_bytes: u64,
 }
+fn validate_setup_progress(settings: &Value) -> Result<()> {
+    if settings
+        .get("setupDraft")
+        .is_some_and(|value| !value.is_boolean())
+    {
+        return Err(err("INVALID_ARGUMENT", "setupDraft must be a boolean"));
+    }
+    if settings
+        .get("draftStep")
+        .is_some_and(|value| value.as_u64().is_none_or(|step| step > 3))
+    {
+        return Err(err(
+            "INVALID_ARGUMENT",
+            "draftStep must be an integer from 0 through 3",
+        ));
+    }
+    Ok(())
+}
 fn validate(settings: &Value) -> Result<()> {
     if !settings.is_object() || serde_json::to_vec(settings)?.len() > 256 * 1024 {
         return Err(err("INVALID_ARGUMENT", "Settings must be a bounded object"));
     }
+    validate_setup_progress(settings)?;
     if let Some(document) = settings.get("portableBookmarks") {
         crate::portable_bookmarks::validate(document)?;
     }
@@ -44,6 +63,7 @@ fn validate(settings: &Value) -> Result<()> {
             {
                 return Err(err("INVALID_ARGUMENT", "Invalid backend configuration"));
             }
+            validate_setup_progress(configuration)?;
             if let Some(document) = configuration.get("portableBookmarks") {
                 crate::portable_bookmarks::validate(document)?;
             }
@@ -409,6 +429,122 @@ mod tests {
         .unwrap()
     }
     #[test]
+    fn setup_draft_inputs_resume_from_encrypted_settings_and_revisions() {
+        let (root, mut m) = manager();
+        let settings = json!({
+            "backend":"wsl2", "setupDraft":true, "draftStep":2,
+            "workspacePath":"C:\\draft-workspace-marker",
+            "installers":["C:\\draft-installer-marker.deb"],
+            "setupCommands":["printf draft-command-marker"],
+            "configurations":{
+                "wsl2":{"setupDraft":true,"draftStep":2,"startupCommands":["printf draft-startup-marker"]},
+                "windows-sandbox":{"setupDraft":true,"draftStep":1,"workspacePath":"C:\\sandbox-draft-marker"}
+            }
+        });
+        let first = m
+            .execute(
+                "superProfiles.create",
+                json!({"name":"Setup draft","settings":settings}),
+            )
+            .unwrap();
+        let id = first["id"].as_str().unwrap().to_string();
+        let original = first["revisionId"].clone();
+        m.execute("vault.lock", json!({})).unwrap();
+        drop(m);
+        fn check(path: &Path) {
+            for entry in fs::read_dir(path).unwrap() {
+                let path = entry.unwrap().path();
+                if path.is_dir() {
+                    check(&path);
+                } else {
+                    let bytes = fs::read(path).unwrap();
+                    for marker in [
+                        "draft-workspace-marker",
+                        "draft-installer-marker",
+                        "draft-command-marker",
+                        "draft-startup-marker",
+                        "sandbox-draft-marker",
+                    ] {
+                        assert!(
+                            !bytes
+                                .windows(marker.len())
+                                .any(|window| window == marker.as_bytes())
+                        );
+                    }
+                }
+            }
+        }
+        check(root.path());
+        let mut m = Manager::new(root.path().join("vault")).unwrap();
+        assert_eq!(
+            m.execute("superProfiles.list", json!({})).unwrap_err().code,
+            "LOCKED"
+        );
+        m.execute("vault.unlock", json!({"password":"test password"}))
+            .unwrap();
+        let resumed = m.execute("superProfiles.list", json!({})).unwrap();
+        assert_eq!(resumed[0]["settings"], settings);
+        let mut completed = settings.clone();
+        completed["setupDraft"] = json!(false);
+        completed.as_object_mut().unwrap().remove("draftStep");
+        let saved = m
+            .execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":original,"settings":completed}),
+            )
+            .unwrap();
+        assert_eq!(saved["settings"], completed);
+        let restored = m
+            .execute(
+                "superProfiles.revisions.restore",
+                json!({"id":id,"expectedRevisionId":saved["revisionId"],"revisionId":original}),
+            )
+            .unwrap();
+        assert_eq!(restored["settings"], settings);
+    }
+
+    #[test]
+    fn setup_progress_rejects_invalid_active_and_inactive_values() {
+        let (_, mut m) = manager();
+        for (field, invalid) in [
+            ("setupDraft", json!("true")),
+            ("setupDraft", json!(1)),
+            ("setupDraft", Value::Null),
+            ("draftStep", json!(-1)),
+            ("draftStep", json!(4)),
+            ("draftStep", json!(1.5)),
+            ("draftStep", json!("2")),
+            ("draftStep", json!(true)),
+            ("draftStep", Value::Null),
+        ] {
+            for inactive in [false, true] {
+                let mut settings = json!({"backend":"wsl2"});
+                if inactive {
+                    settings["configurations"] = json!({"windows-sandbox":{field:invalid}});
+                } else {
+                    settings[field] = invalid.clone();
+                }
+                assert_eq!(
+                    m.execute(
+                        "superProfiles.create",
+                        json!({"name":"Invalid setup progress","settings":settings})
+                    )
+                    .unwrap_err()
+                    .code,
+                    "INVALID_ARGUMENT"
+                );
+            }
+        }
+        for step in 0..=3 {
+            assert!(
+                validate(&json!({"backend":"wsl2","setupDraft":true,"draftStep":step})).is_ok()
+            );
+        }
+        assert!(validate(&json!({"backend":"wsl2"})).is_ok());
+        assert!(validate(&json!({"backend":"wsl2","setupDraft":false})).is_ok());
+    }
+
+    #[test]
     fn portable_bookmarks_are_encrypted_separate_and_revision_restorable() {
         let (root, mut m) = manager();
         let document = |name: &str| json!({"version":1,"folderName":name,"bookmarks":[{"name":"Portable fixture","url":"https://portable-fixture.invalid/private-path"}]});
@@ -453,6 +589,7 @@ mod tests {
             "INVALID_BOOKMARKS"
         );
         m.execute("vault.lock", json!({})).unwrap();
+        drop(m);
         fn check(path: &Path) {
             for entry in fs::read_dir(path).unwrap() {
                 let path = entry.unwrap().path();
@@ -469,6 +606,7 @@ mod tests {
             }
         }
         check(root.path());
+        let mut m = Manager::new(root.path().join("vault")).unwrap();
         m.execute("vault.unlock", json!({"password":"test password"}))
             .unwrap();
         let listed = m.execute("superProfiles.list", json!({})).unwrap();

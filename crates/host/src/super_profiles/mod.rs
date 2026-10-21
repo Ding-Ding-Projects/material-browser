@@ -310,6 +310,7 @@ impl Sessions {
             .as_array()
             .and_then(|a| a.iter().find(|v| v["id"] == profile_id))
             .ok_or_else(|| error("PROFILE_NOT_FOUND", "Super Profile not found"))?;
+        require_setup_complete(&profile["settings"])?;
         if self.entries.values().any(|s| {
             s.profile_id == profile_id
                 && !matches!(s.state.as_str(), "stopped" | "saved" | "discarded")
@@ -745,6 +746,16 @@ fn text<'a>(v: &'a Value, key: &str) -> Result<&'a str> {
         .filter(|s| !s.is_empty())
         .ok_or_else(|| error("INVALID_PARAMS", &format!("{key} is required")))
 }
+fn require_setup_complete(settings: &Value) -> Result<()> {
+    match settings.get("setupDraft") {
+        Some(Value::Bool(true)) => Err(error(
+            "SETUP_INCOMPLETE",
+            "Complete setup before launching this template",
+        )),
+        Some(Value::Bool(false)) | None => Ok(()),
+        Some(_) => Err(error("INVALID_PARAMS", "setupDraft must be a boolean")),
+    }
+}
 fn valid_id(s: &str) -> bool {
     s.len() == 64 && s.bytes().all(|b| b.is_ascii_hexdigit())
 }
@@ -774,6 +785,54 @@ fn verify_hash(path: &Path, expected: &str) -> Result<()> {
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn unfinished_setup_cannot_pass_launch_preflight() {
+        assert_eq!(
+            require_setup_complete(&json!({"setupDraft":true}))
+                .unwrap_err()
+                .code,
+            "SETUP_INCOMPLETE"
+        );
+        assert_eq!(
+            require_setup_complete(&json!({"setupDraft":"true"}))
+                .unwrap_err()
+                .code,
+            "INVALID_PARAMS"
+        );
+        assert!(require_setup_complete(&json!({})).is_ok());
+        assert!(require_setup_complete(&json!({"setupDraft":false,"configurations":{"windows-sandbox":{"setupDraft":true}}})).is_ok());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn draft_launch_creates_no_journal_worker_or_guest_resources() {
+        let root = std::env::temp_dir().join(format!("material-draft-{}", crate::random_hex()));
+        let mut core = material_browser_core::Manager::new(root.join("vault")).unwrap();
+        core.execute("vault.create", json!({"password":"test password"}))
+            .unwrap();
+        let draft = core.execute("superProfiles.create", json!({"name":"Draft","settings":{"backend":"wsl2","setupDraft":true,"draftStep":2}})).unwrap();
+        let mut sessions = Sessions::new(&root).unwrap();
+        assert_eq!(fs::read_dir(&sessions.root).unwrap().count(), 0);
+        assert_eq!(
+            sessions
+                .launch(
+                    &mut core,
+                    &json!({"profileId":draft["id"],"requireStableIdentity":false}),
+                    None
+                )
+                .unwrap_err()
+                .code,
+            "SETUP_INCOMPLETE"
+        );
+        assert_eq!(fs::read_dir(&sessions.root).unwrap().count(), 0);
+        assert!(sessions.entries.is_empty());
+        assert!(sessions.workers.is_empty());
+        assert!(sessions.children.is_empty());
+        drop(sessions);
+        drop(core);
+        fs::remove_dir_all(root).unwrap();
+    }
+
     use super::*;
     #[test]
     fn ownership_ids_are_strict() {

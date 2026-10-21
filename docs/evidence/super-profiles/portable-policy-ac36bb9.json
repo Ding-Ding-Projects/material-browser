@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "1ce75f5ef54c0a9a598e47a75a79b1c39d8ded53",
+  "executableSha256": "43d28f8e3cc454f71f9efe2cb8c51ff9abbb9a3a1bf943520e9cf326d752f72f",
+  "route": "native-owned-WSL-headless-browser-policy-service",
+  "firefoxPolicyRecognized": true,
+  "chromiumPolicyRecognized": true,
+  "nestedNonAsciiPolicyRecognized": true,
+  "editableChromiumBookmarkPreserved": true,
+  "firefoxEncryptedSaveFreshGuestRemovalAndEditableRestorePassed": true,
+  "rawInventoryEqualityClaimed": false,
+  "inventoryQualification": "Concurrent separately owned verification guests changed state or were discarded. Raw inventories remain in private receipts; only exact owned resources were targeted.",
+  "ownedGuestsDiscarded": true,
+  "plaintextRemoved": true,
+  "limitations": [
+    "Windows Sandbox policy loading is unverified.",
+    "No host GUI or visible browser presentation was exercised.",
+    "Chromium import removal after encrypted relaunch was not exercised.",
+    "GUI file input remains pending."
+  ]
+}

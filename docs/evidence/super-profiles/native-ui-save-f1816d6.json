@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "source": "f1816d6b59b5a73bf315c40f13577b626219713e",
+  "buildReceipt": "build-f1816d6.json",
+  "hashes": {
+    "executable": "4c7b15e46ed234e609e391b81c3ee6bb1c2d6954f5bffba4bbe35a2afe454611",
+    "asar": "5089eb8c84f8f2a71de9115f5c544e5041eb80b05415ff78132c183f53aeb0f9",
+    "host": "bf4d2e30870cdf0cd7b87acc6c1c186a4cb78ea74a10f755715458bcbec933f8"
+  },
+  "route": "Native hidden desktop with exact owned CDP target and actual native bridge",
+  "privacy": "Synthetic vault and workspace fixture only; no credentials, private vocabulary or machine paths visible.",
+  "observed": [
+    "Explicit launch consent",
+    "Provisioning cancelled during guarded startup before GUI launch",
+    "Exact owned workspace fixture readback",
+    "Explicit stop reached stopped",
+    "Workspace-only save selection",
+    "Asynchronous collecting with Cancel save",
+    "Discarded with successful saved revision"
+  ],
+  "savedRevisionId": "47e63986-2a68-4112-b3a9-8a085b23e83c",
+  "limits": [
+    "Collection was observed in DOM; no collecting frame retained.",
+    "New encrypted archive was not decrypted or relaunched in this UI run.",
+    "No guest graphical launch.",
+    "Normal English/light tuple only."
+  ],
+  "teardown": {
+    "process": {
+      "ownedProcessAbsent": true,
+      "observedAt": "2026-10-21T20:36:14.8216381Z",
+      "ownedDistributionAbsent": true
+    },
+    "desktop": {
+      "timestampUtc": "2026-10-21T20:36:14.441004+00:00",
+      "method": "EnumDesktopsW on current process window station",
+      "enumerationSucceeded": true,
+      "win32Error": 0,
+      "unrelatedDesktopNamesRetained": false
+    },
+    "directClose": {
+      "ok": true,
+      "name": "SuperSaveProofF1816D6",
+      "closed": false,
+      "backend": "native-cpp"
+    }
+  },
+  "parentInspectedSavePreviewAndSavedRevisionPixels": true
+}
