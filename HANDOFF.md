@@ -35,6 +35,15 @@ its downloader repair is not yet runtime-verified. Packaged native UI interactio
 e92b352 covered template CRUD, restore, backend/engine retention and canceled identity consent,
 with zero guest sessions. Later async-save and lock changes need fresh built UI proof.
 
+The current WSL isolation readback initially rejected the internal WSL2 VM flag. A native
+API-only probe proved successful configure/readback returns version2,uid0,flags8. The repair
+requires exactly that configuration and rejects all host-integration and unknown flags.
+Its focused negative regression and exact root Host build passed; browser runtime retry
+remains pending. The latest native UI run also found minimum-size bilingual navigation
+overflow. A narrow CSS repair is written and typechecked, with same-tuple built proof pending.
+The root Desktop installer and portable handbook completed for77cb8cf; see
+docs/evidence/super-profiles/build-77cb8cf.json for hashes and limits.
+
 Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 
 ## Current delivery

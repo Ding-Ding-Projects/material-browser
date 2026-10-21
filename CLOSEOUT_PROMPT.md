@@ -37,3 +37,13 @@ remain outstanding. Keep roadmap/handoff accurate and retain unverified states.
 Projects discovery lacks read:project and is skipped without changing scopes.
 
 Progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
+
+Latest followup: current-source native WSL launch stopped at strict isolation flag
+readback, before browser provisioning, then owned stop/discard passed. A native
+API-only probe proved WSL2 preserves its internal VM bit8 while host-integration
+bits1/2/4 are zero. The narrow readback repair and negative regression passed,
+and root Host build passed. Retry browser cycles against that rebuilt source.
+Fresh77cb8cf packaged CRUD/consent/lock proof exists; minimum bilingual dark
+760x580 navigation overflow was observed. CSS repair awaits same-tuple rebuild.
+Root Desktop and portable Handbook installer builds completed for77cb8cf;
+source-bound hashes are in docs/evidence/super-profiles/build-77cb8cf.json.
