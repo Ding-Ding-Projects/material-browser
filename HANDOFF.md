@@ -130,3 +130,10 @@ package version; six documentation tests passed, but a rebuild/runtime check rem
 Current proof directories remain private ignored data under .cache and .agent.
 Do not publish them wholesale. Sanitize selected receipts, inspect genuine images,
 and apply evidence promotion before making current presentation claims.
+
+Firefox diagnostic settled before stopping: its only nonregular archive member was
+browser/lock, a browser-root symlink. The validator correctly rejected it; no revision
+was finalized. The synthetic failed archive and headers were retained privately.
+Owned stop/discard completed, no guest or default acquisition operation remains active.
+On resume, exclude only confirmed transient browser-root locks during export, preserve
+link rejection for all other members, and add a meaningful regression before retrying.
