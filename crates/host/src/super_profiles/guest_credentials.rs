@@ -213,7 +213,7 @@ try {
  $phase='start-guest-command'
  $start=New-Object Diagnostics.ProcessStartInfo
  $start.FileName='wsl.exe'
- $start.Arguments='-d '+$Distribution+' -u root --exec chpasswd'
+ $start.Arguments='-d '+$Distribution+' -u root --exec /usr/sbin/chpasswd'
  $start.UseShellExecute=$false
  $start.CreateNoWindow=$true
  $start.RedirectStandardInput=$true

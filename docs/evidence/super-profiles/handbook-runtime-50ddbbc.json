@@ -1,0 +1,84 @@
+{
+  "source": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "artifact": {
+    "file": "Material-Browser-Handbook-0.1.1-x64.exe",
+    "sha256": "d196a01e68f156790ba9215c74a040196f7ee8e1506886e4752f0f3aa76b9d3b",
+    "bytes": 101513570,
+    "oneFileDirectoryContents": [
+      "Material-Browser-Handbook-0.1.1-x64.exe"
+    ]
+  },
+  "verified": [
+    "One-file portable launch from directory containing only executable",
+    "Internal home, Super Profiles article and wiki Home navigation",
+    "Three-step Super Profiles guide interaction",
+    "Reviewed step three persists after actual reload",
+    "Footer reports version 0.1.1 and source 50ddbbc1953c"
+  ],
+  "frames": [
+    {
+      "file": "output/guide-final.png",
+      "sha256": "01315e2f4343785e6020f8ed1a6f182031a71cd769ca3973c12b5b9f5749f2e4",
+      "width": 1264,
+      "height": 861,
+      "inspected": true,
+      "privacy": "Public documentation only; no personal data, credentials or machine paths visible",
+      "method": "CDP Page.captureScreenshot on exact owned renderer",
+      "capturedAt": "2026-10-21T21:17:17.587Z"
+    },
+    {
+      "file": "output/guide-final-native.png",
+      "sha256": "d17eede343f7ff70772dc5735c8f008bd410e708239557056a6455ef5aa4d8a7",
+      "width": 1264,
+      "height": 861,
+      "inspected": true,
+      "privacy": "Public documentation only; no personal data, credentials or machine paths visible",
+      "method": "Cheap Lowlevel exact HWND capture",
+      "capturedAt": null
+    }
+  ],
+  "evidence": [
+    {
+      "path": "binding.json",
+      "sha256": "9dbee35a92f25a91322596608e870234b26bd1d7d7b19c0af296f0a4f622a463"
+    },
+    {
+      "path": "navigation-proof.json",
+      "sha256": "6420cc62a69b0b5a95094fe67060e79278f7edbe21ca1acb0e34b6f3a58f507f"
+    },
+    {
+      "path": "settled-proof.json",
+      "sha256": "9a539ba5fc0f663bc74f6cabd6ba8a2d060ee0fce98a2d9d419f33f1a0c6247e"
+    },
+    {
+      "path": "guide-final-native.json",
+      "sha256": "5a890abc3888ad5860adc31bdee066b043aa888a1ef7bbc5f9271ef451acb97b"
+    },
+    {
+      "path": "process-teardown.json",
+      "sha256": "866fa6734e9ea380c57a302ce70450a7ec7f23964db67b6d38e2f642d8b5c3a1"
+    },
+    {
+      "path": "desktop-readback.json",
+      "sha256": "a4ffae8ecb1a3139e6944fe57fcc3172ddca7fe122fd8faf3d55f5530ff19b01"
+    },
+    {
+      "path": "desktop-close.json",
+      "sha256": "a992e68f153cd2a9b5be128b5c48b3544969c8f67652fb4fd25b42b71678b204"
+    }
+  ],
+  "teardown": {
+    "allOwnedProcessesAbsent": true,
+    "allOwnedDesktopsAbsent": true,
+    "explicitCloseClaimed": false,
+    "observedAt": "2026-10-21T21:17:38.9567282Z"
+  },
+  "limitations": [
+    "Native capture producer does not provide timestamp; none inferred",
+    "Host networking was not disabled; bundled protocol and observed resource list only",
+    "English light normal-size slice only",
+    "No new-source full language/theme/scale matrix",
+    "Earlier incomplete driver receipts retained; no product failure inferred",
+    "Native image named native-guide.png actually shows article and is not selected as guide evidence"
+  ]
+}

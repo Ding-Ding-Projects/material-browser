@@ -36,10 +36,13 @@ editable bookmarks through an encrypted revision. The foreground browser repair 
 launch-owned readiness, browser closure recovery and non-waking status through guest-local
 virtual X. These do not establish WSLg or full-desktop visual operation.
 
-Full desktop provisioning reaches credential preparation but fails before RDP file creation.
+The desktop credential failure was localized and repaired: bare chpasswd returned 1 while
+/usr/sbin/chpasswd returned 0 in the same owned guest. The repaired real helper completed
+with child exit 0 and HRESULT 0, including DPAPI and connection-file writing. The next
+xrdp server startup/readback step remains blocked before the RDP client launches.
 A basic CurrentUser DPAPI test passed in both normal and hidden contexts, and normal-user
 PATH discovery was refuted as the cause. The new helper records only bounded phase and
-numeric results, without credentials or exception text. Native phase diagnosis is pending.
+numeric results, without credentials or exception text. The bounded phase diagnostic established the credential result; server diagnosis continues.
 Cancellation descendant teardown remains unverified. All attempted guest resources were
 removed by exact ownership, with unrelated distro inventory preserved. Sandbox is absent
 on the selected host; no feature enablement or restart was initiated.
