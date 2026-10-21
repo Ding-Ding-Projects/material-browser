@@ -1,0 +1,79 @@
+{
+  "source": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "passed": true,
+  "profileId": "7321f4ec-ff2d-40d6-b0c2-df8e6ec0a4e6",
+  "firstRevision": "f58385bf-2a3e-4e42-b700-7284b64dd6de",
+  "secondRevision": "7c55dacd-e423-48ec-b18e-b82904465b00",
+  "finalRevision": "37974692-f23d-4bb9-9633-ec9359e9b4dd",
+  "verified": [
+    "Double-click progress save produces one template",
+    "Repeated progress save retains identity and advances revision",
+    "Cancel and reopen resumes step three",
+    "Process restart and real vault unlock resumes encrypted full draft",
+    "Nested Unicode bookmark import",
+    "Lone-surrogate and malformed UTF-8 rejection preserve prior document",
+    "Replacement and removal persisted",
+    "Backend separation",
+    "Completion clears draft flags and enables launch"
+  ],
+  "limitations": [
+    "No guest launched",
+    "No controlled lock-during-unresolved-save proof",
+    "English light normal size only in this slice",
+    "New-source high-scale/language/theme matrix remains pending",
+    "Native file picker dialog not exercised",
+    "Earlier failed driver observations retained separately"
+  ],
+  "teardown": {
+    "ownedDesktopCount": 8,
+    "allOwnedDesktopsAbsent": true,
+    "ownedProcessCount": 8,
+    "allOwnedProcessesAbsent": true,
+    "observedAt": "2026-10-21T21:12:44.5687257Z"
+  },
+  "layoutValidation": [
+    "run9/encrypted-progress-layout-receipt.json",
+    "run10/restart-resume-layout-receipt.json"
+  ],
+  "artifactSha256": "5fee4c2fa2a6fb199fd2d64a1cf9b07a66bdd913bbc5f1c88ae94b4ba0a3984b",
+  "sourceEnd": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "framesRetainedPrivately": [
+    {
+      "file": "run9/output/encrypted-progress-native.png",
+      "sha256": "1d4997b6b5672d664b44fd7c45813043f0909ba5e3b5fe438eab9fd13bafd7f0",
+      "width": 1264,
+      "height": 761,
+      "inspected": true,
+      "privacy": "Synthetic template only; no credential, machine path or personal content visible",
+      "route": "cheap Lowlevel HWND screenshot"
+    },
+    {
+      "file": "run9/output/encrypted-progress-renderer.png",
+      "sha256": "eb26dcdbb335741d12df4fd10113f05c4ec6e0dd4fb71764dc93b47d125734cc",
+      "width": 1264,
+      "height": 735,
+      "inspected": true,
+      "privacy": "Synthetic template only; no credential, machine path or personal content visible",
+      "route": "CDP Page.captureScreenshot on exact owned native renderer"
+    },
+    {
+      "file": "run10/output/restart-resume-native.png",
+      "sha256": "1f69a666b1c3ff4b73e685fbaf0591daa2feb7dc122066b4b491dbc29a387655",
+      "width": 1264,
+      "height": 761,
+      "inspected": true,
+      "privacy": "Synthetic template only; no credential, machine path or personal content visible",
+      "route": "cheap Lowlevel HWND screenshot"
+    },
+    {
+      "file": "run10/output/restart-resume-renderer.png",
+      "sha256": "04b0d0b528911ed8ae14b0245ad798ade7f2106c4c00a835d0ebfe884b006a13",
+      "width": 1264,
+      "height": 735,
+      "inspected": true,
+      "privacy": "Synthetic template only; no credential, machine path or personal content visible",
+      "route": "CDP Page.captureScreenshot on exact owned native renderer"
+    }
+  ],
+  "publicationStatus": "Interaction evidence only. Images and layout receipts remain in the private run pending complete promotion validation."
+}

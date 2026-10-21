@@ -1,0 +1,15 @@
+{
+  "sourceEnd": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "exitCode": 0,
+  "finishedAt": "2026-10-21T21:09:41.3064020Z",
+  "entrypoint": "build-installer.bat -Component DocsCompanion",
+  "startedAt": "2026-10-21T21:07:22.1261822Z",
+  "sourceStable": true,
+  "sourceCommit": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "schemaVersion": 1,
+  "artifacts": {
+    "filename": "Material-Browser-Handbook-0.1.1-x64.exe",
+    "bytes": 101513570,
+    "sha256": "d196a01e68f156790ba9215c74a040196f7ee8e1506886e4752f0f3aa76b9d3b"
+  }
+}

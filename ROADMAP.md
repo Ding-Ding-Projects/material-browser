@@ -21,7 +21,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [x] Verify real GUI stopped workspace save and native WSL browser readiness, closure recovery and non-wake status through guest-local virtual X
 - [ ] Verify terminal, graphical WSLg, desktop and Sandbox session health on the supported host
 - [x] Verify pinned WSL Chromium and Firefox managed policy recognition, plus Firefox import removal with encrypted editable-bookmark restoration
-- [ ] Complete portable bookmark file input and encrypted setup-progress controls in the built wizard
+- [x] Verify portable bookmark file input and encrypted setup-progress controls in the built wizard at source 50ddbbc (English/light/normal size; broader matrix remains pending)
 - [ ] Complete guest installer recipes and native runtime acceptance for every supported engine
 - [ ] Verify built interface accessibility, localization, layout and current screenshots
 - [ ] Verify packaging, documentation publication and supported installed update

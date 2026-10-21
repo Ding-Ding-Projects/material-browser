@@ -5,57 +5,8 @@ use std::net::{Ipv4Addr, SocketAddr, TcpListener, TcpStream};
 pub(super) fn launch(session: &Session) -> Result<Child> {
     let reservation = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).map_err(io_error)?;
     let port = reservation.local_addr().map_err(io_error)?.port();
-    let script = session.directory.join("desktop-connection.ps1");
     let rdp = session.directory.join("desktop.rdp");
-    // Parameters contain only owned identifiers, a port and protected output paths.
-    // Random credential generation, guest transfer and DPAPI protection stay in one process.
-    fs::write(&script, r#"param([string]$Distribution,[int]$Port,[string]$ConnectionFile)
-$ErrorActionPreference='Stop'
-Add-Type -AssemblyName System.Security
-$bytes=New-Object byte[] 32
-$rng=[Security.Cryptography.RandomNumberGenerator]::Create()
-$rng.GetBytes($bytes)
-$password=[Convert]::ToBase64String($bytes)
-try {
- $start=New-Object Diagnostics.ProcessStartInfo
- $start.FileName='wsl.exe'
- $start.Arguments='-d '+$Distribution+' -u root --exec chpasswd'
- $start.UseShellExecute=$false
- $start.CreateNoWindow=$true
- $start.RedirectStandardInput=$true
- $start.RedirectStandardOutput=$true
- $start.RedirectStandardError=$true
- $process=[Diagnostics.Process]::Start($start)
- $process.StandardInput.WriteLine('materialbrowser:'+$password)
- $process.StandardInput.Close()
- if (!$process.WaitForExit(15000)) { $process.Kill(); throw 'Guest credential setup timed out' }
- if ($process.ExitCode -ne 0) { throw 'Guest credential setup failed' }
- $plain=[Text.Encoding]::Unicode.GetBytes($password)
- $protected=[Security.Cryptography.ProtectedData]::Protect($plain,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
- $encoded=([BitConverter]::ToString($protected)).Replace('-','')
- $content="full address:s:127.0.0.1:$Port`r`nusername:s:materialbrowser`r`npassword 51:b:$encoded`r`nprompt for credentials:i:0`r`nauthentication level:i:2`r`nredirectclipboard:i:0`r`nredirectprinters:i:0`r`ndrivestoredirect:s:`r`naudiomode:i:2`r`n"
- [IO.File]::WriteAllText($ConnectionFile,$content,[Text.Encoding]::Unicode)
-} finally {
- if ($plain) { [Array]::Clear($plain,0,$plain.Length) }
- [Array]::Clear($bytes,0,$bytes.Length)
- $password=$null
- $rng.Dispose()
-}
-"#).map_err(io_error)?;
-    command(
-        "powershell.exe",
-        &[
-            "-NoLogo",
-            "-NoProfile",
-            "-NonInteractive",
-            "-File",
-            unicode(&script)?,
-            &session.distribution,
-            &port.to_string(),
-            unicode(&rdp)?,
-        ],
-        Duration::from_secs(30),
-    )?;
+    guest_credentials::prepare(session, port, &rdp)?;
     let setup = format!(
         "set -eu; mkdir -p /run/xrdp; sed -i 's|^port=tcp://127.0.0.1:3389$|port=tcp://127.0.0.1:{port}|' /etc/xrdp/xrdp.ini; grep -Fx 'port=tcp://127.0.0.1:{port}' /etc/xrdp/xrdp.ini >/dev/null; echo 'exec /usr/local/lib/material-browser/desktop-entry.sh' > /home/materialbrowser/.xsession; chown materialbrowser /home/materialbrowser/.xsession; service xrdp start >/dev/null"
     );

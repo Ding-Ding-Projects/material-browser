@@ -9,6 +9,7 @@ mod asynchronous;
 mod capabilities;
 mod cleanup;
 mod desktop_connection;
+mod guest_credentials;
 mod guest_installers;
 mod health;
 mod isolation;

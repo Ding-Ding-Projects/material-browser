@@ -1,0 +1,17 @@
+{
+  "sourceEnd": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "exitCode": 0,
+  "finishedAt": "2026-10-21T21:01:57.9393345Z",
+  "entrypoint": "build-installer.bat -Component Desktop",
+  "startedAt": "2026-10-21T20:56:08.7986560Z",
+  "sourceStable": true,
+  "sourceCommit": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "schemaVersion": 1,
+  "artifacts": {
+    "desktopExecutableSha256": "5fee4c2fa2a6fb199fd2d64a1cf9b07a66bdd913bbc5f1c88ae94b4ba0a3984b",
+    "applicationArchiveSha256": "b32991e1edf02896b2278a02e8786fcbd6aef51e0def57b0d6193a7838869dac",
+    "nativeHostSha256": "5d469d0496a70fcf02e1dced46c70872bef91ab7e382c9d78eb323de9334d97f",
+    "installerBytes": 809566208,
+    "installerSha256": "55e671a62714d67ace98d2048526c08e9931377854b3f89e80164b8bc24a4880"
+  }
+}

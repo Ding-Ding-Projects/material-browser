@@ -6,43 +6,51 @@ Current steering: the user explicitly resumed implementation after the goal serv
 was reported unintended. The service still displays paused and exposes no resume API;
 its record was retained without replacement. Work continues under that resume direction.
 
-Latest preserved source:f1816d6b59b5a73bf315c40f13577b626219713e on
-ai/feature/20261021-super-profiles, with exact remote reference verified. Current candidate
-adds bounded owned guest observations, terminal/desktop readiness, managed desktop browser
-launchers, typed client interfaces and explicit UI health/recovery presentation.
+Latest preserved source: 50ddbbc1953ce1919422848ac9c0969fec086d1a on
+ai/feature/20261021-super-profiles, with exact remote reference verified. Main contains
+work through 1ce75f5 after the maintainer merged PR 4. Encrypted full setup drafts and the
+completed wizard remain on the task branch pending integration. A focused desktop credential
+diagnostic extraction is being tested after this immutable candidate.
 
-The host suite passes51 checks. Desktop passes97, with one Windows-only check skipped on
-Linux; the targeted native platform checks passed14 earlier. Core19 passed at e92b352.
-The exact root Desktop installer production passed at f1816d6 with stable source and exit0.
-Its setup is809554944 bytes, SHA256 0a29f9b5b41aaad857ee2eaf57cb925132560bcbf5dcbeca724c3517030dc086.
+Current checks: 53 native host tests, 25 native core tests and 101 desktop tests passed;
+one native-only desktop check was skipped in the Linux run. The 13 focused wizard/model
+checks passed, including malformed UTF-8 and lone-surrogate rejection. The exact root
+Desktop installer and DocsCompanion installer entrypoints both completed with exit 0 at
+stable source 50ddbbc. See docs/evidence/super-profiles/build-50ddbbc.json and
+handbook-build-50ddbbc.json for sizes, hashes and source binding.
 
-Actual runtime proof: Chromium completed two owned headless cycles at0719755 with encrypted
-browser/workspace save and restoration, normal guest user, browser sandboxing enabled,
-owned teardown and unchanged unrelated distro inventory. Firefox completed two headless cycles at f1816d6, restoring browser local storage and workspace
-changes after encrypted save. The root browser/lock link was present before successful export;
-other links remain rejected. Default uncached acquisition downloaded and verified the pinned
-388975696-byte base in6860ms, completed setup and disposed only its owned guest.
-These results supersede the earlier retained Firefox export and default download failures.
+The real packaged wizard saved a complete encrypted draft, kept one identity on double
+click and repeated saves, advanced immutable revisions, resumed step three after cancel
+and after process restart with real vault unlock, retained prior bookmark input on invalid
+UTF-8 or lone surrogates, supported replacement/removal and backend separation, and cleared
+draft flags on completion. All eight owned process identities and desktops were absent
+after teardown. Four inspected original images and two validated layout receipts remain
+private pending complete promotion validation. This slice proves English/light/normal size,
+not the full language/theme/scale matrix or lock during an unresolved save.
 
-Native GUI CRUD/consent/lock proof belongs to77cb8cf. The0719755 minimum760x580 bilingual-dark
-reduced-motion navigation retest passed inspected pixels and bounds. Later successful native
-desktop enumeration proved all task-owned desktops absent. Portable handbook0049c2d passed
-native single-file launch, corrected0.1.1 footer and guide/internal navigation. Earlier
-77cb8cf proof covered reading-progress persistence. Original receipts/images remain private;
-final source-bound image promotion and README refresh are pending.
+Native runtime evidence already retained: Chromium and Firefox each completed two headless
+browser/workspace save and restoration cycles. Default uncached acquisition verified the
+388975696-byte pinned base, completed setup and disposed only its owned guest. Managed
+bookmark policies were recognized by both Linux engines; Firefox import removal preserved
+editable bookmarks through an encrypted revision. The foreground browser repair passed
+launch-owned readiness, browser closure recovery and non-waking status through guest-local
+virtual X. These do not establish WSLg or full-desktop visual operation.
 
-Current host changes observe cached launch-owned streams without executing guests from
-status. Records are nonce/sequence/freshness bounded. Missing or stale readiness is explicit,
-late observations cannot replace save/cleanup states, and visualVerified stays false.
-Terminal requires an actual guest PTY; desktop requires same-display Xfce and window manager.
-Native observation/readiness proof remains pending. Full desktop launchers use the selected
-managed browser profile and workspace. Sandbox runtime is unavailable on the selected host.
+Full desktop provisioning reaches credential preparation but fails before RDP file creation.
+A basic CurrentUser DPAPI test passed in both normal and hidden contexts, and normal-user
+PATH discovery was refuted as the cause. The new helper records only bounded phase and
+numeric results, without credentials or exception text. Native phase diagnosis is pending.
+Cancellation descendant teardown remains unverified. All attempted guest resources were
+removed by exact ownership, with unrelated distro inventory preserved. Sandbox is absent
+on the selected host; no feature enablement or restart was initiated.
 
-Next: preserve/build current candidate, retry Firefox and default acquisition, exercise real
-GUI cancellation/workspace save, verify observation and graphical guest workflows where safe,
-complete layout/localization/accessibility matrix, evidence promotion, wiki/handbook publication,
-installer/update proof and completed-work integration. Keep all unrun proof incomplete.
-Projects discovery lacks read:project and remains skipped without changing scopes.
+Remaining: phase-specific full-desktop repair and runtime roundtrip, actual terminal/WSLg
+proof, Sandbox runtime, full interface matrix, evidence promotion and README refresh,
+current handbook runtime/publication, installer acceptance and completed-work integration.
+The matching local installation is currently absent according to live discovery; the older
+installed-version statements below are historical. No accepted installed update is claimed.
+Projects discovery lacks read:project and remains skipped. The separate wiki initialization
+route remains unavailable; complete wiki source is retained in the documentation bundle.
 
 Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 
