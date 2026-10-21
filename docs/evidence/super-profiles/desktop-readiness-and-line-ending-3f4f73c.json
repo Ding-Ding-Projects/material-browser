@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "baseline": "3f4f73c34d3765ba56193788acd3348b08f8e8c4",
+  "sourcePatchSha256": "b3bf222fc2357a3350478d8fb111165e1a93fe1446a576c064efa9915cbe3158",
+  "nativeCandidateSha256": "25981397b1522d1e6f4ef3bf77268a52336327405f7cb3fb1df1a54db52882ed",
+  "receiptSha256": {
+    "readiness": "541e0e31fe91bb6c48809364b1369531087af6cf2721b5c24289abb07e697af9",
+    "rdpPrompt": "5a7b2a91223a40c3d50ec92ab3744c19a562ead3137f767b1fb64a401b1b0c80",
+    "lineEnding": "d7b1e5c3002e4874874a76e2a58f3c00eb5450754791f6698b7a197548f5e15f",
+    "nativeSender": "b9e5fc23deb6ba63ff9839222359c39813e4510a1b921a3b188e76c16ba606e1"
+  },
+  "readiness": {
+    "boundedPollMilliseconds": 200,
+    "maximumAttempts": 100,
+    "actualExecutableVerified": true,
+    "actualOwnerVerified": true,
+    "configuredLoopbackListenerVerified": true,
+    "sameProcessPersistedAfterReturnSeconds": [
+      0.2,
+      2,
+      5
+    ]
+  },
+  "lineEndingComparison": {
+    "crlf": {
+      "commandExit": 0,
+      "intendedMatches": false,
+      "wrongMatches": false
+    },
+    "lf": {
+      "commandExit": 0,
+      "intendedMatches": true,
+      "wrongMatches": false
+    }
+  },
+  "nativePowerShellLfSender": {
+    "commandExit": 0,
+    "intendedMatches": true,
+    "wrongMatches": false
+  },
+  "rdp": {
+    "ownedNativeWindowReached": true,
+    "accountWideFirstUsePromptObserved": true,
+    "inputSent": false,
+    "authenticationVerified": false,
+    "xfceVerified": false
+  },
+  "verification": {
+    "nativeHostTestsPassed": 56,
+    "nativeHostTestsFailed": 0,
+    "exactRootHostBuildExitCode": 0
+  },
+  "teardown": {
+    "allGuestsDiscarded": true,
+    "onlyOwnershipRecordsRemain": true,
+    "unrelatedDistroInventoriesUnchanged": true,
+    "rdpProcessesAbsent": true,
+    "rdpProbeFourOwnedProcessesAbsent": true,
+    "rdpProbeHiddenDesktopAbsent": true
+  },
+  "limitations": [
+    "Final-binary RDP authentication and full Xfce workflow require a native first-use decision by the user",
+    "Line-ending proof uses the actual native sender and guest PAM API, not the final binary RDP client",
+    "No credential values or hashes were read or retained",
+    "Forced-cancellation descendant teardown remains unverified"
+  ]
+}

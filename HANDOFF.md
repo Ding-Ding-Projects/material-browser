@@ -6,7 +6,7 @@ Current steering: the user explicitly resumed implementation after the goal serv
 was reported unintended. The service still displays paused and exposes no resume API;
 its record was retained without replacement. Work continues under that resume direction.
 
-Latest preserved source: 50ddbbc1953ce1919422848ac9c0969fec086d1a on
+Previous preserved baseline: 3f4f73c34d3765ba56193788acd3348b08f8e8c4 on
 ai/feature/20261021-super-profiles, with exact remote reference verified. Main contains
 work through 1ce75f5 after the maintainer merged PR 4. Encrypted full setup drafts and the
 completed wizard remain on the task branch pending integration. A focused desktop credential
@@ -43,11 +43,16 @@ virtual X. These do not establish WSLg or full-desktop visual operation.
 
 The desktop credential failure was localized and repaired: bare chpasswd returned 1 while
 /usr/sbin/chpasswd returned 0 in the same owned guest. The repaired real helper completed
-with child exit 0 and HRESULT 0, including DPAPI and connection-file writing. The next
-xrdp server startup/readback step remains blocked before the RDP client launches.
+with child exit 0 and HRESULT 0, including DPAPI and connection-file writing. The bounded
+xrdp readiness repair now reaches the actual native RDP first-use prompt. No input was sent;
+the account-wide decision belongs to the user. All four owned processes and the hidden
+desktop were verified absent after exact guest disposal. The host-to-Linux CRLF defect was
+separately proved through PAM booleans and repaired with explicit LF; the native PowerShell
+sender authenticated the intended generated input and rejected its negative control.
 A basic CurrentUser DPAPI test passed in both normal and hidden contexts, and normal-user
 PATH discovery was refuted as the cause. The new helper records only bounded phase and
-numeric results, without credentials or exception text. The bounded phase diagnostic established the credential result; server diagnosis continues.
+numeric results, without credentials or exception text. Both narrow repairs passed 56 native host tests and the exact root Host build. The final
+Desktop/DocsCompanion producer and current image promotion remain pending.
 Cancellation descendant teardown remains unverified. All attempted guest resources were
 removed by exact ownership, with unrelated distro inventory preserved. Sandbox is absent
 on the selected host; no feature enablement or restart was initiated.

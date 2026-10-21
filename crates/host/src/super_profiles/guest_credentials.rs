@@ -221,7 +221,7 @@ try {
  $start.RedirectStandardError=$true
  $process=[Diagnostics.Process]::Start($start)
  $phase='write-guest-input'
- $process.StandardInput.WriteLine('materialbrowser:'+$password)
+ $process.StandardInput.Write('materialbrowser:'+$password+"`n")
  $process.StandardInput.Close()
  $phase='wait-guest-command'
  if (!$process.WaitForExit(15000)) { $helperExit=124; $process.Kill(); throw 'Guest command timeout' }

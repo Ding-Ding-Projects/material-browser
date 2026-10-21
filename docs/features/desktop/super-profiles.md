@@ -148,7 +148,10 @@ separately records one-file launch, internal navigation and guide progress after
 
 The [credential command comparison](../../evidence/super-profiles/desktop-credential-path-8f010e5.json)
 isolates bare executable resolution from the protected handoff. Using /usr/sbin/chpasswd
-completed the real helper through DPAPI and connection-file creation. The following xrdp
-startup/readback step remains under diagnosis; this is not authenticated desktop proof.
+completed the real helper through DPAPI and connection-file creation. A bounded xrdp
+identity/listener readiness loop now reaches the native RDP first-use prompt. That account-wide
+consent remains a user decision. A separate native sender/PAM comparison proved and repaired
+a CRLF mismatch with explicit LF delivery. These [desktop repair results](../../evidence/super-profiles/desktop-readiness-and-line-ending-3f4f73c.json)
+do not establish authenticated Xfce, managed-browser interaction or desktop save/restore.
 The [native test receipt](../../evidence/super-profiles/native-tests-4d81c91.json) records
 56 Windows host tests and three Linux-focused protocol/path checks.
