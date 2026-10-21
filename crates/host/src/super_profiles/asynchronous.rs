@@ -58,6 +58,7 @@ impl Sessions {
         let root = self.root.clone();
         let epoch = self.unlock_epoch.clone();
         let child = self.children.remove(&id);
+        let observer = self.observers.remove(&id);
         let worker_id = id.clone();
         let handle = thread::spawn(move || {
             set_context(&session);
@@ -67,10 +68,14 @@ impl Sessions {
                 unlock_epoch: epoch,
                 entries: BTreeMap::from([(id.clone(), session.clone())]),
                 children: BTreeMap::new(),
+                observers: BTreeMap::new(),
                 workers: BTreeMap::new(),
             };
             if let Some(child) = child {
                 runner.children.insert(id, child);
+            }
+            if let Some(observer) = observer {
+                runner.observers.insert(fallback.id.clone(), observer);
             }
             if let Err(e) = task(&mut runner, session) {
                 let mut retained = runner
@@ -93,7 +98,7 @@ impl Sessions {
                 let _ = runner.persist(&retained);
                 runner.entries.insert(retained.id.clone(), retained);
             }
-            (runner.entries, runner.children)
+            (runner.entries, runner.children, runner.observers)
         });
         self.workers.insert(worker_id, handle);
         Ok(())
@@ -133,6 +138,7 @@ mod tests {
                 unlock_epoch: crate::random_hex(),
                 entries: BTreeMap::new(),
                 children: BTreeMap::new(),
+                observers: BTreeMap::new(),
                 workers: BTreeMap::new(),
             };
             runner
@@ -148,7 +154,7 @@ mod tests {
             event(&mut session, "cancelled", "Retained for recovery");
             runner.persist(&session).unwrap();
             runner.entries.insert(session.id.clone(), session);
-            (runner.entries, runner.children)
+            (runner.entries, runner.children, runner.observers)
         });
         sessions.workers.insert(id.clone(), worker);
         ready_rx.recv_timeout(Duration::from_secs(2)).unwrap();

@@ -1,91 +1,36 @@
 # Super Profiles continuation
 
-Current steering: the user explicitly resumed implementation; the pause was unintended.
-The goal service still displays paused and has no resume endpoint. Retain its record
-without replacing it, and continue the authorized implementation.
-
-Latest source repair: anchored literal WSL tar exclusion of browser/lock only. A real
-GNU tar regression passes, preserving nested/workspace locks and rejecting other links.
-Native Firefox two-cycle retry is next, after exact Host rebuild and immutable copy.
-
 Implement the approved Super Profiles plan in Ding-Ding-Projects/material-browser.
-Preserve existing browser profiles and all unrelated host environments.
+The user explicitly resumed implementation after an unintended goal-service pause. The
+service still displays paused and has no resume operation; retain it without replacement.
 
-Preserved milestones: 07c8702c164379f494c773b6dd0395f541cc76e6 and
-e92b352069a1b2884e15feaa01fe027b705a91bd are verified on
-ai/feature/20261021-super-profiles. Subsequent task changes implement asynchronous
-provisioning, durable progress/cancellation, separate backend archive histories,
-selected guest installers, save-and-close, Sandbox guest controls and explicit
-plaintext staging disposal. Preserve these changes before stopping.
+Latest verified preservation:0049c2d48aa1ddbc31588e544c831d8336cddb22 on
+ai/feature/20261021-super-profiles. Current coherent source adds owned bounded observers,
+terminal/desktop process readiness, managed desktop browser/workspace entries, typed client
+methods and visible health/recovery controls. Host51 and desktop97 checks pass; one native
+platform check was skipped on Linux and passed separately among14 Windows targeted checks.
+Core19 passed earlier. Preserve this candidate, then use exact root build.bat for native
+production and build-installer.bat for installer/companion production.
 
-Verified: current core 19 tests, Linux host 36 tests. Earlier source passed exact
-Windows root Core/Host/Desktop/Docs builds, 28 native Windows host tests,
-89 desktop tests and 17 isolated native stdio checks. The stdio check did not launch
-guests. Source implementation and compilation do not prove guest runtime behavior.
+Actual Chromium0719755 two-cycle headless proof verifies encrypted browser/workspace restore,
+normal user, sandboxing, exact owned teardown and unchanged unrelated distributions. Firefox
+rendered but export rejected its root lock symlink. The anchored-literal root-only export
+exclusion and negative GNU tar regression are preserved; new immutable-host retry is next.
+Default acquisition repair remains unverified. Original diagnostics are retained privately.
 
-Next: complete current-source UI polling and save-close controls, rebuild through
-build.bat, run focused native checks and genuine hidden-desktop UI interaction.
-Verify WSL terminal/browser/full-desktop setup, save and discard using only owned
-distributions, and Windows Sandbox when available. Sandbox is absent on the selected
-host. Do not change host features, power or login state to manufacture acceptance.
+GUI CRUD/consent/lock proof is77cb8cf; repaired minimum760x580 bilingual-dark reduced-motion
+layout is0719755. Native enumeration proved all owned hidden desktops absent. Handbook
+0049c2d native single-file/footer0.1.1/guide/navigation proof passed; reading persistence is
+separately77cb8cf. Source-bound current screenshot promotion and README refresh remain.
 
-New source adds asynchronous save collection, operation-bound confirmation after lock,
-locked stop/discard with redacted responses, host capability preflight and early WSL
-integration configuration. Current desktop checks:95 passed, zero failed, one Windows-only
-test skipped on Linux. The final host suite41 checks passed, including the capability preflight correction.
-The exact current root Host build passed with exit0. Native runtime proof remains pending.
-Two real WSL cycles at e92b352 proved synthetic workspace encrypted save/restore/discard,
-with unrelated distributions unchanged. See docs/evidence/super-profiles/wsl-roundtrip-e92b352.json.
-These canceled before graphical launch and used a separately verified base cache.
-Earlier e92b352 root installer production and packaged native UI CRUD passed, but do not
-prove these latest lifecycle changes. Default acquisition repair requires a fresh check;
-continuous external guest-process health remains unfinished. Packaging, installation,
-current-source screenshots, handbook deployment and default-branch integration
-remain outstanding. Keep roadmap/handoff accurate and retain unverified states.
-Projects discovery lacks read:project and is skipped without changing scopes.
+After preserving/building: Firefox two-cycle and default acquisition; real GUI cancel/stop/
+workspace-only save; observer readiness/external closure/restart recovery; graphical terminal,
+WSLg/full desktop and Sandbox where available; final matrix, documentation publication,
+installer/update proof and completed-work main integration. Sandbox is absent. Never change
+host power/login or unrelated environments. Observer process evidence is not visual evidence.
+
+Private original proof lives under .agent and .cache; sanitize selected receipts and inspect
+images before publication. Do not publish raw diagnostic archives or private paths. Keep
+unfinished work on its owning branch, preserve and verify remote references, never force-push.
 
 Progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
-
-Latest followup: current-source native WSL launch stopped at strict isolation flag
-readback, before browser provisioning, then owned stop/discard passed. A native
-API-only probe proved WSL2 preserves its internal VM bit8 while host-integration
-bits1/2/4 are zero. The narrow readback repair and negative regression passed,
-and root Host build passed. Retry browser cycles against that rebuilt source.
-Fresh77cb8cf packaged CRUD/consent/lock proof exists; minimum bilingual dark
-760x580 navigation overflow was observed. CSS repair awaits same-tuple rebuild.
-Root Desktop and portable Handbook installer builds completed for77cb8cf;
-source-bound hashes are in docs/evidence/super-profiles/build-77cb8cf.json.
-
-## Goal service pause observed
-
-The goal service reports status paused. No implementation resume was attempted. New work
-was stopped pending clarification; active owned runtime work was limited to safe stop,
-discard and evidence preservation. The health observer design remains unimplemented,
-with no source writes from that slice. Do not mark the unfinished goal complete.
-
-Current native evidence: Chromium completed two actual headless cycles on0719755 with
-normal guest user and browser sandboxing enabled. Browser local state and workspace
-restored through the encrypted revision; both owned guests and plaintext staging were
-removed, with unrelated distro inventory unchanged. Firefox first headless launch
-worked but export rejected a linked or unsafe archive member. Its changed diagnostic
-was being settled at pause; exact final receipt is required before further repair.
-No new Firefox or default-download attempt is authorized while the pause remains.
-
-The0719755 minimum760x580 bilingual-dark reduced-motion navigation retest passed pixels
-and measured bounds. Successful EnumDesktopsW later proved all four task-owned desktops
-absent, separately from earlier close calls that returned closed:false. The77cb8cf
-portable handbook passed three-step interaction, reload persistence, internal wiki
-and full feature article navigation, with owned processes absent. Its version footer
-was hard-coded0.1.0. The pending source fix derives the footer from the actual desktop
-package version; six documentation tests passed, but a rebuild/runtime check remains.
-
-Current proof directories remain private ignored data under .cache and .agent.
-Do not publish them wholesale. Sanitize selected receipts, inspect genuine images,
-and apply evidence promotion before making current presentation claims.
-
-Firefox diagnostic settled before stopping: its only nonregular archive member was
-browser/lock, a browser-root symlink. The validator correctly rejected it; no revision
-was finalized. The synthetic failed archive and headers were retained privately.
-Owned stop/discard completed, no guest or default acquisition operation remains active.
-On resume, exclude only confirmed transient browser-root locks during export, preserve
-link rejection for all other members, and add a meaningful regression before retrying.

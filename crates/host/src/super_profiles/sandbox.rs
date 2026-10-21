@@ -115,10 +115,27 @@ try {
  Start-Sleep -Seconds 3
  $running=Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq $browser -and $_.CommandLine -like '*C:\MaterialBrowser\data\browser*' }
  if (!$running) { throw 'Managed browser readiness not observed' }
+ $guestPid=[int](@($running)[0].ProcessId)
+ $guestProcess=Get-Process -Id $guestPid -ErrorAction Stop
+ $guestStart=[UInt64]$guestProcess.StartTime.ToUniversalTime().Ticks
+ $script:healthSequence=0
+ $emitHealth={ param([string]$State)
+  $script:healthSequence++
+  $record=[ordered]@{version=1;sessionId='__SESSION__';nonce='__NONCE__';sequence=$script:healthSequence;mode='browser';state=$State;pid=$guestPid;startTicks=$guestStart;bootId='sandbox'}
+  $temporary=Join-Path $exchange 'health.tmp'
+  $destination=Join-Path $exchange 'health.json'
+  [IO.File]::WriteAllText($temporary,($record|ConvertTo-Json -Compress),[Text.UTF8Encoding]::new($false))
+  if ([IO.File]::Exists($destination)) { [IO.File]::Replace($temporary,$destination,$null) } else { [IO.File]::Move($temporary,$destination) }
+ }
+ & $emitHealth 'ready'
  [IO.File]::WriteAllText((Join-Path $exchange 'ready'),'browser-process-ready')
  $controls=Join-Path $inputRoot 'controls.ps1'
  Start-Process powershell.exe -ArgumentList @('-NoProfile','-STA','-File',$controls) | Out-Null
- while (!(Test-Path -LiteralPath (Join-Path $exchange 'stop')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'save-requested')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'discard-requested'))) { Start-Sleep -Milliseconds 500 }
+ while (!(Test-Path -LiteralPath (Join-Path $exchange 'stop')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'save-requested')) -and !(Test-Path -LiteralPath (Join-Path $exchange 'discard-requested'))) {
+  if (!(Get-Process -Id $guestPid -ErrorAction SilentlyContinue)) { & $emitHealth 'exited'; throw 'Managed browser process exited unexpectedly' }
+  & $emitHealth 'ready'
+  Start-Sleep -Milliseconds 500
+ }
  Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($browser)) -ErrorAction SilentlyContinue | ForEach-Object { $_.CloseMainWindow() | Out-Null }
  Start-Sleep -Seconds 3
  if (Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($browser)) -ErrorAction SilentlyContinue) { throw 'Managed browser remains active; save refused' }
@@ -128,8 +145,9 @@ try {
   Copy-Item -LiteralPath (Join-Path $localRoot 'workspace') -Destination (Join-Path $exchange 'data') -Recurse -Force
  }
  [IO.File]::WriteAllText((Join-Path $exchange 'stopped'),'browser-exited-and-state-copied')
+ & $emitHealth 'exited'
 } catch { [IO.File]::WriteAllText((Join-Path $exchange 'failed'),'Guest bootstrap or graceful stop failed') }
-"#.replace("__EXECUTABLE__",leaf);
+"#.replace("__EXECUTABLE__",leaf).replace("__SESSION__",&s.id).replace("__NONCE__",&s.health_nonce);
     fs::write(input.join("bootstrap.ps1"), script).map_err(io_error)?;
     let config = format!(
         r#"<Configuration><Networking>{}</Networking><ClipboardRedirection>Disable</ClipboardRedirection><vGPU>Disable</vGPU><AudioInput>Disable</AudioInput><VideoInput>Disable</VideoInput><PrinterRedirection>Disable</PrinterRedirection><MappedFolders><MappedFolder><HostFolder>{}</HostFolder><SandboxFolder>C:\MaterialBrowserInput</SandboxFolder><ReadOnly>true</ReadOnly></MappedFolder><MappedFolder><HostFolder>{}</HostFolder><SandboxFolder>C:\MaterialBrowserEngine</SandboxFolder><ReadOnly>true</ReadOnly></MappedFolder><MappedFolder><HostFolder>{}</HostFolder><SandboxFolder>C:\MaterialBrowserOutput</SandboxFolder><ReadOnly>false</ReadOnly></MappedFolder></MappedFolders><LogonCommand><Command>powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\MaterialBrowserInput\bootstrap.ps1</Command></LogonCommand></Configuration>"#,

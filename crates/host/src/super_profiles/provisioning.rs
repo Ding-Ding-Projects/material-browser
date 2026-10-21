@@ -26,6 +26,10 @@ impl Sessions {
                 false
             };
             if backend == "windows-sandbox" {
+                s.health_nonce = crate::random_hex();
+                s.health = Some(health::Snapshot::unknown(
+                    "Waiting for the Sandbox guest heartbeat",
+                ));
                 self.progress(
                     &mut s,
                     "launching-sandbox",
@@ -38,6 +42,8 @@ impl Sessions {
                     settings["networking"].as_bool().unwrap_or(true),
                 )?;
                 self.children.insert(id.clone(), child);
+                self.observers
+                    .insert(id.clone(), health::Observer::sandbox());
                 s.guest_created = true;
                 self.persist(&s)?;
                 s.state = "starting".into();
@@ -227,6 +233,10 @@ impl Sessions {
                 "desktop" => "command -v startxfce4 && command -v xrdp",
                 _ => "command -v sh",
             };
+            health::prepare_wsl(&mut s, engine)?;
+            if mode == "desktop" {
+                install_desktop_launchers(&s, engine)?;
+            }
             run(
                 &[
                     "-d",
@@ -267,7 +277,7 @@ impl Sessions {
                         "-u",
                         USER,
                         "--exec",
-                        "sh",
+                        "/usr/local/lib/material-browser/terminal-entry.sh",
                     ])
                     .stdin(Stdio::null())
                     .stdout(Stdio::null())
@@ -334,6 +344,7 @@ impl Sessions {
                 s.message =
                     "Guest process readiness verified; visual readiness remains unverified".into();
             }
+            self.observers.insert(id.clone(), health::start_wsl(&s)?);
             Ok(())
         })();
         if let Err(e) = result {
@@ -356,5 +367,93 @@ impl Sessions {
         self.persist(&s)?;
         self.entries.insert(id, s.clone());
         Ok(json!(s))
+    }
+}
+
+fn desktop_launcher_script(engine: &str) -> Result<String> {
+    let browser = match engine {
+        "chromium" => {
+            "exec /usr/local/bin/chromium --user-data-dir=/home/materialbrowser/.material-browser/browser about:blank"
+        }
+        "firefox" => {
+            "exec /usr/local/bin/firefox --no-remote --profile /home/materialbrowser/.material-browser/browser about:blank"
+        }
+        _ => {
+            return Err(error(
+                "ENGINE_UNSUPPORTED",
+                "Unsupported desktop browser engine",
+            ));
+        }
+    };
+    Ok(format!(
+        r#"set -eu
+install -d -m 755 /usr/local/lib/material-browser /usr/share/applications
+install -d -o materialbrowser -g materialbrowser -m 700 /home/materialbrowser/Desktop
+cat > /usr/local/lib/material-browser/browser-entry.sh <<'BROWSER'
+#!/bin/sh
+set -eu
+test "$(id -u)" = "$(id -u materialbrowser)"
+{browser}
+BROWSER
+chmod 755 /usr/local/lib/material-browser/browser-entry.sh
+cat > /usr/share/applications/material-browser-managed.desktop <<'ENTRY'
+[Desktop Entry]
+Type=Application
+Name=Managed Browser
+Comment=Open this session's managed browser profile
+Exec=/usr/local/lib/material-browser/browser-entry.sh
+Icon=web-browser
+Terminal=false
+Categories=Network;WebBrowser;
+ENTRY
+cat > /usr/share/applications/material-browser-workspace.desktop <<'ENTRY'
+[Desktop Entry]
+Type=Application
+Name=Managed Workspace
+Exec=exo-open --launch FileManager /home/materialbrowser/.material-browser/workspace
+Icon=folder
+Terminal=false
+Categories=Utility;
+ENTRY
+for name in material-browser-managed material-browser-workspace; do
+  cp "/usr/share/applications/$name.desktop" "/home/materialbrowser/Desktop/$name.desktop"
+  chown materialbrowser:materialbrowser "/home/materialbrowser/Desktop/$name.desktop"
+  chmod 700 "/home/materialbrowser/Desktop/$name.desktop"
+done
+"#
+    ))
+}
+
+fn install_desktop_launchers(s: &Session, engine: &str) -> Result<()> {
+    verify_registration(s)?;
+    let script = desktop_launcher_script(engine)?;
+    let path = s.directory.join("input/desktop-launchers.sh");
+    fs::write(&path, script).map_err(io_error)?;
+    let mut command = Command::new("wsl.exe");
+    command.args(["-d", &s.distribution, "-u", "root", "--exec", "sh", "-s"]);
+    command.stdin(fs::File::open(path).map_err(io_error)?);
+    command.stdout(Stdio::null()).stderr(Stdio::null());
+    wait_owned(command.spawn().map_err(io_error)?, Duration::from_secs(30))?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod desktop_tests {
+    use super::*;
+
+    #[test]
+    fn desktop_entries_bind_each_engine_to_the_managed_profile() {
+        for (engine, expected) in [
+            ("chromium", "--user-data-dir="),
+            ("firefox", "--no-remote --profile "),
+        ] {
+            let script = desktop_launcher_script(engine).unwrap();
+            assert!(script.contains(&format!("exec /usr/local/bin/{engine} {expected}/home/materialbrowser/.material-browser/browser")));
+            assert!(script.contains("Exec=/usr/local/lib/material-browser/browser-entry.sh"));
+            assert!(script.contains("test \"$(id -u)\" = \"$(id -u materialbrowser)\""));
+            assert!(script.contains("Exec=exo-open --launch FileManager /home/materialbrowser/.material-browser/workspace"));
+            assert!(!script.contains("--no-sandbox"));
+        }
+        assert!(desktop_launcher_script("unknown").is_err());
     }
 }

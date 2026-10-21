@@ -1,56 +1,46 @@
 # Material Browser handoff
 
-Current steering: implementation resumed explicitly after the goal service pause was
-reported unintended. The service still reports paused and exposes no resume API; no
-replacement goal was created. Work continues under the explicit resume direction.
-
-Firefox export now excludes only the confirmed transient browser-root lock, with
-anchored literal matching. Its GNU tar regression proves nested/workspace lock files
-remain and arbitrary links are still rejected. Native retry remains pending.
-
 ## Super Profiles implementation in progress
 
-Preserved milestones: 07c8702c164379f494c773b6dd0395f541cc76e6 and
-e92b352069a1b2884e15feaa01fe027b705a91bd on ai/feature/20261021-super-profiles,
-with exact remote references verified. Subsequent source adds asynchronous provisioning,
-durable progress/cancellation, separate backend archive history, selected Linux installers,
-explicit save-and-close, guest save/discard controls and decrypted staging disposal.
-The core and scoped archives remain encrypted; browser profiles remain separate.
+Current steering: the user explicitly resumed implementation after the goal service pause
+was reported unintended. The service still displays paused and exposes no resume API;
+its record was retained without replacement. Work continues under that resume direction.
 
-Checks against e92b352: 19 core tests and 36 Linux host tests passed.
-The earlier preservation milestone passed 28 Windows host tests, 89 desktop tests,
-17 real native stdio protocol checks and exact root Windows builds for Core, Host,
-Desktop and Docs. The e92b352 root Desktop installer build also completed successfully.
-The latest host suite reports41 passed, including asynchronous save, lock and capability checks.
-The exact root Host build passed after the final backend-key correction.
-The latest desktop suite reports 95 passed, zero failed and one Windows-only test skipped
-on Linux. The native protocol check did not launch guests. New native builds
-and current-source UI proof remain pending. Windows Sandbox is absent on the selected
-host. Projects discovery lacks read:project and was skipped without changing scopes.
+Latest preserved source:0049c2d48aa1ddbc31588e544c831d8336cddb22 on
+ai/feature/20261021-super-profiles, with exact remote reference verified. Current candidate
+adds bounded owned guest observations, terminal/desktop readiness, managed desktop browser
+launchers, typed client interfaces and explicit UI health/recovery presentation.
 
-Outstanding acceptance: actual WSL terminal/browser/full-desktop and Sandbox launch,
-setup, installer execution, save-back and disposal; full desktop authentication;
-current-source UI evidence; packaging/deployment and installed update. Save-back and
-guest-request reconciliation have further lifecycle changes awaiting native verification.
-Launch provisioning runs in a worker. Continuous external guest-process health is unfinished.
-Do not treat source, compilation or protocol checks as complete guest runtime proof.
+The host suite passes51 checks. Desktop passes97, with one Windows-only check skipped on
+Linux; the targeted native platform checks passed14 earlier. Core19 passed at e92b352.
+The latest exact root Host build and unpacked Desktop package belong to0719755. Root
+Desktop installer production passed at77cb8cf. Current candidate native build remains next.
 
-Two actual WSL cycles against e92b352 verified synthetic workspace save, encrypted revision
-restoration, owned-distro removal and plaintext staging disposal, while unrelated distributions
-were unchanged. See docs/evidence/super-profiles/wsl-roundtrip-e92b352.json. These used a verified
-base cache and cancellation before graphical launch. Default acquisition timed out separately;
-its downloader repair is not yet runtime-verified. Packaged native UI interaction against
-e92b352 covered template CRUD, restore, backend/engine retention and canceled identity consent,
-with zero guest sessions. Later async-save and lock changes need fresh built UI proof.
+Actual runtime proof: Chromium completed two owned headless cycles at0719755 with encrypted
+browser/workspace save and restoration, normal guest user, browser sandboxing enabled,
+owned teardown and unchanged unrelated distro inventory. Firefox rendered but export
+rejected its browser/lock symlink. The scoped anchored-literal exclusion regression passed;
+Firefox native retry remains pending. Default acquisition repair remains unverified.
 
-The current WSL isolation readback initially rejected the internal WSL2 VM flag. A native
-API-only probe proved successful configure/readback returns version2,uid0,flags8. The repair
-requires exactly that configuration and rejects all host-integration and unknown flags.
-Its focused negative regression and exact root Host build passed; browser runtime retry
-remains pending. The latest native UI run also found minimum-size bilingual navigation
-overflow. A narrow CSS repair is written and typechecked, with same-tuple built proof pending.
-The root Desktop installer and portable handbook completed for77cb8cf; see
-docs/evidence/super-profiles/build-77cb8cf.json for hashes and limits.
+Native GUI CRUD/consent/lock proof belongs to77cb8cf. The0719755 minimum760x580 bilingual-dark
+reduced-motion navigation retest passed inspected pixels and bounds. Later successful native
+desktop enumeration proved all task-owned desktops absent. Portable handbook0049c2d passed
+native single-file launch, corrected0.1.1 footer and guide/internal navigation. Earlier
+77cb8cf proof covered reading-progress persistence. Original receipts/images remain private;
+final source-bound image promotion and README refresh are pending.
+
+Current host changes observe cached launch-owned streams without executing guests from
+status. Records are nonce/sequence/freshness bounded. Missing or stale readiness is explicit,
+late observations cannot replace save/cleanup states, and visualVerified stays false.
+Terminal requires an actual guest PTY; desktop requires same-display Xfce and window manager.
+Native observation/readiness proof remains pending. Full desktop launchers use the selected
+managed browser profile and workspace. Sandbox runtime is unavailable on the selected host.
+
+Next: preserve/build current candidate, retry Firefox and default acquisition, exercise real
+GUI cancellation/workspace save, verify observation and graphical guest workflows where safe,
+complete layout/localization/accessibility matrix, evidence promotion, wiki/handbook publication,
+installer/update proof and completed-work integration. Keep all unrun proof incomplete.
+Projects discovery lacks read:project and remains skipped without changing scopes.
 
 Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 
@@ -111,37 +101,3 @@ Unrelated internal-maintenance references accidentally entered a086a87 and were 
 See docs/evidence/desktop/receipts-0.1.1.json, bundled-runtime-0.1.1.json and the archived presentation for exact public evidence.
 
 Native verification teardown update: after the older unrelated process was independently observed absent, fresh complete ancestry proof passed. The owning wrapper exited normally, both recorded wrapper identities were proven absent and the exact named desktop closed at2026-10-19T06:21:04.275644+00:00. No PID kill or unrelated termination occurred. This supersedes the earlier retained-wrapper state while preserving the initial rejection receipt. The prior separately rejected handbook profile cleanup remains untouched.
-
-## Goal service pause observed
-
-The goal service reports status paused. No implementation resume was attempted. New work
-was stopped pending clarification; active owned runtime work was limited to safe stop,
-discard and evidence preservation. The health observer design remains unimplemented,
-with no source writes from that slice. Do not mark the unfinished goal complete.
-
-Current native evidence: Chromium completed two actual headless cycles on0719755 with
-normal guest user and browser sandboxing enabled. Browser local state and workspace
-restored through the encrypted revision; both owned guests and plaintext staging were
-removed, with unrelated distro inventory unchanged. Firefox first headless launch
-worked but export rejected a linked or unsafe archive member. Its changed diagnostic
-was being settled at pause; exact final receipt is required before further repair.
-No new Firefox or default-download attempt is authorized while the pause remains.
-
-The0719755 minimum760x580 bilingual-dark reduced-motion navigation retest passed pixels
-and measured bounds. Successful EnumDesktopsW later proved all four task-owned desktops
-absent, separately from earlier close calls that returned closed:false. The77cb8cf
-portable handbook passed three-step interaction, reload persistence, internal wiki
-and full feature article navigation, with owned processes absent. Its version footer
-was hard-coded0.1.0. The pending source fix derives the footer from the actual desktop
-package version; six documentation tests passed, but a rebuild/runtime check remains.
-
-Current proof directories remain private ignored data under .cache and .agent.
-Do not publish them wholesale. Sanitize selected receipts, inspect genuine images,
-and apply evidence promotion before making current presentation claims.
-
-Firefox diagnostic settled before stopping: its only nonregular archive member was
-browser/lock, a browser-root symlink. The validator correctly rejected it; no revision
-was finalized. The synthetic failed archive and headers were retained privately.
-Owned stop/discard completed, no guest or default acquisition operation remains active.
-On resume, exclude only confirmed transient browser-root locks during export, preserve
-link rejection for all other members, and add a meaningful regression before retrying.

@@ -46,3 +46,26 @@ export async function finishSuperProfileMutation({kind,result,clearSelection,ref
   if (result?.state === 'cancelling') return 'Cancellation requested. Watch session progress for confirmation.';
   return refreshFailed ? 'Action completed. The view could not refresh; retry Refresh.' : 'Completed';
 }
+
+const healthDetails = new Set([
+  'Waiting for the Sandbox guest heartbeat',
+  'Waiting for a guest workspace observation',
+  'Guest observation was invalid',
+  'No fresh guest observation is available',
+  'Guest process observation only',
+  'Observation state is unavailable',
+  'Guest observation stopped for an explicit lifecycle operation',
+  'Host restarted; guest observation ownership must be recovered explicitly',
+]);
+export function superSessionPresentation(session) {
+  const status = ['unknown','starting','ready','exited'].includes(session.health?.status)
+    ? session.health.status : 'unknown';
+  return {
+    healthStatus: status,
+    healthDetail: healthDetails.has(session.health?.detail) ? session.health.detail : 'Observation state is unavailable',
+    canStop: ['running','launched','starting','recovery-required','disposed-unexported','provisioning','collecting'].includes(session.state),
+    canSave: session.state === 'stopped' || (status === 'ready' && ['running','launched','starting'].includes(session.state)),
+    canDiscard: ['running','launched','starting','stopped','saved','cleanup-required','recovery-required','disposed-unexported','save-ready'].includes(session.state),
+    retained: ['recovery-required','disposed-unexported'].includes(session.state),
+  };
+}

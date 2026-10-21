@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration, finishSuperProfileMutation } from './SuperProfiles.model.mjs';
+import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration, finishSuperProfileMutation, superSessionPresentation } from './SuperProfiles.model.mjs';
 const draft={name:'Work',engine:'chromium',settings:{backend:'wsl2',launchMode:'browser',rootfsPath:'C:\\approved.tar'},step:2};
 test('window draft resumes configuration and bounds the current step',()=>{
  assert.deepEqual(readSuperProfileDraft(JSON.stringify(draft)),draft);
@@ -48,4 +48,23 @@ test('deletion clears the selected revision owner before reloading',async()=>{
  let selected='deleted';
  const message=await finishSuperProfileMutation({kind:'remove',clearSelection:()=>{selected=''},refresh:async()=>{assert.equal(selected,'');throw Error('offline')}});
  assert.equal(message,'Action completed. The view could not refresh; retry Refresh.');
+});
+test('stale running observations cannot enable save before a confirmed stop',()=>{
+ for(const health of [undefined,{status:'unknown'},{status:'exited'}]) {
+  const view=superSessionPresentation({state:'running',health});
+  assert.equal(view.canSave,false);
+  assert.equal(view.canStop,true);
+ }
+ assert.equal(superSessionPresentation({state:'running',health:{status:'ready'}}).canSave,true);
+ assert.equal(superSessionPresentation({state:'stopped',health:{status:'unknown'}}).canSave,true);
+});
+test('retained sessions expose recovery actions without treating output as saved',()=>{
+ for(const state of ['recovery-required','disposed-unexported']) {
+  const view=superSessionPresentation({state,health:{status:'ready',detail:'unexpected private path'}});
+  assert.equal(view.retained,true);
+  assert.equal(view.canSave,false);
+  assert.equal(view.canStop,true);
+  assert.equal(view.canDiscard,true);
+  assert.equal(view.healthDetail,'Observation state is unavailable');
+ }
 });

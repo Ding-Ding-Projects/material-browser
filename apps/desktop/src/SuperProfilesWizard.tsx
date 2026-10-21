@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Field, Select } from './components';
-import { request, SuperProfile, SuperProfileSettings } from './api';
+import { requestSuperProfile as request, SuperProfile, SuperProfileSettings } from './api';
 import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration } from './SuperProfiles.model.mjs';
 const key = 'super-profile-draft-v1';
 type Draft = { name: string; engine: string; settings: SuperProfileSettings; step: number };

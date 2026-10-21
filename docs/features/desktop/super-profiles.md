@@ -26,6 +26,19 @@ Use the session's actual returned state. Provisioning, a spawned process and a v
 desktop are different observations. A failed launch retains owned staging for recovery.
 Never remove an unrelated WSL distribution to resolve a launch failure.
 
+Session health is shown separately from lifecycle state. WSL observations use a bounded
+stream created during the authorized launch; polling status does not execute a new guest
+command. Readiness records require the owned session, launch nonce, increasing sequence and
+fresh host receipt time. Terminal readiness requires the normal user's interactive PTY.
+Desktop readiness requires its authenticated Xfce session and matching-display window manager.
+These observations verify processes, not visible desktop pixels. Stale or missing observations
+remain unknown, and restarting the host requires explicit recovery rather than reattachment.
+Stop an active session before saving when its current readiness is unknown.
+
+Full desktop mode provides browser and workspace entries. The browser entry uses the selected
+engine with the same managed profile directory as browser mode. It does not silently import
+the host's everyday browser profile.
+
 Explicit save-back requires a stopped browser and validated output. It creates a new encrypted
 revision and preserves previous revisions. Restore selects an earlier revision and creates a
 new current revision, so history remains available. Discard must destroy only the positively
@@ -49,6 +62,10 @@ streamed in authenticated chunks rather than passing large payloads through rend
 Super Profiles are currently local-only and excluded from ordinary browser folder sync.
 An interrupted import may leave unreachable encrypted objects, but must not publish an
 incomplete revision. Existing browser profiles retain their original API and launch behavior.
+
+WSL export omits only the transient root `browser/lock` marker. Literal anchored matching
+preserves nested lock files and similarly named workspace files. Arbitrary links remain
+invalid archive members. A forged or linked output cannot replace an encrypted revision.
 
 ## Verification status
 

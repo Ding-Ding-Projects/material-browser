@@ -10,6 +10,7 @@ mod capabilities;
 mod cleanup;
 mod desktop_connection;
 mod guest_installers;
+mod health;
 mod isolation;
 mod linux_runtime;
 mod payload;
@@ -60,14 +61,23 @@ struct Session {
     saved_revision_id: Option<String>,
     #[serde(default)]
     save_confirmation_required: bool,
+    #[serde(default)]
+    health_nonce: String,
+    #[serde(default)]
+    health: Option<health::Snapshot>,
 }
+type WorkerOutput = (
+    BTreeMap<String, Session>,
+    BTreeMap<String, Child>,
+    BTreeMap<String, health::Observer>,
+);
 pub struct Sessions {
     unlock_epoch: String,
     root: PathBuf,
     entries: BTreeMap<String, Session>,
     children: BTreeMap<String, Child>,
-    workers:
-        BTreeMap<String, thread::JoinHandle<(BTreeMap<String, Session>, BTreeMap<String, Child>)>>,
+    observers: BTreeMap<String, health::Observer>,
+    workers: BTreeMap<String, thread::JoinHandle<WorkerOutput>>,
 }
 fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
     asynchronous::check_cancel()?;
@@ -190,6 +200,9 @@ impl Sessions {
                         s.state = "recovery-required".into();
                         s.message =
                             "Host restarted; stop and verify the owned guest before saving".into();
+                        s.health = Some(health::Snapshot::unknown(
+                            "Host restarted; guest observation ownership must be recovered explicitly",
+                        ));
                     }
                     entries.insert(s.id.clone(), s);
                 }
@@ -199,6 +212,7 @@ impl Sessions {
             root,
             entries,
             children: BTreeMap::new(),
+            observers: BTreeMap::new(),
             workers: BTreeMap::new(),
             unlock_epoch: crate::random_hex(),
         })
@@ -228,9 +242,10 @@ impl Sessions {
         for id in completed {
             if let Some(worker) = self.workers.remove(&id) {
                 match worker.join() {
-                    Ok((entries, children)) => {
+                    Ok((entries, children, observers)) => {
                         self.entries.extend(entries);
                         self.children.extend(children);
+                        self.observers.extend(observers);
                     }
                     Err(_) => {
                         if let Some(s) = self.entries.get_mut(&id) {
@@ -262,6 +277,7 @@ impl Sessions {
                 }
             }
         }
+        self.refresh_health();
     }
     pub fn capabilities() -> Value {
         capabilities::detect()
@@ -360,6 +376,8 @@ impl Sessions {
             save_plan: None,
             saved_revision_id: None,
             save_confirmation_required: false,
+            health_nonce: String::new(),
+            health: None,
         };
         self.persist(&s)?;
         self.entries.insert(id.clone(), s.clone());
@@ -401,17 +419,13 @@ impl Sessions {
             if s.backend == "windows-sandbox" {
                 s.save_requested = s.directory.join("exchange/save-requested").is_file();
             }
-            if s.backend == "windows-sandbox" && s.directory.join("exchange/failed").is_file() {
+            if s.backend == "windows-sandbox"
+                && matches!(s.state.as_str(), "starting" | "running" | "launched")
+                && control_receipt(&s.directory.join("exchange/failed"))
+            {
                 s.state = "recovery-required".into();
                 s.message =
                     "Sandbox guest bootstrap or graceful stop failed; staging retained".into();
-            }
-            if s.backend == "windows-sandbox"
-                && s.state == "starting"
-                && s.directory.join("exchange/ready").is_file()
-            {
-                s.state = "running".into();
-                s.message="Sandbox guest reported browser process readiness; visual readiness remains unverified".into();
             }
         }
         json!(self.entries.values().collect::<Vec<_>>())
@@ -497,6 +511,7 @@ impl Sessions {
                 "Cancellation requested; wait for acknowledgement before stopping the guest".into();
             return Ok(json!(response));
         }
+        self.stop_observer(id)?;
         let mut s = self
             .entries
             .get(id)
@@ -797,6 +812,8 @@ mod tests {
             save_plan: None,
             saved_revision_id: None,
             save_confirmation_required: false,
+            health_nonce: String::new(),
+            health: None,
         };
         sessions.persist(&session).unwrap();
         sessions.entries.insert(id.clone(), session);
@@ -846,11 +863,14 @@ mod tests {
             save_plan: None,
             saved_revision_id: None,
             save_confirmation_required: false,
+            health_nonce: String::new(),
+            health: None,
         };
         let mut sessions = Sessions {
             root: PathBuf::from("unused"),
             entries: BTreeMap::from([(s.id.clone(), s)]),
             children: BTreeMap::new(),
+            observers: BTreeMap::new(),
             workers: BTreeMap::new(),
             unlock_epoch: crate::random_hex(),
         };
