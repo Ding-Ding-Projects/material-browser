@@ -80,8 +80,10 @@ The guest receives a generated `ManagedBookmarks` policy containing a separate r
 Existing editable bookmark files and restored browser state are not overwritten. Each backend
 retains its own import, and immutable template revisions retain the associated document.
 Removing an import affects the next fresh guest. Credentials and authenticated sessions are
-outside this import format. Wizard input and exact pinned-browser recognition remain pending
-until their separate built-interface and native runtime checks pass.
+outside this import format. The built wizard verified file input, replacement, removal, backend
+separation and invalid UTF-8/lone-surrogate retention at source 50ddbbc. Separate pinned-browser
+policy recognition passed for Linux Chromium and Firefox; Sandbox recognition and Chromium
+import removal remain unverified.
 
 ## Storage and compatibility
 
@@ -136,3 +138,17 @@ Concurrent sibling-owned guest changes are explicitly reconciled; raw inventory 
 not claimed. The [native interface save receipt](../../evidence/super-profiles/native-ui-save-f1816d6.json)
 records real cancellation, stopped workspace-only preview, asynchronous collection and saved
 revision readback. That interface run did not decrypt or relaunch its new archive.
+
+The [encrypted wizard receipt](../../evidence/super-profiles/wizard-50ddbbc.json) records
+repeated progress saves, one template identity, revision advancement, resume after process
+restart and actual vault unlock, strict file input and final completion. Its English/light
+normal-size scope does not establish the full accessibility or scale matrix. The
+[portable handbook runtime](../../evidence/super-profiles/handbook-runtime-50ddbbc.json)
+separately records one-file launch, internal navigation and guide progress after reload.
+
+The [credential command comparison](../../evidence/super-profiles/desktop-credential-path-8f010e5.json)
+isolates bare executable resolution from the protected handoff. Using /usr/sbin/chpasswd
+completed the real helper through DPAPI and connection-file creation. The following xrdp
+startup/readback step remains under diagnosis; this is not authenticated desktop proof.
+The [native test receipt](../../evidence/super-profiles/native-tests-4d81c91.json) records
+56 Windows host tests and three Linux-focused protocol/path checks.

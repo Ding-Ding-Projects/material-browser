@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "source": "4d81c91c12917bff4b899050c7e8ccce523f4589",
+  "windows": {
+    "command": "cargo test -p material-browser",
+    "passed": 56,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 0,
+    "durationSeconds": 3.68,
+    "exitCode": 0
+  },
+  "linuxFocused": {
+    "command": "cargo test -p material-browser guest_credentials",
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 55,
+    "durationSeconds": 0.01,
+    "exitCode": 0,
+    "additionalCoverage": "Dangling connection links are rejected before helper writes"
+  },
+  "limitations": [
+    "Unit and protocol tests do not establish authenticated desktop operation",
+    "Graphical guest runtime and forced-cancellation descendant teardown remain separate acceptance items"
+  ]
+}

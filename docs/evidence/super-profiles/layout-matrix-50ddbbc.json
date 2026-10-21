@@ -1,0 +1,911 @@
+{
+  "schemaVersion": 1,
+  "source": "50ddbbc1953ce1919422848ac9c0969fec086d1a",
+  "checkoutAtEnd": "4d81c91c12917bff4b899050c7e8ccce523f4589",
+  "artifactHashes": {
+    "exe": "5fee4c2fa2a6fb199fd2d64a1cf9b07a66bdd913bbc5f1c88ae94b4ba0a3984b",
+    "asar": "b32991e1edf02896b2278a02e8786fcbd6aef51e0def57b0d6193a7838869dac",
+    "host": "5d469d0496a70fcf02e1dced46c70872bef91ab7e382c9d78eb323de9334d97f"
+  },
+  "tupleCount": 48,
+  "nativeFramesInspected": 48,
+  "nativeFramesAccepted": 38,
+  "layoutReceiptsValidated": 50,
+  "fullVisualMatrixPassed": false,
+  "privateInventorySha256": "24c2eeadf73b88d0698d33c4287993b16afa2cda2c130f48cb08348e730cf1e6",
+  "tuples": [
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "1a3f59ae869215f5d7619a104321cdd7dfed787e5575d3a1d479739869266d62",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "181d08a21f43f96a7197ba73e6f2c5dda1d764578fa228dc5934d1aa267c89a4",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "339c30a0222230c040b650e9a776d6bfe56d16b5ce69b0cba87822f298367f12",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "3743cdf4c5bbbfb51bc6ef77e409767cb3d4401e123a21a1a9546a12f8c7d3db",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "cd0aa47093f551ed8182515eb8d6dd09e654d290be1bc42e29551a7e669fbfed",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "fab44f936ea7a8530ac3571b38eab2932feb1c6d052b04690f2afeec31d73f55",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "ff37acdb54a072f247d1f16d9c986d6da298c2b94cd26a84cf79d960c50e7629",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "8992c78ef6a5ba3fa2e6bdb7fcaba571f0c548d9ab9864c76f9bf053f7339fd0",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "0d015e9825b8b6692f31c216a1a4015512d677c40f1e5a89bb1387fcb7779b3c",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "84788454589dbabc91cd3911176cfb74383eea3aab505b38d2b1d1d459228177",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 1264,
+        "height": 735,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 1264,
+        "height": 761
+      },
+      "nativeSha256": "9d53967ce83e52a1456f8535ef124d9071ad829034c713c44e572d9ce6d3077a",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1,
+      "viewport": {
+        "width": 744,
+        "height": 515,
+        "scale": 1
+      },
+      "nativeDimensions": {
+        "width": 744,
+        "height": 541
+      },
+      "nativeSha256": "f06318ccc5c689eba78e5b756c0e7172e2e2fa82c308c9ebd9d5bdb6082e09de",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "87a0e80bd52a4f67a3df9eb5b04c261fcc7443d8046353b4beb5d74b67b6e0b5",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "ba09c1eb9b5f542d68cc1143bfcafa1df9365c0c1cd21f97ffbfb87277e92b37",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "955f960e35202837fbbb5801069761275ce1c8d43f77115db0eeb41868d8ff4c",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "16c01683e4d5d68e272e130ec176dd6c710861e8a2811ca7606ac44a5d92ef19",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "72f42c847d648db51150dfdfefaf65a100dcbe948be853569c6cc16c20d47585",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "e86822691eae69d1bc03931145a86f27a11bbb7545bb7032e30e4849ae37670a",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "c01efe687df8c57ca1091a3a91938df0cf2fa8317d7f3da79e95a10a684fde3b",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "fd8305c0a9c41ef73da2f66644f4b2849db18e4ca7c58bd698a63891fb264066",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "eeeb62d7ecb54a424a96b9db5a2211fa18958aeee8bbc0f785a3c3cf8ef2f482",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "ad075b9cff0048a105ff0ab4bafe24854a2729fd2f3e0cf3125e5b2496d07189",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 1268,
+        "height": 743,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 1584,
+        "height": 961
+      },
+      "nativeSha256": "89a8c366d1ee82fdfc8ec24a850dc2deb747e2d88977aca2699c2996af07e7bd",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.25,
+      "viewport": {
+        "width": 750,
+        "height": 526,
+        "scale": 1.25
+      },
+      "nativeDimensions": {
+        "width": 936,
+        "height": 688
+      },
+      "nativeSha256": "e9494e15af4114f54a884a4ea2aa5059429ba1d86446f280b0baceb26b796518",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "a60ab7b42519a855554f6cfa888586d4a0a46a0082d9c0975b06a0a50fdb44c1",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "2e2e6014896b4093e0b2f761dea441605ab47ca4da879a479d8dc52cd8f9e476",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "aeeeece15d5e3884b458f79eb6a484e71c02edaa3a6bdec64f2c322d5318f50d",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "a15e335db0bf4d42c45b4773cea1507aa5a244c68705bdce2745a97c38871fe7",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "5b08f4423ee8a2eacc1dc718adc163737a0604892d35ea17256792d5be33a7a4",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "21d91c7db1b361d4bf25625cc1c388d8e16ab46bb5690905671a93b08ad6d352",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "3655dc301b9ede1743ed92d340a2627ac500a28c26dc377a3cb078bd5f05f473",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "033aeb5e1bdef520a768dcd18c74c24ed2e373154297602f7b7cbe74ac0945c5",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "c5bdbf17ced910ba0a1bd09545b04f0ee3f2a53a55821b9acb8c5d09ee8d55c9",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "4ee32a837df6386d9b1cb798e3c531e9c9cd00d35f77b15e6ec7652b7872b549",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 1270,
+        "height": 748,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1904,
+        "height": 1161
+      },
+      "nativeSha256": "f2612300bfd681e49be1f670044a947d6756adef2a60dcaf4b47320ce76e9c13",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 1.5,
+      "viewport": {
+        "width": 750,
+        "height": 528,
+        "scale": 1.5
+      },
+      "nativeDimensions": {
+        "width": 1124,
+        "height": 831
+      },
+      "nativeSha256": "cec71d332e1f8f2d11374fd78629f6b95aa297a3a42fa7fae962617dbb41ce4d",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "181fdfec7122f988296536c800502eec7542344c017a73533dd85ba18433dbdd",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "757cb297b5e046d4e940a1eed4a4cc5f56bfb87fd46f85d13369fb81a25e820d",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "eea0b08380ba711881991e8b302a8613d83621aaf956ec24aa6f5853e057089c",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "en",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "64ca9811f3ecc967d65f9437a666337158ca76d6b9eb630c078f6d6e697c4cc7",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "87f389f2fa13f639435a68f8d879123df682f18b2a510929f75d7f2c8cc99882",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "yue",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "0c8fd6338550193462172eb1f42f38a39aff40c89b478f75485f3bfa1dec45a7",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "5e4856aa2ebeac82dbb88b6c902b8c53d4642b1a605e251834cac996a8536cb3",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "yue",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "ea1651e68dcccd4aa0749e7e21aab7851d5da0095fbe00f7033d903c883262fd",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "37e9c0f98f2d86320b18f52b2914aef6a59a9ba6fb06a449aa5c3035340e30e2",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    },
+    {
+      "language": "both",
+      "theme": "light",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "6ceca779227a4ad2b0d673fd7ffc718d84c9b871cc05afcff156eb1ebc3e6baa",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "normal",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 1272,
+        "height": 755,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 2544,
+        "height": 1561
+      },
+      "nativeSha256": "71d40a5f78b1897f69f18d788a8b1f2b0a5627d04f72466f961dba55c52df442",
+      "accepted": true,
+      "reason": "Expected labels and scroll layout visible"
+    },
+    {
+      "language": "both",
+      "theme": "dark",
+      "size": "minimum",
+      "rendererDpr": 2,
+      "viewport": {
+        "width": 753,
+        "height": 536,
+        "scale": 2
+      },
+      "nativeDimensions": {
+        "width": 1506,
+        "height": 1123
+      },
+      "nativeSha256": "69c738841436ea24c271b8e5efc32822fe920cd09b5180f94ff0360696a02f22",
+      "accepted": false,
+      "reason": "Partial painted text or native menu/icon; retained but excluded from visual acceptance"
+    }
+  ],
+  "keyboard": {
+    "reducedMotionApplied": true,
+    "escapeClosedDialog": true,
+    "tabFocusReadback": {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": null,
+      "role": null
+    },
+    "limitation": "Tab delivery and active element were observed, but accessible name and focus order were not established."
+  },
+  "limitations": [
+    "Historical immutable package evidence only; not current-source promotion.",
+    "48 tuples executed, but partial-painted frames prevent a complete passing visual matrix.",
+    "Renderer screenshots are retained; only diagnostic subsets were visually inspected.",
+    "Minimum size is 760x580 logical outer window, not client area. Fractional-scale minimum retries add two physical pixels and retain exact measured geometry.",
+    "Native DPI was 96; device scale factor changes renderer DPR, not physical OS display settings.",
+    "Console observations cover CDP plan intervals, not startup or the whole process lifetime.",
+    "Fresh 1.5 English dark minimum retry painted the complete label; source cause remains unconfirmed.",
+    "No guest launched in this matrix.",
+    "CLI close returned false; exact desktop absence was independently observed through EnumDesktopsW."
+  ],
+  "teardown": {
+    "ownedProcessCount": 8,
+    "ownedDesktopCount": 8,
+    "allOwnedProcessesAbsent": true,
+    "allOwnedDesktopsAbsent": true,
+    "observedAt": "2026-10-21T21:28:06.4881024Z"
+  }
+}

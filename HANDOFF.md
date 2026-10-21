@@ -12,9 +12,10 @@ work through 1ce75f5 after the maintainer merged PR 4. Encrypted full setup draf
 completed wizard remain on the task branch pending integration. A focused desktop credential
 diagnostic extraction is being tested after this immutable candidate.
 
-Current checks: 53 native host tests, 25 native core tests and 101 desktop tests passed;
+Current checks: 56 native host tests, 25 native core tests and 101 desktop tests passed;
 one native-only desktop check was skipped in the Linux run. The 13 focused wizard/model
-checks passed, including malformed UTF-8 and lone-surrogate rejection. The exact root
+checks passed, including malformed UTF-8 and lone-surrogate rejection. Three Linux credential
+checks additionally passed, including a real dangling-link rejection. The exact root
 Desktop installer and DocsCompanion installer entrypoints both completed with exit 0 at
 stable source 50ddbbc. See docs/evidence/super-profiles/build-50ddbbc.json and
 handbook-build-50ddbbc.json for sizes, hashes and source binding.
@@ -26,7 +27,11 @@ UTF-8 or lone surrogates, supported replacement/removal and backend separation, 
 draft flags on completion. All eight owned process identities and desktops were absent
 after teardown. Four inspected original images and two validated layout receipts remain
 private pending complete promotion validation. This slice proves English/light/normal size,
-not the full language/theme/scale matrix or lock during an unresolved save.
+not the full language/theme/scale matrix or lock during an unresolved save. A later immutable-package
+matrix executed 48 tuples and validated 50 layout receipts. Native review accepted 38 frames
+and excluded 10 partial-paint frames. All eight owned processes and desktops were absent.
+Renderer DPR and native DPI are separate; physical scale and complete visual acceptance
+remain unverified. See layout-matrix-50ddbbc.json for exact tuples and retained limits.
 
 Native runtime evidence already retained: Chromium and Firefox each completed two headless
 browser/workspace save and restoration cycles. Default uncached acquisition verified the
