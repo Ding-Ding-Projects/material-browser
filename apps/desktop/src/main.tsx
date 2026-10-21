@@ -18,6 +18,7 @@ import {
 } from "./settings/LiveTools";
 import { styledMessage } from "./settings/messages.mjs";
 import { definitions } from "./settings/model.mjs";
+import { SuperProfiles } from './SuperProfiles';
 import { ProfileLaunch } from './ProfileLaunch';
 import { operationFailure } from './operation-errors.mjs';
 import { useDisplayName } from "./settings/useDisplayName";
@@ -106,7 +107,7 @@ function App() {
   useEffect(() => {
     refresh().catch(() => setStatus(null));
     const off = window.materialBrowser?.onEvent((event: any) => {
-      if (event?.type !== "settings-updated")
+      if (event?.type !== "settings-updated" && event?.type !== "super-profile-session")
         refresh().catch(() => setStatus(null));
     });
     return off;
@@ -259,6 +260,7 @@ function App() {
         <nav aria-label="Workspace">
           {[
             ["profiles", "Profiles"],
+            ["super-profiles", "Super Profiles"],
             ["sync", "Synchronization"],
             ["settings", "Settings"],
           ].map(([id, label]) => (
@@ -441,6 +443,8 @@ function App() {
                 </Button>
               </div>
             </section>
+          ) : page === "super-profiles" ? (
+            <SuperProfiles t={t} unlocked={status?.unlocked===true}/>
           ) : page === "profiles" ? (
             <>
               <div className="page-heading">

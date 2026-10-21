@@ -8,6 +8,22 @@ results remain superseded. These results do not establish whole-profile live sna
 All five component branches are integrated into main; native engine source candidates remain inactive;
 no end-to-end completion, release, deployment or two-computer acceptance is claimed.
 
+## Super Profiles
+- [x] Verify encrypted template CRUD, immutable revision history and chunked archive storage with 19 focused core tests
+- [x] Compile the Super Profiles desktop through the root Desktop build entrypoint
+- [x] Compile native guest orchestration through the root Windows Host build entrypoint
+- [ ] Verify actual WSL terminal, browser and full desktop launch, save-back and discard
+- [ ] Verify actual Windows Sandbox provisioning, guest save action and recovery
+- [x] Verify background provisioning, durable phase events and cancellation with focused host checks
+- [x] Verify background save finalization and bounded observation protocol with focused host checks
+- [x] Verify headless Chromium and Firefox encrypted browser/workspace save and restoration
+- [x] Verify default uncached pinned WSL base acquisition and owned teardown
+- [ ] Verify background save and continuous guest-process health on the native host
+- [ ] Add and verify bounded portable bookmark import through guest-only browser policies
+- [ ] Complete guest installer recipes and native runtime acceptance for every supported engine
+- [ ] Verify built interface accessibility, localization, layout and current screenshots
+- [ ] Verify packaging, documentation publication and supported installed update
+
 ## Foundation
 - [ ] Complete applicable settings and preferences with real behavior, persistence and evidence
   - [ ] Integrate the independently reviewed nine-repair Settings slice after current built proof

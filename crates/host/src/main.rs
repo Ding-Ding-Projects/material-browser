@@ -16,6 +16,7 @@ use std::{
 };
 use zeroize::Zeroizing;
 mod lan;
+mod super_profiles;
 const MAX_MESSAGE: usize = 1024 * 1024;
 #[derive(Debug, Serialize)]
 pub struct Error {
@@ -42,6 +43,7 @@ fn empty() -> Value {
 }
 pub struct Host {
     core: Manager,
+    super_sessions: super_profiles::Sessions,
     registry: EngineRegistry,
     supervisor: Supervisor,
     active: PathBuf,
@@ -50,7 +52,8 @@ pub struct Host {
 }
 impl Host {
     fn new(root: &Path) -> Result<Self> {
-        let bundled = std::env::current_exe().ok()
+        let bundled = std::env::current_exe()
+            .ok()
             .and_then(|exe| exe.parent().map(|parent| parent.join("engines")))
             .filter(|directory| directory.is_dir());
         Self::with_engine_root(root, bundled.as_deref())
@@ -82,7 +85,10 @@ impl Host {
         let local_engines = root.join("engines");
         let engine_root = engine_root.unwrap_or(&local_engines);
         if !engine_root.is_absolute() {
-            return Err(error("INVALID_ENGINE_DIR", "Engine directory must be absolute"));
+            return Err(error(
+                "INVALID_ENGINE_DIR",
+                "Engine directory must be absolute",
+            ));
         }
         for kind in ["chromium", "firefox"] {
             let bundle = engine_root.join(kind);
@@ -111,8 +117,11 @@ impl Host {
                         // paths against the caller's working directory.
                         runtime.node = resolve_adapter_path(&bundle, &runtime.node)?;
                         runtime.helper = resolve_adapter_path(&bundle, &runtime.helper)?;
-                        runtime.driver = runtime.driver.as_ref()
-                            .map(|path| resolve_adapter_path(&bundle, path)).transpose()?;
+                        runtime.driver = runtime
+                            .driver
+                            .as_ref()
+                            .map(|path| resolve_adapter_path(&bundle, path))
+                            .transpose()?;
                         let mode = match mode.as_str() {
                             "selenium" => AutomationMode::Selenium,
                             "puppeteer" => AutomationMode::Puppeteer,
@@ -138,8 +147,10 @@ impl Host {
             code: e.code,
             message: e.message,
         })?;
+        let super_sessions = super_profiles::Sessions::new(root)?;
         Ok(Self {
             core,
+            super_sessions,
             registry,
             supervisor,
             active,
@@ -202,6 +213,106 @@ impl Host {
         if !params.is_object() {
             return Err(error("INVALID_PARAMS", "Parameters must be an object"));
         }
+        let mut super_locked = false;
+        if method.starts_with("superProfiles.sessions.") {
+            let status = self
+                .core
+                .execute("system.status", json!({}))
+                .map_err(|e| error(&e.code, &e.message))?;
+            super_locked = status["locked"] == true;
+            if super_locked
+                && !matches!(
+                    method,
+                    "superProfiles.sessions.status"
+                        | "superProfiles.sessions.stop"
+                        | "superProfiles.sessions.discard"
+                )
+            {
+                return Err(error(
+                    "LOCKED",
+                    "Unlock the vault before accessing disposable sessions",
+                ));
+            }
+        }
+        if matches!(
+            method,
+            "superProfiles.update" | "superProfiles.remove" | "superProfiles.revisions.restore"
+        ) {
+            self.super_sessions.guard_mutation(params["id"].as_str())?;
+        }
+        match method {
+            "superProfiles.capabilities" => return Ok(super_profiles::Sessions::capabilities()),
+            "superProfiles.sessions.launch" => {
+                let profiles = self
+                    .core
+                    .execute("superProfiles.list", json!({}))
+                    .map_err(|e| error(&e.code, &e.message))?;
+                let sandbox = profiles
+                    .as_array()
+                    .and_then(|rows| rows.iter().find(|row| row["id"] == params["profileId"]))
+                    .is_some_and(|row| row["settings"]["backend"] == "windows-sandbox");
+                let browser = if sandbox {
+                    Some(
+                        self.registry
+                            .get(EngineKind::Chromium)
+                            .map_err(|e| error(&e.code, &e.message))?
+                            .verified_executable_path()
+                            .map_err(|e| error(&e.code, &e.message))?
+                            .to_path_buf(),
+                    )
+                } else {
+                    None
+                };
+                return self
+                    .super_sessions
+                    .launch(&mut self.core, &params, browser.as_deref());
+            }
+            "superProfiles.sessions.status" => {
+                if !super_locked {
+                    self.super_sessions.finalize_ready_saves(&mut self.core);
+                }
+                self.super_sessions
+                    .reconcile_guest_requests(&mut self.core, !super_locked);
+                return Ok(if super_locked {
+                    self.super_sessions.locked_status()
+                } else {
+                    self.super_sessions.status()
+                });
+            }
+            "superProfiles.sessions.preview" => return self.super_sessions.preview(&params),
+            "superProfiles.sessions.discard" => {
+                let result = self.super_sessions.discard(
+                    params["sessionId"]
+                        .as_str()
+                        .ok_or_else(|| error("INVALID_PARAMS", "sessionId is required"))?,
+                )?;
+                return Ok(if super_locked {
+                    super_profiles::Sessions::redact_control_response(result)
+                } else {
+                    result
+                });
+            }
+            "superProfiles.sessions.stop" => {
+                let result = self.super_sessions.stop(
+                    params["sessionId"]
+                        .as_str()
+                        .ok_or_else(|| error("INVALID_PARAMS", "sessionId is required"))?,
+                )?;
+                return Ok(if super_locked {
+                    super_profiles::Sessions::redact_control_response(result)
+                } else {
+                    result
+                });
+            }
+            "superProfiles.sessions.save" => {
+                return self.super_sessions.save(&mut self.core, &params);
+            }
+            "superProfiles.sessions.finalizeSave" => {
+                return self.super_sessions.finalize_save(&mut self.core, &params);
+            }
+            _ => {}
+        }
+
         match method {
             "automation.webdriver" => {
                 let endpoint = self.execute_inner("automation.endpoint", params.clone())?;
@@ -328,10 +439,14 @@ impl Host {
                         locks.push(stopped_lock(&self.active, &id)?);
                     }
                 }
-                self.core.execute(method, params).map_err(|e| Error {
+                let result = self.core.execute(method, params).map_err(|e| Error {
                     code: e.code,
                     message: e.message,
-                })
+                });
+                if result.is_ok() {
+                    self.super_sessions.on_vault_lock();
+                }
+                result
             }
             "profiles.snapshot" | "revisions.restore" | "profiles.remove" => {
                 let id = params
@@ -432,14 +547,23 @@ fn resolve_adapter_path(bundle: &Path, path: &Path) -> Result<PathBuf> {
     let candidate = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        if path.components().any(|part| !matches!(part, std::path::Component::Normal(_))) {
-            return Err(error("INVALID_ADAPTER_PATH", "Adapter path must stay inside its engine bundle"));
+        if path
+            .components()
+            .any(|part| !matches!(part, std::path::Component::Normal(_)))
+        {
+            return Err(error(
+                "INVALID_ADAPTER_PATH",
+                "Adapter path must stay inside its engine bundle",
+            ));
         }
         root.join(path)
     };
     let candidate = candidate.canonicalize().map_err(io_error)?;
     if !candidate.starts_with(&root) || !candidate.is_file() {
-        return Err(error("INVALID_ADAPTER_PATH", "Adapter path must stay inside its engine bundle"));
+        return Err(error(
+            "INVALID_ADAPTER_PATH",
+            "Adapter path must stay inside its engine bundle",
+        ));
     }
     Ok(candidate)
 }
@@ -863,11 +987,23 @@ fn run() -> Result<()> {
         .next()
         .ok_or_else(|| error("USAGE", "Command required"))?;
     let engine_root = if command == "--engine-dir" {
-        let path = PathBuf::from(args.next().ok_or_else(|| error("USAGE", "Engine directory required"))?);
-        if !path.is_absolute() { return Err(error("INVALID_ENGINE_DIR", "Engine directory must be absolute")); }
-        command = args.next().ok_or_else(|| error("USAGE", "Command required"))?;
+        let path = PathBuf::from(
+            args.next()
+                .ok_or_else(|| error("USAGE", "Engine directory required"))?,
+        );
+        if !path.is_absolute() {
+            return Err(error(
+                "INVALID_ENGINE_DIR",
+                "Engine directory must be absolute",
+            ));
+        }
+        command = args
+            .next()
+            .ok_or_else(|| error("USAGE", "Command required"))?;
         Some(path)
-    } else { None };
+    } else {
+        None
+    };
     if command == "pair-key" {
         return lan::create_key(&root);
     }
@@ -1054,7 +1190,11 @@ mod tests {
     use super::*;
     #[test]
     fn adapter_paths_are_bundle_contained_and_relocatable() {
-        let root = std::env::temp_dir().join(format!("browser-bundle-paths-{}-{}", std::process::id(), rand::random::<u64>()));
+        let root = std::env::temp_dir().join(format!(
+            "browser-bundle-paths-{}-{}",
+            std::process::id(),
+            rand::random::<u64>()
+        ));
         let bundle = root.join("folder with spaces");
         fs::create_dir_all(bundle.join("automation")).unwrap();
         fs::write(bundle.join("automation/node.exe"), b"synthetic fixture").unwrap();
@@ -1237,6 +1377,63 @@ mod tests {
             "PROFILE_ACTIVE"
         );
         drop(lock);
+        drop(host);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn retained_guest_does_not_prevent_vault_lock_or_redacted_cleanup() {
+        let root = std::env::temp_dir().join(format!("material-host-lock-{}", random_hex()));
+        let mut host = Host::new(&root).unwrap();
+        host.execute(
+            "vault.create",
+            json!({"password":"test-only-not-a-real-credential"}),
+        )
+        .unwrap();
+        let id = random_hex();
+        let directory = root.join("super-sessions").join(&id);
+        fs::create_dir(&directory).unwrap();
+        fs::write(directory.join("ownership.json"),json!({"id":id,"profileId":"fixture-profile","revisionId":"fixture-revision","distribution":format!("MaterialBrowser-{id}"),"mode":"browser","backend":"windows-sandbox","state":"stopped","directory":directory,"message":"fixture","guestRemoved":true}).to_string()).unwrap();
+        host.super_sessions = super_profiles::Sessions::new(&root).unwrap();
+        assert_eq!(
+            host.execute("vault.lock", json!({})).unwrap()["locked"],
+            true
+        );
+        let status = host
+            .execute("superProfiles.sessions.status", json!({}))
+            .unwrap();
+        assert_eq!(status[0]["id"], id);
+        for key in [
+            "profileId",
+            "revisionId",
+            "directory",
+            "message",
+            "events",
+            "savePlan",
+        ] {
+            assert!(status[0].get(key).is_none());
+        }
+        for method in [
+            "superProfiles.sessions.launch",
+            "superProfiles.sessions.save",
+            "superProfiles.sessions.preview",
+            "superProfiles.sessions.finalizeSave",
+        ] {
+            assert_eq!(
+                host.execute(method, json!({"sessionId":id}))
+                    .unwrap_err()
+                    .code,
+                "LOCKED"
+            );
+        }
+        let stopped = host
+            .execute("superProfiles.sessions.stop", json!({"sessionId":id}))
+            .unwrap();
+        assert!(stopped.get("profileId").is_none());
+        let discarded = host
+            .execute("superProfiles.sessions.discard", json!({"sessionId":id}))
+            .unwrap();
+        assert_eq!(discarded["state"], "discarded");
+        assert!(discarded.get("directory").is_none());
         drop(host);
         fs::remove_dir_all(root).unwrap();
     }

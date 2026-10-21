@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "071975517400a9962189da253894f4588e54660c",
+  "executableSha256": "94ce2e49f87b42baf4dc0f5137aabba518b55e1c2f4f867650685f48700b05ad",
+  "engine": "chromium",
+  "route": "native-stdio-owned-WSL-headless-browser",
+  "cycles": 2,
+  "sourceCleanAtProducerStart": true,
+  "processChecksPassed": true,
+  "unrelatedDistributionInventoryPreserved": true,
+  "postDiscardChecks": [
+    {
+      "sessionId": "c32b1c53d898813c872d4b6283611811311183c400ef7033adfa5c11706d45d7",
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    },
+    {
+      "sessionId": "c9c0a2ca758736718ffd2f8d81a8f5e4857bcd02dfe1179d0ea94aac959e0d9e",
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    }
+  ],
+  "restoredSyntheticBrowserValue": "synthetic-chromium-persisted",
+  "restoredSyntheticWorkspaceValue": "saved-new-value",
+  "visualInspectionPassed": true,
+  "cycle2PngSha256": "cc08162192c6b13e02cc9ba757dc372fd614d7aa83c037ba4635dd1344c04253",
+  "limitations": [
+    "Headless synthetic browser evidence does not prove a graphical WSLg session.",
+    "Terminal and full desktop user interface readiness remain unverified.",
+    "Pinned verified base cache used; default acquisition repair remains unverified.",
+    "Windows Sandbox runtime remains unverified."
+  ]
+}

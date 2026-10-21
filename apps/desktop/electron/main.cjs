@@ -11,6 +11,11 @@ const { pathToFileURL } = require("node:url");
 const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
 const { registerSettingsIpc } = require("./settings-ipc.cjs");
+const publishSessionEvents = require("./session-events.cjs").createSessionEvents(event => {
+  if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
+    window.webContents.send("material:event", event);
+  }
+});
 const rendererFile = path.join(__dirname, "../dist/index.html");
 const rendererUrl = pathToFileURL(rendererFile).href;
 const dataArguments = process.argv.filter((value) =>
@@ -45,6 +50,21 @@ const allowed = new Set([
   "profiles.stop",
   "profiles.focus",
   "profiles.status",
+  "superProfiles.list",
+  "superProfiles.create",
+  "superProfiles.update",
+  "superProfiles.duplicate",
+  "superProfiles.remove",
+  "superProfiles.revisions.list",
+  "superProfiles.revisions.restore",
+  "superProfiles.capabilities",
+  "superProfiles.sessions.launch",
+  "superProfiles.sessions.status",
+  "superProfiles.sessions.stop",
+  "superProfiles.sessions.save",
+  "superProfiles.sessions.finalizeSave",
+  "superProfiles.sessions.preview",
+  "superProfiles.sessions.discard",
   "engines.list",
   "revisions.list",
   "revisions.restore",
@@ -102,6 +122,7 @@ function startHost() {
       if (p) {
         clearTimeout(p.timer);
         pending.delete(msg.id);
+        if (!msg.error) publishSessionEvents(p.method, msg.result);
         msg.error
           ? p.reject(new Error(String(msg.error.code || "OPERATION_FAILED")))
           : p.resolve(msg.result);
@@ -149,7 +170,7 @@ ipcMain.handle("material:request", (event, method, params) => {
       pending.delete(id);
       reject(new Error("REQUEST_TIMEOUT"));
     }, 120000);
-    pending.set(id, { resolve, reject, timer });
+    pending.set(id, { resolve, reject, timer, method });
     host.stdin.write(JSON.stringify({ id, method, params }) + "\n", (err) => {
       if (err) {
         clearTimeout(timer);

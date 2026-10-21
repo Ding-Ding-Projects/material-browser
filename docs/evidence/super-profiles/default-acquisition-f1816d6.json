@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f1816d6b59b5a73bf315c40f13577b626219713e",
+  "executableSha256": "bf4d2e30870cdf0cd7b87acc6c1c186a4cb78ea74a10f755715458bcbec933f8",
+  "route": "native-console-stdio-no-gui",
+  "initialBaseCacheExists": false,
+  "defaultAcquisition": true,
+  "downloadedBase": {
+    "sha256": "bb415d824822c4b878125729af451a5d18fb13d1cf5cbed9a7393ad64ac6039e",
+    "bytes": 388975696
+  },
+  "acquisitionAndVerificationElapsedMs": 6860,
+  "passed": true,
+  "unrelatedDistributionInventoryPreserved": true,
+  "postDiscardChecks": [
+    {
+      "sessionId": "9af0becdf8191d802357936d4559b461ed244daa018ed42175f7bf0ea065d1ae",
+      "state": "discarded",
+      "guestRemoved": true,
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    }
+  ],
+  "limitations": [
+    "Provisioning was cancelled before graphical launch; this verifies acquisition, setup and owned teardown only."
+  ]
+}

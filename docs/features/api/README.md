@@ -21,6 +21,32 @@ The maximum input line is 1 MiB. Malformed envelopes do not execute commands. Ov
 closes the stream. There are no password arguments, secret environment variables or request logs.
 Native standard input is a privileged channel, so do not expose it to an untrusted renderer.
 
+## Disposable environment templates
+
+`superProfiles.list/create/update/duplicate/remove` manage encrypted templates.
+`superProfiles.revisions.list/restore` expose immutable history. Updates, removal and restore
+use `expectedRevisionId`; restore also supplies the historical `revisionId`.
+`superProfiles.capabilities` reports detected host availability separately from guest readiness.
+
+`superProfiles.sessions.launch` accepts `profileId` and explicit `requireStableIdentity: false`.
+It returns session and operation identifiers before provisioning completes. Poll
+`superProfiles.sessions.status` for bounded phase events, readiness and recovery state.
+`superProfiles.sessions.stop` cancels an active worker or stops the exact owned session.
+`superProfiles.sessions.discard` removes only that identified disposable guest and its staging.
+
+Use `superProfiles.sessions.preview` with `sessionId` to review output categories. Save accepts
+`sessionId`, the launched `expectedRevisionId`, selected `categories` (`browser`, `workspace`),
+and `closeAfterSave`. Its queued response is not proof of an encrypted revision. Collection
+finishes before host-side finalization. After a vault lock or host restart,
+`superProfiles.sessions.finalizeSave` requires `sessionId`, the exact `operationId`, the
+original `expectedRevisionId` and `confirmAfterUnlock: true`. Repeated successful finalization
+returns the saved revision instead of creating another. `saved` and `cleanupPending` are
+separate results. A conflict or interrupted save retains recoverable data.
+
+While locked, only session status, stop and discard are available. Their responses omit private
+template, revision, staging and progress details. Launch, preview and finalization require unlock.
+These methods preserve ordinary browser-profile API behavior.
+
 ## CLI and local daemon
 
 ```text

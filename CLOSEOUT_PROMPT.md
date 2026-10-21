@@ -1,25 +1,52 @@
-# Continuation handoff
+# Super Profiles continuation
 
-Objective: finish Windows build/release automation, the application/setup icon, explicit launch capability handling, engines bundled inside the installer and genuine current README screenshots. Current owner direction is to integrate completed work, safely retire integrated branches/worktrees and continue implementation on main.
+Implement the approved Super Profiles plan in Ding-Ding-Projects/material-browser.
+The user explicitly resumed implementation after an unintended goal-service pause. The
+service still displays paused and has no resume operation; retain it without replacement.
 
-All five component tips are integrated into remotely verified main at 6566d71f4279cb27b653739e7fc0a1016af73c7f. Settings persistence, protected history and selected export are included. Native engine source candidates remain inactive and uncompiled, with advanced capability flags false. The existing gh-pages publication branch remains load-bearing. All five source branches remain preserved until backup and cleanup verification finish. No deletion has occurred. Archive access selection is pending.
+Latest verified preservation:f1816d6b59b5a73bf315c40f13577b626219713e on
+ai/feature/20261021-super-profiles. Current coherent source adds owned bounded observers,
+terminal/desktop process readiness, managed desktop browser/workspace entries, typed client
+methods and visible health/recovery controls. Host51 and desktop97 checks pass; one native
+platform check was skipped on Linux and passed separately among14 Windows targeted checks.
+Core19 passed earlier. Preserve this candidate, then use exact root build.bat for native
+production and build-installer.bat for installer/companion production.
 
-The next source checkpoint adds early Squirrel maintenance handling, adjacent updater-only shortcut actions and matching Windows shell identity. Normal and first-run launches remain productive. The previously failing maintenance/shell-identity regression now passes. All 87 desktop startup, security, preferences, persistence and runtime-inventory tests passed locally. An independent source review found no critical concern. Timeout requests termination only of its own updater, reports incomplete status and does not claim descendant teardown. Built installer, actual installed shortcuts and shortcut launch remain unverified.
+Actual Chromium0719755 and Firefox f1816d6 two-cycle headless proof verifies encrypted
+browser/workspace restore, normal user, sandboxing, exact owned teardown and unchanged
+unrelated distributions. Firefox root-lock export is repaired and proved. Default uncached
+base acquisition at f1816d6 passed checksum, setup and owned teardown. Exact root Desktop
+installer build f1816d6 passed with stable source; sanitized build/runtime receipts are in
+docs/evidence/super-profiles. Graphical readiness remains a separate incomplete criterion.
 
-Prior version0.1.1 evidence is source-bound to 5922074548f3a79f56b69c25b67826c0be3e209e, not the newly combined main. Its exact local installer, six native engine-mode cases and four automation title roundtrips passed. Three genuine images with receipts are linked in README and bundled in the handbook. Current public handbook deployment is source09442f5, with all 17 files verified and 31 article/search/preferences interaction checks passed. One handbook review retained incomplete descendant teardown evidence; its profile and desktop handle remain retained after automatic approval review rejected their cleanup. Do not retry deletion through another route.
+GUI CRUD/consent/lock proof is77cb8cf; repaired minimum760x580 bilingual-dark reduced-motion
+layout is0719755. Native enumeration proved all owned hidden desktops absent. Handbook
+0049c2d native single-file/footer0.1.1/guide/navigation proof passed; reading persistence is
+separately77cb8cf. Source-bound current screenshot promotion and README refresh remain.
 
-The combined source04e003f now passed the exact local desktop installer entrypoint, all87 desktop tests, six native engine/mode cases and real GUI restart-persistence/history checks. Three inspected source-bound1920x1500 PNGs replace current README images; earlier images/provenance remain archived. Both GUI fixture teardowns are complete. The separate native verification wrapper remains retained after an ancestry rejection involving an older unrelated process with a reused parentPID; no termination or desktop-close action was attempted.
+Active next work: strict encrypted portable-bookmark import through guest policies; real GUI cancel/stop/
+workspace-only save; observer readiness/external closure/restart recovery; graphical terminal,
+WSLg/full desktop and Sandbox where available; final matrix, documentation publication,
+installer/update proof and completed-work main integration. Sandbox is absent. Never change
+host power/login or unrelated environments. Observer process evidence is not visual evidence.
 
-Next: verify actual shortcut maintenance through a safe supported installed update, publish and read back the refreshed handbook, verify the normal hosted release and exact assets, and finish archive-dependent cleanup after the pending backup access choice. The existing installed0.1.0 application is active; preserve work, settings and authentication and wait for a safe normal lifecycle boundary before applying a supported update. Do not force-close it. Packaging, publication and installed-update proof are separate verdicts.
+Private original proof lives under .agent and .cache; sanitize selected receipts and inspect
+images before publication. Do not publish raw diagnostic archives or private paths. Keep
+unfinished work on its owning branch, preserve and verify remote references, never force-push.
 
-Before retiring any of the five integrated worktrees or branches, verify the authorized backup destination, complete archive readback including ignored private announcement originals, fresh ownership/status and remote ancestry. Keep anything active, dirty, unmerged, unpushed, load-bearing or uncertain. Do not rewrite history. Separate wiki transport remains unavailable despite the enabled feature, with source wiki content available locally and in the handbook. The broader roadmap remains unfinished.
+Progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
 
-Preserve this checkpoint on main and verify its exact remote SHA. Subsequent build, release, deployment, backup and installation results must be recorded without relabelling earlier evidence.
+Portable bookmark API slice: strict bounded neutral JSON is encrypted in per-backend template
+settings and immutable revisions. Guest-only managed policy generation preserves editable
+profile files. Core23 and host52 checks passed; independent source review found no confirmed
+defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
+review and successful policy-file generation do not prove browser recognition.
 
-Latest delivery: normal release build-17-39207217449-1 is verified for productive source04e003f, with successful hosted run and all five expected assets uploaded with published hashes. The later evidence source29c4c83 has hosted run39208676657 in progress. The live handbook publication4dccbf2674f8900bc86d0de9d61041b3793d23f2 serves source29c4c83:37 complete articles, all19 declared file bytes/hashes match, home/new articles/images/search/dark-preference reload and390px layout interactions passed. Eight saved browser process identities and listener were absent before its named desktop closed.
-
-Two structured owner choices remain unanswered: approved backup access for the archive before retiring the five integrated component worktrees/branches, and whether the existing installation is saved and closed for a supported normal update. The latest readback still finds four matching installed processes. Do not infer consent or closure from elapsed time. No source branch or worktree has been deleted, no update has been applied and no actual installed shortcut proof exists. Keep all unproven cleanup sources and the load-bearing publication branch.
-
-Next independent check is the latest documentation release and its downloaded single-file offline handbook against the37-article/current-image inventory. If pending choices remain unanswered after all independent checks, retain the completed/preserved work and report those narrow user-state requirements. Do not manufacture completion, rewrite history, remove the older unrelated process or retry the previously rejected profile cleanup.
-
-Native verification teardown update: after the older unrelated process was independently observed absent, fresh complete ancestry proof passed. The owning wrapper exited normally, both recorded wrapper identities were proven absent and the exact named desktop closed at2026-10-19T06:21:04.275644+00:00. No PID kill or unrelated termination occurred. This supersedes the earlier retained-wrapper state while preserving the initial rejection receipt. The prior separately rejected handbook profile cleanup remains untouched.
+Managed WSL browser launch diagnosis at f1816d6 showed the detached command returning0,
+then the readiness probe returning1 with no browser left. Identical foreground managed
+Chromium survived10 seconds in the proven guest-local virtual display. Current repair
+retains the foreground WSL child before cancellation/readiness and detects launcher loss.
+Focused launch1 and health8 checks passed. Native repaired readiness remains next. The
+workspace-wide formatting check reports existing unrelated formatting drift; no broad
+formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
+immutable f1816d6, with its final receipt and teardown inventory pending inspection.

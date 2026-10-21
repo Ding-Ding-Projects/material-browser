@@ -112,6 +112,9 @@ nav {
   border-right: 1px solid var(--border);
 }
 nav button {
+  flex-shrink: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   border: 0;
   border-radius: 24px;
   background: none;

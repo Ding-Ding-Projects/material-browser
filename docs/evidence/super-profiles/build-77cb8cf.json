@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "77cb8cfa29a88727def12af3595079b0170c50bf",
+  "hostBuild": {
+    "entrypoint": "build.bat -Component Host",
+    "exitCode": 0,
+    "sha256": "1d7e70edfa16debfa83e66dc466f5876adb5bb6b79d8e0289e64a4d80dc36e15"
+  },
+  "desktopInstaller": {
+    "entrypoint": "build-installer.bat -Component Desktop",
+    "exitCode": 0,
+    "filename": "material-browser-desktop-0.1.1 Setup.exe",
+    "bytes": 809513984,
+    "sha256": "719df8831b6fd04b409bfea41b55a9b51cc401627bccf9512f932b5baab524e7"
+  },
+  "handbook": {
+    "entrypoint": "build-installer.bat -Component DocsCompanion",
+    "exitCode": 0,
+    "filename": "Material-Browser-Handbook-0.1.1-x64.exe",
+    "bytes": 101511526,
+    "sha256": "0c66f84c0785812556e8a648a21cead1a226b57f1e35fef6047aa1c0a506c8e3",
+    "articles": 39
+  },
+  "checks": {
+    "linuxHostPassed": 41,
+    "windowsHostPassed": 40,
+    "linuxDesktopPassed": 95,
+    "linuxDesktopSkipped": 1,
+    "windowsTargetedPassed": 14
+  },
+  "limitations": [
+    "Installer production is not installation or update proof.",
+    "Native guest readiness and current-source full interface acceptance remain incomplete.",
+    "This build precedes the subsequent navigation and WSL API repairs."
+  ]
+}

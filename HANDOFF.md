@@ -1,5 +1,51 @@
 # Material Browser handoff
 
+## Super Profiles implementation in progress
+
+Current steering: the user explicitly resumed implementation after the goal service pause
+was reported unintended. The service still displays paused and exposes no resume API;
+its record was retained without replacement. Work continues under that resume direction.
+
+Latest preserved source:f1816d6b59b5a73bf315c40f13577b626219713e on
+ai/feature/20261021-super-profiles, with exact remote reference verified. Current candidate
+adds bounded owned guest observations, terminal/desktop readiness, managed desktop browser
+launchers, typed client interfaces and explicit UI health/recovery presentation.
+
+The host suite passes51 checks. Desktop passes97, with one Windows-only check skipped on
+Linux; the targeted native platform checks passed14 earlier. Core19 passed at e92b352.
+The exact root Desktop installer production passed at f1816d6 with stable source and exit0.
+Its setup is809554944 bytes, SHA256 0a29f9b5b41aaad857ee2eaf57cb925132560bcbf5dcbeca724c3517030dc086.
+
+Actual runtime proof: Chromium completed two owned headless cycles at0719755 with encrypted
+browser/workspace save and restoration, normal guest user, browser sandboxing enabled,
+owned teardown and unchanged unrelated distro inventory. Firefox completed two headless cycles at f1816d6, restoring browser local storage and workspace
+changes after encrypted save. The root browser/lock link was present before successful export;
+other links remain rejected. Default uncached acquisition downloaded and verified the pinned
+388975696-byte base in6860ms, completed setup and disposed only its owned guest.
+These results supersede the earlier retained Firefox export and default download failures.
+
+Native GUI CRUD/consent/lock proof belongs to77cb8cf. The0719755 minimum760x580 bilingual-dark
+reduced-motion navigation retest passed inspected pixels and bounds. Later successful native
+desktop enumeration proved all task-owned desktops absent. Portable handbook0049c2d passed
+native single-file launch, corrected0.1.1 footer and guide/internal navigation. Earlier
+77cb8cf proof covered reading-progress persistence. Original receipts/images remain private;
+final source-bound image promotion and README refresh are pending.
+
+Current host changes observe cached launch-owned streams without executing guests from
+status. Records are nonce/sequence/freshness bounded. Missing or stale readiness is explicit,
+late observations cannot replace save/cleanup states, and visualVerified stays false.
+Terminal requires an actual guest PTY; desktop requires same-display Xfce and window manager.
+Native observation/readiness proof remains pending. Full desktop launchers use the selected
+managed browser profile and workspace. Sandbox runtime is unavailable on the selected host.
+
+Next: preserve/build current candidate, retry Firefox and default acquisition, exercise real
+GUI cancellation/workspace save, verify observation and graphical guest workflows where safe,
+complete layout/localization/accessibility matrix, evidence promotion, wiki/handbook publication,
+installer/update proof and completed-work integration. Keep all unrun proof incomplete.
+Projects discovery lacks read:project and remains skipped without changing scopes.
+
+Task progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
+
 ## Current delivery
 
 The productive repair has a successful hosted run39207217449 and normal release build-17-39207217449-1. The live handbook now serves source29c4c83 through publication4dccbf2, with37 articles and all19 declared file hashes verified. Its home, shortcut/current-evidence articles, all three images, search, dark-preference reload and390px layout checks passed. Eight saved browser identities were proven absent and its exact desktop closed. The later documentation build39208676657 remains a separate pending release result. See docs/evidence/handbook/verification-29c4c83.json.
@@ -57,3 +103,18 @@ Unrelated internal-maintenance references accidentally entered a086a87 and were 
 See docs/evidence/desktop/receipts-0.1.1.json, bundled-runtime-0.1.1.json and the archived presentation for exact public evidence.
 
 Native verification teardown update: after the older unrelated process was independently observed absent, fresh complete ancestry proof passed. The owning wrapper exited normally, both recorded wrapper identities were proven absent and the exact named desktop closed at2026-10-19T06:21:04.275644+00:00. No PID kill or unrelated termination occurred. This supersedes the earlier retained-wrapper state while preserving the initial rejection receipt. The prior separately rejected handbook profile cleanup remains untouched.
+
+Portable bookmark API slice: strict bounded neutral JSON is encrypted in per-backend template
+settings and immutable revisions. Guest-only managed policy generation preserves editable
+profile files. Core23 and host52 checks passed; independent source review found no confirmed
+defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
+review and successful policy-file generation do not prove browser recognition.
+
+Managed WSL browser launch diagnosis at f1816d6 showed the detached command returning0,
+then the readiness probe returning1 with no browser left. Identical foreground managed
+Chromium survived10 seconds in the proven guest-local virtual display. Current repair
+retains the foreground WSL child before cancellation/readiness and detects launcher loss.
+Focused launch1 and health8 checks passed. Native repaired readiness remains next. The
+workspace-wide formatting check reports existing unrelated formatting drift; no broad
+formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
+immutable f1816d6, with its final receipt and teardown inventory pending inspection.

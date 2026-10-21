@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f1816d6b59b5a73bf315c40f13577b626219713e",
+  "executableSha256": "bf4d2e30870cdf0cd7b87acc6c1c186a4cb78ea74a10f755715458bcbec933f8",
+  "engine": "firefox",
+  "route": "native-owned-wsl-headless-browser",
+  "cycles": 2,
+  "sourceCleanAtProducerStart": true,
+  "processChecksPassed": true,
+  "unrelatedDistributionInventoryPreserved": true,
+  "postDiscardChecks": [
+    {
+      "sessionId": "323b404ce8a6ac4ff9ec06eb32d23046d92f0861eae475b7fab720c1604b74e8",
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    },
+    {
+      "sessionId": "7dca9fe418fd7034913901ce7a97bd9afde3c62bf3867c05b83871db4119892f",
+      "remainingEntries": [
+        "ownership.json"
+      ],
+      "plaintextRemoved": true
+    }
+  ],
+  "restoredSyntheticBrowserValue": "synthetic-firefox-persisted",
+  "restoredSyntheticWorkspaceValue": "saved-new-value",
+  "parentInspectedCycle2": true,
+  "cycle2PngSha256": "1f06829697dc23e69f9f738046496152df3206e87ac13d3eaa998a5cdfa8a53d",
+  "rootLockPresentBeforeExport": true,
+  "limitations": [
+    "Headless synthetic browser evidence does not prove graphical WSLg readiness.",
+    "Provisioning was cancelled at the startup fixture before graphical launch.",
+    "Terminal, full desktop and Windows Sandbox runtime acceptance remains incomplete."
+  ]
+}

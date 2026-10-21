@@ -75,6 +75,11 @@ impl VerifiedEngine {
     pub fn manifest(&self) -> &EngineManifest {
         &self.manifest
     }
+    /// Revalidate before handing a managed executable to a guest launcher.
+    pub fn verified_executable_path(&self) -> Result<&Path> {
+        verify_hash(&self.executable, &self.manifest.executable_sha256)?;
+        Ok(&self.executable)
+    }
 }
 #[derive(Default)]
 pub struct EngineRegistry {
