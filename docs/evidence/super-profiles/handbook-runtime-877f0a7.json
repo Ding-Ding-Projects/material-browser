@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "877f0a791a1edf9f636940746d253955f2d16b88",
+  "sourceEnd": "877f0a791a1edf9f636940746d253955f2d16b88",
+  "entrypoint": "build-installer.bat -Component DocsCompanion",
+  "buildExitCode": 0,
+  "sourceStable": true,
+  "package": {
+    "filename": "Material-Browser-Handbook-0.1.1-x64.exe",
+    "bytes": 101563992,
+    "sha256": "da867bf371ecbb719946a0814782a10ec063e67b30505299460378893554bec5",
+    "sha256AtEnd": "da867bf371ecbb719946a0814782a10ec063e67b30505299460378893554bec5",
+    "oneFileLaunch": true
+  },
+  "verified": [
+    "One-file portable launch from directory containing only the verified executable",
+    "Actual home to guide navigation",
+    "All three review controls and Next transitions",
+    "Reviewed final step persisted across actual reload",
+    "Internal complete Super Profiles article, wiki Home, reference catalog and current desktop evidence routes",
+    "Approved setup image loaded at natural dimensions1264x735 from bundled hash-addressed asset",
+    "Footer version0.1.1 and source877f0a791a1e",
+    "Owned launcher and window processes absent; exact named desktop absent"
+  ],
+  "frames": [
+    {
+      "sha256": "bcbdbc6c00b8b0ec265a797548edf575db7bd9f7648a02ae9a67aeb8a3fa1da7",
+      "width": 1264,
+      "height": 861,
+      "inspected": true,
+      "privacy": "Public documentation and approved product image only; no credentials, private paths or personal data visible",
+      "capturedAt": "2026-10-21T22:05:52.390Z",
+      "method": "CDP screenshot of exact owned renderer",
+      "name": "guide.png"
+    },
+    {
+      "sha256": "325eaa7da8fa86e53e9b042716ec91d0248ea106fbd87325747d68bc90e7ebcc",
+      "width": 1264,
+      "height": 861,
+      "inspected": true,
+      "privacy": "Public documentation and approved product image only; no credentials, private paths or personal data visible",
+      "capturedAt": "2026-10-21T22:06:21.911Z",
+      "method": "CDP screenshot of exact owned renderer",
+      "name": "current-image.png"
+    },
+    {
+      "sha256": "ec85eb284f2763c3147b81371db86e55b80c0b753fad14e79a6afb8454bebbea",
+      "width": 1264,
+      "height": 861,
+      "inspected": true,
+      "privacy": "Public documentation and approved product image only; no credentials, private paths or personal data visible",
+      "capturedAt": null,
+      "method": "Cheap Lowlevel exact HWND screenshot",
+      "name": "current-image-native.png"
+    }
+  ],
+  "teardown": {
+    "ownedProcessesAbsent": true,
+    "ownedDesktopAbsent": true,
+    "processObservation": "2026-10-21T22:06:40.9324485Z",
+    "desktopObservation": "2026-10-21T22:06:40.423341+00:00",
+    "cliCloseReported": false
+  },
+  "limitations": [
+    "English light normal-size bounded slice only; no broad matrix",
+    "No network-disable experiment; internal custom-protocol routes verified",
+    "No guest launched or native consent exercised",
+    "Native capture timestamp unavailable; request start/end retained separately without inventing capture time",
+    "Console observations limited to driven plan intervals"
+  ]
+}
