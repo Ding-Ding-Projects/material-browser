@@ -10,6 +10,7 @@ See [the workflow and current limits](docs/features/desktop/super-profiles.md).
 **Development status:** unsigned development installers and the portable offline handbook are available through [normal automated releases](https://github.com/Ding-Ding-Projects/material-browser/releases). The product remains incomplete. Native installation/update acceptance, portable browser credentials, stable advanced identity, consistent live snapshots and two-computer restoration remain unverified or unsupported.
 
 - [Interactive handbook and complete documentation](https://ding-ding-projects.github.io/material-browser/)
+- [Reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/) with per-image hashes and capture provenance
 - [Architecture](docs/architecture.md)
 - [Roadmap](ROADMAP.md) and [current handoff](HANDOFF.md)
 - [Windows build and release automation](docs/features/delivery/windows-automation.md)
@@ -25,7 +26,7 @@ Builds enter through build.bat; installer production enters through build-instal
 
 ## Current desktop screenshots
 
-These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](docs/evidence/desktop/gui-rewrite/inventory.json).
+These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](docs/evidence/desktop/gui-rewrite/inventory.json). The same eight images are published in the [reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/), where each live image hash was verified against this inventory.
 
 ![Profile table and selected profile overview with synthetic records](docs/evidence/desktop/gui-rewrite/profiles-workspace.png)
 
