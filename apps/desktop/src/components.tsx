@@ -117,10 +117,16 @@ export function Modal({
   title,
   children,
   onClose,
-  closeLabel = 'Close',
-  accessibilityLabel = 'Accessibility',
+  closeLabel = "Close",
+  accessibilityLabel = "Accessibility",
   actions,
-}: React.PropsWithChildren<{ title: string; onClose: () => void; closeLabel?: string; accessibilityLabel?: string; actions?: React.ReactNode }>) {
+}: React.PropsWithChildren<{
+  title: string;
+  onClose: () => void;
+  closeLabel?: string;
+  accessibilityLabel?: string;
+  actions?: React.ReactNode;
+}>) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = ref.current as any;
@@ -131,8 +137,12 @@ export function Modal({
     return () => {
       el?.removeEventListener("closed", closed);
       queueMicrotask(() => {
-        if (!el?.isConnected && origin?.isConnected &&
-          (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+        if (
+          !el?.isConnected &&
+          origin?.isConnected &&
+          (document.activeElement === document.body ||
+            !document.activeElement?.isConnected)
+        ) {
           origin.focus();
         }
       });
@@ -183,7 +193,9 @@ export function Tabs({
   items,
   value,
   onChange,
+  panelPrefix = "panel",
 }: {
+  panelPrefix?: string;
   items: [string, string][];
   value: string;
   onChange: (v: string) => void;
@@ -201,7 +213,7 @@ export function Tabs({
     items.map(([id, label]) =>
       React.createElement(
         "md-primary-tab",
-        { key: id, "aria-controls": "panel-" + id },
+        { key: id, "aria-controls": panelPrefix + "-" + id },
         label,
       ),
     ),
