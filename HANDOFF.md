@@ -1,5 +1,29 @@
 # Material Browser handoff
 
+## Desktop GUI preservation, 2026-10-22
+
+Latest direction: stop new implementation and verification, preserve current work, and perform only proven task-owned cleanup. The full task remains unfinished.
+
+### Pending new-profile password-manager integration
+
+The next implementation must offer an optional KeePassXC database during new-profile creation, install and configure the KeePassXC browser extension for profiles that select it, and enable passkey support by default. Use the maintainer-owned [Ding-Ding-Projects/keepassxc](https://github.com/Ding-Ding-Projects/keepassxc) source lineage rather than substituting another distribution. This is a requested follow-up, not implemented or verified behavior. Preserve existing databases and credentials, provide explicit database selection or creation, and verify actual extension connectivity, default passkey behavior and persistence in the built application. Record engine-specific compatibility limits honestly.
+
+### Separate gallery publication review
+
+The separate evidence gallery requires maintainer review of a historical publication-language incident. Its current files were reviewed, but an earlier reachable commit still requires an explicitly authorized history remedy. A local replacement candidate and verified private backup exist; no history rewrite has been authorized or performed. The source README gallery backlink remains pending that review. Do not reproduce the historical content in public records.
+
+GUI source `baa9512ecbc2727929547059f3b5d95f7cde989f` is integrated on main with remote proof. Implementation commits are `6206ddf92965a707eb3d916d8b2ceb1a8de313b2` and `29528b77e95f604445a3174674a868f632314e23`. Local desktop checks: 109 passed, zero failed; TypeScript passed; documentation checks: six passed; offline-handbook policy checks: three passed. Exact root desktop installer production completed successfully. Normal release [build-44](https://github.com/Ding-Ding-Projects/material-browser/releases/tag/build-44-39834158436-1) and [workflow](https://github.com/Ding-Ding-Projects/material-browser/actions/runs/39834158436) are verified for the GUI source, with five uploaded assets. This later preservation documentation commit has its own workflow verdict, which must be checked separately.
+
+The rebuilt package passed focused real profile actions, persisted choice/reset, compact section renderer-keyboard behavior and inspected layout. The representative matrix stopped at 138 completed cells; 200% and broader states remain unverified. All owned product processes and named hidden desktops were closed with absence proof. Synthetic credentials were memory-only and released. [Images, exact evidence, limitations](docs/evidence/desktop/gui-rewrite/README.md) and [coverage](docs/evidence/desktop/gui-rewrite/coverage.json) are retained.
+
+The matching existing installation remains 0.1.0. No installed update was attempted because closeout stopped that lane. Full updater-feed acceptance, native physical input, guest lifecycle, sync conflicts, current hosted documentation and refreshed offline-handbook runtime remain unfinished. The wiki endpoint returned Repository not found; complete local wiki source remains bundled in documentation. Status delivery was unavailable because the live service rejected current client metadata; no delivery was claimed.
+
+Resume with the remaining coverage and the supported matching installed update, then refresh and verify hosted documentation and the offline handbook. Preserve default user data, existing installations, unrelated worktrees and all original evidence. Do not relabel the earlier green workflow as proof for this preservation commit.
+
+---
+
+The following earlier handoff is retained as historical context; its prior task/goal state is not this closeout's current state.
+
 ## Super Profiles implementation in progress
 
 Current steering: the user explicitly resumed implementation after the goal service pause

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "sourceCommit": "baa9512ecbc2727929547059f3b5d95f7cde989f",
+  "completion": "partial, stopped for owner-requested preservation",
+  "matrix": {
+    "surfaces": ["profiles", "settings", "super-profiles", "synchronization"],
+    "viewports": [[1280, 800], [760, 580]],
+    "languages": ["en", "yue", "both"],
+    "themes": ["light", "dark"],
+    "completedCells": 138,
+    "completedByRuntimeScale": {"1": 48, "1.25": 48, "1.5": 42, "2": 0},
+    "unverifiedCells": 54,
+    "scale150Remaining": "Both-language dark settings, Super Profiles and synchronization at both viewports",
+    "scale200": "Not started",
+    "excludedVariants": "48 initial 125% images retained with a persisted operation notification; excluded from default-state evidence",
+    "scope": "Representative surfaces only, not all design states",
+    "scaleMethod": "Fresh process with forced device scale, followed by explicit CSS viewport emulation; no physical display-setting verification"
+  },
+  "verifiedWorkflows": [
+    "Real backend-created synthetic ordinary profiles and Super Profile template",
+    "Populated profile table and selected overview",
+    "Bulk duplicate increased ordinary profile count from 4 to 8",
+    "Unique DOM ids across mounted profile and Super Profile panels",
+    "Oversized rename rejected while retaining draft, dialog and original name",
+    "Vault lock cleared ordinary profile rows and operation-result names",
+    "Explicit per-launch standard-identity consent",
+    "Firefox 158.0 launch with automation off and actual running status",
+    "Mixed bulk stop retained inactive-profile failure and active-profile success separately",
+    "Normal managed browser stop followed by an empty running-profile status list",
+    "Real snapshot, populated revision history and confirmed restore",
+    "Settings compact navigation: arrow traversal retained disclosure, explicit activation closed it and focused content, Escape returned focus to its toggle",
+    "Language explanation, practice result, example reset and explanation close",
+    "Actual language choice applied bilingual mode, survived reload and reset to English",
+    "Normal main scrolling made the final profile row reachable",
+    "Validated source-bound navigation and settings layout probes",
+    "Normal application close, exact process absence and owned desktop closure for completed runs"
+  ],
+  "unverifiedStates": [
+    "Native posted keyboard input; DOM keyboard checks do not establish native delivery",
+    "Empty unlocked ordinary-profile inventory",
+    "Profile filtering, sorting, UI creation and successful rename",
+    "All onboarding Back/Next, optional-step skip, save/resume and finish transitions",
+    "Configured sync folder selection, transfer and real conflict creation/resolution",
+    "Super Profile template creation/edit wizard and guest lifecycle consent/provisioning/save/discard states",
+    "All ten settings category screenshots and all four docking edges",
+    "Groups, pins, history import/export, protected-history workflows and unsaved forms",
+    "Personal wording drop/upload/clear, narration and reduced-motion runtime paths",
+    "Complete long-label, focused-control and scrolled-state matrix",
+    "Physical host display scales, native stderr and startup console history"
+  ],
+  "privacy": "Selected images use isolated synthetic records and were inspected before and after byte-exact staging. Raw variants and machine-specific receipts remain private."
+}

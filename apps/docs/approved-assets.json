@@ -63,5 +63,45 @@
     "path": "docs/evidence/desktop/display-name-history-04e003f.png",
     "sha256": "a80fd03c2b1a2331684ff7ddfa247b628616a2f41e98bb67c92f6117ab45de91",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/profiles-workspace.png",
+    "sha256": "5a02aa577a49989ef631d8c58a2e3e06ab8a1be8c4571001d008579bcf3e35b9",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/settings-normal.png",
+    "sha256": "8bbc51770204293b5ab1c9f157956babd726c295022ad6a5ed510630dc1cf1b9",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/settings-minimum.png",
+    "sha256": "48e825f489d2c4511e48c5fafca58273be552956c16b88fa256cbb9024b67b34",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/super-profiles.png",
+    "sha256": "260b5064d24679b775f524722af74f9e3cc89304077963ecc4d6f52d6eff227f",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/synchronization.png",
+    "sha256": "38dd10e90938a517c6a39496bc848c588f82fc2c020d0906bc34ce10d5f731c9",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/setup.png",
+    "sha256": "56bd348b441df5e9746be71c82c8be0a37996d3b351d6a5f05a0dcc10a859635",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/launch-consent.png",
+    "sha256": "ac807b25eb7fd56da6cb5b620cac6db6d3cae13c9ca57fa99173adb0d1d98daa",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/gui-rewrite/revisions.png",
+    "sha256": "2e03cb0cc8d9d22520fc447037ca34b68458613355c0e2554b71c42a197aa00e",
+    "reviewedForPublication": true
   }
 ]

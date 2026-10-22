@@ -25,6 +25,7 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Verify packaging, documentation publication and supported installed update
 
 ## Foundation
+- [ ] Offer an optional KeePassXC database during new-profile creation, configure its browser extension, and enable passkey support by default using Ding-Ding-Projects/keepassxc; implementation and built verification remain pending
 - [ ] Complete applicable settings and preferences with real behavior, persistence and evidence
   - [ ] Integrate the independently reviewed nine-repair Settings slice after current built proof
   - [ ] Complete the 109-row inventory, including all 65 desktop-applicable rows
@@ -69,9 +70,11 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Verify the final hosted release and safe installed-update outcome
 
 ## Desktop workspace redesign
-- [ ] Replace the desktop presentation with the reviewed profile-table and inspector workspace
-- [ ] Preserve profile, Super Profiles, synchronization, onboarding and settings workflows
-- [ ] Verify rebuilt desktop interactions and layout across supported tuples
-- [ ] Refresh current desktop screenshots, documentation and offline handbook
-- [ ] Verify the release, matching installed update and deployed documentation
+- [x] Replace the desktop presentation with the reviewed profile-table and inspector workspace, with inspected source-bound images
+- [ ] Complete broad workflow acceptance across profiles, Super Profiles, synchronization, onboarding and settings; source review and focused ordinary-profile workflows passed
+- [ ] Finish rebuilt desktop state/tuple acceptance: 138 representative cells completed, six 150% cells and all 200% cells unrun
+- [ ] Finish documentation/handbook delivery: current source screenshots and articles refreshed, hosted and offline companion refresh pending
+- [ ] Finish installed-update and deployed-documentation acceptance; normal source-bound release 0.1.44 and its five assets verified
 
+
+- [x] Verify real Firefox standard-identity launch/stop, bulk duplication, partial stop results, failed rename retention, lock redaction and snapshot/revision restoration

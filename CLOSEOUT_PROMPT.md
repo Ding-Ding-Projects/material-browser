@@ -1,52 +1,22 @@
-# Super Profiles continuation
+# Desktop GUI continuation
 
-Implement the approved Super Profiles plan in Ding-Ding-Projects/material-browser.
-The user explicitly resumed implementation after an unintended goal-service pause. The
-service still displays paused and has no resume operation; retain it without replacement.
+```text
+Objective: finish the approved Material Browser desktop GUI rewrite acceptance and delivery.
+Latest user direction: preservation and task-owned cleanup now; stop new implementation, runtime scales and installation. Resume substantive work only after new user direction.
 
-Latest verified preservation:f1816d6b59b5a73bf315c40f13577b626219713e on
-ai/feature/20261021-super-profiles. Current coherent source adds owned bounded observers,
-terminal/desktop process readiness, managed desktop browser/workspace entries, typed client
-methods and visible health/recovery controls. Host51 and desktop97 checks pass; one native
-platform check was skipped on Linux and passed separately among14 Windows targeted checks.
-Core19 passed earlier. Preserve this candidate, then use exact root build.bat for native
-production and build-installer.bat for installer/companion production.
+New requested follow-up: new-profile creation offers an optional KeePassXC database, installs and configures its browser extension when selected, and enables passkey support by default. Use the maintainer-owned Ding-Ding-Projects/keepassxc source lineage. This remains unimplemented and unverified; preserve existing databases and credentials and verify engine compatibility, connectivity and persisted defaults when implementation resumes.
 
-Actual Chromium0719755 and Firefox f1816d6 two-cycle headless proof verifies encrypted
-browser/workspace restore, normal user, sandboxing, exact owned teardown and unchanged
-unrelated distributions. Firefox root-lock export is repaired and proved. Default uncached
-base acquisition at f1816d6 passed checksum, setup and owned teardown. Exact root Desktop
-installer build f1816d6 passed with stable source; sanitized build/runtime receipts are in
-docs/evidence/super-profiles. Graphical readiness remains a separate incomplete criterion.
+Separate gallery: current files were reviewed, but a historical publication-language incident remains reachable in its history. A clean local replacement candidate and verified private backup exist. History rewriting requires explicit authorization, and no rewrite has occurred. The source README gallery backlink remains pending review. Do not reproduce the historical content.
 
-GUI CRUD/consent/lock proof is77cb8cf; repaired minimum760x580 bilingual-dark reduced-motion
-layout is0719755. Native enumeration proved all owned hidden desktops absent. Handbook
-0049c2d native single-file/footer0.1.1/guide/navigation proof passed; reading persistence is
-separately77cb8cf. Source-bound current screenshot promotion and README refresh remain.
+GUI implementation is integrated and remotely verified at baa9512ecbc2727929547059f3b5d95f7cde989f. Its implementation commits are 6206ddf92965a707eb3d916d8b2ceb1a8de313b2 and 29528b77e95f604445a3174674a868f632314e23. This file records state before its own preservation commit; read the current remote main reference and issue handoff for the later proof.
 
-Active next work: strict encrypted portable-bookmark import through guest policies; real GUI cancel/stop/
-workspace-only save; observer readiness/external closure/restart recovery; graphical terminal,
-WSLg/full desktop and Sandbox where available; final matrix, documentation publication,
-installer/update proof and completed-work main integration. Sandbox is absent. Never change
-host power/login or unrelated environments. Observer process evidence is not visual evidence.
+Implemented: compact shell, profile table/inspector, bulk actions with real outcomes, structured sync candidates, resumable setup, compact aligned settings and responsive category disclosure, and preserved Super Profiles lifecycle logic.
+Verified: 109 desktop checks, TypeScript, six docs checks, three handbook policy checks, exact root desktop installer build, normal release 0.1.44 with expected assets, genuine current screenshots, real Firefox launch/stop, duplicate/partial outcomes, rename failure retention, lock redaction, snapshot and restore.
+Matrix: 138 unobstructed representative cells (48 at100%,48 at125%,42 at150%). Six150% cells and all200% cells were not run. Preserve48 notification-obscured variants separately. Broader state, native input, sync conflict and guest lifecycle acceptance remain unverified.
+Evidence: docs/evidence/desktop/gui-rewrite/README.md, inventory.json, receipts.json and coverage.json. Raw originals, exact private receipts and all unsuccessful variants are retained privately. Every owned product process and hidden desktop is closed and absence-verified; fixture credentials were released.
 
-Private original proof lives under .agent and .cache; sanitize selected receipts and inspect
-images before publication. Do not publish raw diagnostic archives or private paths. Keep
-unfinished work on its owning branch, preserve and verify remote references, never force-push.
+Unfinished: remaining matrix/state inventory, matching installed update (existing version0.1.0 unchanged), full updater-feed proof, current hosted documentation, refreshed offline-handbook runtime, and their final release/deployment readbacks. The newer preservation commit's CI is independent from the already-green GUI workflow.
+Keep scope fixed: no storage/hosting/build-companion GUI redesign, unrelated backend work, unrelated issue backlog, credential exposure, history rewriting or cleanup of other owners' work. Use normal explicit model routing and fresh isolated ownership when resumed. Try unchanged failures at most3times; observe an external operation at most1hour. No fixed token budget. Check actual account allowance and preserve at10%or less remaining. The closeout request was explicit; the last account reading was78%remaining, not a limit trigger.
 
-Progress: https://github.com/Ding-Ding-Projects/material-browser/discussions/3
-
-Portable bookmark API slice: strict bounded neutral JSON is encrypted in per-backend template
-settings and immutable revisions. Guest-only managed policy generation preserves editable
-profile files. Core23 and host52 checks passed; independent source review found no confirmed
-defect. Wizard input and exact pinned-engine policy recognition remain pending. Source-only
-review and successful policy-file generation do not prove browser recognition.
-
-Managed WSL browser launch diagnosis at f1816d6 showed the detached command returning0,
-then the readiness probe returning1 with no browser left. Identical foreground managed
-Chromium survived10 seconds in the proven guest-local virtual display. Current repair
-retains the foreground WSL child before cancellation/readiness and detects launcher loss.
-Focused launch1 and health8 checks passed. Native repaired readiness remains next. The
-workspace-wide formatting check reports existing unrelated formatting drift; no broad
-formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
-immutable f1816d6, with its final receipt and teardown inventory pending inspection.
+Completion requires the stated GUI acceptance and delivery evidence. Until then the goal is unfinished. Retain earlier source/evidence and report blocked or unavailable proof honestly.
+```

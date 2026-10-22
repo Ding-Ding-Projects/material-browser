@@ -1,17 +1,23 @@
 # Current desktop evidence
 
-Source: `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. Local package: 0.1.1. The exact root desktop installer entrypoint completed with exit 0. The three original 1920 by 1500 PNGs below show the real combined preferences/history workspace after restart, in English and dark theme at logical scale 1.
+The current desktop rewrite images and receipts are in the [source-bound GUI inventory](gui-rewrite/README.md), at source `baa9512ecbc2727929547059f3b5d95f7cde989f`.
 
-![Persisted dark theme and compact density after restart](persisted-preferences-04e003f.png)
+![Profile table and selected profile overview with synthetic records](gui-rewrite/profiles-workspace.png)
 
-![Protected history unlocked after restart with independent access](protected-history-04e003f.png)
+![Compact settings rows in the packaged desktop application](gui-rewrite/settings-normal.png)
 
-![Persisted workspace display name and recorded settings change](display-name-history-04e003f.png)
+![Compact settings navigation at the minimum supported viewport](gui-rewrite/settings-minimum.png)
 
-Visible preference save, stale revision rejection, protected history setup, display-name save, recorded settings change, locked restart and persistence were exercised separately from the pictures. Both GUI fixtures retained complete six-process inventories before close and proved all recorded identities absent before closing the exact named desktops. No PID kill was used.
+![Super Profile template inventory with synthetic records](gui-rewrite/super-profiles.png)
 
-Capture dates and UTC timezone come from the producing receipts. Prospective observation covered all three final images with zero console errors, page errors or unhandled exceptions. This does not observe startup history or native stderr. The synthetic workspace contains no real user information, private wording or credential values. Original bytes were inspected and staged without transformation.
+![Synchronization workspace before a shared folder is configured](gui-rewrite/synchronization.png)
 
-Physical display scales, native keyboard behavior, complete localization, history restore/export/recovery/retention and native installation/update remain unverified.
+![Setup wizard with an existing unlocked synthetic vault](gui-rewrite/setup.png)
 
-[Inventory](inventory.json) · [Public receipt summary](receipts-04e003f.json) · [Previous source-bound article](archive-5922074.md) · [Older archive](archive.md)
+![Explicit standard browser identity consent before profile launch](gui-rewrite/launch-consent.png)
+
+![Profile revision history after a real snapshot and restore](gui-rewrite/revisions.png)
+
+The GUI source and focused interactions are preserved; full product acceptance is incomplete. The representative matrix contains 138 completed cells, with the remainder and broader states explicitly listed in [coverage](gui-rewrite/coverage.json). Scale emulation, native input, guest lifecycle, conflict resolution, installation/update and deployed documentation have separate verdicts.
+
+[Current inventory](gui-rewrite/inventory.json) · [Receipt summary](gui-rewrite/receipts.json) · [Earlier presentation archive](../archive.md)

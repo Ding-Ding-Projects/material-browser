@@ -25,19 +25,27 @@ Builds enter through build.bat; installer production enters through build-instal
 
 ## Current desktop screenshots
 
-These original version 0.1.1 images show the combined packaged desktop at source `04e003fb37fcdc5fecb8ef45806aaae74a69b603`. The exact local desktop installer entrypoint completed with exit 0. Images were taken through an isolated hidden desktop, inspected for private data and promoted without changing their bytes. Viewports are 1920 by 1500 at logical scale 1, in English and dark theme.
+These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](docs/evidence/desktop/gui-rewrite/inventory.json).
 
-![Persisted dark theme and compact density after restart](docs/evidence/desktop/persisted-preferences-04e003f.png)
+![Profile table and selected profile overview with synthetic records](docs/evidence/desktop/gui-rewrite/profiles-workspace.png)
 
-![Protected history unlocked after restart with independent access](docs/evidence/desktop/protected-history-04e003f.png)
+![Compact settings rows in the packaged desktop application](docs/evidence/desktop/gui-rewrite/settings-normal.png)
 
-![Persisted workspace display name and recorded settings change](docs/evidence/desktop/display-name-history-04e003f.png)
+![Compact settings navigation at the minimum supported viewport](docs/evidence/desktop/gui-rewrite/settings-minimum.png)
 
-The visible controls saved dark theme, compact density and a synthetic workspace name. A stale native preference write was rejected. Protected history recorded the settings change, reopened locked after a real process restart and retained its records after unlocking. Both GUI launches saved six complete process identities before closing; all were proven absent and both exact hidden desktops closed.
+![Super Profile template inventory with synthetic records](docs/evidence/desktop/gui-rewrite/super-profiles.png)
 
-These observations do not prove physical display-scale coverage, native keyboard behavior, complete localization, history restore/export/recovery or installation/update. Earlier onboarding, consent and bilingual images keep their original provenance in the archive.
+![Synchronization workspace before a shared folder is configured](docs/evidence/desktop/gui-rewrite/synchronization.png)
 
-[Current evidence inventory](docs/evidence/desktop/inventory.json) · [Source/hash summary](docs/evidence/desktop/receipts-04e003f.json) · [Earlier presentation archive](docs/evidence/archive.md)
+![Setup wizard with an existing unlocked synthetic vault](docs/evidence/desktop/gui-rewrite/setup.png)
+
+![Explicit standard browser identity consent before profile launch](docs/evidence/desktop/gui-rewrite/launch-consent.png)
+
+![Profile revision history after a real snapshot and restore](docs/evidence/desktop/gui-rewrite/revisions.png)
+
+The representative matrix stopped at the owner-requested preservation boundary: 138 completed cells (48 at 100%, 48 at 125%, 42 at 150%). The 200% run and broader state inventory remain unfinished. Runtime-forced scales and CDP viewport overrides do not establish physical host display-scale or native keyboard proof. Ordinary Firefox launch/stop, bulk duplicate, failure retention, lock redaction and snapshot/restore were exercised separately from the pictures.
+
+[Current evidence and limitations](docs/evidence/desktop/gui-rewrite/README.md) · [Coverage](docs/evidence/desktop/gui-rewrite/coverage.json) · [Historical image archive](docs/evidence/archive.md)
 
 ## Documentation and remaining work
 

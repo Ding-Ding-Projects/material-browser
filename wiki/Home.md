@@ -15,3 +15,5 @@ Start with [Getting started](Getting-started.md), then choose the task you need.
 ## Evidence boundaries
 
 A documented interface is not proof that an installed engine implements it. Read the actual capability result and operation result. Cross-machine restoration, native browser launch, supported installers and deployed storage require separate runtime verification. Interactive examples in this handbook run only in the documentation page and never operate an installed browser or vault.
+
+- [Desktop profile workspace](Desktop-Workspace.md)
