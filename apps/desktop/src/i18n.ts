@@ -1,3 +1,4 @@
+import { workspaceZh } from "./workspace/locale";
 import { superProfilesZh } from "./SuperProfiles.locale";
 import { settingsZh } from "./settings/locale.mjs";
 export type Language = "en" | "yue" | "both";
@@ -16,12 +17,16 @@ export const zh: Record<string, string> = {
   Revisions: "版本",
   Automation: "自動化",
   Launch: "啟動",
-  'Launch profile': '啟動設定檔',
-  'Launch with standard identity': '使用標準識別資料啟動',
-  'Stable browser identity is unavailable in this build.': '呢個版本未支援穩定瀏覽器識別資料。',
-  'The saved profile identity is not enforced, so websites may recognize a different browser identity.': '已儲存嘅設定檔識別資料唔會被強制套用，網站可能會識別到另一個瀏覽器身份。',
-  'Standard launch uses the engine’s normal identity. It does not provide identity spoofing, stable cross-device identity or portable browser credentials.': '標準啟動會使用引擎本身嘅識別資料，唔提供識別資料偽裝、跨裝置穩定識別資料或可攜瀏覽器登入憑證。',
-  'Continue only if this standard identity behavior is suitable for this profile. This choice applies to this launch only.': '只有當標準識別資料適合呢個設定檔先繼續。呢個選擇只適用於今次啟動。',
+  "Launch profile": "啟動設定檔",
+  "Launch with standard identity": "使用標準識別資料啟動",
+  "Stable browser identity is unavailable in this build.":
+    "呢個版本未支援穩定瀏覽器識別資料。",
+  "The saved profile identity is not enforced, so websites may recognize a different browser identity.":
+    "已儲存嘅設定檔識別資料唔會被強制套用，網站可能會識別到另一個瀏覽器身份。",
+  "Standard launch uses the engine’s normal identity. It does not provide identity spoofing, stable cross-device identity or portable browser credentials.":
+    "標準啟動會使用引擎本身嘅識別資料，唔提供識別資料偽裝、跨裝置穩定識別資料或可攜瀏覽器登入憑證。",
+  "Continue only if this standard identity behavior is suitable for this profile. This choice applies to this launch only.":
+    "只有當標準識別資料適合呢個設定檔先繼續。呢個選擇只適用於今次啟動。",
   Stop: "停止",
   Duplicate: "複製",
   Snapshot: "建立快照",
@@ -92,7 +97,7 @@ export const zh: Record<string, string> = {
   Configuration: "設定內容",
   "Setup progress": "設定進度",
 };
-Object.assign(zh, settingsZh, superProfilesZh);
+Object.assign(zh, settingsZh, superProfilesZh, workspaceZh);
 export function translate(s: string, l: Language) {
   return l === "en"
     ? s

@@ -1,7 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
-import { APP_VERSION } from "./build-version";
-import { Button, Field, Select, Modal, Tabs } from "./components";
+import { ProfilesWorkspace } from "./workspace/ProfilesWorkspace";
+import { Onboarding } from "./workspace/Onboarding";
+import { Synchronization } from "./workspace/Synchronization";
+import { WorkspaceHeader, WorkspaceNavigation } from "./workspace/Shell";
+import {
+  catalogDestinations,
+  validSelection,
+  createOperationRegistry,
+} from "./workspace/model.mjs";
+import { Button, Field, Select, Modal } from "./components";
 import { Search } from "./Search";
 import { request, Profile } from "./api";
 import { translate, Language } from "./i18n";
@@ -17,11 +25,12 @@ import {
   Toasts,
 } from "./settings/LiveTools";
 import { styledMessage } from "./settings/messages.mjs";
-import { definitions } from "./settings/model.mjs";
-import { SuperProfiles } from './SuperProfiles';
-import { ProfileLaunch } from './ProfileLaunch';
-import { operationFailure } from './operation-errors.mjs';
+import { definitions, categories } from "./settings/model.mjs";
+import { SuperProfiles } from "./SuperProfiles";
+import { ProfileLaunch } from "./ProfileLaunch";
+import { operationFailure } from "./operation-errors.mjs";
 import { useDisplayName } from "./settings/useDisplayName";
+import "./workspace/workspace.css";
 const read = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -47,9 +56,9 @@ function App() {
   const [page, setPage] = useState("profiles"),
     [status, setStatus] = useState<any>(null),
     [profiles, setProfiles] = useState<Profile[]>([]),
-    [selected, setSelected] = useState(""),
-    [detail, setDetail] = useState("overview"),
-    [busy, setBusy] = useState(false),
+    [selected, setSelected] = useState<string>(() =>
+      read("selectedProfile", ""),
+    ),
     [notice, setNotice] = useState(""),
     [celebration, setCelebration] = useState(""),
     [create, setCreate] = useState(false),
@@ -59,55 +68,75 @@ function App() {
     [password, setPassword] = useState(""),
     [name, setName] = useState(""),
     [engine, setEngine] = useState("chromium"),
-    [automation, setAutomation] = useState("off"),
     [folder, setFolder] = useState(""),
-    [revisions, setRevisions] = useState<any[]>([]),
-    [conflicts, setConflicts] = useState<any[]>([]),
-    [runtime, setRuntime] = useState<any>(null);
-  const [profileRows, setProfileRows] = useState<number[]>([]),
-    [revisionRows, setRevisionRows] = useState<number[]>([]),
-    [conflictRows, setConflictRows] = useState<number[]>([]),
-    [commandRows, setCommandRows] = useState<number[]>([]),
-    [automationRows, setAutomationRows] = useState<number[]>([]);
-  const profile = profiles.find((p) => p.id === selected);
+    [conflicts, setConflicts] = useState<any[]>([]);
+  const [commandRows, setCommandRows] = useState<number[]>([]);
+  const [workspaceTabs, setWorkspaceTabs] = useState<
+    {
+      id: string;
+      label: string;
+      page: string;
+      setting?: string;
+      section?: string;
+    }[]
+  >([]);
   const [launchTarget, setLaunchTarget] = useState<Profile | null>(null);
   const launchInFlight = useRef(false);
+  const [pendingOperations, setPendingOperations] = useState<string[]>([]);
+  const operations = useRef(createOperationRegistry(setPendingOperations));
+  const busy = pendingOperations.length > 0;
+  const [activeTab, setActiveTab] = useState("");
   useEffect(() => {
-    if (!status?.unlocked || !profiles.some(p => p.id === launchTarget?.id)) setLaunchTarget(null);
+    if (selected)
+      localStorage.setItem("selectedProfile", JSON.stringify(selected));
+  }, [selected]);
+  useEffect(() => {
+    if (!status?.unlocked || !profiles.some((p) => p.id === launchTarget?.id))
+      setLaunchTarget(null);
   }, [status?.unlocked, profiles]);
   useEffect(() => setLaunchTarget(null), [selected]);
+  const refreshSequence = useRef(0);
   const refresh = async () => {
+    const sequence = ++refreshSequence.current;
     const s = await request("system.status");
+    if (sequence !== refreshSequence.current) return;
     setStatus({ ...s, exists: s.vaultExists, unlocked: s.locked === false });
     if (s.locked === false) {
       const rows = await request("profiles.list");
-      setProfiles(Array.isArray(rows) ? rows : rows.profiles || []);
-    } else setProfiles([]);
-  };
-  const perform = async (fn: () => Promise<any>) => {
-    if (busy) return;
-    setBusy(true);
-    setNotice(styledMessage("progress", "Working", "處理中", prefs));
-    try {
-      await fn();
-      const message = styledMessage("success", "Completed", "已完成", prefs);
-      setNotice(message);
-      settingsController.notify(message, "success");
-      narrator.speak("Completed", "已完成", "success");
-    } catch (e) {
-      const [english, cantonese] = operationFailure(e);
-      const message = styledMessage("error", english, cantonese, prefs);
-      setNotice(message);
-      settingsController.notify(message, "error");
-      narrator.speak(english, cantonese, "error");
-    } finally {
-      setBusy(false);
+      if (sequence !== refreshSequence.current) return;
+      const next = Array.isArray(rows) ? rows : rows.profiles || [];
+      setProfiles(next);
+      setSelected((current) => validSelection(next, current));
+    } else {
+      setProfiles([]);
+      setConflicts([]);
     }
+  };
+  const perform = async (fn: () => Promise<any>, keys: string[] = ["*"]) => {
+    return operations.current.runMany(keys, async () => {
+      setNotice(styledMessage("progress", "Working", "處理中", prefs));
+      try {
+        await fn();
+        const message = styledMessage("success", "Completed", "已完成", prefs);
+        setNotice(message);
+        settingsController.notify(message, "success");
+        narrator.speak("Completed", "已完成", "success");
+      } catch (e) {
+        const [english, cantonese] = operationFailure(e);
+        const message = styledMessage("error", english, cantonese, prefs);
+        setNotice(message);
+        settingsController.notify(message, "error");
+        narrator.speak(english, cantonese, "error");
+      }
+    });
   };
   useEffect(() => {
     refresh().catch(() => setStatus(null));
     const off = window.materialBrowser?.onEvent((event: any) => {
-      if (event?.type !== "settings-updated" && event?.type !== "super-profile-session")
+      if (
+        event?.type !== "settings-updated" &&
+        event?.type !== "super-profile-session"
+      )
         refresh().catch(() => setStatus(null));
     });
     return off;
@@ -115,21 +144,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("setup", JSON.stringify(setup));
   }, [setup]);
-  useEffect(() => {
-    setAutomation(profile?.automation || "off");
-    setRevisions([]);
-    setRuntime(null);
-    if (profile)
-      request("profiles.status", { id: profile.id })
-        .then((rows) =>
-          setRuntime(
-            Array.isArray(rows)
-              ? rows.find((r) => r.profileId === profile.id)
-              : rows,
-          ),
-        )
-        .catch(() => {});
-  }, [selected, profiles]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
@@ -175,7 +189,11 @@ function App() {
   }, [prefs.language]);
   const createProfile = async () => {
     if (!name.trim()) throw Error("NAME_REQUIRED");
-    await request("profiles.create", { name: name.trim(), engine });
+    const created = await request("profiles.create", {
+      name: name.trim(),
+      engine,
+    });
+    if (created?.id) setSelected(created.id);
     setName("");
     setCreate(false);
     await refresh();
@@ -188,24 +206,24 @@ function App() {
       setFolder(chosen);
     }
   };
-  const loadRevisions = async () => {
-    if (!profile) return;
-    const rows = await request("revisions.list", { id: profile.id });
-    setRevisions(Array.isArray(rows) ? rows : rows.revisions || []);
-  };
+  const conflictGeneration = useRef(0);
+  const currentStatus = useRef(status);
+  currentStatus.current = status;
   const loadConflicts = async () => {
+    const generation = ++conflictGeneration.current;
     const rows = await request("sync.conflicts");
+    if (
+      !currentStatus.current?.unlocked ||
+      generation !== conflictGeneration.current
+    )
+      return;
     setConflicts(Array.isArray(rows) ? rows : rows.conflicts || []);
   };
-  const commands = [
-    "Profiles",
-    "Synchronization",
-    "Settings",
-    "Setup",
-    "Create profile",
-    "Lock vault",
-    ...definitions.map((d) => `Settings: ${d.label}`),
-  ];
+  const commands = catalogDestinations(definitions, categories);
+  const commandLabel = (label: string) =>
+    label.startsWith("Settings: ")
+      ? `${t("Settings")}: ${t(label.slice(10))}`
+      : t(label);
   const profileForm = (
     <>
       <Field label={t("Name")} value={name} onChange={setName} required />
@@ -218,7 +236,7 @@ function App() {
           ["firefox", "Firefox"],
         ]}
       />
-      <p>Automation is off until explicitly enabled for this profile.</p>
+      <p>{t("Automation is off until explicitly enabled for this profile.")}</p>
       <Button
         disabled={busy || !name.trim()}
         onClick={() => void perform(createProfile)}
@@ -229,75 +247,79 @@ function App() {
   );
   return (
     <div className={`app-shell palette-${prefs.paletteSize}`}>
-      <header>
-        <div className="brand-mark" aria-hidden="true">
-          {prefs.logoPreset === "profiles"
-            ? "▤"
-            : prefs.logoPreset === "compass"
-              ? "◇"
-              : "M"}
-        </div>
-        <div className="identity">
-          <strong>{displayName || "Material Browser"}</strong>
-          <small>
-              {t("Version")} {APP_VERSION} · {t("Updated")}: {t("Unavailable")}
-          </small>
-        </div>
-        <span className="connection">
-          {t(
-            status
-              ? status.unlocked
-                ? "Connected"
-                : "Locked"
-              : "Backend unavailable",
-          )}
-        </span>
-        <Button secondary onClick={() => setPalette(true)}>
-          {t("Command palette")} <kbd>Ctrl Shift F</kbd>
-        </Button>
-      </header>
-      <div className="body">
-        <nav aria-label="Workspace">
-          {[
-            ["profiles", "Profiles"],
-            ["super-profiles", "Super Profiles"],
-            ["sync", "Synchronization"],
-            ["settings", "Settings"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              className={page === id ? "active" : ""}
-              onClick={() => {
-                setPage(id);
-                if (id === "settings") setShowSetup(false);
-              }}
+      <WorkspaceHeader {...{ prefs, displayName, t, status, setPalette }} />
+      {workspaceTabs.length > 0 && (
+        <div className="workspace-tab-strip" aria-label={t("Open tabs")}>
+          {workspaceTabs.map((target) => (
+            <div
+              key={target.id}
+              className={activeTab === target.id ? "active" : ""}
             >
-              <span className="nav-icon" aria-hidden="true">
-                {id === "profiles" ? "▤" : id === "sync" ? "⇄" : "⚙"}
-              </span>
-              {t(label)}
-            </button>
+              <button
+                onClick={() => {
+                  setActiveTab(target.id);
+                  setShowSetup(false);
+                  setPage(target.page);
+                  if (target.section)
+                    settingsController.selectSection(target.section);
+                  if (target.setting) {
+                    settingsController.selectSection(target.section!);
+                    setTimeout(
+                      () =>
+                        window.dispatchEvent(
+                          new CustomEvent("settings-reveal", {
+                            detail: target.setting,
+                          }),
+                        ),
+                      0,
+                    );
+                  }
+                }}
+              >
+                {commandLabel(target.label)}
+              </button>
+              <button
+                aria-label={`${t("Close")} ${commandLabel(target.label)}`}
+                onClick={() => {
+                  setWorkspaceTabs((tabs) =>
+                    tabs.filter((tab) => tab.id !== target.id),
+                  );
+                  if (activeTab === target.id) setActiveTab("");
+                }}
+              >
+                ×
+              </button>
+            </div>
           ))}
-          <button onClick={() => setShowSetup(true)}>{t("Setup")}</button>
-          <button
-            disabled={!status?.unlocked || busy}
-            onClick={() =>
-              void perform(async () => {
-                await request("vault.lock");
-                await refresh();
-              })
-            }
-          >
-            {t("Lock vault")}
-          </button>
-        </nav>
-        <main>
+        </div>
+      )}
+      <div className="body">
+        <WorkspaceNavigation
+          {...{
+            t,
+            page,
+            setPage: (value: string) => {
+              setActiveTab("");
+              setPage(value);
+            },
+            setShowSetup: (value: boolean) => {
+              setActiveTab("");
+              setShowSetup(value);
+            },
+            status,
+            busy,
+            perform,
+            refresh,
+          }}
+        />
+        <main className="workspace-main">
           {!status && (
             <section className="banner">
               <h2>{t("Backend unavailable")}</h2>
               <p>
-                The native host is not connected. No profile data is simulated.
-                Build and open the desktop package to use the vault.
+                {t(
+                  "The native host is not connected. No profile data is simulated. Build and open the desktop package to use the vault.",
+                )}
               </p>
               <Button secondary onClick={() => void perform(refresh)}>
                 {t("Retry connection")}
@@ -305,449 +327,86 @@ function App() {
             </section>
           )}
           {showSetup ? (
-            <section className="surface wizard">
-              <div className="eyebrow">
-                {t("Setup progress")} {setup + 1}/4
-              </div>
-              <h1>
-                {t(
-                  [
-                    "Create vault",
-                    "Create profile",
-                    "Optional synchronization",
-                    "Workspace ready",
-                  ][setup],
-                )}
-              </h1>
-              <progress
-                max={4}
-                value={setup + 1}
-                aria-label={t("Setup progress")}
-              />
-              {setup === 0 && (
-                <>
-                  {status?.unlocked ? (
-                    <p>{t("Connected")}</p>
-                  ) : (
-                    <>
-                      <p>
-                        Create an encrypted vault or unlock the existing vault.
-                        Passwords are never saved by this interface.
-                      </p>
-                      <Field
-                        label={t("Password")}
-                        value={password}
-                        onChange={setPassword}
-                        type="password"
-                      />
-                      <Button
-                        disabled={busy || !status || !password}
-                        onClick={() =>
-                          void perform(async () => {
-                            const secret = password;
-                            setPassword("");
-                            await request(
-                              status?.exists ? "vault.unlock" : "vault.create",
-                              { password: secret },
-                            );
-                            await refresh();
-                          })
-                        }
-                      >
-                        {t(status?.exists ? "Unlock vault" : "Create vault")}
-                      </Button>
-                      {!status?.exists && (
-                        <Button
-                          secondary
-                          disabled={busy || !password || !status}
-                          onClick={() =>
-                            void perform(async () => {
-                              const chosen =
-                                await window.materialBrowser?.chooseDirectory();
-                              if (chosen) {
-                                const secret = password;
-                                setPassword("");
-                                await request("vault.join", {
-                                  folder: chosen,
-                                  password: secret,
-                                });
-                                setFolder(chosen);
-                                await refresh();
-                              }
-                            })
-                          }
-                        >
-                          Join existing shared vault
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-              {setup === 1 && (
-                <>
-                  {profileForm}
-                  <p>{profiles.length} profiles</p>
-                </>
-              )}
-              {setup === 2 && (
-                <>
-                  <p>
-                    Choose a shared folder to exchange encrypted snapshots. This
-                    step is optional.
-                  </p>
-                  <p className="literal">{folder}</p>
-                  <Button
-                    disabled={busy}
-                    onClick={() => void perform(chooseFolder)}
-                  >
-                    {t("Choose folder")}
-                  </Button>
-                </>
-              )}
-              {setup === 3 && (
-                <p>
-                  Vault is unlocked and your profile workspace is ready. Managed
-                  browser launch remains subject to actual installed engine
-                  capabilities.
-                </p>
-              )}
-              <div className="actions">
-                <Button
-                  secondary
-                  disabled={setup === 0 || busy}
-                  onClick={() => setSetup(setup - 1)}
-                >
-                  {t("Back")}
-                </Button>
-                {setup === 2 && (
-                  <Button secondary onClick={() => setSetup(3)}>
-                    {t("Skip")}
-                  </Button>
-                )}
-                <Button
-                  disabled={
-                    busy ||
-                    (setup === 0 && !status?.unlocked) ||
-                    (setup === 1 && !profiles.length)
-                  }
-                  onClick={() => {
-                    if (setup === 3) {
-                      localStorage.setItem("setupComplete", "true");
-                      setShowSetup(false);
-                      setPage("profiles");
-                    } else setSetup(setup + 1);
-                  }}
-                >
-                  {t(setup === 3 ? "Finish" : "Next")}
-                </Button>
-              </div>
-            </section>
-          ) : page === "super-profiles" ? (
-            <SuperProfiles t={t} unlocked={status?.unlocked===true}/>
-          ) : page === "profiles" ? (
-            <>
-              <div className="page-heading">
-                <div>
-                  <span className="eyebrow">LOCAL WORKSPACE</span>
-                  <h1>{t("Profiles")}</h1>
-                </div>
-                <Button
-                  disabled={!status?.unlocked}
-                  onClick={() => setCreate(true)}
-                >
-                  {t("Create profile")}
-                </Button>
-              </div>
-              <div className="profiles-layout">
-                <section className="surface profile-list">
-                  <Search
-                    label={t("Search")}
-                    items={profiles.map((p) => `${p.name} ${p.engine}`)}
-                    onResults={setProfileRows}
-                    t={t}
-                  />
-                  {profiles.length === 0 ? (
-                    <p className="empty">{t("No profiles yet")}</p>
-                  ) : (
-                    profileRows.map((i) => (
-                      <button
-                        className={`profile-row ${selected === profiles[i].id ? "selected" : ""}`}
-                        key={profiles[i].id}
-                        onClick={() => setSelected(profiles[i].id)}
-                      >
-                        <span className="avatar">
-                          {profiles[i].name.slice(0, 1).toUpperCase()}
-                        </span>
-                        <span>
-                          <strong>{profiles[i].name}</strong>
-                          <small>
-                            {profiles[i].engine} · {profiles[i].automation}
-                          </small>
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </section>
-                <section className="surface detail">
-                  {profile ? (
-                    <>
-                      <div className="detail-heading">
-                        <span className="avatar large">
-                          {profile.name.slice(0, 1).toUpperCase()}
-                        </span>
-                        <div>
-                          <h2>{profile.name}</h2>
-                          <p>{profile.engine}</p>
-                        </div>
-                      </div>
-                      <Tabs
-                        items={["overview", "revisions", "automation"].map(
-                          (x) => [x, t(x[0].toUpperCase() + x.slice(1))],
-                        )}
-                        value={detail}
-                        onChange={(x) => {
-                          setDetail(x);
-                          if (x === "revisions") void perform(loadRevisions);
-                        }}
-                      />
-                      <div role="tabpanel" id={`panel-${detail}`}>
-                        {detail === "overview" ? (
-                          <>
-                            <dl>
-                              <dt>ID</dt>
-                              <dd>{profile.id}</dd>
-                              <dt>{t("Profile identity")}</dt>
-                              <dd>
-                                <pre>
-                                  {JSON.stringify(
-                                    profile.identity || {},
-                                    null,
-                                    2,
-                                  )}
-                                </pre>
-                              </dd>
-                            </dl>
-                            <div className="actions">
-                              {[
-                                ["profiles.launch", "Launch"],
-                                ["profiles.stop", "Stop"],
-                                ["profiles.duplicate", "Duplicate"],
-                                ["profiles.snapshot", "Snapshot"],
-                              ].map(([method, label]) => (
-                                <Button
-                                  key={method}
-                                  disabled={busy}
-                                  secondary={label !== "Launch"}
-                                  onClick={() =>
-                                    method === 'profiles.launch' ? setLaunchTarget({ ...profile }) : void perform(async () => {
-                                      await request(method, {
-                                        id: profile.id,
-                                        running: false,
-                                      });
-                                      await refresh();
-                                    })
-                                  }
-                                >
-                                  {t(label)}
-                                </Button>
-                              ))}
-                            </div>
-                            <p className="help">
-                              Actions run only when the native host supports
-                              them. Unsupported engine integrations return a
-                              capability reason.
-                            </p>
-                          </>
-                        ) : detail === "revisions" ? (
-                          <>
-                            <Search
-                              label={t("Search")}
-                              items={revisions.map((r) => JSON.stringify(r))}
-                              onResults={setRevisionRows}
-                              t={t}
-                            />
-                            <Button
-                              secondary
-                              disabled={busy}
-                              onClick={() => void perform(loadRevisions)}
-                            >
-                              {t("Refresh")}
-                            </Button>
-                            {!revisions.length && <p>{t("No revisions")}</p>}
-                            {revisionRows.map((i) => (
-                              <article className="record" key={i}>
-                                <code>{revisions[i].id}</code>
-                                <p>{revisions[i].createdAt}</p>
-                                <Button
-                                  secondary
-                                  disabled={busy}
-                                  onClick={() =>
-                                    void perform(async () => {
-                                      await request("revisions.restore", {
-                                        id: profile.id,
-                                        revisionId: revisions[i].id,
-                                      });
-                                      await loadRevisions();
-                                    })
-                                  }
-                                >
-                                  {t("Restore")}
-                                </Button>
-                              </article>
-                            ))}
-                          </>
-                        ) : (
-                          <>
-                            <Search
-                              label={t("Search")}
-                              items={[
-                                "Off Selenium Puppeteer saved effective restart",
-                              ]}
-                              onResults={setAutomationRows}
-                              t={t}
-                            />
-                            {automationRows.length > 0 && (
-                              <>
-                                <p>
-                                  {t("Saved preference")}: {profile.automation}
-                                </p>
-                                <p>
-                                  {t("Effective mode")}:{" "}
-                                  {runtime?.effectiveMode || t("Unavailable")}
-                                </p>
-                                {runtime &&
-                                  runtime.effectiveMode !==
-                                    profile.automation && (
-                                    <p>{t("Restart required")}</p>
-                                  )}
-                                <Select
-                                  label={t("Automation")}
-                                  value={automation}
-                                  onChange={setAutomation}
-                                  options={[
-                                    ["off", t("Off")],
-                                    ["selenium", "Selenium"],
-                                    ["puppeteer", "Puppeteer"],
-                                  ]}
-                                />
-                                <p>
-                                  Saving changes the preference. A running
-                                  profile requires restart before its automation
-                                  mode changes. Default: Off.
-                                </p>
-                                <Button
-                                  disabled={busy}
-                                  onClick={() =>
-                                    void perform(async () => {
-                                      await request("profiles.update", {
-                                        id: profile.id,
-                                        automation,
-                                      });
-                                      await refresh();
-                                    })
-                                  }
-                                >
-                                  {t("Save preference")}
-                                </Button>
-                              </>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="empty">
-                      <h2>{t("Select a profile")}</h2>
-                      <p>
-                        Keep identities, snapshots and automation preferences in
-                        separate profiles.
-                      </p>
-                    </div>
-                  )}
-                </section>
-              </div>
-            </>
-          ) : page === "sync" ? (
-            <>
-              <div className="page-heading">
-                <h1>{t("Synchronization")}</h1>
-              </div>
-              <section className="surface">
-                <h2>{t("Folder")}</h2>
-                <p className="literal">{folder || t("Unavailable")}</p>
-                <div className="actions">
-                  <Button
-                    disabled={busy || !status?.unlocked}
-                    onClick={() => void perform(chooseFolder)}
-                  >
-                    {t("Choose folder")}
-                  </Button>
-                  {[
-                    ["sync.push", "Upload changes"],
-                    ["sync.pull", "Download changes"],
-                  ].map(([method, label]) => (
-                    <Button
-                      key={method}
-                      secondary
-                      disabled={busy || !status?.unlocked}
-                      onClick={() =>
-                        void perform(async () => {
-                          await request(method);
-                          await loadConflicts();
-                          await refresh();
-                        })
-                      }
-                    >
-                      {t(label)}
-                    </Button>
-                  ))}
-                </div>
-                <h2>{t("Conflicts")}</h2>
-                <Search
-                  label={t("Search")}
-                  items={conflicts.map((c) => JSON.stringify(c))}
-                  onResults={setConflictRows}
-                  t={t}
-                />
-                <Button
-                  secondary
-                  disabled={busy}
-                  onClick={() => void perform(loadConflicts)}
-                >
-                  {t("Refresh")}
-                </Button>
-                {!conflicts.length && <p>{t("No conflicts")}</p>}
-                {conflictRows.map((i) => (
-                  <article className="record" key={i}>
-                    <pre>{JSON.stringify(conflicts[i], null, 2)}</pre>
-                    <div className="actions">
-                      {(conflicts[i].revisionIds || []).map(
-                        (revisionId: string) => (
-                          <Button
-                            secondary
-                            disabled={busy}
-                            key={revisionId}
-                            onClick={() =>
-                              void perform(async () => {
-                                await request("sync.resolve", {
-                                  id: conflicts[i].profileId,
-                                  revisionId,
-                                });
-                                await loadConflicts();
-                              })
-                            }
-                          >
-                            {t("Restore")} {revisionId}
-                          </Button>
-                        ),
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </section>
-            </>
-          ) : (
+            <Onboarding
+              {...{
+                t,
+                setup: status?.unlocked
+                  ? Math.min(
+                      profiles.length ? 3 : 1,
+                      Math.max(0, Number(setup) || 0),
+                    )
+                  : 0,
+                setSetup,
+                status,
+                password,
+                setPassword,
+                busy,
+                perform,
+                refresh,
+                setFolder,
+                profileForm,
+                profiles,
+                folder,
+                chooseFolder,
+                setShowSetup,
+                setPage,
+              }}
+            />
+          ) : null}
+          <div hidden={showSetup || page !== "super-profiles"}>
+            <SuperProfiles t={t} unlocked={status?.unlocked === true} />
+          </div>
+          <div hidden={showSetup || page !== "profiles"}>
+            <ProfilesWorkspace
+              profiles={profiles}
+              selected={selected}
+              onSelect={setSelected}
+              unlocked={status?.unlocked === true}
+              t={t}
+              onCreate={() => setCreate(true)}
+              onLaunch={setLaunchTarget}
+              refresh={refresh}
+              operations={operations.current}
+              pending={pendingOperations}
+              onResults={(results) => {
+                const failed = results.some((result) => !result.ok);
+                const english = failed ? "Some operations failed" : "Completed";
+                const cantonese = failed ? "部分操作未能完成" : "已完成";
+                const message = styledMessage(
+                  failed ? "error" : "success",
+                  english,
+                  cantonese,
+                  prefs,
+                );
+                settingsController.notify(
+                  message,
+                  failed ? "error" : "success",
+                );
+                narrator.speak(
+                  english,
+                  cantonese,
+                  failed ? "error" : "success",
+                );
+              }}
+            />
+          </div>
+          <div hidden={showSetup || page !== "sync"}>
+            <Synchronization
+              {...{
+                t,
+                folder,
+                busy,
+                status,
+                perform,
+                chooseFolder,
+                loadConflicts,
+                refresh,
+                conflicts,
+                profiles,
+              }}
+            />
+          </div>
+          <div hidden={showSetup || page !== "settings"}>
             <SettingsWorkspace
               controller={settingsController}
               t={t}
@@ -759,7 +418,7 @@ function App() {
                 setEntries({});
               }}
             />
-          )}
+          </div>
         </main>
       </div>
       <AccessibilityTools
@@ -769,7 +428,7 @@ function App() {
       />
       <AttentionStatus controller={settingsController} t={t} />
       <Toasts controller={settingsController} t={t} />
-      <footer role="status" aria-live="polite">
+      <footer className="app-status" role="status" aria-live="polite">
         <span className={busy ? "pulse" : ""}>{busy ? "●" : "○"}</span>
         {notice || t("Local settings")}
       </footer>
@@ -779,63 +438,81 @@ function App() {
         </Modal>
       )}
       {launchTarget && (
-        <ProfileLaunch profile={launchTarget} busy={busy} t={t}
+        <ProfileLaunch
+          profile={launchTarget}
+          busy={operations.current.blocked([launchTarget.id])}
+          t={t}
           onClose={() => setLaunchTarget(null)}
           onLaunch={(id) => {
-            if (busy || launchInFlight.current) return;
+            if (operations.current.blocked([id]) || launchInFlight.current)
+              return;
             launchInFlight.current = true;
             setLaunchTarget(null);
             void perform(async () => {
-              if (!status?.unlocked) throw new Error('VAULT_LOCKED');
-              if (!profiles.some(p => p.id === id)) throw new Error('PROFILE_NOT_FOUND');
-              await request('profiles.launch', { id, requireStableIdentity: false });
+              if (!status?.unlocked) throw new Error("VAULT_LOCKED");
+              if (!profiles.some((p) => p.id === id))
+                throw new Error("PROFILE_NOT_FOUND");
+              await request("profiles.launch", {
+                id,
+                requireStableIdentity: false,
+              });
               await refresh();
-            }).finally(() => { launchInFlight.current = false; });
-          }} />
+            }, [id]).finally(() => {
+              launchInFlight.current = false;
+            });
+          }}
+        />
       )}
       {palette && (
-        <Modal title={t("Command palette")} onClose={() => setPalette(false)}>
+        <Modal title={t("New tab")} onClose={() => setPalette(false)}>
           <Search
             label={t("Search")}
-            items={commands.map(t)}
+            items={commands.map((command) => commandLabel(command.label))}
             onResults={setCommandRows}
             t={t}
           />
           {commandRows.map((i) => (
             <Button
-              key={i}
+              key={commands[i].id}
               secondary
               onClick={() => {
                 setPalette(false);
-                if (i >= 6) {
+                const target = commands[i];
+                setActiveTab(target.id);
+                if (target.page)
+                  setWorkspaceTabs((tabs) =>
+                    tabs.some((tab) => tab.id === target.id)
+                      ? tabs
+                      : [...tabs, { ...target, page: target.page }],
+                  );
+                if (target.setting) {
                   setShowSetup(false);
                   setPage("settings");
-                  const target = definitions[i - 6];
-                  settingsController.selectSection(target.category);
+                  settingsController.selectSection(target.section!);
                   setTimeout(
                     () =>
                       window.dispatchEvent(
                         new CustomEvent("settings-reveal", {
-                          detail: target.key,
+                          detail: target.setting,
                         }),
                       ),
                     0,
                   );
-                  return;
-                }
-                if (i < 3) {
+                } else if (target.page) {
                   setShowSetup(false);
-                  setPage(["profiles", "sync", "settings"][i]);
-                } else if (i === 3) setShowSetup(true);
-                else if (i === 4) setCreate(true);
-                else
+                  setPage(target.page);
+                  if (target.section)
+                    settingsController.selectSection(target.section);
+                } else if (target.id === "action:setup") setShowSetup(true);
+                else if (target.id === "action:create") setCreate(true);
+                else if (target.id === "action:lock")
                   void perform(async () => {
                     await request("vault.lock");
                     await refresh();
                   });
               }}
             >
-              {t(commands[i])}
+              {commandLabel(commands[i].label)}
             </Button>
           ))}
         </Modal>
