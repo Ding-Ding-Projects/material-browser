@@ -261,20 +261,6 @@ export function ProfilesWorkspace({
           {t("Create profile")}
         </Button>
       </div>
-      <div className="inspector-size">
-        <label>
-          {t("Inspector width")}{" "}
-          <input
-            type="range"
-            min="320"
-            max="360"
-            step="4"
-            value={width}
-            onChange={(event) => resize(Number(event.target.value))}
-          />
-          <output>{width} px</output>
-        </label>
-      </div>
       <div
         className="profiles-layout"
         style={{ "--inspector-width": `${width}px` } as React.CSSProperties}
@@ -307,6 +293,8 @@ export function ProfilesWorkspace({
         <ProfileInspector
           {...{
             profile,
+            width,
+            resize,
             runtime,
             tab,
             revisions,

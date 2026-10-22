@@ -54,6 +54,29 @@ export function SettingsTabs({
     [includePinned, setIncludePinned] = useState(false),
     [bulkQuery, setBulkQuery] = useState(""),
     [bulkValid, setBulkValid] = useState(false);
+  const [compactWidth, setCompactWidth] = useState(false),
+    [navigationOpen, setNavigationOpen] = useState(false);
+  const layout = useRef<HTMLDivElement | null>(null),
+    navigationToggle = useRef<HTMLButtonElement | null>(null),
+    content = useRef<HTMLDivElement | null>(null);
+  const compact = compactWidth && ["left", "right"].includes(state.edge);
+  useEffect(() => {
+    const element = layout.current;
+    if (!element) return;
+    const measure = () =>
+      setCompactWidth(element.getBoundingClientRect().width < 680);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const selectVisible = (id: string, closeNavigation = true) => {
+    onChange(id);
+    if (compact && closeNavigation) {
+      setNavigationOpen(false);
+      requestAnimationFrame(() => content.current?.focus());
+    }
+  };
   const instance = useId();
   const strip = useRef<HTMLElement | null>(null);
   const label = (id: string) =>
@@ -68,8 +91,10 @@ export function SettingsTabs({
   useEffect(() => {
     const element = strip.current;
     if (!element) return;
-    return bindTabChanges(element, displayedIds, onChange);
-  }, [JSON.stringify(displayedIds), onChange]);
+    return bindTabChanges(element, displayedIds, (id: string) =>
+      selectVisible(id, false),
+    );
+  }, [JSON.stringify(displayedIds), onChange, compact]);
   useEffect(() => {
     const element = strip.current;
     if (!element) return;
@@ -97,7 +122,7 @@ export function SettingsTabs({
     if (state.closed.includes(id)) {
       save({ ...state, closed: state.closed.filter((x: string) => x !== id) });
     }
-    onChange(id);
+    selectVisible(id);
   }
   function close(ids: string[]) {
     const result = closeTabs(state, ids, includePinned);
@@ -127,8 +152,44 @@ export function SettingsTabs({
       includePinned,
     );
   return (
-    <div className={`settings-tabs-layout edge-${state.edge}`}>
-      <aside className="settings-tab-rail">
+    <div
+      ref={layout}
+      className={`settings-tabs-layout edge-${state.edge} ${compact ? "compact-navigation" : ""}`}
+    >
+      {compact && (
+        <div className="settings-navigation-bar">
+          <strong>{label(value)}</strong>
+          <button
+            ref={navigationToggle}
+            aria-expanded={navigationOpen}
+            aria-controls={`${instance}-navigation`}
+            onClick={() => setNavigationOpen((open) => !open)}
+          >
+            {t("Sections")}
+          </button>
+          <button
+            aria-label={t("Actions for current tab")}
+            onClick={() => {
+              setContext(value);
+              setNavigationOpen(true);
+            }}
+          >
+            ⋯
+          </button>
+        </div>
+      )}
+      <aside
+        id={`${instance}-navigation`}
+        className="settings-tab-rail"
+        hidden={compact && !navigationOpen}
+        onKeyDown={(event) => {
+          if (compact && event.key === "Escape") {
+            event.preventDefault();
+            setNavigationOpen(false);
+            navigationToggle.current?.focus();
+          }
+        }}
+      >
         <details>
           <summary>{t("Tab controls")}</summary>
           <Choice
@@ -177,7 +238,7 @@ export function SettingsTabs({
                 "md-primary-tab",
                 {
                   key: id,
-                  onClick: () => onChange(id),
+                  onClick: () => selectVisible(id),
                   "aria-controls": `panel-${id}`,
                   style: state.membership[id]
                     ? {
@@ -410,7 +471,12 @@ export function SettingsTabs({
           </Button>
         </details>
       </aside>
-      <div className="settings-tab-content">
+      <div
+        ref={content}
+        className="settings-tab-content"
+        tabIndex={-1}
+        aria-label={label(value)}
+      >
         {catalog && (
           <section className="setting-card">
             <h2>{t("New tab")}</h2>

@@ -1,4 +1,5 @@
 export const workspaceZh: Record<string, string> = {
+  Sections: "分類",
   "Inspector width": "詳情欄寬度",
   "New tab": "新增分頁",
   "Open tabs": "已開啟分頁",

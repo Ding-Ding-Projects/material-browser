@@ -5,6 +5,8 @@ import { Search } from "../Search";
 import { observedRuntime } from "./model.mjs";
 type Props = {
   profile?: Profile;
+  width: number;
+  resize: (value: number) => void;
   runtime: any;
   tab: string;
   revisions: any[];
@@ -32,6 +34,8 @@ type Props = {
 };
 export function ProfileInspector({
   profile,
+  width,
+  resize,
   runtime,
   tab,
   revisions,
@@ -74,6 +78,24 @@ export function ProfileInspector({
                 {profile.engine} · {t(observedRuntime(runtime))}
               </p>
             </div>
+            <details className="inspector-resize">
+              <summary title={t("Inspector width")}>
+                <span aria-hidden="true">↔</span>
+                <span className="sr-only">{t("Inspector width")}</span>
+              </summary>
+              <label>
+                {t("Inspector width")}
+                <input
+                  type="range"
+                  min="320"
+                  max="360"
+                  step="4"
+                  value={width}
+                  onChange={(event) => resize(Number(event.target.value))}
+                />
+                <output>{width} px</output>
+              </label>
+            </details>
           </div>
           <Tabs
             panelPrefix="profile-panel"

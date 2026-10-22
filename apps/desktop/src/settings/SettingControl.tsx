@@ -20,6 +20,7 @@ export function Choice({
   onChange,
   t,
   previewFont = false,
+  showLabel = true,
 }: {
   label: string;
   value: string;
@@ -27,6 +28,7 @@ export function Choice({
   onChange: (v: string) => void;
   t: (s: string) => string;
   previewFont?: boolean;
+  showLabel?: boolean;
 }) {
   const [open, setOpen] = useState(false),
     [matches, setMatches] = useState<string[]>([]),
@@ -39,7 +41,7 @@ export function Choice({
   );
   return (
     <div className="settings-choice">
-      <span className="field-label">{label}</span>
+      {showLabel && <span className="field-label">{label}</span>}
       {React.createElement(
         "md-outlined-button",
         {
@@ -222,12 +224,14 @@ export function SettingInput({
   onChange,
   t,
   voices = [],
+  compact = false,
 }: {
   definition: any;
   value: any;
   onChange: (v: any) => void;
   t: (s: string) => string;
   voices?: [string, string][];
+  compact?: boolean;
 }) {
   const id = useId();
   if (d.type === "boolean")
@@ -254,6 +258,7 @@ export function SettingInput({
         onChange={onChange}
         t={t}
         previewFont={d.type === "font"}
+        showLabel={!compact}
       />
     );
   if (d.type === "color")
@@ -305,136 +310,142 @@ export function SettingControl({
   };
   return (
     <section
-      className="setting-card"
+      className="setting-card setting-row"
       id={id}
       tabIndex={-1}
       data-setting-id={d.key}
     >
-      <div className="setting-heading">
+      <div className="setting-metadata">
         <h2>{t(d.label)}</h2>
-        {React.createElement(
-          "md-icon-button",
-          {
-            ref: info,
-            "aria-label": `${t("Explanation and example")}: ${t(d.label)}`,
-            "aria-expanded": help,
-            "aria-controls": `${id}-help`,
-            title: t("Explanation and example"),
-            onClick: () => {
-              setHelp(!help);
-              setSample(d.initial);
-              setSampleResult("");
-            },
-          },
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M11 17h2v-6h-2v6zm1-15a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-11h2V7h-2v2z"
-            />
-          </svg>,
-        )}
+        <p className="provenance">
+          {t(p.source === "saved-local" ? "Saved locally" : "Compiled default")}{" "}
+          · {t("Default")}:{" "}
+          <code>
+            {d.type === "voice" && !d.initial
+              ? t("Choose automatically")
+              : d.type === "boolean"
+                ? t(d.initial ? "On" : "Off")
+                : d.options
+                  ? t(
+                      d.options.find(
+                        ([v]: [string, string]) => v === d.initial,
+                      )?.[1] || String(d.initial),
+                    )
+                  : String(d.initial)}
+          </code>
+          {p.temporarilyOverridden && (
+            <>
+              {" "}
+              · {t("Scheduled override")}:{" "}
+              <code>{String(p.effectiveValue)}</code>
+            </>
+          )}
+        </p>
       </div>
-      {help && (
-        <div
-          className="setting-help"
-          id={`${id}-help`}
-          role="region"
-          aria-label={`${t("Explanation and example")}: ${t(d.label)}`}
-        >
-          <p>{t(d.help)}</p>
-          <h3>{t("Practice only")}</h3>
-          <p>{t("This example does not change your settings.")}</p>
-          <SettingInput
-            definition={d}
-            value={sample}
-            onChange={setSample}
-            t={t}
-            voices={voices}
-          />
-          <div className="actions">
-            <Button
-              secondary
-              onClick={() => {
-                try {
-                  validateValue(d.key, sample);
-                  setSampleResult(t("Valid value") + ": " + String(sample));
-                } catch (e) {
-                  setSampleResult(
-                    e instanceof Error ? e.message : "Invalid value",
-                  );
-                }
-              }}
-            >
-              {t("Try example")}
-            </Button>
-            <Button
-              secondary
-              onClick={() => {
+      <div className="setting-editor">
+        <div className="setting-editor-toolbar">
+          {React.createElement(
+            "md-icon-button",
+            {
+              ref: info,
+              "aria-label": `${t("Explanation and example")}: ${t(d.label)}`,
+              "aria-expanded": help,
+              "aria-controls": `${id}-help`,
+              title: t("Explanation and example"),
+              onClick: () => {
+                setHelp(!help);
                 setSample(d.initial);
                 setSampleResult("");
-              }}
-            >
-              {t("Reset example")}
-            </Button>
-            <Button
-              secondary
-              onClick={() => {
-                setHelp(false);
-                info.current?.focus();
-              }}
-            >
-              {t("Close explanation")}
-            </Button>
-          </div>
-          <p role="status">{sampleResult}</p>
+              },
+            },
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M11 17h2v-6h-2v6zm1-15a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-11h2V7h-2v2z"
+              />
+            </svg>,
+          )}
+          <Button
+            secondary
+            onClick={() => {
+              c.reset(d.key);
+              setError("");
+              setResetVersion((v) => v + 1);
+            }}
+          >
+            {t("Reset this setting")}
+          </Button>
         </div>
-      )}
-      <SettingInput
-        key={resetVersion}
-        definition={d}
-        value={c.record.preferences[d.key]}
-        onChange={apply}
-        t={t}
-        voices={voices}
-      />
-      <p className="provenance">
-        {t(p.source === "saved-local" ? "Saved locally" : "Compiled default")} ·{" "}
-        {t("Default")}:{" "}
-        <code>
-          {d.type === "voice" && !d.initial
-            ? t("Choose automatically")
-            : d.type === "boolean"
-              ? t(d.initial ? "On" : "Off")
-              : d.options
-                ? t(
-                    d.options.find(
-                      ([v]: [string, string]) => v === d.initial,
-                    )?.[1] || String(d.initial),
-                  )
-                : String(d.initial)}
-        </code>
-        {p.temporarilyOverridden && (
-          <>
-            {" "}
-            · {t("Scheduled override")}: <code>{String(p.effectiveValue)}</code>
-          </>
+        {help && (
+          <div
+            className="setting-help"
+            id={`${id}-help`}
+            role="region"
+            aria-label={`${t("Explanation and example")}: ${t(d.label)}`}
+          >
+            <p>{t(d.help)}</p>
+            <h3>{t("Practice only")}</h3>
+            <p>{t("This example does not change your settings.")}</p>
+            <SettingInput
+              definition={d}
+              value={sample}
+              onChange={setSample}
+              t={t}
+              voices={voices}
+            />
+            <div className="actions">
+              <Button
+                secondary
+                onClick={() => {
+                  try {
+                    validateValue(d.key, sample);
+                    setSampleResult(t("Valid value") + ": " + String(sample));
+                  } catch (e) {
+                    setSampleResult(
+                      e instanceof Error ? e.message : "Invalid value",
+                    );
+                  }
+                }}
+              >
+                {t("Try example")}
+              </Button>
+              <Button
+                secondary
+                onClick={() => {
+                  setSample(d.initial);
+                  setSampleResult("");
+                }}
+              >
+                {t("Reset example")}
+              </Button>
+              <Button
+                secondary
+                onClick={() => {
+                  setHelp(false);
+                  info.current?.focus();
+                }}
+              >
+                {t("Close explanation")}
+              </Button>
+            </div>
+            <p role="status">{sampleResult}</p>
+          </div>
         )}
-      </p>
-      {error && (
-        <p className="validation" role="alert">
-          {t(error)}
-        </p>
-      )}
-      <Button
-        secondary
-        onClick={() => {
-          c.reset(d.key);
-          setError("");
-          setResetVersion((v) => v + 1);
-        }}
-      >
-        {t("Reset this setting")}
-      </Button>
+        <SettingInput
+          compact
+          key={resetVersion}
+          definition={d}
+          value={c.record.preferences[d.key]}
+          onChange={apply}
+          t={t}
+          voices={voices}
+        />
+        {error && (
+          <p className="validation" role="alert">
+            {t(error)}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
