@@ -68,7 +68,7 @@ export function WorkspaceNavigation({
           <span className="nav-icon" aria-hidden="true">
             {id === "profiles" ? "▤" : id === "sync" ? "⇄" : "⚙"}
           </span>
-          {t(label)}
+          <span className="nav-label">{t(label)}</span>
         </button>
       ))}
       <button onClick={() => setShowSetup(true)}>{t("Setup")}</button>

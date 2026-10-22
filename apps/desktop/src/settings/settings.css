@@ -406,3 +406,78 @@
     grid-template-columns: 1fr;
   }
 }
+/* Compact settings rows retain the existing controller and editable drafts. */
+.settings-workspace .setting-card.setting-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 20px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px 16px;
+  margin: 0;
+  background: transparent;
+  align-items: start;
+}
+.setting-row .setting-metadata {
+  min-width: 0;
+  padding-top: 8px;
+}
+.setting-row .setting-metadata h2 {
+  font-size: 15px;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+.setting-row .setting-metadata .provenance {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.setting-row .setting-editor {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.setting-row .setting-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+}
+.setting-row .setting-editor-toolbar md-icon-button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.setting-row .setting-editor-toolbar md-outlined-button {
+  max-width: calc(100% - 52px);
+}
+.setting-row .settings-choice {
+  gap: 4px;
+}
+.setting-row .settings-choice > md-outlined-button {
+  min-height: 48px;
+  justify-content: flex-start;
+}
+.setting-row .range-control {
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 138px);
+}
+.setting-row .setting-help {
+  margin: 0 0 8px;
+}
+.settings-control-grid {
+  container-type: inline-size;
+  container-name: setting-controls;
+}
+@container setting-controls (max-width:620px) {
+  .settings-workspace .setting-card.setting-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 10px 12px;
+  }
+  .setting-row .setting-metadata {
+    padding-top: 0;
+  }
+}

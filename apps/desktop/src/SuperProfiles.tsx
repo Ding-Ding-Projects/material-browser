@@ -277,18 +277,18 @@ export function SuperProfiles({
           <h1>{t("Super Profiles")}</h1>
           <p>{t("Reusable environments with explicit save-back revisions.")}</p>
         </div>
-        <Button disabled={busy} onClick={() => setWizard("new")}>
-          {t("Create Super Profile")}
-        </Button>
+        <div className="super-heading-actions">
+          <Button secondary disabled={busy} onClick={() => void run(refresh)}>
+            {t("Refresh")}
+          </Button>
+          <Button disabled={busy} onClick={() => setWizard("new")}>
+            {t("Create Super Profile")}
+          </Button>
+        </div>
       </div>
       <p className="super-notice" role="status" aria-live="polite">
         {notice || t("Select a template to begin")}
       </p>
-      <div className="super-actions">
-        <Button secondary disabled={busy} onClick={() => void run(refresh)}>
-          {t("Refresh")}
-        </Button>
-      </div>
       {wizard ? (
         <SuperProfilesWizard
           key={wizard === "edit" ? selected : "new"}

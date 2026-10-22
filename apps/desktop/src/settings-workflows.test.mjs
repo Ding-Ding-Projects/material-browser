@@ -31,6 +31,8 @@ function component(relative, name, state = {}, props = {}) {
       ];
     },
     useRef: (initial) => ({ current: initial }),
+    useId: () => "fixture-control",
+    useEffect: () => {},
   };
   const exports = {};
   const source = ts.transpileModule(
@@ -48,23 +50,25 @@ function component(relative, name, state = {}, props = {}) {
     require: (id) =>
       id === "react"
         ? { __esModule: true, default: React, ...React }
-        : id.endsWith("model.mjs") &&
-            !id.endsWith("history-model.mjs") &&
-            !id.endsWith("interaction-model.mjs")
-          ? model
-          : id.endsWith("history-model.mjs")
-            ? history
-            : id.endsWith("interaction-model.mjs")
-              ? interaction
-              : {
-                  Button: "Button",
-                  Field: "Field",
-                  Modal: "Modal",
-                  Search: "Search",
-                  Choice: "Choice",
-                  SettingInput: "SettingInput",
-                  ConfirmAction: "ConfirmAction",
-                },
+        : id.endsWith("/record.mjs")
+          ? recordModel
+          : id.endsWith("model.mjs") &&
+              !id.endsWith("history-model.mjs") &&
+              !id.endsWith("interaction-model.mjs")
+            ? model
+            : id.endsWith("history-model.mjs")
+              ? history
+              : id.endsWith("interaction-model.mjs")
+                ? interaction
+                : {
+                    Button: "Button",
+                    Field: "Field",
+                    Modal: "Modal",
+                    Search: "Search",
+                    Choice: "Choice",
+                    SettingInput: "SettingInput",
+                    ConfirmAction: "ConfirmAction",
+                  },
     crypto: { randomUUID: () => "fixture-schedule" },
     requestAnimationFrame: (fn) => fn(),
     Intl,
@@ -394,4 +398,59 @@ test("production single notification rejection retains the previous undo target"
   await view.find("Undo dismissal").props.onClick();
   assert.equal(restored.notices.find((row) => row.id === "a").dismissed, false);
   assert.equal(restored.notices.find((row) => row.id === "b").dismissed, false);
+});
+
+test("compact production setting row keeps saved edits separate from practice and reset", () => {
+  const c = baseController(),
+    saved = [],
+    resets = [];
+  c.preferences = { ...model.defaults };
+  c.record.writtenKeys = [];
+  c.update = (key, value) => saved.push([key, value]);
+  c.reset = (key) => resets.push(key);
+  const definition = model.definitions.find((item) => item.key === "language");
+  const view = component(
+    "./settings/SettingControl.tsx",
+    "SettingControl",
+    { 0: true, 1: "yue" },
+    { definition, controller: c },
+  );
+  const inputs = view.nodes.filter(
+    (node) => node.type?.name === "SettingInput",
+  );
+  assert.equal(inputs.length, 2);
+  const practice = inputs.find((node) => !node.props.compact),
+    actual = inputs.find((node) => node.props.compact);
+  practice.props.onChange("both");
+  assert.deepEqual(saved, []);
+  actual.props.onChange("yue");
+  assert.deepEqual(saved, [["language", "yue"]]);
+  actual.props.onChange("not-a-language");
+  assert.equal(saved.length, 1);
+  view.find("Reset this setting").props.onClick();
+  assert.deepEqual(resets, ["language"]);
+  const info = view.nodes.find((node) => node.type === "md-icon-button");
+  const help = view.nodes.find((node) => node.props.role === "region");
+  assert.equal(info.props["aria-controls"], help.props.id);
+});
+
+test("compact choice keeps its exact owning accessible name without repeating its visual label", () => {
+  const view = component(
+    "./settings/SettingControl.tsx",
+    "Choice",
+    {},
+    {
+      label: "Language",
+      value: "en",
+      options: [["en", "English"]],
+      onChange: () => {},
+      showLabel: false,
+    },
+  );
+  const opener = view.nodes.find((node) => node.type === "md-outlined-button");
+  assert.equal(opener.props["aria-label"], "Language: English");
+  assert.equal(
+    view.nodes.some((node) => node.props.className === "field-label"),
+    false,
+  );
 });
