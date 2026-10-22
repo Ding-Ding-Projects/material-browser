@@ -16,6 +16,7 @@ use std::{
 };
 use zeroize::Zeroizing;
 mod lan;
+mod password_manager;
 mod super_profiles;
 const MAX_MESSAGE: usize = 1024 * 1024;
 #[derive(Debug, Serialize)]
@@ -158,6 +159,61 @@ impl Host {
             _lock: lock,
         })
     }
+    /// Writes KeePassXC browser registrations for a profile that opted in, before launch.
+    fn stage_password_manager(&self, id: &str, profile: &Value) -> Result<Option<Value>> {
+        let manager = &profile["passwordManager"];
+        if manager.is_null() || manager["extension"] != true {
+            return Ok(None);
+        }
+        if manager["source"] == "wsl" {
+            return Err(error(
+                "PASSWORD_MANAGER_WSL_UNAVAILABLE",
+                "The WSL KeePassXC source is not provisioned on this host yet; choose an installed KeePassXC or disable the extension for this profile",
+            ));
+        }
+        let installation = if cfg!(windows) {
+            password_manager::detect_installation(&password_manager_roots())
+        } else {
+            None
+        };
+        let Some(installation) = installation else {
+            return Err(error(
+                "PASSWORD_MANAGER_UNAVAILABLE",
+                "No KeePassXC installation from the maintained lineage was found; install it or disable the extension for this profile",
+            ));
+        };
+        let result = match profile["engine"].as_str() {
+            Some("chromium") => {
+                let profile_dir = self.active.join(id);
+                fs::create_dir_all(&profile_dir).map_err(io_error)?;
+                password_manager::stage_chromium(&profile_dir, &installation.proxy)?
+            }
+            Some("firefox") => {
+                let engine = self
+                    .registry
+                    .get(EngineKind::Firefox)
+                    .map_err(|e| error(&e.code, &e.message))?;
+                let executable = engine
+                    .verified_executable_path()
+                    .map_err(|e| error(&e.code, &e.message))?;
+                let firefox_root = executable
+                    .parent()
+                    .ok_or_else(|| error("ENGINE_UNAVAILABLE", "Firefox root unavailable"))?;
+                let user_root = self
+                    .active
+                    .parent()
+                    .ok_or_else(|| error("HOST_IO", "Data root unavailable"))?
+                    .join("password-manager");
+                let mut result =
+                    password_manager::stage_firefox(firefox_root, &user_root, &installation.proxy)?;
+                result["registryValueWritten"] =
+                    json!(password_manager::register_firefox_manifest(&user_root)?);
+                result
+            }
+            _ => return Err(error("INVALID_PROFILE", "Unsupported engine")),
+        };
+        Ok(Some(result))
+    }
     fn execute(&mut self, method: &str, params: Value) -> Result<Value> {
         if !params.is_object() {
             return Err(error("INVALID_PARAMS", "Parameters must be an object"));
@@ -242,6 +298,11 @@ impl Host {
         }
         match method {
             "superProfiles.capabilities" => return Ok(super_profiles::Sessions::capabilities()),
+            "passwordManager.detect" => {
+                return Ok(password_manager::detect(
+                    &super_profiles::Sessions::capabilities(),
+                ));
+            }
             "superProfiles.sessions.launch" => {
                 let profiles = self
                     .core
@@ -380,6 +441,7 @@ impl Host {
                     .and_then(|p| p.iter().find(|p| p["id"] == id))
                     .ok_or_else(|| error("PROFILE_NOT_FOUND", "Profile not found"))?;
                 let request: LaunchRequest = serde_json::from_value(json!({"profileId": id, "engine":profile["engine"],"requestedMode":profile["automation"],"requireStableIdentity":params.get("requireStableIdentity").and_then(Value::as_bool).unwrap_or(true)})).map_err(|_|error("INVALID_PROFILE", "Invalid profile launch configuration"))?;
+                self.stage_password_manager(id, profile)?;
                 serde_json::to_value(self.supervisor.launch(&self.registry, request).map_err(
                     |e| Error {
                         code: e.code,
@@ -748,6 +810,15 @@ fn stdio(host: &mut Host) -> Result<()> {
         output.flush().map_err(io_error)?;
     }
     Ok(())
+}
+fn password_manager_roots() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+    if let Some(local) = std::env::var_os("LOCALAPPDATA") {
+        for name in ["KeePassXC.Material", "KeePassXC"] {
+            roots.push(PathBuf::from(&local).join(name));
+        }
+    }
+    roots
 }
 fn random_hex() -> String {
     let mut bytes = [0u8; 32];

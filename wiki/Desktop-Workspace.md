@@ -10,6 +10,10 @@ and real actions. See the complete [desktop workflow article](../docs/features/d
 - Synchronization: configure storage, transfer encrypted changes and inspect conflict candidates.
 - Settings: adjust validated preferences through the existing category and tab workspace.
 - Setup: resume actual vault, first-profile and optional synchronization actions.
+- Password manager: profile creation can pair a profile with a KeePassXC database, register the
+  browser extension and keep passkeys on by default; see the
+  [pairing article](../docs/features/desktop/password-manager.md) for exact file locations and
+  the pending built verification.
 
 The command palette and explicit catalog navigate supported destinations. Normal navigation
 preserves working state. Unsupported backend capabilities remain explicitly unfinished.

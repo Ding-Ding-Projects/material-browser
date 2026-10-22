@@ -1,12 +1,22 @@
 # Material Browser handoff
 
+## Password-manager pairing source implementation, 2026-10-22
+
+Latest direction: continue the handoff from a Linux cloud session without subagents. The KeePassXC pairing requested below now has a source implementation; built verification on the Windows host remains pending.
+
+Implemented on this pass: `passwordManager` profile field with strict core validation (`crates/core/src/password_manager.rs`), host-side detection of an installed KeePassXC from the maintained lineage and per-profile Chromium and Firefox registrations written only into application-owned paths (`crates/host/src/password_manager.rs`, staged from `profiles.launch`), a `passwordManager.detect` method, the optional password-manager section in the profile creation form, inspector facts with a redacted database name and a pairing removal action, a `.kdbx` file picker bridge, Cantonese strings, and the [feature article](docs/features/desktop/password-manager.md). Installed KeePassXC is preferred when present; the WSL guest source is recorded but launch reports `PASSWORD_MANAGER_WSL_UNAVAILABLE` until guest provisioning exists.
+
+Verified here: `cargo test` for the core (26 passed) and host (57 passed) crates on Linux, desktop `tsc --noEmit`, desktop tests (112 passed), documentation checks (112 passed), rustfmt on the new modules and the publication-language scan on every changed file. Dependencies were installed without modifying the committed lock files; `npm ci` currently rejects the desktop lock file because `@types/react@19.3.0` is missing from it, which predates this pass and still needs a lock refresh on the maintainer's host.
+
+Not verified: root `build.bat` and `build-installer.bat`, the built creation form, real extension connectivity, passkey behavior, the Windows registry registration for Firefox, and the installer. The separate gallery backlink is delivered: the source README links to the live gallery, and every live image hash matched the inventory.
+
 ## Desktop GUI preservation, 2026-10-22
 
 Latest direction: stop new implementation and verification, preserve current work, and perform only proven task-owned cleanup. The full task remains unfinished.
 
 ### Pending new-profile password-manager integration
 
-The next implementation must offer an optional KeePassXC database during new-profile creation, install and configure the KeePassXC browser extension for profiles that select it, and enable passkey support by default. Use the maintainer-owned [Ding-Ding-Projects/keepassxc](https://github.com/Ding-Ding-Projects/keepassxc) source lineage rather than substituting another distribution. This is a requested follow-up, not implemented or verified behavior. Preserve existing databases and credentials, provide explicit database selection or creation, and verify actual extension connectivity, default passkey behavior and persistence in the built application. Record engine-specific compatibility limits honestly.
+Original request, now implemented in source as recorded above: offer an optional KeePassXC database during new-profile creation, install and configure the KeePassXC browser extension for profiles that select it, and enable passkey support by default. Use the maintainer-owned [Ding-Ding-Projects/keepassxc](https://github.com/Ding-Ding-Projects/keepassxc) source lineage rather than substituting another distribution. This is a requested follow-up, not implemented or verified behavior. Preserve existing databases and credentials, provide explicit database selection or creation, and verify actual extension connectivity, default passkey behavior and persistence in the built application. Record engine-specific compatibility limits honestly.
 
 ### Separate gallery publication review
 

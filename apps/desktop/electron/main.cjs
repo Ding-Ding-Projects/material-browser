@@ -58,6 +58,7 @@ const allowed = new Set([
   "superProfiles.revisions.list",
   "superProfiles.revisions.restore",
   "superProfiles.capabilities",
+  "passwordManager.detect",
   "superProfiles.sessions.launch",
   "superProfiles.sessions.status",
   "superProfiles.sessions.stop",
@@ -186,6 +187,16 @@ ipcMain.handle("material:directory", async (event) => {
     properties: ["openDirectory", "createDirectory"],
   });
   return result.canceled ? null : result.filePaths[0];
+});
+ipcMain.handle("material:database-file", async (event) => {
+  if (!trusted(event)) throw new Error("INVALID_REQUEST");
+  // Picks a KeePassXC database path only; the file itself is never read by this process.
+  const result = await dialog.showOpenDialog(window, {
+    properties: ["openFile", "promptToCreate"],
+    filters: [{ name: "KeePassXC database", extensions: ["kdbx"] }],
+  });
+  const chosen = result.canceled ? null : result.filePaths[0];
+  return chosen && /\.kdbx$/i.test(chosen) ? chosen : null;
 });
 app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler(

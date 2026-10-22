@@ -12,6 +12,22 @@ import {
 import { Button, Field, Select, Modal } from "./components";
 import { Search } from "./Search";
 import { request, Profile } from "./api";
+import type { PasswordManagerDetection } from "./api";
+import {
+  DEFAULT_PASSWORD_MANAGER_FORM,
+  buildPasswordManager,
+  databaseBasename,
+  recommendedSource,
+  sourceOptions,
+} from "./password-manager-model.mjs";
+type PasswordManagerForm = {
+  enabled: boolean;
+  source: string;
+  databaseMode: string;
+  databasePath: string;
+  extension: boolean;
+  passkeys: boolean;
+};
 import { translate, Language } from "./i18n";
 import { parseVocabulary, replaceLabel } from "./vocabulary.mjs";
 import "./style.css";
@@ -68,6 +84,11 @@ function App() {
     [password, setPassword] = useState(""),
     [name, setName] = useState(""),
     [engine, setEngine] = useState("chromium"),
+    [managerForm, setManagerForm] = useState<PasswordManagerForm>({
+      ...DEFAULT_PASSWORD_MANAGER_FORM,
+    }),
+    [managerDetection, setManagerDetection] =
+      useState<PasswordManagerDetection | null>(null),
     [folder, setFolder] = useState(""),
     [conflicts, setConflicts] = useState<any[]>([]);
   const [commandRows, setCommandRows] = useState<number[]>([]);
@@ -189,15 +210,33 @@ function App() {
   }, [prefs.language]);
   const createProfile = async () => {
     if (!name.trim()) throw Error("NAME_REQUIRED");
+    const passwordManager = buildPasswordManager(managerForm);
     const created = await request("profiles.create", {
       name: name.trim(),
       engine,
+      ...(passwordManager ? { passwordManager } : {}),
     });
     if (created?.id) setSelected(created.id);
     setName("");
+    setManagerForm({ ...DEFAULT_PASSWORD_MANAGER_FORM });
     setCreate(false);
     await refresh();
   };
+  const detectPasswordManager = async () => {
+    try {
+      const detection = await request("passwordManager.detect");
+      setManagerDetection(detection);
+      const source = recommendedSource(detection);
+      setManagerForm((form) => ({
+        ...form,
+        source: source === "none" ? form.source : source,
+      }));
+    } catch {
+      setManagerDetection(null);
+    }
+  };
+  const updateManager = (patch: Partial<typeof managerForm>) =>
+    setManagerForm((form) => ({ ...form, ...patch }));
   const chooseFolder = async () => {
     if (!window.materialBrowser) throw Error("BACKEND_UNAVAILABLE");
     const chosen = await window.materialBrowser.chooseDirectory();
@@ -237,8 +276,104 @@ function App() {
         ]}
       />
       <p>{t("Automation is off until explicitly enabled for this profile.")}</p>
+      <details
+        className="password-manager-option"
+        open={managerForm.enabled}
+        onToggle={(event) => {
+          const open = (event.currentTarget as HTMLDetailsElement).open;
+          updateManager({ enabled: open });
+          if (open && !managerDetection) void detectPasswordManager();
+        }}
+      >
+        <summary>{t("Password manager (optional)")}</summary>
+        <p>
+          {t(
+            "Pair this profile with a KeePassXC database. The database password is never stored by this application.",
+          )}
+        </p>
+        <Select
+          label={t("KeePassXC source")}
+          value={managerForm.source}
+          onChange={(value) => updateManager({ source: value })}
+          options={sourceOptions(managerDetection).map((option) => [
+            option.value,
+            option.available
+              ? t(option.label)
+              : `${t(option.label)} (${t(option.reason)})`,
+          ])}
+        />
+        {managerDetection && !managerDetection.installed && (
+          <p className="literal">
+            {t("No installed KeePassXC was detected. Releases:")}{" "}
+            {managerDetection.sourceRelease}
+          </p>
+        )}
+        <Select
+          label={t("Database")}
+          value={managerForm.databaseMode}
+          onChange={(value) => updateManager({ databaseMode: value })}
+          options={[
+            ["existing", t("Use an existing database")],
+            ["create", t("Create a new database at this path")],
+          ]}
+        />
+        <Field
+          label={t("Database path (.kdbx)")}
+          value={managerForm.databasePath}
+          onChange={(value) => updateManager({ databasePath: value })}
+          required={managerForm.enabled}
+        />
+        <Button
+          secondary
+          disabled={busy}
+          onClick={() =>
+            void perform(async () => {
+              const chosen = await window.materialBrowser?.chooseDatabaseFile();
+              if (chosen) updateManager({ databasePath: chosen });
+            })
+          }
+        >
+          {t("Choose database file")}
+        </Button>
+        {managerForm.databasePath && (
+          <p className="literal">{databaseBasename(managerForm.databasePath)}</p>
+        )}
+        <label className="switch-row">
+          {React.createElement("md-switch", {
+            selected: managerForm.extension,
+            onChange: (event: Event) =>
+              updateManager({
+                extension: (event.target as unknown as { selected: boolean })
+                  .selected,
+              }),
+            "aria-label": t("Install the KeePassXC browser extension"),
+          })}
+          <span>{t("Install the KeePassXC browser extension")}</span>
+        </label>
+        <label className="switch-row">
+          {React.createElement("md-switch", {
+            selected: managerForm.passkeys,
+            onChange: (event: Event) =>
+              updateManager({
+                passkeys: (event.target as unknown as { selected: boolean })
+                  .selected,
+              }),
+            "aria-label": t("Enable passkeys"),
+          })}
+          <span>{t("Enable passkeys")}</span>
+        </label>
+        <p>
+          {t(
+            "The browser still asks once to enable the extension. Nothing is installed silently.",
+          )}
+        </p>
+      </details>
       <Button
-        disabled={busy || !name.trim()}
+        disabled={
+          busy ||
+          !name.trim() ||
+          (managerForm.enabled && !managerForm.databasePath.trim())
+        }
         onClick={() => void perform(createProfile)}
       >
         {t("Create")}

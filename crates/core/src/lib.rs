@@ -1,4 +1,5 @@
 //! Encrypted local vault and immutable revision store. No browser processes are launched here.
+pub mod password_manager;
 pub mod portable_bookmarks;
 mod super_profiles;
 use argon2::{Algorithm, Argon2, Params, Version};
@@ -69,6 +70,9 @@ struct Profile {
     created_at: u64,
     updated_at: u64,
     sync: bool,
+    /// Optional KeePassXC pairing; `null` for profiles created before the field existed.
+    #[serde(default)]
+    password_manager: Value,
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -563,10 +567,14 @@ impl Manager {
                     created_at: now(),
                     updated_at: now(),
                     sync: false,
+                    password_manager: password_manager::normalize(
+                        p.get("passwordManager").unwrap_or(&Value::Null),
+                    )?,
                 };
                 if m == "profiles.duplicate" {
                     let source = self.id(p)?;
                     profile.engine = self.state.profiles[source].engine.clone();
+                    profile.password_manager = self.state.profiles[source].password_manager.clone();
                 }
                 self.state.keys.insert(id.clone(), SecretKey(random(32)));
                 self.state.profiles.insert(id.clone(), profile.clone());
@@ -586,6 +594,9 @@ impl Manager {
                 }
                 if let Some(s) = p.get("sync").and_then(Value::as_bool) {
                     profile.sync = s;
+                }
+                if let Some(manager) = p.get("passwordManager") {
+                    profile.password_manager = password_manager::normalize(manager)?;
                 }
                 profile.updated_at = now();
                 Ok(json!(profile))

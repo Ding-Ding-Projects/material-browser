@@ -7,10 +7,28 @@ export type Profile = {
   createdAt?: number | string;
   updatedAt?: number | string;
   sync?: unknown;
+  passwordManager?: PasswordManager | null;
+};
+export type PasswordManager = {
+  provider: "keepassxc";
+  source: "installed" | "wsl";
+  database: { mode: "existing" | "create"; path: string };
+  extension: boolean;
+  passkeys: boolean;
+};
+export type PasswordManagerDetection = {
+  provider: "keepassxc";
+  installed: { root: string; executable: string; proxy: string } | null;
+  wslAvailable: boolean;
+  recommendedSource: "installed" | "wsl" | "none";
+  sourceRelease: string;
+  wslRuntimeVerified: false;
+  limits: string[];
 };
 export type Bridge = {
   request: (method: string, params?: Record<string, unknown>) => Promise<any>;
   chooseDirectory: () => Promise<string | null>;
+  chooseDatabaseFile: () => Promise<string | null>;
   settingsService: (
     operation: string,
     params?: Record<string, unknown>,

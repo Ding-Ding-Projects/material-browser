@@ -3,6 +3,7 @@ import { Profile } from "../api";
 import { Button, Select, Tabs } from "../components";
 import { Search } from "../Search";
 import { observedRuntime } from "./model.mjs";
+import { describePasswordManager } from "../password-manager-model.mjs";
 type Props = {
   profile?: Profile;
   width: number;
@@ -123,7 +124,30 @@ export function ProfileInspector({
                   <dd>{t(observedRuntime(runtime))}</dd>
                   <dt>{t("Effective mode")}</dt>
                   <dd>{runtime?.effectiveMode || t("Unavailable")}</dd>
+                  {describePasswordManager(profile.passwordManager).map(
+                    ([label, value]) => (
+                      <React.Fragment key={label}>
+                        <dt>{t(label)}</dt>
+                        <dd>{t(value)}</dd>
+                      </React.Fragment>
+                    ),
+                  )}
                 </dl>
+                {profile.passwordManager && (
+                  <div className="actions">
+                    <Button
+                      secondary
+                      disabled={busy || !unlocked}
+                      onClick={() =>
+                        void execute("profiles.update", [profile], {
+                          passwordManager: null,
+                        })
+                      }
+                    >
+                      {t("Remove password manager pairing")}
+                    </Button>
+                  </div>
+                )}
                 <div className="actions">
                   <Button
                     disabled={busy || !unlocked}

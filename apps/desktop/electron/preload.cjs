@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld(
     request: (method, params = {}) =>
       ipcRenderer.invoke("material:request", method, params),
     chooseDirectory: () => ipcRenderer.invoke("material:directory"),
+    chooseDatabaseFile: () => ipcRenderer.invoke("material:database-file"),
     settingsService: (operation, params = {}) =>
       ipcRenderer.invoke("material:settings-service", operation, params),
     onEvent: (listener) => {

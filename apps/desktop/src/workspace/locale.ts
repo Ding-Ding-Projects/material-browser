@@ -56,4 +56,34 @@ export const workspaceZh: Record<string, string> = {
     "選擇共用資料夾以交換加密快照。呢一步可以略過。",
   "Vault is unlocked and your profile workspace is ready. Managed browser launch remains subject to actual installed engine capabilities.":
     "保管庫已解鎖，設定檔工作區已就緒。瀏覽器啟動仍取決於已安裝引擎嘅實際支援。",
+  "Password manager (optional)": "密碼管理器（可選）",
+  "Pair this profile with a KeePassXC database. The database password is never stored by this application.":
+    "將呢個設定檔同 KeePassXC 資料庫配對。本程式永遠唔會儲存資料庫密碼。",
+  "KeePassXC source": "KeePassXC 來源",
+  "Installed KeePassXC": "已安裝嘅 KeePassXC",
+  "KeePassXC inside the WSL guest": "WSL 客體入面嘅 KeePassXC",
+  "No KeePassXC installation from the maintained lineage was detected.":
+    "未偵測到維護版本嘅 KeePassXC 安裝。",
+  "Guest provisioning for this source is not verified yet.":
+    "呢個來源嘅客體佈建仍未驗證。",
+  "WSL was not detected on this computer.": "呢部電腦未偵測到 WSL。",
+  "No installed KeePassXC was detected. Releases:":
+    "未偵測到已安裝嘅 KeePassXC。發佈版本：",
+  Database: "資料庫",
+  "Use an existing database": "使用現有資料庫",
+  "Create a new database at this path": "喺呢個路徑建立新資料庫",
+  "Database path (.kdbx)": "資料庫路徑（.kdbx）",
+  "Choose database file": "選擇資料庫檔案",
+  "Install the KeePassXC browser extension": "安裝 KeePassXC 瀏覽器擴充功能",
+  "Enable passkeys": "啟用通行金鑰",
+  "The browser still asks once to enable the extension. Nothing is installed silently.":
+    "瀏覽器仍會問一次係咪啟用擴充功能，唔會靜靜雞安裝任何嘢。",
+  "Password manager": "密碼管理器",
+  "Password manager source": "密碼管理器來源",
+  "WSL guest": "WSL 客體",
+  "Browser extension": "瀏覽器擴充功能",
+  Passkeys: "通行金鑰",
+  Enabled: "已啟用",
+  Disabled: "已停用",
+  "Remove password manager pairing": "移除密碼管理器配對",
 };
