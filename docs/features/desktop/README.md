@@ -28,3 +28,5 @@ Implemented source paths: isolated preload RPC, native folder picker, real vault
 Incomplete: the regex workbench currently provides raw/guided constructs, actual worker matching/captures/replacement, timing and timeout but lacks saved snippets/import-export, structured syntax tree, test-case suites and full independent surface coverage. Settings localization has English fallback for explanatory paragraphs. Full universal features such as scheduled settings, narration, shared school mode, per-element appearance/locks, advanced tab docking/groups, authenticator, support recovery, exports/history, bulk operations, converter, local model manager and game-server manager are not implemented here. These are acceptance gaps, not nonapplicability claims. No decorative switches claim these capabilities.
 
 Built runtime, accessibility, narrow/high-scale matrix, all-language copy, installer/update, restart persistence and backend integration acceptance remain unverified until actual evidence is recorded. The package source does not prove any of these.
+
+- [Desktop profile workspace and daily workflows](profile-workspace.md)

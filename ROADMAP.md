@@ -67,3 +67,11 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Verify the newer versioned installer and safe update of the existing active installation
 - [x] Retain current inspected source-bound README screenshots and archived originals
 - [ ] Verify the final hosted release and safe installed-update outcome
+
+## Desktop workspace redesign
+- [ ] Replace the desktop presentation with the reviewed profile-table and inspector workspace
+- [ ] Preserve profile, Super Profiles, synchronization, onboarding and settings workflows
+- [ ] Verify rebuilt desktop interactions and layout across supported tuples
+- [ ] Refresh current desktop screenshots, documentation and offline handbook
+- [ ] Verify the release, matching installed update and deployed documentation
+
