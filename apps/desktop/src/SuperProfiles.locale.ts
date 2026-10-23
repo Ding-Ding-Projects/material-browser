@@ -62,7 +62,7 @@ export const superProfilesZh: Record<string,string> = {
   'Launch mode':'啟動模式', 'terminal':'終端機', 'browser':'瀏覽器', 'desktop':'桌面',
   'Root filesystem archive path':'根檔案系統封存路徑', 'Root filesystem SHA-256':'根檔案系統 SHA-256',
   'Workspace folder path':'工作區資料夾路徑', 'Allow network access':'允許網絡連線', 'Allow clipboard sharing':'允許共用剪貼簿',
-  'Memory limit (MB)':'記憶體上限 (MB)', 'Installer paths, one per line':'安裝程式路徑，每行一個',
+  'Memory limit (MB)':'記憶體上限 (MB)', 'Installer paths, one per line':'安裝程式路徑，每行一個', 'Pair the guest browser with KeePassXC inside the guest':'將客體瀏覽器同客體入面嘅 KeePassXC 配對', 'Guest database path (.kdbx)':'客體資料庫路徑（.kdbx）', 'Guest database path must end with .kdbx':'客體資料庫路徑必須以 .kdbx 結尾', 'Add a KeePassXC package from the maintained lineage to the installers above; the guest must provide /usr/bin/keepassxc-proxy before launch.':'請喺上面嘅安裝程式加入維護版本嘅 KeePassXC 套件；客體啟動前必須有 /usr/bin/keepassxc-proxy。',
   'Setup commands, one per line':'設定指令，每行一個', 'Startup commands, one per line':'啟動指令，每行一個',
   'Commands run inside the selected environment. Review every command and use trusted installers.':'指令會喺所選環境執行。請逐項檢查，並使用可信嘅安裝程式。',
   'Saving a template does not install prerequisites or verify that this environment can launch.':'儲存範本唔會安裝必要元件，亦唔代表已驗證環境可以啟動。',

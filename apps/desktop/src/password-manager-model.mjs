@@ -4,13 +4,18 @@ export const DEFAULT_PASSWORD_MANAGER_FORM = Object.freeze({
   source: "installed",
   databaseMode: "existing",
   databasePath: "",
+  wslDistribution: "",
   extension: true,
   passkeys: true,
 });
+export function wslDistributions(detection) {
+  const list = detection?.wslDistributions;
+  return Array.isArray(list) ? list.filter((d) => typeof d === "string" && d) : [];
+}
 export function recommendedSource(detection) {
   if (!detection || typeof detection !== "object") return "none";
   if (detection.installed) return "installed";
-  if (detection.wslAvailable === true) return "wsl";
+  if (wslDistributions(detection).length > 0) return "wsl";
   return "none";
 }
 export function sourceOptions(detection) {
@@ -27,12 +32,12 @@ export function sourceOptions(detection) {
     },
     {
       value: "wsl",
-      label: "KeePassXC inside the WSL guest",
-      available: detection?.wslAvailable === true,
+      label: "KeePassXC inside a WSL distribution",
+      available: wslDistributions(detection).length > 0,
       reason:
-        detection?.wslAvailable === true
-          ? "Guest provisioning for this source is not verified yet."
-          : "WSL was not detected on this computer.",
+        wslDistributions(detection).length > 0
+          ? "The distribution must already contain KeePassXC from the maintained lineage."
+          : "No WSL distribution was detected on this computer.",
     },
   ];
 }
@@ -49,7 +54,7 @@ export function buildPasswordManager(form) {
     throw new Error("DATABASE_PATH_INVALID");
   if (!["installed", "wsl"].includes(form.source))
     throw new Error("PASSWORD_MANAGER_SOURCE_INVALID");
-  return {
+  const document = {
     provider: "keepassxc",
     source: form.source,
     database: {
@@ -59,6 +64,20 @@ export function buildPasswordManager(form) {
     extension: form.extension !== false,
     passkeys: form.passkeys !== false,
   };
+  if (form.source === "wsl") {
+    const distribution = String(form.wslDistribution || "").trim();
+    if (!/^[A-Za-z0-9._-]{1,64}$/.test(distribution))
+      throw new Error("WSL_DISTRIBUTION_REQUIRED");
+    document.wslDistribution = distribution;
+  }
+  return document;
+}
+/** Guest pairing for a Super Profile template: the guest itself hosts KeePassXC. */
+export function buildGuestPasswordManager(form) {
+  const document = buildPasswordManager(
+    form ? { ...form, source: "wsl", wslDistribution: "guest" } : form,
+  );
+  return document;
 }
 /** Facts for the inspector; the full path never leaves the native host's answer unredacted. */
 export function describePasswordManager(manager) {
@@ -67,7 +86,11 @@ export function describePasswordManager(manager) {
     ["Password manager", "KeePassXC"],
     [
       "Password manager source",
-      manager.source === "wsl" ? "WSL guest" : "Installed KeePassXC",
+      manager.source !== "wsl"
+        ? "Installed KeePassXC"
+        : manager.wslDistribution === "guest"
+          ? "WSL guest"
+          : `WSL: ${manager.wslDistribution}`,
     ],
     ["Database", databaseBasename(manager.database?.path)],
     ["Browser extension", manager.extension ? "Enabled" : "Disabled"],

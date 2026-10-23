@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Button, Field, Select } from './components';
-import { requestSuperProfile as request, SuperProfile, SuperProfileSettings } from './api';
+import { requestSuperProfile as request, PasswordManager, SuperProfile, SuperProfileSettings } from './api';
 import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration } from './SuperProfiles.model.mjs';
+import { buildGuestPasswordManager as buildGuest } from './password-manager-model.mjs';
+const buildGuestPasswordManager=(form:Parameters<typeof buildGuest>[0])=>buildGuest(form) as PasswordManager|null;
 const key = 'super-profile-draft-v1';
 type Draft = { name: string; engine: string; settings: SuperProfileSettings; step: number };
 const initial = (): Draft => ({name:'',engine:'chromium',settings:{backend:'wsl2',launchMode:'terminal',},step:0});
@@ -45,6 +47,13 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
       </>}
       {draft.step===2 && <>
         {lines('Installer paths, one per line','installers')}
+        <label className="super-check"><input type="checkbox" disabled={draft.settings.backend!=='wsl2'} checked={!!draft.settings.passwordManager} onChange={e=>setting({passwordManager:e.target.checked?buildGuestPasswordManager({enabled:true,databasePath:'/home/materialbrowser/.material-browser/workspace/vault.kdbx',databaseMode:'existing',extension:true,passkeys:true}):null})}/>{t('Pair the guest browser with KeePassXC inside the guest')}</label>
+        {draft.settings.passwordManager && <>
+          <Field label={t('Guest database path (.kdbx)')} value={draft.settings.passwordManager.database.path} onChange={path=>{try{setting({passwordManager:buildGuestPasswordManager({enabled:true,databasePath:path,databaseMode:draft.settings.passwordManager!.database.mode,extension:draft.settings.passwordManager!.extension,passkeys:draft.settings.passwordManager!.passkeys})});setMessage('');}catch{setMessage(t('Guest database path must end with .kdbx'));}}}/>
+          <label className="super-check"><input type="checkbox" checked={draft.settings.passwordManager.extension} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,extension:e.target.checked}})}/>{t('Install the KeePassXC browser extension')}</label>
+          <label className="super-check"><input type="checkbox" checked={draft.settings.passwordManager.passkeys} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,passkeys:e.target.checked}})}/>{t('Enable passkeys')}</label>
+          <p>{t('Add a KeePassXC package from the maintained lineage to the installers above; the guest must provide /usr/bin/keepassxc-proxy before launch.')}</p>
+        </>}
         {lines('Setup commands, one per line','setupCommands')}
         {lines('Startup commands, one per line','startupCommands')}
         <p>{t('Commands run inside the selected environment. Review every command and use trusted installers.')}</p>

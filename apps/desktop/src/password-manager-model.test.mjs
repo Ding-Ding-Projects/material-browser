@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   DEFAULT_PASSWORD_MANAGER_FORM,
+  buildGuestPasswordManager,
   buildPasswordManager,
   databaseBasename,
   describePasswordManager,
@@ -43,27 +44,60 @@ test("invalid paths and sources are rejected before any native request", () => {
       buildPasswordManager({ ...base, databasePath: "/x/v.kdbx", source: "cloud" }),
     /PASSWORD_MANAGER_SOURCE_INVALID/,
   );
+  assert.throws(
+    () => buildPasswordManager({ ...base, databasePath: "/x/v.kdbx", source: "wsl" }),
+    /WSL_DISTRIBUTION_REQUIRED/,
+  );
+  assert.throws(
+    () =>
+      buildPasswordManager({
+        ...base,
+        databasePath: "/x/v.kdbx",
+        source: "wsl",
+        wslDistribution: "bad name",
+      }),
+    /WSL_DISTRIBUTION_REQUIRED/,
+  );
   const created = buildPasswordManager({
     ...base,
     databasePath: "/x/new.kdbx",
     databaseMode: "create",
     source: "wsl",
+    wslDistribution: " Ubuntu-24.04 ",
     extension: false,
     passkeys: false,
   });
+  assert.equal(created.wslDistribution, "Ubuntu-24.04");
+  assert.equal(
+    Object.hasOwn(
+      buildPasswordManager({ ...base, databasePath: "/x/v.kdbx" }),
+      "wslDistribution",
+    ),
+    false,
+  );
+  const guest = buildGuestPasswordManager({
+    ...base,
+    databasePath: "/home/materialbrowser/vault.kdbx",
+    source: "installed",
+  });
+  assert.equal(guest.source, "wsl");
+  assert.equal(guest.wslDistribution, "guest");
+  assert.equal(buildGuestPasswordManager(DEFAULT_PASSWORD_MANAGER_FORM), null);
   assert.equal(created.database.mode, "create");
   assert.equal(created.extension, false);
   assert.equal(created.passkeys, false);
 });
 
 test("recommended source prefers an installed KeePassXC, then WSL, then none", () => {
-  assert.equal(recommendedSource({ installed: { proxy: "x" }, wslAvailable: true }), "installed");
-  assert.equal(recommendedSource({ installed: null, wslAvailable: true }), "wsl");
-  assert.equal(recommendedSource({ installed: null, wslAvailable: false }), "none");
+  assert.equal(recommendedSource({ installed: { proxy: "x" }, wslDistributions: ["Ubuntu"] }), "installed");
+  assert.equal(recommendedSource({ installed: null, wslDistributions: ["Ubuntu"] }), "wsl");
+  assert.equal(recommendedSource({ installed: null, wslDistributions: [] }), "none");
+  assert.equal(recommendedSource({ installed: null, wslAvailable: true }), "none");
   assert.equal(recommendedSource(undefined), "none");
-  const options = sourceOptions({ installed: null, wslAvailable: false });
+  const options = sourceOptions({ installed: null, wslDistributions: [] });
   assert.equal(options.every((o) => o.available === false && o.reason), true);
   assert.equal(sourceOptions({ installed: { proxy: "x" } })[0].available, true);
+  assert.equal(sourceOptions({ installed: null, wslDistributions: ["Ubuntu"] })[1].available, true);
 });
 
 test("inspector facts redact the database path to its file name", () => {
@@ -72,6 +106,7 @@ test("inspector facts redact the database path to its file name", () => {
   const facts = describePasswordManager({
     provider: "keepassxc",
     source: "wsl",
+    wslDistribution: "Ubuntu",
     database: { mode: "existing", path: "/home/demo/secret-folder/vault.kdbx" },
     extension: true,
     passkeys: false,
@@ -84,7 +119,11 @@ test("inspector facts redact the database path to its file name", () => {
     "Passkeys",
   ]);
   assert.equal(JSON.stringify(facts).includes("secret-folder"), false);
-  assert.equal(facts[1][1], "WSL guest");
+  assert.equal(facts[1][1], "WSL: Ubuntu");
   assert.equal(facts[4][1], "Disabled");
+  assert.equal(
+    describePasswordManager({ source: "wsl", wslDistribution: "guest", database: {} })[1][1],
+    "WSL guest",
+  );
   assert.deepEqual(describePasswordManager(null), []);
 });

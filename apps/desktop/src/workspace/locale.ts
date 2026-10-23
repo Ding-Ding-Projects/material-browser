@@ -61,12 +61,16 @@ export const workspaceZh: Record<string, string> = {
     "將呢個設定檔同 KeePassXC 資料庫配對。本程式永遠唔會儲存資料庫密碼。",
   "KeePassXC source": "KeePassXC 來源",
   "Installed KeePassXC": "已安裝嘅 KeePassXC",
-  "KeePassXC inside the WSL guest": "WSL 客體入面嘅 KeePassXC",
+  "KeePassXC inside a WSL distribution": "WSL 發行版入面嘅 KeePassXC",
   "No KeePassXC installation from the maintained lineage was detected.":
     "未偵測到維護版本嘅 KeePassXC 安裝。",
-  "Guest provisioning for this source is not verified yet.":
-    "呢個來源嘅客體佈建仍未驗證。",
-  "WSL was not detected on this computer.": "呢部電腦未偵測到 WSL。",
+  "The distribution must already contain KeePassXC from the maintained lineage.":
+    "發行版必須已經裝咗維護版本嘅 KeePassXC。",
+  "No WSL distribution was detected on this computer.":
+    "呢部電腦未偵測到任何 WSL 發行版。",
+  "WSL distribution": "WSL 發行版",
+  "The distribution must already contain KeePassXC from the maintained lineage at /usr/bin/keepassxc-proxy. This application verifies it before launch and never installs it.":
+    "發行版必須已經喺 /usr/bin/keepassxc-proxy 裝好維護版本嘅 KeePassXC。本程式啟動前會核實，但永遠唔會代你安裝。",
   "No installed KeePassXC was detected. Releases:":
     "未偵測到已安裝嘅 KeePassXC。發佈版本：",
   Database: "資料庫",

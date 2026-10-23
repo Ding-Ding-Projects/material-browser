@@ -1,5 +1,11 @@
 # Material Browser handoff
 
+## WSL password-manager sources and lock refresh, 2026-10-23
+
+Latest direction: implement everything remaining and push to main. Both WSL routes now exist in source. An ordinary profile with `source: "wsl"` names an existing distribution; before launch the host verifies `/usr/bin/keepassxc-proxy` inside it and writes an app-owned `keepassxc-proxy-<distribution>.cmd` bridge that the Chromium and Firefox registrations point at (`crates/host/src/password_manager.rs`, `crates/host/src/main.rs`). A WSL Super Profile template can carry `passwordManager` with `wslDistribution: "guest"`; provisioning stages and installs guest registrations after verifying the guest proxy, merging the Firefox policy with managed bookmarks (`crates/host/src/super_profiles/password_manager_guest.rs`, `crates/core/src/super_profiles.rs`). `passwordManager.detect` lists distributions from `wsl -l -q`; the creation form offers a distribution picker and the Super Profile wizard offers guest pairing fields. The desktop `package-lock.json` was regenerated with `npm install --package-lock-only`; `npm ci` now succeeds.
+
+Verified here: core 28 and host 59 Rust tests on Linux, desktop `tsc --noEmit`, desktop tests 112, docs tests 6, rustfmt on the touched files, publication scan on every changed file (the scanner's `cat` match in the pre-existing provisioning script predates this change and is a literal shell command). Not verified: any WSL runtime, the wrapper launch, guest provisioning with a KeePassXC package, the Windows registry write, built screenshots, installers, and the installed update.
+
 ## Password-manager pairing source implementation, 2026-10-22
 
 Latest direction: continue the handoff from a Linux cloud session without subagents. The KeePassXC pairing requested below now has a source implementation; built verification on the Windows host remains pending.

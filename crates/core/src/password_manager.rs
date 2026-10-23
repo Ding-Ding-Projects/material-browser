@@ -69,7 +69,14 @@ pub fn normalize(document: &Value) -> Result<Value> {
     }
     keys(
         document,
-        &["provider", "source", "database", "extension", "passkeys"],
+        &[
+            "provider",
+            "source",
+            "database",
+            "extension",
+            "passkeys",
+            "wslDistribution",
+        ],
     )?;
     if document["provider"].as_str() != Some("keepassxc") {
         return Err(invalid("Unsupported password manager provider"));
@@ -85,13 +92,47 @@ pub fn normalize(document: &Value) -> Result<Value> {
         return Err(invalid("Unsupported database mode"));
     }
     let path = database_path(&database["path"])?;
-    Ok(json!({
+    let distribution = match (source, document.get("wslDistribution")) {
+        ("installed", None | Some(Value::Null)) => None,
+        ("installed", Some(_)) => {
+            return Err(invalid(
+                "An installed KeePassXC source takes no WSL distribution",
+            ));
+        }
+        ("wsl", value) => Some(wsl_distribution(value)?),
+        _ => unreachable!("source already validated"),
+    };
+    let mut stored = json!({
         "provider": "keepassxc",
         "source": source,
         "database": {"mode": mode, "path": path},
         "extension": flag(document.get("extension"), true)?,
         "passkeys": flag(document.get("passkeys"), true)?,
-    }))
+    });
+    if let Some(distribution) = distribution {
+        stored["wslDistribution"] = json!(distribution);
+    }
+    Ok(stored)
+}
+/// A WSL distribution name is a bounded identifier; `guest` names the owning Super Profile guest.
+pub fn wsl_distribution(value: Option<&Value>) -> Result<String> {
+    let name = value
+        .and_then(Value::as_str)
+        .filter(|n| {
+            !n.is_empty()
+                && n.len() <= 64
+                && n.chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        })
+        .ok_or_else(|| invalid("A WSL source names its distribution"))?;
+    Ok(name.to_string())
+}
+/// Wrapper script that bridges a Windows browser's stdio to a proxy inside a WSL distribution.
+pub fn wsl_proxy_wrapper_script(distribution: &str) -> Result<String> {
+    let distribution = wsl_distribution(Some(&json!(distribution)))?;
+    Ok(format!(
+        "@echo off\r\nrem managed-by: material-browser\r\nwsl.exe -d \"{distribution}\" --exec /usr/bin/keepassxc-proxy %*\r\n"
+    ))
 }
 fn proxy(path: &str) -> Result<&str> {
     if path.is_empty() || path.chars().any(char::is_control) || !absolute(path) {
@@ -147,8 +188,10 @@ mod tests {
         assert_eq!(stored["database"]["mode"], "existing");
         assert_eq!(stored["extension"], true);
         assert_eq!(stored["passkeys"], true);
-        let off = normalize(&json!({"provider":"keepassxc","source":"wsl","database":{"mode":"create","path":"/home/demo/new.kdbx"},"extension":false,"passkeys":false})).unwrap();
+        let off = normalize(&json!({"provider":"keepassxc","source":"wsl","wslDistribution":"Ubuntu-24.04","database":{"mode":"create","path":"/home/demo/new.kdbx"},"extension":false,"passkeys":false})).unwrap();
         assert_eq!(off["source"], "wsl");
+        assert_eq!(off["wslDistribution"], "Ubuntu-24.04");
+        assert!(stored.get("wslDistribution").is_none());
         assert_eq!(off["extension"], false);
         assert_eq!(off["passkeys"], false);
     }
@@ -181,6 +224,22 @@ mod tests {
         value["passkeys"] = json!("yes");
         assert!(validate(&value).is_err());
         assert!(validate(&json!({"provider":"keepassxc","database":{"path":"/x.kdbx"},"extension":"x".repeat(9000)})).is_err());
+        let wsl = |distribution: Value| json!({"provider":"keepassxc","source":"wsl","wslDistribution":distribution,"database":{"path":"/home/demo/vault.kdbx"}});
+        assert!(validate(&wsl(Value::Null)).is_err());
+        assert!(validate(&wsl(json!("bad name"))).is_err());
+        assert!(validate(&wsl(json!("x".repeat(65)))).is_err());
+        assert!(validate(&wsl(json!("guest"))).is_ok());
+        let mut installed = sample("/home/demo/vault.kdbx");
+        installed["wslDistribution"] = json!("Ubuntu");
+        assert!(validate(&installed).is_err());
+    }
+    #[test]
+    fn wsl_wrapper_bridges_stdio_to_the_named_distribution() {
+        let script = wsl_proxy_wrapper_script("Ubuntu-24.04").unwrap();
+        assert!(script.starts_with("@echo off\r\n"));
+        assert!(script.contains("wsl.exe -d \"Ubuntu-24.04\" --exec /usr/bin/keepassxc-proxy %*"));
+        assert!(script.contains("managed-by: material-browser"));
+        assert!(wsl_proxy_wrapper_script("a b").is_err());
     }
     #[test]
     fn registrations_carry_exact_identifiers_and_reject_relative_proxy() {

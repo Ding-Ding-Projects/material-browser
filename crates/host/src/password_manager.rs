@@ -60,6 +60,86 @@ pub fn detect_installation(roots: &[PathBuf]) -> Option<Installation> {
     })
 }
 
+/// Parses `wsl.exe -l -q` output: one distribution per line, UTF-16 artefacts and blanks removed.
+pub fn parse_distribution_list(output: &str) -> Vec<String> {
+    output
+        .lines()
+        .map(|line| {
+            line.chars()
+                .filter(|c| *c != '\0' && *c != '\u{feff}')
+                .collect::<String>()
+        })
+        .map(|line| line.trim().to_string())
+        .filter(|line| core_pm::wsl_distribution(Some(&json!(line))).is_ok())
+        .collect()
+}
+/// Registered WSL distributions on this host; empty off Windows or when WSL is unavailable.
+pub fn list_distributions() -> Vec<String> {
+    if !cfg!(windows) {
+        return Vec::new();
+    }
+    crate::super_profiles::run(&["-l", "-q"], std::time::Duration::from_secs(10))
+        .map(|output| parse_distribution_list(&output))
+        .unwrap_or_default()
+}
+/// Confirms the maintained-lineage proxy is installed inside the named distribution.
+pub fn verify_wsl_proxy(distribution: &str) -> Result<()> {
+    let distribution = core_pm::wsl_distribution(Some(&json!(distribution)))
+        .map_err(|e| error(&e.code, &e.message))?;
+    if !cfg!(windows) {
+        return Err(error(
+            "CAPABILITY_UNAVAILABLE",
+            "WSL password-manager sources require the supported Windows host",
+        ));
+    }
+    crate::super_profiles::run(
+        &[
+            "-d",
+            &distribution,
+            "--exec",
+            "sh",
+            "-lc",
+            "test -x /usr/bin/keepassxc-proxy",
+        ],
+        std::time::Duration::from_secs(15),
+    )
+    .map(|_| ())
+    .map_err(|_| {
+        error(
+            "PASSWORD_MANAGER_WSL_UNAVAILABLE",
+            "The selected WSL distribution has no /usr/bin/keepassxc-proxy; install KeePassXC from the maintained lineage inside it first",
+        )
+    })
+}
+/// Writes the app-owned stdio bridge that a Windows browser launches as the native host.
+pub fn wsl_proxy_wrapper(user_root: &Path, distribution: &str) -> Result<PathBuf> {
+    let script =
+        core_pm::wsl_proxy_wrapper_script(distribution).map_err(|e| error(&e.code, &e.message))?;
+    let path = user_root.join(format!("keepassxc-proxy-{distribution}.cmd"));
+    fs::create_dir_all(user_root).map_err(io_error)?;
+    if path.exists() {
+        let existing = fs::read_to_string(&path).unwrap_or_default();
+        if existing != script {
+            if !existing.contains("managed-by: material-browser") {
+                return Err(error(
+                    "REGISTRATION_EXISTS",
+                    "A wrapper this application does not own already exists",
+                ));
+            }
+            fs::write(&path, script).map_err(io_error)?;
+        }
+        return Ok(path);
+    }
+    use std::io::Write;
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&path)
+        .map_err(io_error)?;
+    file.write_all(script.as_bytes()).map_err(io_error)?;
+    Ok(path)
+}
+
 /// Capability report for the renderer: what exists, what is missing, and why.
 pub fn detect(wsl_capabilities: &Value) -> Value {
     let installation = if cfg!(windows) {
@@ -67,7 +147,8 @@ pub fn detect(wsl_capabilities: &Value) -> Value {
     } else {
         None
     };
-    let wsl = wsl_capabilities["wsl2"]["available"] == true;
+    let distributions = list_distributions();
+    let wsl = wsl_capabilities["wsl2"]["available"] == true && !distributions.is_empty();
     json!({
         "provider": "keepassxc",
         "installed": installation.as_ref().map(|i| json!({
@@ -76,13 +157,14 @@ pub fn detect(wsl_capabilities: &Value) -> Value {
             "proxy": i.proxy,
         })),
         "wslAvailable": wsl,
+        "wslDistributions": distributions,
         "recommendedSource": if installation.is_some() { "installed" } else if wsl { "wsl" } else { "none" },
         "sourceRelease": "https://github.com/Ding-Ding-Projects/keepassxc/releases",
         "wslRuntimeVerified": false,
         "limits": [
             "Chromium and Firefox still ask the person to enable the extension on first launch; no silent enable exists.",
             "Passkey support lives in the extension and KeePassXC; this application records the default and does not edit KeePassXC settings.",
-            "The WSL source requires guest provisioning from the maintained source lineage and has no verified runtime yet."
+            "The WSL source expects KeePassXC from the maintained source lineage already installed in the chosen distribution; this application verifies the proxy and never installs it."
         ]
     })
 }
@@ -163,7 +245,7 @@ pub fn remove_chromium(profile_dir: &Path) -> Result<Value> {
 
 /// Merges the KeePassXC-Browser `ExtensionSettings` entry into the bundled Firefox policy file,
 /// preserving unrelated policies such as `ManagedBookmarks`.
-pub fn merge_firefox_policy(existing: &Value) -> Result<Value> {
+pub(crate) fn merge_firefox_policy(existing: &Value) -> Result<Value> {
     let mut document = if existing.is_null() {
         json!({"policies":{}})
     } else {
@@ -326,6 +408,26 @@ mod tests {
             b"{\"name\":\"foreign\"}"
         );
         fs::remove_dir_all(profile).unwrap();
+    }
+    #[test]
+    fn wsl_wrapper_is_owned_and_distribution_list_is_filtered() {
+        let user = root("wsl-wrapper");
+        let path = wsl_proxy_wrapper(&user, "Ubuntu-24.04").unwrap();
+        let script = fs::read_to_string(&path).unwrap();
+        assert!(script.contains("wsl.exe -d \"Ubuntu-24.04\" --exec /usr/bin/keepassxc-proxy"));
+        assert_eq!(wsl_proxy_wrapper(&user, "Ubuntu-24.04").unwrap(), path);
+        fs::write(&path, "@echo off\r\nforeign\r\n").unwrap();
+        assert_eq!(
+            wsl_proxy_wrapper(&user, "Ubuntu-24.04").unwrap_err().code,
+            "REGISTRATION_EXISTS"
+        );
+        assert!(wsl_proxy_wrapper(&user, "bad name").is_err());
+        assert_eq!(
+            parse_distribution_list("\u{feff}Ubuntu-24.04\r\n\r\nD\0ebian\r\nbad name\r\n"),
+            vec!["Ubuntu-24.04".to_string(), "Debian".to_string()]
+        );
+        assert!(verify_wsl_proxy("Ubuntu-24.04").is_err());
+        fs::remove_dir_all(user).unwrap();
     }
     #[test]
     fn firefox_policy_merge_preserves_existing_policies_and_stages_manifest() {

@@ -15,11 +15,13 @@ export type PasswordManager = {
   database: { mode: "existing" | "create"; path: string };
   extension: boolean;
   passkeys: boolean;
+  wslDistribution?: string;
 };
 export type PasswordManagerDetection = {
   provider: "keepassxc";
   installed: { root: string; executable: string; proxy: string } | null;
   wslAvailable: boolean;
+  wslDistributions: string[];
   recommendedSource: "installed" | "wsl" | "none";
   sourceRelease: string;
   wslRuntimeVerified: false;
@@ -63,6 +65,7 @@ export type SuperProfileSettings = {
   setupCommands?: string[];
   startupCommands?: string[];
   installers?: string[];
+  passwordManager?: PasswordManager | null;
   networking?: boolean;
   clipboard?: boolean;
   memoryMb?: number;

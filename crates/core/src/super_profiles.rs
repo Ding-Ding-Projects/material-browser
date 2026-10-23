@@ -28,12 +28,31 @@ pub(crate) struct SuperRevision {
     #[serde(default)]
     archive_bytes: u64,
 }
+/// A guest pairing runs KeePassXC inside the Super Profile guest: WSL source, guest-local proxy,
+/// no host distribution name.
+fn guest_password_manager(document: &Value) -> Result<()> {
+    let stored = crate::password_manager::normalize(document)?;
+    if stored.is_null() {
+        return Ok(());
+    }
+    if stored["source"] != "wsl" || stored["wslDistribution"] != "guest" {
+        return Err(err(
+            "INVALID_PASSWORD_MANAGER",
+            "A guest pairing uses source wsl with wslDistribution guest",
+        ));
+    }
+    Ok(())
+}
+
 fn validate(settings: &Value) -> Result<()> {
     if !settings.is_object() || serde_json::to_vec(settings)?.len() > 256 * 1024 {
         return Err(err("INVALID_ARGUMENT", "Settings must be a bounded object"));
     }
     if let Some(document) = settings.get("portableBookmarks") {
         crate::portable_bookmarks::validate(document)?;
+    }
+    if let Some(document) = settings.get("passwordManager") {
+        guest_password_manager(document)?;
     }
     if let Some(configurations) = settings.get("configurations") {
         let configurations = configurations
@@ -46,6 +65,9 @@ fn validate(settings: &Value) -> Result<()> {
             }
             if let Some(document) = configuration.get("portableBookmarks") {
                 crate::portable_bookmarks::validate(document)?;
+            }
+            if let Some(document) = configuration.get("passwordManager") {
+                guest_password_manager(document)?;
             }
         }
     }
@@ -407,6 +429,72 @@ mod tests {
             json!({"name":"Development","settings":{"backend":"wsl2","launchMode":"terminal"}}),
         )
         .unwrap()
+    }
+    #[test]
+    fn guest_password_manager_pairing_is_validated_and_restorable() {
+        let (_root, mut m) = manager();
+        let base = json!({"backend":"wsl2","launchMode":"browser"});
+        let mut paired = base.clone();
+        paired["passwordManager"] = json!({"provider":"keepassxc","source":"wsl","wslDistribution":"guest","database":{"path":"/home/materialbrowser/vault.kdbx"}});
+        let created = m
+            .execute(
+                "superProfiles.create",
+                json!({"name":"Paired","settings":paired}),
+            )
+            .unwrap();
+        assert_eq!(
+            created["settings"]["passwordManager"]["wslDistribution"],
+            "guest"
+        );
+        let id = created["id"].as_str().unwrap();
+        let first = created["revisionId"].as_str().unwrap();
+        let mut host_bound = paired.clone();
+        host_bound["passwordManager"]["wslDistribution"] = json!("Ubuntu");
+        assert_eq!(
+            m.execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":first,"settings":host_bound}),
+            )
+            .unwrap_err()
+            .code,
+            "INVALID_PASSWORD_MANAGER"
+        );
+        let mut installed = paired.clone();
+        installed["passwordManager"]["source"] = json!("installed");
+        installed["passwordManager"]
+            .as_object_mut()
+            .unwrap()
+            .remove("wslDistribution");
+        assert!(
+            m.execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":first,"settings":installed}),
+            )
+            .is_err()
+        );
+        let mut nested = base.clone();
+        nested["configurations"] = json!({"wsl2":{"passwordManager":{"provider":"keepassxc","source":"wsl","wslDistribution":"guest","database":{"path":"relative.kdbx"}}}});
+        assert!(
+            m.execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":first,"settings":nested}),
+            )
+            .is_err()
+        );
+        let unpaired = m
+            .execute(
+                "superProfiles.update",
+                json!({"id":id,"expectedRevisionId":first,"settings":base}),
+            )
+            .unwrap();
+        assert!(unpaired["settings"].get("passwordManager").is_none());
+        let restored = m
+            .execute(
+                "superProfiles.revisions.restore",
+                json!({"id":id,"revisionId":first,"expectedRevisionId":unpaired["revisionId"]}),
+            )
+            .unwrap();
+        assert_eq!(restored["settings"], paired);
     }
     #[test]
     fn portable_bookmarks_are_encrypted_separate_and_revision_restorable() {

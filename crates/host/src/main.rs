@@ -165,28 +165,38 @@ impl Host {
         if manager.is_null() || manager["extension"] != true {
             return Ok(None);
         }
-        if manager["source"] == "wsl" {
-            return Err(error(
-                "PASSWORD_MANAGER_WSL_UNAVAILABLE",
-                "The WSL KeePassXC source is not provisioned on this host yet; choose an installed KeePassXC or disable the extension for this profile",
-            ));
-        }
-        let installation = if cfg!(windows) {
-            password_manager::detect_installation(&password_manager_roots())
+        let user_root = self
+            .active
+            .parent()
+            .ok_or_else(|| error("HOST_IO", "Data root unavailable"))?
+            .join("password-manager");
+        // The proxy a browser launches: the installed Windows proxy, or an owned stdio bridge
+        // into the named WSL distribution where KeePassXC from the maintained lineage lives.
+        let proxy = if manager["source"] == "wsl" {
+            let distribution = manager["wslDistribution"]
+                .as_str()
+                .ok_or_else(|| error("INVALID_PROFILE", "WSL source without a distribution"))?;
+            password_manager::verify_wsl_proxy(distribution)?;
+            password_manager::wsl_proxy_wrapper(&user_root, distribution)?
         } else {
-            None
-        };
-        let Some(installation) = installation else {
-            return Err(error(
-                "PASSWORD_MANAGER_UNAVAILABLE",
-                "No KeePassXC installation from the maintained lineage was found; install it or disable the extension for this profile",
-            ));
+            let installation = if cfg!(windows) {
+                password_manager::detect_installation(&password_manager_roots())
+            } else {
+                None
+            };
+            let Some(installation) = installation else {
+                return Err(error(
+                    "PASSWORD_MANAGER_UNAVAILABLE",
+                    "No KeePassXC installation from the maintained lineage was found; install it or disable the extension for this profile",
+                ));
+            };
+            installation.proxy
         };
         let result = match profile["engine"].as_str() {
             Some("chromium") => {
                 let profile_dir = self.active.join(id);
                 fs::create_dir_all(&profile_dir).map_err(io_error)?;
-                password_manager::stage_chromium(&profile_dir, &installation.proxy)?
+                password_manager::stage_chromium(&profile_dir, &proxy)?
             }
             Some("firefox") => {
                 let engine = self
@@ -199,13 +209,7 @@ impl Host {
                 let firefox_root = executable
                     .parent()
                     .ok_or_else(|| error("ENGINE_UNAVAILABLE", "Firefox root unavailable"))?;
-                let user_root = self
-                    .active
-                    .parent()
-                    .ok_or_else(|| error("HOST_IO", "Data root unavailable"))?
-                    .join("password-manager");
-                let mut result =
-                    password_manager::stage_firefox(firefox_root, &user_root, &installation.proxy)?;
+                let mut result = password_manager::stage_firefox(firefox_root, &user_root, &proxy)?;
                 result["registryValueWritten"] =
                     json!(password_manager::register_firefox_manifest(&user_root)?);
                 result

@@ -36,18 +36,39 @@ Passkey support is provided by KeePassXC and its browser extension. The profile 
 never edits KeePassXC's own configuration file. Verifying passkey registration and sign-in in a
 built profile remains pending.
 
+## WSL sources
+
+The maintained lineage publishes Windows packages only, so a WSL route expects KeePassXC to be
+built or installed inside the distribution first (for example a `.deb` produced from the pinned
+source tree). This application verifies `/usr/bin/keepassxc-proxy` and never installs it.
+
+- **Ordinary profile, source `wsl`.** The pairing names an existing distribution
+  (`wslDistribution`, listed from `wsl -l -q` by `passwordManager.detect`). Before launch the host
+  runs `test -x /usr/bin/keepassxc-proxy` inside that distribution, then writes an app-owned
+  wrapper `<data root>/password-manager/keepassxc-proxy-<distribution>.cmd` that bridges the
+  browser's native messaging stdio into `wsl.exe -d <distribution> --exec /usr/bin/keepassxc-proxy`.
+  The same Chromium and Firefox registrations as above point at that wrapper. A missing proxy
+  fails launch with `PASSWORD_MANAGER_WSL_UNAVAILABLE`.
+- **Super Profile template, guest pairing.** Template settings accept `passwordManager` with
+  `source: "wsl"` and `wslDistribution: "guest"`. During provisioning the host stages the guest
+  registrations (`input/password-manager/`), verifies the guest proxy, and installs them into the
+  guest browser profile: Chromium under `~/.material-browser/browser/NativeMessagingHosts` and
+  `External Extensions`; Firefox under `~/.mozilla/native-messaging-hosts` plus
+  `/opt/material-browser/firefox/distribution/policies.json`, merged with any managed bookmarks
+  policy. KeePassXC enters the guest through the template's selected Linux installers.
+
 ## Limits and pending verification
 
-- The WSL source records the choice but launch reports `PASSWORD_MANAGER_WSL_UNAVAILABLE`
-  until guest provisioning from the maintained lineage exists. The lineage publishes Windows
-  packages only, so the guest route needs a verified source build inside the guest.
+- Both WSL routes are source-implemented and unit-tested on Linux fixtures; no WSL runtime,
+  wrapper launch, guest provisioning or extension connection has been exercised yet.
 - Launch with the installed source fails with `PASSWORD_MANAGER_UNAVAILABLE` when no supported
   installation is detected, rather than launching without the promised registration.
 - Core validation rejects relative paths, traversal segments, control characters, non-`.kdbx`
   suffixes and unknown fields with `INVALID_PASSWORD_MANAGER`. Existing vaults without the field
   load with no pairing.
 - Verified so far: core and host unit tests for validation, registration shapes, idempotent
-  create-if-absent writes, foreign-file refusal, scoped removal, Firefox policy merging and
-  installation detection; renderer form-model tests for defaults, validation and path redaction.
+  create-if-absent writes, foreign-file refusal, scoped removal, Firefox policy merging,
+  installation detection, the WSL wrapper, distribution-list parsing and guest staging; renderer
+  form-model tests for defaults, validation, distribution requirements and path redaction.
 - Not verified: built interface capture, real extension connectivity, passkey behavior in a
   running browser, the Windows registry write and the installer. These remain acceptance gaps.

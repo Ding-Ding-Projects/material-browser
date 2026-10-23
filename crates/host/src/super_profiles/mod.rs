@@ -13,6 +13,7 @@ mod guest_installers;
 mod health;
 mod isolation;
 mod linux_runtime;
+mod password_manager_guest;
 mod payload;
 mod portable_bookmarks;
 mod provisioning;
@@ -80,7 +81,7 @@ pub struct Sessions {
     observers: BTreeMap<String, health::Observer>,
     workers: BTreeMap<String, thread::JoinHandle<WorkerOutput>>,
 }
-fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
+pub(crate) fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
     asynchronous::check_cancel()?;
     let mut child = Command::new(program)
         .args(args)
@@ -161,7 +162,7 @@ fn command(program: &str, args: &[&str], timeout: Duration) -> Result<String> {
         thread::sleep(Duration::from_millis(100));
     }
 }
-fn run(args: &[&str], timeout: Duration) -> Result<String> {
+pub(crate) fn run(args: &[&str], timeout: Duration) -> Result<String> {
     command("wsl.exe", args, timeout)
 }
 impl Sessions {

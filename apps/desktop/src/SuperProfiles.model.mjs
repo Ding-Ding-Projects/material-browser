@@ -5,6 +5,10 @@ export function readSuperProfileDraft(serialized) {
   if (!d || typeof d.name !== 'string' || d.name.length > 256 || !['chromium','firefox'].includes(d.engine) || !d.settings || !['wsl2','windows-sandbox'].includes(d.settings.backend) || !['terminal','browser','desktop'].includes(d.settings.launchMode)) throw new Error('INVALID_DRAFT');
   for (const key of ['rootfsPath','rootfsSha256','workspacePath']) if (d.settings[key] !== undefined && (typeof d.settings[key] !== 'string' || d.settings[key].length > 4096)) throw new Error('INVALID_DRAFT');
   for (const key of ['setupCommands','startupCommands','installers']) if (d.settings[key] !== undefined && (!Array.isArray(d.settings[key]) || d.settings[key].some(v => typeof v !== 'string'))) throw new Error('INVALID_DRAFT');
+  if (d.settings.passwordManager !== undefined && d.settings.passwordManager !== null) {
+    const pm = d.settings.passwordManager;
+    if (!pm || typeof pm !== 'object' || pm.provider !== 'keepassxc' || pm.source !== 'wsl' || pm.wslDistribution !== 'guest' || !pm.database || typeof pm.database.path !== 'string' || pm.database.path.length > 1024 || typeof pm.extension !== 'boolean' || typeof pm.passkeys !== 'boolean') throw new Error('INVALID_DRAFT');
+  }
   if (d.settings.configurations !== undefined) {
     if (!d.settings.configurations || typeof d.settings.configurations !== 'object' || Array.isArray(d.settings.configurations)) throw new Error('INVALID_DRAFT');
     for (const [backend,config] of Object.entries(d.settings.configurations)) {

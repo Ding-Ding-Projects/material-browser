@@ -21,6 +21,7 @@ impl Sessions {
             )?;
             payload::stage(settings, &s.directory)?;
             portable_bookmarks::stage(settings, &s.directory, engine)?;
+            password_manager_guest::stage(settings, &s.directory, engine)?;
             let has_installers = if backend == "wsl2" {
                 guest_installers::prepare(&s.directory)?
             } else {
@@ -236,6 +237,7 @@ impl Sessions {
             };
             health::prepare_wsl(&mut s, engine)?;
             portable_bookmarks::install_wsl(&s, engine)?;
+            password_manager_guest::install_wsl(&s, engine)?;
             if mode == "desktop" {
                 install_desktop_launchers(&s, engine)?;
             }

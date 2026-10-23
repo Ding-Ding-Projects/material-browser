@@ -27,7 +27,8 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 ## Foundation
 - [ ] Offer an optional KeePassXC database during new-profile creation, configure its browser extension, and enable passkey support by default using Ding-Ding-Projects/keepassxc
   - [x] Source implementation: profile field with strict validation, installed-KeePassXC detection, per-profile Chromium and Firefox registrations, creation form, inspector facts and unit tests
-  - [ ] Built verification: interface capture, extension connectivity, passkey behavior, Windows registry registration and the WSL guest source remain pending
+  - [x] WSL sources in source: named-distribution wrapper route for ordinary profiles and guest pairing for WSL templates, with unit tests on Linux fixtures
+  - [ ] Built verification: interface capture, extension connectivity, passkey behavior, Windows registry registration, WSL wrapper launch and guest provisioning remain pending
 - [ ] Complete applicable settings and preferences with real behavior, persistence and evidence
   - [ ] Integrate the independently reviewed nine-repair Settings slice after current built proof
   - [ ] Complete the 109-row inventory, including all 65 desktop-applicable rows

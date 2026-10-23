@@ -55,6 +55,15 @@ The Sandbox guest includes explicit save-and-close and discard-and-close control
 exports stopped-browser state and a complete manifest before asking the host to finalize it.
 Closing the Sandbox window itself cannot export state that has already been destroyed.
 
+## Guest password manager
+
+A WSL template can pair its guest browser with KeePassXC running inside the same guest. Set
+`passwordManager` on the template with `source: "wsl"`, `wslDistribution: "guest"`, a guest
+database path and the extension and passkeys switches (both default on). Provisioning stages and
+installs the browser registrations only after the guest provides `/usr/bin/keepassxc-proxy`;
+supply KeePassXC from the maintained lineage through the selected installers. Details and limits
+are in the [password manager article](password-manager.md).
+
 ## Portable bookmark documents
 
 A template can store a user-selected neutral JSON bookmark document in its encrypted backend

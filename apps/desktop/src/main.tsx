@@ -19,12 +19,14 @@ import {
   databaseBasename,
   recommendedSource,
   sourceOptions,
+  wslDistributions,
 } from "./password-manager-model.mjs";
 type PasswordManagerForm = {
   enabled: boolean;
   source: string;
   databaseMode: string;
   databasePath: string;
+  wslDistribution: string;
   extension: boolean;
   passkeys: boolean;
 };
@@ -227,9 +229,11 @@ function App() {
       const detection = await request("passwordManager.detect");
       setManagerDetection(detection);
       const source = recommendedSource(detection);
+      const distributions = wslDistributions(detection);
       setManagerForm((form) => ({
         ...form,
         source: source === "none" ? form.source : source,
+        wslDistribution: form.wslDistribution || distributions[0] || "",
       }));
     } catch {
       setManagerDetection(null);
@@ -308,6 +312,24 @@ function App() {
             {managerDetection.sourceRelease}
           </p>
         )}
+        {managerForm.source === "wsl" && (
+          <>
+            <Select
+              label={t("WSL distribution")}
+              value={managerForm.wslDistribution}
+              onChange={(value) => updateManager({ wslDistribution: value })}
+              options={wslDistributions(managerDetection).map((name) => [
+                name,
+                name,
+              ])}
+            />
+            <p>
+              {t(
+                "The distribution must already contain KeePassXC from the maintained lineage at /usr/bin/keepassxc-proxy. This application verifies it before launch and never installs it.",
+              )}
+            </p>
+          </>
+        )}
         <Select
           label={t("Database")}
           value={managerForm.databaseMode}
@@ -372,7 +394,10 @@ function App() {
         disabled={
           busy ||
           !name.trim() ||
-          (managerForm.enabled && !managerForm.databasePath.trim())
+          (managerForm.enabled && !managerForm.databasePath.trim()) ||
+          (managerForm.enabled &&
+            managerForm.source === "wsl" &&
+            !managerForm.wslDistribution.trim())
         }
         onClick={() => void perform(createProfile)}
       >
