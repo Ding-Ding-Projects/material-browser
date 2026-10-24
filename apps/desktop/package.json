@@ -15,7 +15,10 @@
     "test": "node --test src/*.test.mjs electron/*.test.cjs"
   },
   "dependencies": {
+    "@fontsource/roboto": "5.3.0",
+    "@fontsource/roboto-mono": "5.3.0",
     "@material/web": "2.5.0",
+    "@mdi/js": "7.4.47",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

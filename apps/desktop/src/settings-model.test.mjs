@@ -45,6 +45,8 @@ const required = [
   "momentum",
   "idleMinutes",
   "snoozeMinutes",
+  "actionSounds",
+  "actionSoundVolume",
   "toastSeconds",
   "quietEnabled",
   "quietStart",
@@ -145,7 +147,7 @@ test("schedule validation rejects unknown sources, malformed dates and duplicate
     assert.throws(() => validateSchedule(rule(extra)));
 });
 test("priority then stable order wins without modifying base preferences", () => {
-  const base = { ...defaults };
+  const base = { ...defaults, theme: "light" };
   const rules = [
     rule({ id: "a", priority: 5, values: { theme: "light" } }),
     rule({ id: "b", priority: 1 }),

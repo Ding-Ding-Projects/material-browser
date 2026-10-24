@@ -1,3 +1,6 @@
+import "./surfaces.css";
+import { Icon } from "../Icon";
+import { mdiFolderOpenOutline, mdiRefresh } from "@mdi/js";
 import React, { useState, useEffect } from "react";
 import { Profile, request } from "../api";
 import { Button, Modal } from "../components";
@@ -51,7 +54,7 @@ export function Synchronization({
             disabled={busy || !status?.unlocked}
             onClick={() => void perform(chooseFolder)}
           >
-            {t("Choose folder")}
+            <Icon path={mdiFolderOpenOutline} size={18} /> {t("Choose folder")}
           </Button>
           {[
             ["sync.push", "Upload changes"],
@@ -82,7 +85,7 @@ export function Synchronization({
             disabled={busy || !status?.unlocked}
             onClick={() => void perform(loadConflicts)}
           >
-            {t("Refresh")}
+            <Icon path={mdiRefresh} size={18} /> {t("Refresh")}
           </Button>
         </div>
         <Search
@@ -95,7 +98,8 @@ export function Synchronization({
           onKeys={setMatched}
           t={t}
         />
-        {!conflicts.length && <p>{t("No conflicts")}</p>}
+        {!conflicts.length && <p className="workflow-empty">{t("No conflicts")}</p>}
+        {conflicts.length > 0 && !matched.length && <p className="workflow-empty">{t("No results")}</p>}
         {conflicts
           .filter((c) => matched.includes(c.profileId))
           .map((conflict) => {
@@ -163,7 +167,7 @@ export function Synchronization({
         >
           <p>{t("Resolve this conflict using the selected revision?")}</p>
           <strong>{review.name}</strong>
-          <code>{review.revisionId}</code>
+          <code className="literal">{review.revisionId}</code>
         </Modal>
       )}
     </div>

@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { Icon } from "./Icon";
+import { mdiArrowLeft, mdiPlus, mdiRefresh } from "@mdi/js";
+import React, { useEffect, useRef, useState, useId } from "react";
 import { request, SuperProfile, SuperRevision, SuperSession } from "./api";
 import { Button, Modal, Tabs } from "./components";
 import { Search } from "./Search";
@@ -38,6 +40,8 @@ export function SuperProfiles({
   t: (s: string) => string;
   unlocked: boolean;
 }) {
+  const panelPrefix = useId();
+  const workspaceRef = useRef<HTMLDivElement>(null);
   const [profiles, setProfiles] = useState<SuperProfile[]>([]),
     [selected, setSelected] = useState(""),
     [rows, setRows] = useState<number[]>([]);
@@ -271,7 +275,7 @@ export function SuperProfiles({
       </section>
     );
   return (
-    <div className="super-workspace">
+    <div className="super-workspace" ref={workspaceRef}>
       <div className="page-heading">
         <div>
           <h1>{t("Super Profiles")}</h1>
@@ -279,10 +283,10 @@ export function SuperProfiles({
         </div>
         <div className="super-heading-actions">
           <Button secondary disabled={busy} onClick={() => void run(refresh)}>
-            {t("Refresh")}
+            <Icon path={mdiRefresh} size={18} /> {t("Refresh")}
           </Button>
           <Button disabled={busy} onClick={() => setWizard("new")}>
-            {t("Create Super Profile")}
+            <Icon path={mdiPlus} size={18} /> {t("Create Super Profile")}
           </Button>
         </div>
       </div>
@@ -336,20 +340,21 @@ export function SuperProfiles({
               onResults={setRows}
               t={t}
             />
-            {!profiles.length && <p>{t("No Super Profiles yet")}</p>}
+            {!profiles.length && <p className="workflow-empty">{t("No Super Profiles yet")}</p>}
+            {profiles.length > 0 && !rows.length && <p className="workflow-empty">{t("No results")}</p>}
             <div className="table-scroll">
               <table className="workspace-table">
                 <caption className="sr-only">{t("Super Profiles")}</caption>
                 <thead>
                   <tr>
-                    <th scope="col">
+                    <th scope="col" aria-sort={sort === "name" ? "ascending" : "none"}>
                       <button onClick={() => setSort("name")}>
                         {t("Name")}
                       </button>
                     </th>
                     <th scope="col">{t("Environment")}</th>
                     <th scope="col">{t("Sessions")}</th>
-                    <th scope="col">
+                    <th scope="col" aria-sort={sort === "updatedAt" ? "descending" : "none"}>
                       <button onClick={() => setSort("updatedAt")}>
                         {t("Updated")}
                       </button>
@@ -379,6 +384,7 @@ export function SuperProfiles({
                               setSelected(p.id);
                               setShowDetail(true);
                               setDetail("overview");
+                              requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".detail-title")?.focus());
                             }}
                           >
                             {p.name}
@@ -409,12 +415,16 @@ export function SuperProfiles({
               <>
                 <button
                   className="back-to-list"
-                  onClick={() => setShowDetail(false)}
+                  onClick={() => {
+                    setShowDetail(false);
+                    requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>("tr.selected .record-name")?.focus());
+                  }}
                 >
-                  ← {t("Back to profiles")}
+                  <Icon path={mdiArrowLeft} size={20} /> {t("Back to profiles")}
                 </button>
+                <div className="detail-heading"><div><h2 className="detail-title" tabIndex={-1}>{profile.name}</h2><p>{profile.engine} · {profile.settings.backend}</p></div></div>
                 <Tabs
-                  panelPrefix="super-panel"
+                  panelPrefix={panelPrefix}
                   items={[
                     ["overview", t("Overview")],
                     ["sessions", t("Sessions")],
@@ -426,16 +436,17 @@ export function SuperProfiles({
                 <div
                   hidden={detail !== "overview"}
                   role="tabpanel"
-                  id="super-panel-overview"
+                  id={`${panelPrefix}-overview`}
+                  aria-labelledby={`${panelPrefix}-tab-overview`}
                 >
-                  <h2>{profile.name}</h2>
                   <dl>
+                    <dt>ID</dt><dd className="literal">{profile.id}</dd>
                     <dt>{t("Environment")}</dt>
                     <dd>{profile.settings.backend}</dd>
                     <dt>{t("Engine")}</dt>
                     <dd>{profile.engine}</dd>
                     <dt>{t("Current revision")}</dt>
-                    <dd>{profile.revisionId}</dd>
+                    <dd className="literal">{profile.revisionId}</dd>
                   </dl>
                   <div className="super-actions">
                     <Button
@@ -489,7 +500,8 @@ export function SuperProfiles({
                 <div
                   hidden={detail !== "sessions"}
                   role="tabpanel"
-                  id="super-panel-sessions"
+                  id={`${panelPrefix}-sessions`}
+                  aria-labelledby={`${panelPrefix}-tab-sessions`}
                 >
                   <h3>{t("Sessions")}</h3>
                   {sessions.filter((s) => s.profileId === profile.id).length ===
@@ -605,7 +617,8 @@ export function SuperProfiles({
                 <div
                   hidden={detail !== "revisions"}
                   role="tabpanel"
-                  id="super-panel-revisions"
+                  id={`${panelPrefix}-revisions`}
+                  aria-labelledby={`${panelPrefix}-tab-revisions`}
                 >
                   <h3>{t("Revisions")}</h3>
                   {revisions.map((r) => (

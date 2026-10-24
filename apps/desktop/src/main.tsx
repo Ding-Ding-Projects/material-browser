@@ -11,6 +11,8 @@ import {
 } from "./workspace/model.mjs";
 import { Button, Field, Select, Modal } from "./components";
 import { Search } from "./Search";
+import { Icon } from "./Icon";
+import { mdiClose, mdiArrowTopRight } from "@mdi/js";
 import { request, Profile } from "./api";
 import type { PasswordManagerDetection } from "./api";
 import {
@@ -32,6 +34,7 @@ type PasswordManagerForm = {
 };
 import { translate, Language } from "./i18n";
 import { parseVocabulary, replaceLabel } from "./vocabulary.mjs";
+import "./design-system/worldlens.css";
 import "./style.css";
 import "./settings/settings.css";
 import { useSettings } from "./settings/store";
@@ -60,7 +63,7 @@ function App() {
   const displayName = useDisplayName();
   const settingsController = useSettings();
   const prefs = settingsController.preferences;
-  usePresentationEffects(prefs);
+  usePresentationEffects(prefs, settingsController.record);
   const narrator = useNarrator(prefs);
   const [entries, setEntries] = useState<Record<string, string>>(() => {
     try {
@@ -358,7 +361,9 @@ function App() {
           {t("Choose database file")}
         </Button>
         {managerForm.databasePath && (
-          <p className="literal">{databaseBasename(managerForm.databasePath)}</p>
+          <p className="literal">
+            {databaseBasename(managerForm.databasePath)}
+          </p>
         )}
         <label className="switch-row">
           {React.createElement("md-switch", {
@@ -405,59 +410,17 @@ function App() {
       </Button>
     </>
   );
+  const activeWorkspaceTab =
+    !showSetup && workspaceTabs.find((tab) => tab.id === activeTab);
   return (
     <div className={`app-shell palette-${prefs.paletteSize}`}>
       <WorkspaceHeader {...{ prefs, displayName, t, status, setPalette }} />
-      {workspaceTabs.length > 0 && (
-        <div className="workspace-tab-strip" aria-label={t("Open tabs")}>
-          {workspaceTabs.map((target) => (
-            <div
-              key={target.id}
-              className={activeTab === target.id ? "active" : ""}
-            >
-              <button
-                onClick={() => {
-                  setActiveTab(target.id);
-                  setShowSetup(false);
-                  setPage(target.page);
-                  if (target.section)
-                    settingsController.selectSection(target.section);
-                  if (target.setting) {
-                    settingsController.selectSection(target.section!);
-                    setTimeout(
-                      () =>
-                        window.dispatchEvent(
-                          new CustomEvent("settings-reveal", {
-                            detail: target.setting,
-                          }),
-                        ),
-                      0,
-                    );
-                  }
-                }}
-              >
-                {commandLabel(target.label)}
-              </button>
-              <button
-                aria-label={`${t("Close")} ${commandLabel(target.label)}`}
-                onClick={() => {
-                  setWorkspaceTabs((tabs) =>
-                    tabs.filter((tab) => tab.id !== target.id),
-                  );
-                  if (activeTab === target.id) setActiveTab("");
-                }}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
       <div className="body">
         <WorkspaceNavigation
           {...{
             t,
             page,
+            showSetup,
             setPage: (value: string) => {
               setActiveTab("");
               setPage(value);
@@ -472,114 +435,224 @@ function App() {
             refresh,
           }}
         />
-        <main className="workspace-main">
-          {!status && (
-            <section className="banner">
-              <h2>{t("Backend unavailable")}</h2>
-              <p>
-                {t(
-                  "The native host is not connected. No profile data is simulated. Build and open the desktop package to use the vault.",
-                )}
-              </p>
-              <Button secondary onClick={() => void perform(refresh)}>
-                {t("Retry connection")}
-              </Button>
-            </section>
+        <div className="workspace-plane">
+          {workspaceTabs.length > 0 && (
+            <div
+              className="workspace-tab-strip"
+              role="tablist"
+              aria-label={t("Open tabs")}
+              aria-orientation="horizontal"
+              onKeyDown={(event) => {
+                const tabs = Array.from(
+                  event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                    '[role="tab"]',
+                  ),
+                );
+                const index = tabs.indexOf(
+                  document.activeElement as HTMLButtonElement,
+                );
+                if (index < 0) return;
+                const next =
+                  event.key === "ArrowRight"
+                    ? (index + 1) % tabs.length
+                    : event.key === "ArrowLeft"
+                      ? (index + tabs.length - 1) % tabs.length
+                      : event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? tabs.length - 1
+                          : -1;
+                if (next >= 0) {
+                  event.preventDefault();
+                  tabs[next].focus();
+                  tabs[next].click();
+                }
+              }}
+            >
+              {workspaceTabs.map((target) => (
+                <div
+                  key={target.id}
+                  className={activeTab === target.id ? "active" : ""}
+                >
+                  <button
+                    role="tab"
+                    id={`work-tab-${target.id}`}
+                    aria-selected={activeTab === target.id}
+                    aria-controls="workspace-content"
+                    tabIndex={
+                      activeTab === target.id ||
+                      (!activeTab && workspaceTabs[0].id === target.id)
+                        ? 0
+                        : -1
+                    }
+                    onClick={() => {
+                      setActiveTab(target.id);
+                      setShowSetup(false);
+                      setPage(target.page);
+                      if (target.section)
+                        settingsController.selectSection(target.section);
+                      if (target.setting) {
+                        settingsController.selectSection(target.section!);
+                        setTimeout(
+                          () =>
+                            window.dispatchEvent(
+                              new CustomEvent("settings-reveal", {
+                                detail: target.setting,
+                              }),
+                            ),
+                          0,
+                        );
+                      }
+                    }}
+                  >
+                    {commandLabel(target.label)}
+                  </button>
+                  <button
+                    aria-label={`${t("Close")} ${commandLabel(target.label)}`}
+                    onClick={() => {
+                      setWorkspaceTabs((tabs) =>
+                        tabs.filter((tab) => tab.id !== target.id),
+                      );
+                      if (activeTab === target.id) setActiveTab("");
+                      requestAnimationFrame(() => {
+                        const next = document.querySelector<HTMLButtonElement>(
+                          '.workspace-tab-strip [role="tab"][tabindex="0"]',
+                        );
+                        if (next) next.focus();
+                        else
+                          document
+                            .querySelector<HTMLElement>(".workspace-main")
+                            ?.focus();
+                      });
+                    }}
+                  >
+                    <Icon path={mdiClose} size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
-          {showSetup ? (
-            <Onboarding
-              {...{
-                t,
-                setup: status?.unlocked
-                  ? Math.min(
-                      profiles.length ? 3 : 1,
-                      Math.max(0, Number(setup) || 0),
-                    )
-                  : 0,
-                setSetup,
-                status,
-                password,
-                setPassword,
-                busy,
-                perform,
-                refresh,
-                setFolder,
-                profileForm,
-                profiles,
-                folder,
-                chooseFolder,
-                setShowSetup,
-                setPage,
-              }}
-            />
-          ) : null}
-          <div hidden={showSetup || page !== "super-profiles"}>
-            <SuperProfiles t={t} unlocked={status?.unlocked === true} />
-          </div>
-          <div hidden={showSetup || page !== "profiles"}>
-            <ProfilesWorkspace
-              profiles={profiles}
-              selected={selected}
-              onSelect={setSelected}
-              unlocked={status?.unlocked === true}
-              t={t}
-              onCreate={() => setCreate(true)}
-              onLaunch={setLaunchTarget}
-              refresh={refresh}
-              operations={operations.current}
-              pending={pendingOperations}
-              onResults={(results) => {
-                const failed = results.some((result) => !result.ok);
-                const english = failed ? "Some operations failed" : "Completed";
-                const cantonese = failed ? "部分操作未能完成" : "已完成";
-                const message = styledMessage(
-                  failed ? "error" : "success",
-                  english,
-                  cantonese,
-                  prefs,
-                );
-                settingsController.notify(
-                  message,
-                  failed ? "error" : "success",
-                );
-                narrator.speak(
-                  english,
-                  cantonese,
-                  failed ? "error" : "success",
-                );
-              }}
-            />
-          </div>
-          <div hidden={showSetup || page !== "sync"}>
-            <Synchronization
-              {...{
-                t,
-                folder,
-                busy,
-                status,
-                perform,
-                chooseFolder,
-                loadConflicts,
-                refresh,
-                conflicts,
-                profiles,
-              }}
-            />
-          </div>
-          <div hidden={showSetup || page !== "settings"}>
-            <SettingsWorkspace
-              controller={settingsController}
-              t={t}
-              narrator={narrator}
-              wordingLoaded={Object.keys(entries).length > 0}
-              onWordingFile={(file) => void importWording(file)}
-              onClearWording={() => {
-                localStorage.removeItem("wording");
-                setEntries({});
-              }}
-            />
-          </div>
-        </main>
+          <main
+            className="workspace-main"
+            id="workspace-content"
+            tabIndex={-1}
+            role={activeWorkspaceTab ? "tabpanel" : undefined}
+            aria-labelledby={
+              activeWorkspaceTab
+                ? `work-tab-${activeWorkspaceTab.id}`
+                : undefined
+            }
+          >
+            {!status && (
+              <section className="banner">
+                <h2>{t("Backend unavailable")}</h2>
+                <p>
+                  {t(
+                    "The native host is not connected. No profile data is simulated. Build and open the desktop package to use the vault.",
+                  )}
+                </p>
+                <Button secondary onClick={() => void perform(refresh)}>
+                  {t("Retry connection")}
+                </Button>
+              </section>
+            )}
+            {showSetup ? (
+              <Onboarding
+                {...{
+                  t,
+                  setup: status?.unlocked
+                    ? Math.min(
+                        profiles.length ? 3 : 1,
+                        Math.max(0, Number(setup) || 0),
+                      )
+                    : 0,
+                  setSetup,
+                  status,
+                  password,
+                  setPassword,
+                  busy,
+                  perform,
+                  refresh,
+                  setFolder,
+                  profileForm,
+                  profiles,
+                  folder,
+                  chooseFolder,
+                  setShowSetup,
+                  setPage,
+                }}
+              />
+            ) : null}
+            <div hidden={showSetup || page !== "super-profiles"}>
+              <SuperProfiles t={t} unlocked={status?.unlocked === true} />
+            </div>
+            <div hidden={showSetup || page !== "profiles"}>
+              <ProfilesWorkspace
+                profiles={profiles}
+                selected={selected}
+                onSelect={setSelected}
+                unlocked={status?.unlocked === true}
+                t={t}
+                onCreate={() => setCreate(true)}
+                onLaunch={setLaunchTarget}
+                refresh={refresh}
+                operations={operations.current}
+                pending={pendingOperations}
+                onResults={(results) => {
+                  const failed = results.some((result) => !result.ok);
+                  const english = failed
+                    ? "Some operations failed"
+                    : "Completed";
+                  const cantonese = failed ? "部分操作未能完成" : "已完成";
+                  const message = styledMessage(
+                    failed ? "error" : "success",
+                    english,
+                    cantonese,
+                    prefs,
+                  );
+                  settingsController.notify(
+                    message,
+                    failed ? "error" : "success",
+                  );
+                  narrator.speak(
+                    english,
+                    cantonese,
+                    failed ? "error" : "success",
+                  );
+                }}
+              />
+            </div>
+            <div hidden={showSetup || page !== "sync"}>
+              <Synchronization
+                {...{
+                  t,
+                  folder,
+                  busy,
+                  status,
+                  perform,
+                  chooseFolder,
+                  loadConflicts,
+                  refresh,
+                  conflicts,
+                  profiles,
+                }}
+              />
+            </div>
+            <div hidden={showSetup || page !== "settings"}>
+              <SettingsWorkspace
+                controller={settingsController}
+                t={t}
+                narrator={narrator}
+                wordingLoaded={Object.keys(entries).length > 0}
+                onWordingFile={(file) => void importWording(file)}
+                onClearWording={() => {
+                  localStorage.removeItem("wording");
+                  setEntries({});
+                }}
+              />
+            </div>
+          </main>
+        </div>
       </div>
       <AccessibilityTools
         controller={settingsController}
@@ -631,50 +704,54 @@ function App() {
             onResults={setCommandRows}
             t={t}
           />
-          {commandRows.map((i) => (
-            <Button
-              key={commands[i].id}
-              secondary
-              onClick={() => {
-                setPalette(false);
-                const target = commands[i];
-                setActiveTab(target.id);
-                if (target.page)
-                  setWorkspaceTabs((tabs) =>
-                    tabs.some((tab) => tab.id === target.id)
-                      ? tabs
-                      : [...tabs, { ...target, page: target.page }],
-                  );
-                if (target.setting) {
-                  setShowSetup(false);
-                  setPage("settings");
-                  settingsController.selectSection(target.section!);
-                  setTimeout(
-                    () =>
-                      window.dispatchEvent(
-                        new CustomEvent("settings-reveal", {
-                          detail: target.setting,
-                        }),
-                      ),
-                    0,
-                  );
-                } else if (target.page) {
-                  setShowSetup(false);
-                  setPage(target.page);
-                  if (target.section)
-                    settingsController.selectSection(target.section);
-                } else if (target.id === "action:setup") setShowSetup(true);
-                else if (target.id === "action:create") setCreate(true);
-                else if (target.id === "action:lock")
-                  void perform(async () => {
-                    await request("vault.lock");
-                    await refresh();
-                  });
-              }}
-            >
-              {commandLabel(commands[i].label)}
-            </Button>
-          ))}
+          <div className="catalog-results">
+            {commandRows.length === 0 && <p role="status">{t("No matches")}</p>}
+            {commandRows.map((i) => (
+              <Button
+                key={commands[i].id}
+                secondary
+                onClick={() => {
+                  setPalette(false);
+                  const target = commands[i];
+                  setActiveTab(target.id);
+                  if (target.page)
+                    setWorkspaceTabs((tabs) =>
+                      tabs.some((tab) => tab.id === target.id)
+                        ? tabs
+                        : [...tabs, { ...target, page: target.page }],
+                    );
+                  if (target.setting) {
+                    setShowSetup(false);
+                    setPage("settings");
+                    settingsController.selectSection(target.section!);
+                    setTimeout(
+                      () =>
+                        window.dispatchEvent(
+                          new CustomEvent("settings-reveal", {
+                            detail: target.setting,
+                          }),
+                        ),
+                      0,
+                    );
+                  } else if (target.page) {
+                    setShowSetup(false);
+                    setPage(target.page);
+                    if (target.section)
+                      settingsController.selectSection(target.section);
+                  } else if (target.id === "action:setup") setShowSetup(true);
+                  else if (target.id === "action:create") setCreate(true);
+                  else if (target.id === "action:lock")
+                    void perform(async () => {
+                      await request("vault.lock");
+                      await refresh();
+                    });
+                }}
+              >
+                {commandLabel(commands[i].label)}{" "}
+                <Icon path={mdiArrowTopRight} size={18} />
+              </Button>
+            ))}
+          </div>
         </Modal>
       )}
       {celebration && (

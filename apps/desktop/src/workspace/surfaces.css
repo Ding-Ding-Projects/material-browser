@@ -1,0 +1,41 @@
+/* Workflow-specific detail planes; the shell owns table and column geometry. */
+.profile-inspector .detail-title,
+.super-inspector .detail-title { margin: 0; font-size: 1.375rem; line-height: 1.75rem; overflow-wrap: anywhere; }
+.profile-inspector .detail-title:focus-visible,
+.super-inspector .detail-title:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 4px; }
+.profile-inspector .avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: var(--md-sys-shape-corner-full, 999px); background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 1.125rem; }
+.profile-inspector dl { margin-block: 12px; }
+.profile-inspector dt { color: var(--md-sys-color-on-surface-variant); font-size: .75rem; line-height: 1rem; padding-block: 4px; }
+.profile-inspector dd { margin: 0; padding-block: 4px; min-width: 0; overflow-wrap: anywhere; }
+.profile-inspector .record { border: 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); border-radius: 0; background: transparent; padding: 12px 0; margin: 0; }
+.profile-inspector details > summary { min-height: 44px; align-content: center; cursor: pointer; }
+.profile-inspector details dl { grid-template-columns: minmax(0, 1fr); }
+.profile-inspector .help { font-size: .75rem; line-height: 1rem; color: var(--md-sys-color-on-surface-variant); }
+.profile-inspector [role="tabpanel"], .super-inspector [role="tabpanel"] { min-width: 0; }
+.profile-inspector .tabs, .super-inspector .tabs { max-width: 100%; overflow-x: auto; }
+.table-count { font-variant-numeric: tabular-nums; color: var(--md-sys-color-on-surface-variant); font-size: .75rem; }
+.workflow-empty { padding: 24px 12px; color: var(--md-sys-color-on-surface-variant); }
+.sync-workspace .surface { background: var(--md-sys-color-surface); border: 0; border-radius: 0; box-shadow: none; }
+.sync-workspace .sync-folder-strip { border-block: 1px solid var(--md-sys-color-outline-variant); padding: 16px 0; }
+.sync-folder-strip > div:first-child { flex: 1 1 16rem; }
+.sync-folder-strip .actions { flex-wrap: wrap; }
+.sync-folder-strip h2, .sync-conflicts h2 { font-size: 1rem; line-height: 1.5rem; }
+.sync-conflicts .record { padding: 16px 0; margin: 0; border: 0; border-top: 1px solid var(--md-sys-color-outline-variant); border-radius: 0; background: transparent; }
+.sync-conflicts .record h3 { margin: 0; overflow-wrap: anywhere; }
+.sync-workspace .conflict-candidates li { border: 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); border-radius: 0; flex-wrap: wrap; padding: 12px 0; margin: 0; }
+.sync-workspace .conflict-candidates li > div { flex: 1 1 12rem; }
+.conflict-candidates span { color: var(--md-sys-color-on-surface-variant); font-size: .75rem; line-height: 1rem; }
+.setup-wizard { width: 100%; box-sizing: border-box; }
+.setup-wizard .eyebrow, .super-wizard .eyebrow { color: var(--md-sys-color-primary); font-size: .75rem; line-height: 1rem; font-weight: 500; }
+.setup-wizard progress, .super-wizard progress { display: block; width: 100%; height: 4px; border: 0; border-radius: 999px; accent-color: var(--md-sys-color-primary); margin-block: 16px 24px; }
+.setup-wizard progress::-webkit-progress-bar, .super-wizard progress::-webkit-progress-bar { background: var(--md-sys-color-surface-container-highest); border-radius: 999px; }
+.setup-wizard progress::-webkit-progress-value, .super-wizard progress::-webkit-progress-value { background: var(--md-sys-color-primary); border-radius: 999px; }
+.setup-wizard .wizard-footer, .super-wizard .wizard-footer { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.setup-wizard p, .super-wizard p { max-width: 68ch; }
+.launch-target { display: grid; gap: 4px; padding: 12px; border-radius: var(--md-sys-shape-corner-medium, 12px); background: var(--md-sys-color-surface-container-high); min-width: 0; }
+.launch-target > span { font-size: .75rem; color: var(--md-sys-color-on-surface-variant); }
+.launch-target > strong, .launch-target > code { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .profile-inspector dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .profile-inspector dd { margin-bottom: 8px; }
+}

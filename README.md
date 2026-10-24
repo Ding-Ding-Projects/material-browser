@@ -24,7 +24,15 @@ Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop check
 
 Builds enter through build.bat; installer production enters through build-installer.bat. Hosted builds run on every branch push and manual dispatch, use increasing package versions and publish normal development releases. Tests and lint run locally, not in the hosted workflow. Each release asset is transferred separately and checked against its published byte count and SHA-256.
 
-## Current desktop screenshots
+## WorldLens desktop design
+
+The desktop now adopts WorldLens's blue Material Design 3 color roles, locally bundled Roboto typography, compact icon rail, flat workspace panels and rounded controls. New installations open in dark mode; saved appearance choices remain effective. Profiles, Super Profiles, synchronization, setup and Settings keep their native workflows. [Design and compatibility details](docs/features/desktop/worldlens-design.md).
+
+Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
+
+## Historical desktop screenshots
+
+The following images predate the WorldLens adaptation and retain their original evidence identity.
 
 These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](docs/evidence/desktop/gui-rewrite/inventory.json). The same eight images are published in the [reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/), where each live image hash was verified against this inventory.
 

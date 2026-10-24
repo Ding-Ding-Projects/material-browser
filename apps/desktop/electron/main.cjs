@@ -209,7 +209,7 @@ app.whenReady().then(() => {
     height: 800,
     minWidth: 760,
     minHeight: 580,
-    backgroundColor: "#f7f9fc",
+    backgroundColor: "#0b0e11",
     icon: path.join(__dirname, "../assets/material-browser.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),

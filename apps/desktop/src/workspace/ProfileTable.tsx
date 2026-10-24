@@ -1,3 +1,5 @@
+import { Icon } from "../Icon";
+import { mdiArrowUp, mdiArrowDown, mdiRefresh } from "@mdi/js";
 import React from "react";
 import { Profile } from "../api";
 import { Button } from "../components";
@@ -68,7 +70,7 @@ export function ProfileTable({
             <option value="firefox">Firefox</option>
           </select>
         </label>
-        <span>
+        <span className="table-count">
           {rows.length} / {profiles.length}
         </span>
         <Button
@@ -87,7 +89,7 @@ export function ProfileTable({
             )
           }
         >
-          {t("Refresh")}
+          <Icon path={mdiRefresh} size={18} /> {t("Refresh")}
         </Button>
       </div>
       {targets.length > 0 && (
@@ -171,8 +173,8 @@ export function ProfileTable({
                       {t(label)}
                       {key === sort.key
                         ? sort.direction === "asc"
-                          ? " ↑"
-                          : " ↓"
+                          ? <Icon path={mdiArrowUp} size={16} />
+                          : <Icon path={mdiArrowDown} size={16} />
                         : ""}
                     </button>
                   )}

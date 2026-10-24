@@ -1,5 +1,11 @@
 import { definitions } from "./model.mjs";
 const labels = {
+  "Action sounds": "操作音效",
+  "Action sound volume": "操作音效音量",
+  "Preview action sound": "試聽操作音效",
+  "Play short local tones after completed actions or failed operations. Quiet hours, low stimulation, narration and screen reader mode silence all tones.": "操作完成或失敗後播放簡短本機音效。安靜時段、減少刺激、朗讀及螢幕閱讀器模式會關閉所有音效。",
+  "Adjust action sounds from zero to 100 percent. Zero is silent. Sounds never replace visible results.": "將操作音效音量設定為百分之零至一百。零即靜音。操作結果仍會以文字顯示。",
+  "Preview respects your sound and accessibility preferences. A silent preview means sounds are muted or audio is unavailable.": "試聽會遵從音效及無障礙設定。如果冇聲，即係音效已靜音或音訊無法使用。",
   "Language and voice": "語言與語音",
   Accessibility: "無障礙",
   "Focus and time": "專注與時間",
@@ -27,6 +33,7 @@ const labels = {
   "Show accessibility button": "顯示無障礙按鈕",
   "Accessibility text scale": "無障礙文字比例",
   "Higher contrast": "提高對比度",
+  "High contrast": "高對比度",
   "Stronger keyboard focus": "加強鍵盤焦點",
   "Larger interaction targets": "加大控制項",
   "Focus on the active workspace": "集中顯示目前工作區",
@@ -307,6 +314,8 @@ const help = [
   "在指定閒置時間後提供可關閉的提示；暫時不要會延後指定時間。",
   "從最近鍵盤或滑鼠活動開始計時；提示只陳述時間，不會評價你的工作。",
   "暫時不要會在指定分鐘內保持安靜；重新載入後仍保留期限。",
+  "操作完成或失敗後播放簡短本機音效。安靜時段、減少刺激、朗讀及螢幕閱讀器模式會關閉所有音效。",
+  "將操作音效音量設定為百分之零至一百。零即靜音。操作結果仍會以文字顯示。",
   "一般訊息在指定秒數後自動關閉；警告及錯誤需要手動關閉。",
   "本機時段內減少一般朗讀及彈出提示；錯誤仍可見，所有訊息保留在通知中心。",
   "以本機時區開始安靜時段，可跨越午夜。",

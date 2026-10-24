@@ -5,6 +5,8 @@ export type Language = "en" | "yue" | "both";
 export const zh: Record<string, string> = {
   Profiles: "設定檔",
   Synchronization: "同步",
+  Sync: "同步",
+  "No matches": "冇符合項目",
   Settings: "設定",
   Search: "搜尋",
   "Regex builder": "正則表達式編輯器",

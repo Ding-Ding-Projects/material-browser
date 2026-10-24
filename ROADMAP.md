@@ -1,5 +1,14 @@
 # Roadmap
 
+## WorldLens desktop adaptation
+
+- [x] Adapt pinned WorldLens colors, typography, shapes and motion to React and Material Web
+- [x] Remake the shell, profile and template workspaces, synchronization, setup and Settings
+- [x] Preserve saved appearance choices and prioritize high contrast
+- [x] Add local action sounds with a persisted switch, volume and preview
+- [ ] Complete current built layout and workflow evidence; retain exact platform exclusions
+- [ ] Verify the current Windows installer and installed preference persistence
+
 Current preservation state: component source and focused checks exist, but the complete
 product remains unfinished. Integrated native lifecycle work passed the exact Host build,
 45 Rust workspace tests and two adapter tests. Six real hidden-desktop runs covered local

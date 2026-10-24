@@ -1,4 +1,5 @@
 import test from "node:test";
+import * as actionSounds from "./settings/action-sounds.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
@@ -301,7 +302,7 @@ test("production persistence returns rejected save results without publishing un
   const before = persistence.current.current;
   const result = await persistence.persist((old) => ({
     ...old,
-    preferences: { ...old.preferences, theme: "dark" },
+    preferences: { ...old.preferences, theme: old.preferences.theme === "dark" ? "light" : "dark" },
   }));
   assert.equal(result.ok, false);
   assert.equal(result.message, "Native save rejected");
@@ -336,7 +337,9 @@ test("production settings actions propagate the persistence promise to their cal
           ? React
           : id === "./model.mjs"
             ? model
-            : id === "./history-model.mjs"
+            : id === "./action-sounds.mjs"
+              ? actionSounds
+              : id === "./history-model.mjs"
               ? history
               : { useSettingsPersistence: () => persistence },
       Date,
@@ -453,4 +456,32 @@ test("compact choice keeps its exact owning accessible name without repeating it
     view.nodes.some((node) => node.props.className === "field-label"),
     false,
   );
+});
+
+test("production action notification sounds wait for durable success and stay silent on persistence rejection", async () => {
+  for (const ok of [true, false]) {
+    const waiting = deferred(), record = recordModel.readPresentationRecord(null), heard = [];
+    const persistence = { record, current: { current: record }, persist: () => waiting.promise };
+    const exports = {};
+    vm.runInNewContext(ts.transpileModule(
+      readFileSync(new URL("./settings/store.ts", import.meta.url), "utf8"),
+      { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+    ).outputText, {
+      exports,
+      require: (id) => ({
+        react: { useState: (fn) => [fn(), () => {}], useMemo: (fn) => fn(), useCallback: (fn) => fn, useEffect() {} },
+        "./model.mjs": model,
+        "./history-model.mjs": history,
+        "./action-sounds.mjs": { createActionSounds: () => ({ play: (kind) => heard.push(kind) }) },
+        "./useSettingsPersistence": { useSettingsPersistence: () => persistence },
+      })[id],
+      Date, JSON,
+    });
+    const controller = exports.useSettings();
+    const result = controller.notify("Operation complete", "success");
+    assert.deepEqual(heard, []);
+    waiting.resolve(ok ? { ok: true } : { ok: false, message: "Save rejected" });
+    assert.equal((await result).ok, ok);
+    assert.deepEqual(heard, ok ? ["success"] : []);
+  }
 });

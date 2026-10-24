@@ -2,6 +2,8 @@
 
 - [Profile launch and identity capabilities](profile-launch.md)
 - [Super Profiles](super-profiles.md)
+- [Action sounds and quiet controls](action-sounds.md)
+- [Desktop visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
 The desktop shell provides an isolated React interface backed by the native host. It never seeds demonstration profiles. A standalone web preview cannot operate the vault and explicitly reports that the native host is unavailable.

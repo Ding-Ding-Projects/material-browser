@@ -1,5 +1,13 @@
 # Material Browser handoff
 
+## WorldLens desktop adaptation, 2026-10-24
+
+The desktop remake follows the independently reviewed design in `design/desktop/`, based on WorldLens commit `aaf1063e1ad7826591fa4dd6f504d086451e645b`. The target remains React, TypeScript, Material Web and Electron. Framework-neutral color/token sources and the upstream MIT license are pinned under `apps/desktop/src/design-system/`; `scripts/sync-worldlens-design-system.mjs` verifies their hashes.
+
+Fresh defaults are dark and Roboto. Saved choices, custom accents and fonts survive; high contrast overrides accent changes. Shell, tables, inspectors, dialogs, onboarding and Settings use the shared design. Completion/failure sounds are synthesized locally, with persisted mute/volume, preview and quiet/accessibility suppression. Existing native operations, revision checks and consent flows are retained.
+
+Local sound, theme, settings and workflow checks accompany the change. Linux GUI verification uses a task-owned Electron runtime and disposable data. Native preference writes explicitly require the existing Windows lock implementation and cannot be verified on Linux; the lock was not bypassed. Theme/language matrix preference injection must be labelled separately from actual native save/restart proof. Windows installer, guest lifecycle, physical input and audio output require their own evidence. Earlier screenshots below remain historical.
+
 ## WSL password-manager sources and lock refresh, 2026-10-23
 
 Latest direction: implement everything remaining and push to main. Both WSL routes now exist in source. An ordinary profile with `source: "wsl"` names an existing distribution; before launch the host verifies `/usr/bin/keepassxc-proxy` inside it and writes an app-owned `keepassxc-proxy-<distribution>.cmd` bridge that the Chromium and Firefox registrations point at (`crates/host/src/password_manager.rs`, `crates/host/src/main.rs`). A WSL Super Profile template can carry `passwordManager` with `wslDistribution: "guest"`; provisioning stages and installs guest registrations after verifying the guest proxy, merging the Firefox policy with managed bookmarks (`crates/host/src/super_profiles/password_manager_guest.rs`, `crates/core/src/super_profiles.rs`). `passwordManager.detect` lists distributions from `wsl -l -q`; the creation form offers a distribution picker and the Super Profile wizard offers guest pairing fields. The desktop `package-lock.json` was regenerated with `npm install --package-lock-only`; `npm ci` now succeeds.

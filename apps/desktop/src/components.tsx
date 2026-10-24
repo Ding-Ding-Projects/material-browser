@@ -213,7 +213,7 @@ export function Tabs({
     items.map(([id, label]) =>
       React.createElement(
         "md-primary-tab",
-        { key: id, "aria-controls": panelPrefix + "-" + id },
+        { key: id, id: `${panelPrefix}-tab-${id}`, "aria-controls": panelPrefix + "-" + id },
         label,
       ),
     ),

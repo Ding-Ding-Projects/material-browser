@@ -6,6 +6,7 @@ import {
   validateSchedule,
   effectivePreferences,
 } from "./model.mjs";
+import { createActionSounds } from "./action-sounds.mjs";
 import { historyTransition } from "./history-model.mjs";
 import { useSettingsPersistence } from "./useSettingsPersistence";
 import type { SettingsRecord, Preferences, Notice } from "./types";
@@ -20,6 +21,21 @@ export function useSettings() {
     saving,
     reloadSaved,
   } = useSettingsPersistence();
+  const [actionSounds] = useState(() => createActionSounds({
+    getPreferences: () => effectivePreferences(
+      current.current.preferences, current.current.schedules, new Date(),
+    ).preferences,
+  }));
+  useEffect(() => {
+    const unlock = () => { void actionSounds.unlock(); };
+    window.addEventListener("pointerdown", unlock, { capture: true });
+    window.addEventListener("keydown", unlock, { capture: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock, { capture: true });
+      window.removeEventListener("keydown", unlock, { capture: true });
+      actionSounds.dispose();
+    };
+  }, [actionSounds]);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
@@ -64,7 +80,13 @@ export function useSettings() {
   const update = useCallback(
     (key: string, value: any) => {
       validateValue(key, value);
-      return persist(
+      let releaseSoundHold: (() => void) | undefined;
+      if ((key === "actionSounds" && !value) ||
+          (key === "actionSoundVolume" && value === 0) ||
+          (["lowStimulation", "screenReaderMode", "narration", "quietEnabled"].includes(key) && value)) {
+        releaseSoundHold = actionSounds.hold();
+      }
+      const operation = persist(
         (old) =>
           historyTransition(
             old,
@@ -80,8 +102,10 @@ export function useSettings() {
             },
           ) as SettingsRecord,
       );
+      if (releaseSoundHold) void operation.finally(releaseSoundHold);
+      return operation;
     },
-    [persist],
+    [persist, actionSounds],
   );
   const notify = useCallback(
     (message: string, kind: Notice["kind"] = "info") =>
@@ -97,14 +121,19 @@ export function useSettings() {
             dismissed: false,
           },
         ].slice(-500),
-      })),
-    [persist],
+      })).then((result) => {
+        if (result.ok && (kind === "success" || kind === "error")) actionSounds.play(kind);
+        return result;
+      }),
+    [persist, actionSounds],
   );
   const effective = useMemo(
     () => effectivePreferences(record.preferences, record.schedules, now),
     [record.preferences, record.schedules, now],
   );
+  useEffect(() => { actionSounds.sync(); }, [actionSounds, effective.preferences]);
   return {
+    previewSound: actionSounds.preview,
     record,
     preferences: effective.preferences,
     activeSchedules: effective.active,

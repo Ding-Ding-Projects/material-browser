@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import type { Preferences } from "./store";
+import type { Preferences, SettingsRecord } from "./store";
+import { applyPresentationTheme } from "../design-system/theme.mjs";
 import { selectVoice, narrationAllowed } from "./messages.mjs";
 import { enqueueSpeechGroups, takeSpeechPart } from "./speech-queue.mjs";
 import { timeWindowMatches } from "./model.mjs";
-export function usePresentationEffects(prefs: Preferences) {
+export function usePresentationEffects(prefs: Preferences, record?: SettingsRecord) {
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.accessibilityVisible = String(prefs.accessibilityVisible);
@@ -18,6 +19,7 @@ export function usePresentationEffects(prefs: Preferences) {
     root.dataset.focusMode = String(prefs.focus);
     root.dataset.lowStimulation = String(prefs.lowStimulation);
     const families: Record<string, string> = {
+      Roboto: 'Roboto,"Microsoft JhengHei","PingFang HK",sans-serif',
       system: '"Segoe UI",system-ui,"Microsoft JhengHei",sans-serif',
       "sans-serif": 'Arial,"Microsoft JhengHei",sans-serif',
       serif: 'Georgia,"Microsoft JhengHei",serif',
@@ -34,9 +36,13 @@ export function usePresentationEffects(prefs: Preferences) {
       String(prefs.fontScale * prefs.textScale),
     );
     root.style.setProperty("--interface-weight", String(prefs.fontWeight));
-    root.style.setProperty("--md-sys-color-primary", prefs.accent);
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyTheme = () => applyPresentationTheme(root, prefs, record, media.matches);
+    applyTheme();
+    media.addEventListener("change", applyTheme);
     root.lang = prefs.language === "yue" ? "zh-HK" : "en";
-  }, [prefs]);
+    return () => media.removeEventListener("change", applyTheme);
+  }, [prefs, record]);
 }
 export function useNarrator(prefs: Preferences) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);

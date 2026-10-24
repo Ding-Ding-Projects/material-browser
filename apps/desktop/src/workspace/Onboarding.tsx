@@ -1,3 +1,4 @@
+import "./surfaces.css";
 import React from "react";
 import { Button, Field } from "../components";
 import { request } from "../api";
@@ -20,7 +21,7 @@ export function Onboarding({
   setPage,
 }: any) {
   return (
-    <section className="surface wizard">
+    <section className="surface wizard setup-wizard">
       <div className="eyebrow">
         {t("Setup progress")} {setup + 1}/4
       </div>
@@ -35,6 +36,7 @@ export function Onboarding({
         )}
       </h1>
       <progress max={4} value={setup + 1} aria-label={t("Setup progress")} />
+      {!status && <p role="status">{t("Backend unavailable")}</p>}
       {setup === 0 && (
         <>
           {status?.unlocked ? (
@@ -99,7 +101,7 @@ export function Onboarding({
       {setup === 1 && (
         <>
           {profileForm}
-          <p>{profiles.length} profiles</p>
+          <p>{profiles.length} {t("Profiles")}</p>
         </>
       )}
       {setup === 2 && (
@@ -122,7 +124,7 @@ export function Onboarding({
           )}
         </p>
       )}
-      <div className="actions">
+      <div className="actions wizard-footer">
         <Button
           secondary
           disabled={setup === 0 || busy}
@@ -131,7 +133,7 @@ export function Onboarding({
           {t("Back")}
         </Button>
         {setup === 2 && (
-          <Button secondary onClick={() => setSetup(3)}>
+          <Button secondary disabled={busy} onClick={() => setSetup(3)}>
             {t("Skip")}
           </Button>
         )}

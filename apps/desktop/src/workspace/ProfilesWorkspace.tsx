@@ -1,3 +1,6 @@
+import "./surfaces.css";
+import { Icon } from "../Icon";
+import { mdiPlus } from "@mdi/js";
 import { ProfileTable } from "./ProfileTable";
 import { ProfileInspector } from "./ProfileInspector";
 import React, { useEffect, useRef, useState } from "react";
@@ -223,19 +226,26 @@ export function ProfilesWorkspace({
       direction:
         current.key === key && current.direction === "asc" ? "desc" : "asc",
     }));
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const focusDetail = () => requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".detail-title")?.focus());
+  const returnToList = (show: boolean) => {
+    setShowDetail(show);
+    if (!show) requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>("tr.selected .record-name")?.focus());
+  };
   const select = (id: string) => {
     onSelect(id);
     setShowDetail(true);
+    focusDetail();
   };
   const date = (value?: number | string) =>
     timestampDate(value)?.toLocaleString() || t("Unavailable");
   const [width, setWidth] = useState(() => {
     try {
       return inspectorWidth(
-        localStorage.getItem("profileInspectorWidth") || 340,
+        localStorage.getItem("profileInspectorWidth") || 336,
       );
     } catch {
-      return 340;
+      return 336;
     }
   });
   const resize = (value: number) => {
@@ -247,6 +257,7 @@ export function ProfilesWorkspace({
   };
   return (
     <div
+      ref={workspaceRef}
       className={`profile-workspace ${showDetail && profile ? "show-detail" : ""}`}
     >
       <div className="page-heading">
@@ -258,7 +269,7 @@ export function ProfilesWorkspace({
           </p>
         </div>
         <Button disabled={!unlocked || busy} onClick={onCreate}>
-          {t("Create profile")}
+          <Icon path={mdiPlus} size={18} /> {t("Create profile")}
         </Button>
       </div>
       <div
@@ -303,7 +314,7 @@ export function ProfilesWorkspace({
             busy,
             unlocked,
             t,
-            setShowDetail,
+            setShowDetail: returnToList,
             setTab,
             loadRevisions,
             date,

@@ -388,7 +388,16 @@ export function SettingsWorkspace({
             </section>
           )}
           {section === "notifications" && (
-            <NotificationCenter controller={c} t={t} />
+            <>
+              <section className="setting-card">
+                <h2>{t("Action sounds")}</h2>
+                <p>{t("Preview respects your sound and accessibility preferences. A silent preview means sounds are muted or audio is unavailable.")}</p>
+                <Button secondary onClick={() => { void c.previewSound(); }}>
+                  {t("Preview action sound")}
+                </Button>
+              </section>
+              <NotificationCenter controller={c} t={t} />
+            </>
           )}
           {section === "schedules" && <Schedules controller={c} t={t} />}
           {section === "history" && <HistoryTransfer controller={c} t={t} />}

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { Icon } from "../Icon";
+import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "@mdi/js";
+import React, { useState, useId } from "react";
 import { Profile } from "../api";
 import { Button, Select, Tabs } from "../components";
 import { Search } from "../Search";
@@ -58,6 +60,7 @@ export function ProfileInspector({
   setDraftAutomation,
   execute,
 }: Props) {
+  const panelPrefix = useId();
   const [automationMatches, setAutomationMatches] = useState<number[]>([0]);
   return (
     <section
@@ -67,21 +70,21 @@ export function ProfileInspector({
       {profile ? (
         <>
           <button className="back-to-list" onClick={() => setShowDetail(false)}>
-            ← {t("Back to profiles")}
+            <Icon path={mdiArrowLeft} size={20} /> {t("Back to profiles")}
           </button>
           <div className="detail-heading">
             <span className="avatar" aria-hidden="true">
               {profile.name.slice(0, 1).toUpperCase()}
             </span>
             <div>
-              <h2>{profile.name}</h2>
+              <h2 className="detail-title" tabIndex={-1}>{profile.name}</h2>
               <p>
                 {profile.engine} · {t(observedRuntime(runtime))}
               </p>
             </div>
             <details className="inspector-resize">
               <summary title={t("Inspector width")}>
-                <span aria-hidden="true">↔</span>
+                <Icon path={mdiArrowExpandHorizontal} size={20} />
                 <span className="sr-only">{t("Inspector width")}</span>
               </summary>
               <label>
@@ -99,7 +102,7 @@ export function ProfileInspector({
             </details>
           </div>
           <Tabs
-            panelPrefix="profile-panel"
+            panelPrefix={panelPrefix}
             items={["overview", "revisions", "automation"].map((key) => [
               key,
               t(key[0].toUpperCase() + key.slice(1)),
@@ -110,10 +113,12 @@ export function ProfileInspector({
               if (value === "revisions") void loadRevisions();
             }}
           />
-          <div role="tabpanel" id={`profile-panel-${tab}`}>
+          <div role="tabpanel" id={`${panelPrefix}-${tab}`} aria-labelledby={`${panelPrefix}-tab-${tab}`}>
             {tab === "overview" ? (
               <>
                 <dl className="profile-facts">
+                  <dt>ID</dt><dd className="literal">{profile.id}</dd>
+                  <dt>{t("Engine")}</dt><dd>{profile.engine}</dd>
                   <dt>{t("Updated")}</dt>
                   <dd>{date(profile.updatedAt)}</dd>
                   <dt>{t("Created")}</dt>
@@ -153,7 +158,7 @@ export function ProfileInspector({
                     disabled={busy || !unlocked}
                     onClick={() => onLaunch({ ...profile })}
                   >
-                    {t("Launch")}
+                    <Icon path={mdiPlay} size={18} /> {t("Launch")}
                   </Button>
                   {[
                     ["profiles.focus", "Focus"],
@@ -197,7 +202,7 @@ export function ProfileInspector({
                   <summary>{t("Profile identity")}</summary>
                   <dl>
                     <dt>ID</dt>
-                    <dd>{profile.id}</dd>
+                    <dd className="literal">{profile.id}</dd>
                     {Object.entries(profile.identity || {}).map(
                       ([key, value]) => (
                         <React.Fragment key={key}>
@@ -230,6 +235,7 @@ export function ProfileInspector({
                   {t("Refresh")}
                 </Button>
                 {!revisions.length && <p>{t("No revisions")}</p>}
+                {revisions.length > 0 && !revisionKeys.length && <p>{t("No results")}</p>}
                 {revisions
                   .filter((r) => revisionKeys.includes(r.id))
                   .map((r) => (

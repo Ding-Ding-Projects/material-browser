@@ -48,7 +48,10 @@ test("history apply rejects missing revision and an ABA change despite matching 
   );
   const b = await store.write(
     request(a.record, {
-      preferences: { ...a.record.preferences, theme: "dark" },
+      preferences: {
+        ...a.record.preferences,
+        theme: a.record.preferences.theme === "dark" ? "light" : "dark",
+      },
     }),
   );
   await store.write(request(b.record, { preferences: a.record.preferences }));
@@ -107,17 +110,18 @@ test("history apply checks the expected snapshot and supports idempotent recover
   const { store } = await fixture(t);
   const initial = (await store.read()).record;
   const a = await store.write(request(initial));
+  const changedTheme = a.record.preferences.theme === "dark" ? "light" : "dark";
   const before = snapshot(a.record),
     after = {
       ...before,
-      preferences: { ...before.preferences, theme: "dark" },
+      preferences: { ...before.preferences, theme: changedTheme },
     };
   const context = {
     expected: before,
     expectedNativeRevision: a.record.revision,
   };
   const restored = await store.apply(after, context);
-  assert.equal(restored.record.preferences.theme, "dark");
+  assert.equal(restored.record.preferences.theme, changedTheme);
   assert.deepEqual(restored.record.writtenKeys, ["theme"]);
   assert.equal((await store.apply(after, context)).changed, false);
   await assert.rejects(

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "targetRepository": "material-browser",
+  "targetCommit": "0b68532159e3e821f44cbc1549ffa170806d8b94",
+  "referenceRepository": "worldlens",
+  "referenceCommit": "aaf1063e1ad7826591fa4dd6f504d086451e645b",
+  "purpose": "Design provenance only; no target runtime verification",
+  "references": [
+    {
+      "path": "design/packages/design-system/src/colors.ts",
+      "sha256": "8dde557d033cf7cbbd266a7287b9864e6d44a92eea713dba51894bc1589ac151"
+    },
+    {
+      "path": "design/packages/design-system/src/tokens.css",
+      "sha256": "24f0cff01573879e29a4d1e22970ccea7b1e6e899f6e9578be375966cc78e5f9"
+    },
+    {
+      "path": "design/packages/design-system/src/theme.ts",
+      "sha256": "db4cd38e4575cac9b56f4a44567dbcc3c9e1c3f712c6ad1d211cebe96d265796"
+    },
+    {
+      "path": "docs/design-system.md",
+      "sha256": "b31394abdd0eaf17d16b23c9ad43dee01c3f85a4a45787ef61478edba10a6341"
+    },
+    {
+      "path": "design/packages/ui/src/components/shell/AppRail.vue",
+      "sha256": "f22bab9c60341cea6e7560ab45f34e38e57001eae3685dd76fd0e47fd8b1a372"
+    },
+    {
+      "path": "design/packages/ui/src/components/shell/WorkPane.vue",
+      "sha256": "1ca7bcadb74d37a483c8ee3d941d8f1b66c94204212c125cac4faab8b52dec47"
+    },
+    {
+      "path": "docs/screenshots/theme-dark.png",
+      "sha256": "1b41a27e6723124cfb539c9e70c70c0181655a54e9600df6ec58faf356ee366d"
+    },
+    {
+      "path": "docs/screenshots/theme-dark.caption.txt",
+      "sha256": "a7c45aaccee8f821ffb2e911ed4c3de9c641c48a935b3a7fd21dfd366a4fa1bd"
+    },
+    {
+      "path": "docs/screenshots/shell-800x600-narrow.png",
+      "sha256": "2433ccbb603880719ed5bf23cfabb9c4f276703395d067a3456a1722860ae9fe"
+    },
+    {
+      "path": "docs/screenshots/shell-800x600-narrow.caption.txt",
+      "sha256": "e024ead0bbcbd507c9c1360a8dbc5ccea1c4a89e4b2be18bf21ddd3356453e3a"
+    },
+    {
+      "path": "docs/screenshots/settings-1280-scale200.png",
+      "sha256": "9c10821785f047877983ec5a50bf294d910f87de5493d3ee24a4f85da85a544c"
+    },
+    {
+      "path": "docs/screenshots/settings-1280-scale200.caption.txt",
+      "sha256": "06038da6b57a71f65f85a55cb9d573b64c6f9f6068cfa0e08db054d0dd94c682"
+    }
+  ]
+}

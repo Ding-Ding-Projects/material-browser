@@ -15,9 +15,9 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
   const setting=(value:Partial<SuperProfileSettings>)=>setDraft(d=>({...d,settings:{...d.settings,...value}}));
   const lines=(label:string,field:'setupCommands'|'startupCommands'|'installers')=><label>{t(label)}<textarea value={(draft.settings[field] || []).join('\n')} onChange={e=>setting({[field]:e.target.value.split('\n').filter(line=>line.trim())})}/></label>;
   const titles=['Template','Environment','Startup and files','Review'];
-  return <section className="surface" aria-label={t('Super Profile wizard')}>
+  return <section className="surface super-wizard" aria-label={t('Super Profile wizard')}>
     <h2>{t(profile ? 'Edit template' : 'Create Super Profile')}</h2>
-    <p>{t('Step')} {draft.step+1} / 4: {t(titles[draft.step])}</p>
+    <p className="eyebrow">{t('Step')} {draft.step+1} / 4: {t(titles[draft.step])}</p>
     <progress max={4} value={draft.step+1} aria-label={t('Setup progress')}/>
     <div className="super-actions">
       {!profile && <Button secondary disabled={busy} onClick={()=>{try {const saved=readSuperProfileDraft(localStorage.getItem(key));setDraft(saved);setMessage('Draft restored');}catch {setMessage('No valid saved draft');}}}>{t('Resume draft')}</Button>}
@@ -64,7 +64,7 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
         <p>{t('Standard launch uses the engine’s normal identity. It does not provide identity spoofing, stable cross-device identity or portable browser credentials.')}</p>
       </>}
     </fieldset>
-    <div className="super-actions">
+    <div className="super-actions wizard-footer">
       <Button secondary disabled={busy} onClick={onCancel}>{t('Cancel')}</Button>
       <Button secondary disabled={busy||draft.step===0} onClick={()=>update({step:draft.step-1})}>{t('Back')}</Button>
       {draft.step<3 ? <Button disabled={busy||!draft.name.trim()} onClick={()=>update({step:draft.step+1})}>{t('Next')}</Button> : <Button disabled={busy||!draft.name.trim()} onClick={()=>void onSave({name:draft.name.trim(),engine:draft.engine,settings:persistSuperProfileConfiguration({...draft.settings,engine:draft.engine})}).then(()=>localStorage.removeItem(key)).catch(()=>{})}>{t('Save template')}</Button>}

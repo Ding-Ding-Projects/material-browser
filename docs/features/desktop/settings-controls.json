@@ -1318,6 +1318,88 @@
       "localization": [],
       "tests": [],
       "runtimeEvidence": []
+    },
+    {
+      "id": "actionSounds",
+      "section": "notifications",
+      "label": "Action sounds",
+      "purpose": "Play short local tones after completed actions or failed operations. Quiet hours, low stimulation, narration and screen reader mode silence all tones.",
+      "type": "boolean",
+      "default": true,
+      "options": null,
+      "bounds": null,
+      "sourceProvenance": "Compiled default until explicitly saved in native presentation preferences.",
+      "persistence": "native presentation preferences: actionSounds",
+      "validation": "apps/desktop/shared/settings-model.mjs#validateValue",
+      "implementation": "implemented-source",
+      "consumer": {
+        "status": "implemented-source",
+        "route": "settings/action-sounds.mjs and settings/store.ts"
+      },
+      "guide": {
+        "id": "help-actionSounds",
+        "entry": "info-actionSounds",
+        "placement": "above-control",
+        "example": "true",
+        "playground": "sample-actionSounds",
+        "lifetime": "per-open-session, no production writes",
+        "status": "implemented-source"
+      },
+      "clear": null,
+      "reset": "reset-actionSounds",
+      "localization": [
+        "English",
+        "Cantonese",
+        "bilingual"
+      ],
+      "tests": [
+        "apps/desktop/src/action-sounds.test.mjs",
+        "apps/desktop/src/settings-workflows.test.mjs"
+      ],
+      "runtimeEvidence": []
+    },
+    {
+      "id": "actionSoundVolume",
+      "section": "notifications",
+      "label": "Action sound volume",
+      "purpose": "Adjust action sounds from zero to 100 percent. Zero is silent. Sounds never replace visible results.",
+      "type": "number",
+      "default": 35,
+      "options": null,
+      "bounds": {
+        "min": 0,
+        "max": 100,
+        "step": 5
+      },
+      "sourceProvenance": "Compiled default until explicitly saved in native presentation preferences.",
+      "persistence": "native presentation preferences: actionSoundVolume",
+      "validation": "apps/desktop/shared/settings-model.mjs#validateValue",
+      "implementation": "implemented-source",
+      "consumer": {
+        "status": "implemented-source",
+        "route": "settings/action-sounds.mjs and settings/store.ts"
+      },
+      "guide": {
+        "id": "help-actionSoundVolume",
+        "entry": "info-actionSoundVolume",
+        "placement": "above-control",
+        "example": "35",
+        "playground": "sample-actionSoundVolume",
+        "lifetime": "per-open-session, no production writes",
+        "status": "implemented-source"
+      },
+      "clear": null,
+      "reset": "reset-actionSoundVolume",
+      "localization": [
+        "English",
+        "Cantonese",
+        "bilingual"
+      ],
+      "tests": [
+        "apps/desktop/src/action-sounds.test.mjs",
+        "apps/desktop/src/settings-workflows.test.mjs"
+      ],
+      "runtimeEvidence": []
     }
   ],
   "workflows": [

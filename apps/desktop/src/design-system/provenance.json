@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/Ding-Ding-Projects/worldlens",
+  "sourceCommit": "aaf1063e1ad7826591fa4dd6f504d086451e645b",
+  "license": "MIT",
+  "files": [
+    {
+      "source": "design/packages/design-system/src/colors.ts",
+      "destination": "vendor/colors.ts",
+      "sha256": "8dde557d033cf7cbbd266a7287b9864e6d44a92eea713dba51894bc1589ac151"
+    },
+    {
+      "source": "design/packages/design-system/src/tokens.css",
+      "destination": "vendor/tokens.css",
+      "sha256": "24f0cff01573879e29a4d1e22970ccea7b1e6e899f6e9578be375966cc78e5f9"
+    },
+    {
+      "source": "LICENSE",
+      "destination": "vendor/LICENSE",
+      "sha256": "b26ddeb6cc71ec22a66bc3f86f2e7c067f2354c01e67d76f3f89300589cd8b41"
+    }
+  ]
+}

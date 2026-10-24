@@ -1,0 +1,99 @@
+@import '@fontsource/roboto/latin-300.css';
+@import '@fontsource/roboto/latin-400.css';
+@import '@fontsource/roboto/latin-500.css';
+@import '@fontsource/roboto/latin-600.css';
+@import '@fontsource/roboto/latin-700.css';
+@import '@fontsource/roboto-mono/latin-400.css';
+@import './vendor/tokens.css';
+
+/* Framework-neutral adaptation. Theme effects apply the full pinned role set. */
+:root {
+  /* Initial paint is dark; values match the pinned DARK_SCHEME byte-for-byte. */
+  --md-sys-color-primary: #8FCDFF;
+  --md-sys-color-on-primary: #003351;
+  --md-sys-color-primary-container: #004B73;
+  --md-sys-color-on-primary-container: #CEE5FF;
+  --md-sys-color-secondary: #B7C9D9;
+  --md-sys-color-on-secondary: #22323F;
+  --md-sys-color-secondary-container: #384956;
+  --md-sys-color-on-secondary-container: #D3E5F5;
+  --md-sys-color-tertiary: #D1BFE7;
+  --md-sys-color-on-tertiary: #372A49;
+  --md-sys-color-tertiary-container: #4E4161;
+  --md-sys-color-on-tertiary-container: #EDDCFF;
+  --md-sys-color-error: #FFB4AB;
+  --md-sys-color-on-error: #410002;
+  --md-sys-color-error-container: #93000A;
+  --md-sys-color-on-error-container: #FFDAD6;
+  --md-sys-color-background: #0B0E11;
+  --md-sys-color-on-background: #E1E2E8;
+  --md-sys-color-surface: #101418;
+  --md-sys-color-on-surface: #E1E2E8;
+  --md-sys-color-surface-dim: #101418;
+  --md-sys-color-surface-bright: #37393E;
+  --md-sys-color-surface-light: #272A2E;
+  --md-sys-color-surface-container-lowest: #0B0E11;
+  --md-sys-color-surface-container-low: #191C20;
+  --md-sys-color-surface-container: #1D2024;
+  --md-sys-color-surface-container-high: #272A2E;
+  --md-sys-color-surface-container-highest: #323539;
+  --md-sys-color-surface-variant: #42474E;
+  --md-sys-color-on-surface-variant: #C2C7CF;
+  --md-sys-color-outline: #8C9199;
+  --md-sys-color-outline-variant: #42474E;
+  --md-sys-color-inverse-surface: #E1E2E8;
+  --md-sys-color-inverse-on-surface: #2E3135;
+  --md-sys-color-inverse-primary: #00639B;
+  --md-sys-color-surface-tint: #8FCDFF;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-shadow: #000000;
+
+  --interface-font: Roboto, 'Microsoft JhengHei', 'PingFang HK', sans-serif;
+  --literal-font: 'Roboto Mono', Consolas, 'Microsoft JhengHei', monospace;
+  --md-ref-typeface-plain: var(--interface-font);
+  --md-ref-typeface-brand: var(--interface-font);
+  --md-sys-typescale-body-large-weight: var(--interface-weight, 400);
+  --md-sys-typescale-body-medium-weight: var(--interface-weight, 400);
+  --md-sys-typescale-body-small-weight: var(--interface-weight, 400);
+  --panel: var(--md-sys-color-surface);
+  --border: var(--md-sys-color-outline-variant);
+  --muted: var(--md-sys-color-on-surface-variant);
+  --md-sys-elevation-shadow-level0: none;
+  --md-sys-elevation-shadow-level1: 0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 1px 3px 1px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+  --md-sys-elevation-shadow-level2: 0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 2px 6px 2px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+  --md-sys-elevation-shadow-level3: 0 1px 3px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 4px 8px 3px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+  --md-sys-elevation-shadow-level4: 0 2px 3px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 6px 10px 4px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+  --md-sys-elevation-shadow-level5: 0 4px 4px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 8px 12px 6px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent);
+
+  /* Public component tokens inherit through Material Web shadow roots. */
+  --md-filled-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-outlined-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-filled-button-container-height: 44px;
+  --md-outlined-button-container-height: 44px;
+  --md-filled-button-label-text-font: var(--interface-font);
+  --md-outlined-button-label-text-font: var(--interface-font);
+  --md-outlined-text-field-container-shape: var(--md-sys-shape-corner-md);
+  --md-outlined-select-text-field-container-shape: var(--md-sys-shape-corner-md);
+  --md-outlined-text-field-input-text-font: var(--interface-font);
+  --md-outlined-text-field-label-text-font: var(--interface-font);
+  --md-outlined-select-text-field-input-text-font: var(--interface-font);
+  --md-outlined-select-text-field-label-text-font: var(--interface-font);
+  --md-dialog-container-shape: var(--md-sys-shape-corner-xl);
+  --md-dialog-container-color: var(--md-sys-color-surface-container-high);
+  --md-dialog-headline-font: var(--interface-font);
+  --md-dialog-supporting-text-font: var(--interface-font);
+  --md-menu-container-shape: var(--md-sys-shape-corner-xl);
+  --md-menu-container-color: var(--md-sys-color-surface-container-high);
+  --md-primary-tab-label-text-font: var(--interface-font);
+  --md-primary-tab-container-color: transparent;
+  --md-primary-tab-active-indicator-color: var(--md-sys-color-primary);
+  --md-primary-tab-active-label-text-color: var(--md-sys-color-primary);
+  --md-primary-tab-inactive-label-text-color: var(--md-sys-color-on-surface-variant);
+}
+
+:root[data-resolved-theme='contrast'] {
+  --border: var(--md-sys-color-outline);
+  --md-outlined-text-field-outline-width: 2px;
+  --md-outlined-select-text-field-outline-width: 2px;
+  --md-outlined-button-outline-width: 2px;
+}
