@@ -167,11 +167,13 @@ export function SettingsWorkspace({
         <h1>{t("Settings")}</h1>
         <p role="status">
           {t(
-            !c.storageReady
-              ? "Loading saved preferences"
-              : c.saving
-                ? "Saving preferences"
-                : "Settings are saved on this device.",
+            c.storageError
+              ? "Preference storage needs attention"
+              : !c.storageReady
+                ? "Loading saved preferences"
+                : c.saving
+                  ? "Saving preferences"
+                  : "Settings are saved on this device.",
           )}
         </p>
       </div>

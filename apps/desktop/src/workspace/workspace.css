@@ -1,5 +1,7 @@
 /* Shared table, inspector and workspace geometry. */
 .profiles-layout {
+  display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr) var(--inspector-width, 336px);
   gap: 12px;
   align-items: start;
@@ -692,7 +694,7 @@ md-outlined-button {
   gap: 12px;
   margin-bottom: 12px;
 }
-.workspace-main .surface {
+.workspace-main :where(.surface) {
   border-radius: 16px;
   box-shadow: none;
 }

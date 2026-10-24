@@ -44,6 +44,14 @@ export async function measure(page) {
         elements.push({ selector,matchedCount:matches.length,chosenIndex:index,...describe(element),ancestors:Array.from((function*(){let p=element.parentElement;for(let n=0;p&&n<4;n++,p=p.parentElement)yield p;})()).map(describe) });
       });
     }
+    const dialogHosts = Array.from(document.querySelectorAll('md-dialog'));
+    dialogHosts.forEach((host,index) => {
+      const dialog = host.shadowRoot?.querySelector('dialog');
+      if (!dialog) return;
+      const r = dialog.getBoundingClientRect();
+      if (!r.width || !r.height || getComputedStyle(dialog).visibility === 'hidden') return;
+      elements.push({ selector:'md-dialog::shadow dialog',matchedCount:dialogHosts.length,chosenIndex:index,...describe(dialog),ancestors:[describe(host),describe(document.documentElement)] });
+    });
     const escaped = Array.from(document.querySelectorAll('button,input,select,textarea,md-filled-button,md-outlined-button,md-text-button,[role="tab"]')).filter(e => { const r=e.getBoundingClientRect(); return r.width&&r.height&&(r.left < -1 || r.right > innerWidth+1); }).map(e=>({tag:e.tagName,text:(e.getAttribute('aria-label')||e.textContent||'').trim().slice(0,100),rect:rect(e)}));
     return { viewport:{width:innerWidth,height:innerHeight,devicePixelRatio},document:{scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,scrollHeight:document.documentElement.scrollHeight},presentation:{...document.documentElement.dataset},fonts:{status:document.fonts.status,roboto:document.fonts.check('14px Roboto'),robotoMono:document.fonts.check('14px "Roboto Mono"')},focused:{tag:document.activeElement?.tagName,id:document.activeElement?.id},elements,controlsOutsideViewportX:escaped };
   });

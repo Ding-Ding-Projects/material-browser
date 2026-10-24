@@ -403,7 +403,7 @@
       "label": "Theme",
       "purpose": "Apply a light or dark palette immediately. A matching schedule can temporarily override this base choice.",
       "type": "select",
-      "default": "light",
+      "default": "dark",
       "options": [
         [
           "light",
@@ -412,6 +412,14 @@
         [
           "dark",
           "Dark"
+        ],
+        [
+          "system",
+          "Follow operating system"
+        ],
+        [
+          "contrast",
+          "High contrast"
         ]
       ],
       "bounds": null,
@@ -427,7 +435,7 @@
         "id": "help-theme",
         "entry": "info-theme",
         "placement": "above-control",
-        "example": "light",
+        "example": "dark",
         "playground": "sample-theme",
         "lifetime": "per-open-session, no production writes",
         "status": "planned"
@@ -485,7 +493,7 @@
       "label": "Accent",
       "purpose": "Choose the primary accent with the continuous native color selector or exact hexadecimal entry. Full multi-space color conversion remains incomplete.",
       "type": "color",
-      "default": "#475f99",
+      "default": "#8FCDFF",
       "options": null,
       "bounds": null,
       "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
@@ -500,7 +508,7 @@
         "id": "help-accent",
         "entry": "info-accent",
         "placement": "above-control",
-        "example": "#475f99",
+        "example": "#8FCDFF",
         "playground": "sample-accent",
         "lifetime": "per-open-session, no production writes",
         "status": "planned"
@@ -516,9 +524,13 @@
       "section": "appearance",
       "label": "Interface font",
       "purpose": "Select a platform font family with a CJK-safe fallback. Installed-font enumeration and variable-axis editing are not yet available.",
-      "type": "select",
-      "default": "system",
+      "type": "font",
+      "default": "Roboto",
       "options": [
+        [
+          "Roboto",
+          "Roboto"
+        ],
         [
           "system",
           "System interface"
@@ -549,7 +561,7 @@
         "id": "help-fontFamily",
         "entry": "info-fontFamily",
         "placement": "above-control",
-        "example": "system",
+        "example": "Roboto",
         "playground": "sample-fontFamily",
         "lifetime": "per-open-session, no production writes",
         "status": "planned"
