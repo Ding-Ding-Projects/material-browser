@@ -1,0 +1,68 @@
+{
+  "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+  "sourceTreeSha256": "078414b2b1cc466789911c7992ec2832fa34ffc39e81af7ca8b518c851d89d8c",
+  "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+  "captures": 143,
+  "mainCaptures": 137,
+  "supplementCaptures": 6,
+  "matrixTuples": 72,
+  "coveredStates": 61,
+  "inventoryStates": 241,
+  "uncoveredStates": 180,
+  "sourceStable": true,
+  "artifactStable": true,
+  "rendererErrors": 0,
+  "scenarioFailures": 0,
+  "supplementProof": [
+    {
+      "action": "preview-action-sound",
+      "scope": "Actual user-gesture button invocation; no claim about audible output or native preference persistence."
+    },
+    {
+      "action": "emulated-media",
+      "result": {
+        "forcedColors": true,
+        "reducedMotion": true
+      }
+    },
+    {
+      "action": "reset-reachability",
+      "obstructedKey": "accent",
+      "pointerClickAfterScroll": true,
+      "nativePersistenceVerified": false
+    },
+    {
+      "action": "choice-keyboard-escape-after-tab",
+      "remainingPopovers": 0
+    },
+    {
+      "action": "local-table-geometry",
+      "metrics": {
+        "clientWidth": 349,
+        "scrollWidth": 640,
+        "overflowX": "auto",
+        "documentWidth": 372,
+        "viewportWidth": 380
+      }
+    },
+    {
+      "action": "local-table-scroll",
+      "scrollLeft": 291.5
+    }
+  ],
+  "cleanup": {
+    "electronMainProcessesAbsent": true,
+    "supplementNativeHostAbsent": true,
+    "referenceServerAbsent": true,
+    "xvfbAbsent": true,
+    "mainNativeHostIndividualPidRecorded": false
+  },
+  "limits": [
+    "Linux unpackaged Electron and actual Linux Rust host, not Windows acceptance.",
+    "Presentation variants use actual legacy reader because native preference persistence requires Windows.",
+    "Sound preview invoked; audibility not proven.",
+    "Forced colors and reduced motion are Chromium CSS emulation.",
+    "Floating Accessibility overlaps content at certain scroll positions; initially obstructed Accent Reset was pointer reachable after scrolling.",
+    "Synthetic profiles retained in private task scratch; no user data touched."
+  ]
+}

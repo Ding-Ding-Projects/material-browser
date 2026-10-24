@@ -103,5 +103,55 @@
     "path": "docs/evidence/desktop/gui-rewrite/revisions.png",
     "sha256": "2e03cb0cc8d9d22520fc447037ca34b68458613355c0e2554b71c42a197aa00e",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/profile-overview.png",
+    "sha256": "f0cd418acd9bf02ecb07703ef8caa39d90983d72823b1d8f243394c4438c1110",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/super-metadata-result.png",
+    "sha256": "3e3259c39797fdcbca1ede72801d06fab8af0a4ce2d65c9c4537ad7c71a86a77",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/synchronization.png",
+    "sha256": "1c31485d7f29058d2eca76232053b8fc7ad601f286c918a5d5a4af830773b4df",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/setup-fresh.png",
+    "sha256": "1322b836b52f53001248a5f3061e50d0c69a182eb68b52091570489c3ebf5658",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/launch-review.png",
+    "sha256": "cb43f4da41792f11fe7991ffdf6b5a7904a822bcae820d2f1cd97a5a16ff2109",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/settings-notifications.png",
+    "sha256": "e71ba5bf9995272bbc704414a2d8d1685700604a0932c0cbf751892b099c0f05",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/settings-notifications-lower.png",
+    "sha256": "7c763dbe0a7313d3fb7542312bc2592fd2ee461ae628cae36455b833a5a5d734",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/appearance-light.png",
+    "sha256": "62e4a3889805f4bb00456739697a790b7ac0f2ba4c1f9ca5df12071513300e4d",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/appearance-contrast.png",
+    "sha256": "948c022baa9ca4af165686a49ef11a02627535c3796995df56e42a2952ae376a",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/worldlens/minimum-bilingual-dark.png",
+    "sha256": "00437d253d62757b296212aed76f090673a0ef7b5dc4c463cd9f7993dc78e619",
+    "reviewedForPublication": true
   }
 ]

@@ -1,0 +1,439 @@
+{
+  "version": 1,
+  "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+  "route": "electron-playwright-xvfb",
+  "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+  "records": [
+    {
+      "id": "profile-overview",
+      "path": "docs/evidence/desktop/worldlens/profile-overview.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "f0cd418acd9bf02ecb07703ef8caa39d90983d72823b1d8f243394c4438c1110",
+      "capturedAt": "2026-10-24T00:37:18.349Z",
+      "screen": "profiles",
+      "state": "Selected synthetic profile with a side-by-side inspector",
+      "stateIds": [
+        "PR-L-one-selected",
+        "PR-O-overview",
+        "PR-O-observed-stopped-or-unavailable"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "profile-overview",
+      "interactionReceiptSha256": "43fbc46ac946299de58194138c126429bde18479ff2e99600ed2772587ddb054",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md",
+        "README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "super-metadata-result",
+      "path": "docs/evidence/desktop/worldlens/super-metadata-result.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "3e3259c39797fdcbca1ede72801d06fab8af0a4ce2d65c9c4537ad7c71a86a77",
+      "capturedAt": "2026-10-24T00:38:43.661Z",
+      "screen": "super-profiles",
+      "state": "Saved synthetic template with its selected overview",
+      "stateIds": [
+        "SP-W-metadata-save",
+        "SP-L-populated",
+        "SP-L-selected",
+        "SP-O-overview"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "super-metadata-result",
+      "interactionReceiptSha256": "8520a2ba5bcadbcd5a8909bf629a28565231ed2361b104539e2ac14ff7d02c85",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "synchronization",
+      "path": "docs/evidence/desktop/worldlens/synchronization.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "1c31485d7f29058d2eca76232053b8fc7ad601f286c918a5d5a4af830773b4df",
+      "capturedAt": "2026-10-24T00:38:55.356Z",
+      "screen": "synchronization",
+      "state": "No folder configured and no conflicts",
+      "stateIds": [
+        "SY-folder-missing",
+        "SY-conflicts-empty"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "synchronization",
+      "interactionReceiptSha256": "469e886003e41295fa9d840e72869f6d296041ac525aff4ddd7f0751a3e61872",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "setup-fresh",
+      "path": "docs/evidence/desktop/worldlens/setup-fresh.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "1322b836b52f53001248a5f3061e50d0c69a182eb68b52091570489c3ebf5658",
+      "capturedAt": "2026-10-24T00:36:59.006Z",
+      "screen": "setup",
+      "state": "Initial locked setup with an empty password field",
+      "stateIds": [
+        "SU-vault-create",
+        "SH-locked",
+        "ST-A-fresh-default"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "setup-fresh",
+      "interactionReceiptSha256": "55132e3a31472e2e45a10dd03fcee765bfd404a87102ff52d91c38e4d4a7e22a",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "launch-review",
+      "path": "docs/evidence/desktop/worldlens/launch-review.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "cb43f4da41792f11fe7991ffdf6b5a7904a822bcae820d2f1cd97a5a16ff2109",
+      "capturedAt": "2026-10-24T00:37:22.578Z",
+      "screen": "profiles",
+      "state": "Standard browser identity review before launch",
+      "stateIds": [
+        "PR-D-launch-consent",
+        "OV-modal-open"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "launch-review",
+      "interactionReceiptSha256": "5160f3cc788bf9c74953db1d0661254a8cdcdc32921d19cce8846c17293a59ae",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md",
+        "README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "settings-notifications",
+      "path": "docs/evidence/desktop/worldlens/settings-notifications.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "e71ba5bf9995272bbc704414a2d8d1685700604a0932c0cbf751892b099c0f05",
+      "capturedAt": "2026-10-24T00:37:57.263Z",
+      "screen": "settings",
+      "state": "Action sound switch and volume controls",
+      "stateIds": [
+        "ST-N-notification-empty"
+      ],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "settings-notifications",
+      "interactionReceiptSha256": "6ac6d690c2e08d50a6a3530da868c35f5110a6cd857f349af9d4aef740304c5b",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md",
+        "README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "settings-notifications-lower",
+      "path": "docs/evidence/desktop/worldlens/settings-notifications-lower.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "7c763dbe0a7313d3fb7542312bc2592fd2ee461ae628cae36455b833a5a5d734",
+      "capturedAt": "2026-10-24T00:38:13.528Z",
+      "screen": "settings",
+      "state": "Action sound preview and empty notification centre",
+      "stateIds": [],
+      "theme": "dark",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "settings-notifications-lower",
+      "interactionReceiptSha256": "3d8ddbb083aafd495287c7b08cefe0148936f74ff1294f63db963f36026eb6ee",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "appearance-light",
+      "path": "docs/evidence/desktop/worldlens/appearance-light.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "62e4a3889805f4bb00456739697a790b7ac0f2ba4c1f9ca5df12071513300e4d",
+      "capturedAt": "2026-10-24T00:39:03.054Z",
+      "screen": "settings",
+      "state": "Light appearance with bundled Roboto available",
+      "stateIds": [
+        "ST-A-theme-light"
+      ],
+      "theme": "light",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "matrix-1280-en-light-1",
+      "interactionReceiptSha256": "0f39b1fe3842f19199cf5b97539870c768f97a1a42c4bd20861b94fe5835f413",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "appearance-contrast",
+      "path": "docs/evidence/desktop/worldlens/appearance-contrast.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "948c022baa9ca4af165686a49ef11a02627535c3796995df56e42a2952ae376a",
+      "capturedAt": "2026-10-24T00:39:30.572Z",
+      "screen": "settings",
+      "state": "High contrast appearance with bundled Roboto available",
+      "stateIds": [
+        "ST-A-theme-contrast"
+      ],
+      "theme": "contrast",
+      "language": "en",
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "devicePixelRatio": 1
+      },
+      "zoom": 1,
+      "screenshot": {
+        "width": 1280,
+        "height": 800
+      },
+      "interactionProofId": "matrix-1280-en-contrast-1",
+      "interactionReceiptSha256": "1b1c9c0529962f6b24f9455c6311cb2529f8424526472638d4b97ac6a320ef32",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    },
+    {
+      "id": "minimum-bilingual-dark",
+      "path": "docs/evidence/desktop/worldlens/minimum-bilingual-dark.png",
+      "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+      "artifactSha256": "0c7f9e4020c5e32ef66b48fc4a9e342affa182b1959ef42108d172566c1ba690",
+      "captureSha256": "00437d253d62757b296212aed76f090673a0ef7b5dc4c463cd9f7993dc78e619",
+      "capturedAt": "2026-10-24T00:44:36.900Z",
+      "screen": "settings",
+      "state": "Bilingual dark appearance at minimum window size and 200 percent interface zoom",
+      "stateIds": [
+        "ST-A-theme-dark"
+      ],
+      "theme": "dark",
+      "language": "both",
+      "window": {
+        "width": 760,
+        "height": 580
+      },
+      "viewport": {
+        "width": 380,
+        "height": 290,
+        "devicePixelRatio": 2
+      },
+      "zoom": 2,
+      "screenshot": {
+        "width": 760,
+        "height": 580
+      },
+      "interactionProofId": "matrix-760-both-dark-2",
+      "interactionReceiptSha256": "357a9b7a198a2a88890ba98b2b021c0e5322b7dcfc576663d825348ebe0bba69",
+      "inspectionStatus": "inspected",
+      "privacyReviewed": true,
+      "documentation": [
+        "docs/evidence/desktop/worldlens/README.md",
+        "README.md"
+      ],
+      "limitations": [
+        "Unpackaged Linux Electron and Linux Rust host; no Windows installation or update proof.",
+        "Native preference saving requires the existing Windows mutex implementation and was not bypassed.",
+        "Language and theme variants use explicitly seeded startup presentation preferences, not verified native saves.",
+        "No physical display scaling, native Windows keyboard, screen-reader speech, audible speaker output, or guest lifecycle acceptance."
+      ]
+    }
+  ]
+}

@@ -6,7 +6,8 @@
 - [x] Remake the shell, profile and template workspaces, synchronization, setup and Settings
 - [x] Preserve saved appearance choices and prioritize high contrast
 - [x] Add local action sounds with a persisted switch, volume and preview
-- [ ] Complete current built layout and workflow evidence; retain exact platform exclusions
+- [x] Record current Linux built layout and representative workflow evidence: 143 captures, 72 Appearance tuples, ten inspected originals
+- [ ] Complete the remaining 180 inventory states and native platform acceptance
 - [ ] Verify the current Windows installer and installed preference persistence
 
 Current preservation state: component source and focused checks exist, but the complete

@@ -425,11 +425,11 @@
       "bounds": null,
       "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
       "persistence": "presentation.v1.preferences.theme",
-      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
-      "implementation": "descriptor-and-validator-only",
+      "validation": "apps/desktop/shared/settings-model.mjs#validateValue",
+      "implementation": "implemented-source",
       "consumer": {
-        "status": "planned",
-        "route": "settings/effects.ts"
+        "status": "implemented-source",
+        "route": "settings/effects.ts and design-system/theme.mjs"
       },
       "guide": {
         "id": "help-theme",
@@ -443,7 +443,9 @@
       "clear": null,
       "reset": "reset-theme",
       "localization": [],
-      "tests": [],
+      "tests": [
+        "apps/desktop/src/presentation-theme.test.mjs"
+      ],
       "runtimeEvidence": []
     },
     {
@@ -498,11 +500,11 @@
       "bounds": null,
       "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
       "persistence": "presentation.v1.preferences.accent",
-      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
-      "implementation": "descriptor-and-validator-only",
+      "validation": "apps/desktop/shared/settings-model.mjs#validateValue",
+      "implementation": "implemented-source",
       "consumer": {
-        "status": "planned",
-        "route": "settings/effects.ts"
+        "status": "implemented-source",
+        "route": "settings/effects.ts and design-system/theme.mjs"
       },
       "guide": {
         "id": "help-accent",
@@ -516,7 +518,9 @@
       "clear": "clear-accent",
       "reset": "reset-accent",
       "localization": [],
-      "tests": [],
+      "tests": [
+        "apps/desktop/src/presentation-theme.test.mjs"
+      ],
       "runtimeEvidence": []
     },
     {
@@ -551,11 +555,11 @@
       "bounds": null,
       "sourceProvenance": "Compiled default until a valid local presentation record explicitly stores this key.",
       "persistence": "presentation.v1.preferences.fontFamily",
-      "validation": "apps/desktop/src/settings/model.mjs#validateValue",
-      "implementation": "descriptor-and-validator-only",
+      "validation": "apps/desktop/shared/settings-model.mjs#validateValue",
+      "implementation": "implemented-source",
       "consumer": {
-        "status": "planned",
-        "route": "settings/effects.ts"
+        "status": "implemented-source",
+        "route": "settings/effects.ts and design-system/theme.mjs"
       },
       "guide": {
         "id": "help-fontFamily",
@@ -569,7 +573,9 @@
       "clear": null,
       "reset": "reset-fontFamily",
       "localization": [],
-      "tests": [],
+      "tests": [
+        "apps/desktop/src/presentation-theme.test.mjs"
+      ],
       "runtimeEvidence": []
     },
     {

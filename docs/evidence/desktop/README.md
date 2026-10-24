@@ -1,23 +1,11 @@
 # Current desktop evidence
 
-The current desktop rewrite images and receipts are in the [source-bound GUI inventory](gui-rewrite/README.md), at source `baa9512ecbc2727929547059f3b5d95f7cde989f`.
+The current WorldLens desktop captures come from source `284fc88f94487a7716099469daadeec258d97b07`. See the [complete inspected set and verification limits](worldlens/README.md), [exact image inventory](worldlens/inventory.json) and [coverage record](worldlens/coverage.json).
 
-![Profile table and selected profile overview with synthetic records](gui-rewrite/profiles-workspace.png)
+![Selected profile and inspector in the WorldLens desktop design](worldlens/profile-overview.png)
 
-![Compact settings rows in the packaged desktop application](gui-rewrite/settings-normal.png)
+![Current action sound switch and volume controls](worldlens/settings-notifications.png)
 
-![Compact settings navigation at the minimum supported viewport](gui-rewrite/settings-minimum.png)
+These are genuine Linux Electron captures with a native Linux host and synthetic records. Startup theme and language variants do not prove Windows native preference saving. Windows packaging, physical input and audible output require separate evidence.
 
-![Super Profile template inventory with synthetic records](gui-rewrite/super-profiles.png)
-
-![Synchronization workspace before a shared folder is configured](gui-rewrite/synchronization.png)
-
-![Setup wizard with an existing unlocked synthetic vault](gui-rewrite/setup.png)
-
-![Explicit standard browser identity consent before profile launch](gui-rewrite/launch-consent.png)
-
-![Profile revision history after a real snapshot and restore](gui-rewrite/revisions.png)
-
-The GUI source and focused interactions are preserved; full product acceptance is incomplete. The representative matrix contains 138 completed cells, with the remainder and broader states explicitly listed in [coverage](gui-rewrite/coverage.json). Scale emulation, native input, guest lifecycle, conflict resolution, installation/update and deployed documentation have separate verdicts.
-
-[Current inventory](gui-rewrite/inventory.json) · [Receipt summary](gui-rewrite/receipts.json) · [Earlier presentation archive](../archive.md)
+[Previous desktop evidence article](archive-baa9512.md) · [Earlier image archive](../archive.md)

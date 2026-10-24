@@ -22,6 +22,8 @@ The target-owned [design reference](../../../design/desktop/REFERENCE.md), [stat
 
 Runtime evidence must identify its source, built bytes, viewport, language, theme and actual interface zoom. Linux Electron captures establish Linux rendered behavior only. They do not establish Windows installer, physical display scaling, guest-environment or speaker-output acceptance. Earlier desktop screenshots retain their original source identity and are historical after this remake.
 
+The [current desktop evidence](../../evidence/desktop/worldlens/README.md) includes inspected profile, Settings, dialog and narrow-layout captures, with an exact inventory and coverage limits. Native preference writes require the existing Windows mutex implementation; Linux captures retain the resulting storage warning rather than bypassing that boundary. Theme and language variations use isolated startup preferences and do not prove native save/restart behavior.
+
 ## 廣東話
 
 桌面介面沿用 WorldLens 嘅 Material Design 3 藍色色系、字款、圓角、陰影同動態規格，保留 Material Browser 自己嘅名稱及設定檔工作流程。側邊導覽列用圖示加文字；空間不足時改用有標籤嘅選單。設定檔表格同詳細資料用一致層次，窄視窗可開啟全寬詳細資料，再按返回。

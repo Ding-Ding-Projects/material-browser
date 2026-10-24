@@ -10,11 +10,27 @@ See [the workflow and current limits](docs/features/desktop/super-profiles.md).
 **Development status:** unsigned development installers and the portable offline handbook are available through [normal automated releases](https://github.com/Ding-Ding-Projects/material-browser/releases). The product remains incomplete. Native installation/update acceptance, portable browser credentials, stable advanced identity, consistent live snapshots and two-computer restoration remain unverified or unsupported.
 
 - [Interactive handbook and complete documentation](https://ding-ding-projects.github.io/material-browser/)
-- [Reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/) with per-image hashes and capture provenance
+- [Reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/) with its original per-image hashes and capture provenance
 - [Architecture](docs/architecture.md)
 - [Roadmap](ROADMAP.md) and [current handoff](HANDOFF.md)
 - [Windows build and release automation](docs/features/delivery/windows-automation.md)
 - [Browsers and automation runtimes bundled in the installer](docs/features/delivery/bundled-engines.md)
+
+## Desktop workflow
+
+```mermaid
+flowchart TD
+    A[Open the desktop] --> B[Create or unlock the encrypted vault]
+    B --> C[Select a profile or reusable template]
+    C --> D[Choose an action and review any required consent]
+    D --> E[Native host checks capabilities and operation ownership]
+    E --> F{Action available and authorized?}
+    F -- No --> G[Show the reason and available recovery]
+    F -- Yes --> H[Run the operation and preserve its result]
+    H --> I[Show feedback and an optional action sound]
+    G --> C
+    I --> C
+```
 
 ## Bundled engines and launch behavior
 
@@ -30,31 +46,19 @@ The desktop now adopts WorldLens's blue Material Design 3 color roles, locally b
 
 Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
 
-## Historical desktop screenshots
+## Current desktop screenshots
 
-The following images predate the WorldLens adaptation and retain their original evidence identity.
+The current WorldLens adaptation is documented in the [source-bound Linux desktop evidence](docs/evidence/desktop/worldlens/README.md). The captures show the production renderer with a real native Linux host and isolated synthetic records. They establish rendered Linux behavior; Windows packaging and preference persistence are separate checks.
 
-These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](docs/evidence/desktop/gui-rewrite/inventory.json). The same eight images are published in the [reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/), where each live image hash was verified against this inventory.
+![Dark profile workspace with the selected inspector beside the table](docs/evidence/desktop/worldlens/profile-overview.png)
 
-![Profile table and selected profile overview with synthetic records](docs/evidence/desktop/gui-rewrite/profiles-workspace.png)
+![Notification settings with the action sound switch and volume controls](docs/evidence/desktop/worldlens/settings-notifications.png)
 
-![Compact settings rows in the packaged desktop application](docs/evidence/desktop/gui-rewrite/settings-normal.png)
+![Bilingual appearance controls at the minimum window size and 200 percent interface zoom](docs/evidence/desktop/worldlens/minimum-bilingual-dark.png)
 
-![Compact settings navigation at the minimum supported viewport](docs/evidence/desktop/gui-rewrite/settings-minimum.png)
+![Standard browser identity review before launching a profile](docs/evidence/desktop/worldlens/launch-review.png)
 
-![Super Profile template inventory with synthetic records](docs/evidence/desktop/gui-rewrite/super-profiles.png)
-
-![Synchronization workspace before a shared folder is configured](docs/evidence/desktop/gui-rewrite/synchronization.png)
-
-![Setup wizard with an existing unlocked synthetic vault](docs/evidence/desktop/gui-rewrite/setup.png)
-
-![Explicit standard browser identity consent before profile launch](docs/evidence/desktop/gui-rewrite/launch-consent.png)
-
-![Profile revision history after a real snapshot and restore](docs/evidence/desktop/gui-rewrite/revisions.png)
-
-The representative matrix stopped at the owner-requested preservation boundary: 138 completed cells (48 at 100%, 48 at 125%, 42 at 150%). The 200% run and broader state inventory remain unfinished. Runtime-forced scales and CDP viewport overrides do not establish physical host display-scale or native keyboard proof. Ordinary Firefox launch/stop, bulk duplicate, failure retention, lock redaction and snapshot/restore were exercised separately from the pictures.
-
-[Current evidence and limitations](docs/evidence/desktop/gui-rewrite/README.md) · [Coverage](docs/evidence/desktop/gui-rewrite/coverage.json) · [Historical image archive](docs/evidence/archive.md)
+[Exact capture inventory and limits](docs/evidence/desktop/worldlens/inventory.json) · [Earlier desktop images and provenance](docs/evidence/archive.md)
 
 ## Documentation and remaining work
 

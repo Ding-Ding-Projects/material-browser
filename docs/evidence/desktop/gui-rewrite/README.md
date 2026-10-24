@@ -1,4 +1,6 @@
-# Desktop rewrite evidence
+# Historical desktop rewrite evidence
+
+These images predate the WorldLens adaptation. [Current desktop evidence](../worldlens/README.md) is kept separately.
 
 These original images show the source-bound packaged application with isolated synthetic records. The complete raw matrix is retained privately.
 

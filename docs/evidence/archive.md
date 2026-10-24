@@ -155,3 +155,30 @@ These observations do not prove physical display-scale coverage, native keyboard
 
 
 Archived during the desktop rewrite preservation pass. Original PNG bytes and source provenance are unchanged; links above were adjusted for this archive location.
+
+
+## Desktop presentation before the WorldLens adaptation
+
+The following images predate the WorldLens adaptation and retain their original evidence identity.
+
+These eight original images show the rewritten local package at source `baa9512ecbc2727929547059f3b5d95f7cde989f`, package version 0.1.1. They were produced on an isolated hidden desktop with actual synthetic backend records, inspected for publication, and promoted without changing their bytes. Exact screen, viewport, theme, source and hash bindings are in the [current evidence inventory](desktop/gui-rewrite/inventory.json). The same eight images are published in the [reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/), where each live image hash was verified against this inventory.
+
+![Profile table and selected profile overview with synthetic records](desktop/gui-rewrite/profiles-workspace.png)
+
+![Compact settings rows in the packaged desktop application](desktop/gui-rewrite/settings-normal.png)
+
+![Compact settings navigation at the minimum supported viewport](desktop/gui-rewrite/settings-minimum.png)
+
+![Super Profile template inventory with synthetic records](desktop/gui-rewrite/super-profiles.png)
+
+![Synchronization workspace before a shared folder is configured](desktop/gui-rewrite/synchronization.png)
+
+![Setup wizard with an existing unlocked synthetic vault](desktop/gui-rewrite/setup.png)
+
+![Explicit standard browser identity consent before profile launch](desktop/gui-rewrite/launch-consent.png)
+
+![Profile revision history after a real snapshot and restore](desktop/gui-rewrite/revisions.png)
+
+The representative matrix stopped at the owner-requested preservation boundary: 138 completed cells (48 at 100%, 48 at 125%, 42 at 150%). The 200% run and broader state inventory remain unfinished. Runtime-forced scales and CDP viewport overrides do not establish physical host display-scale or native keyboard proof. Ordinary Firefox launch/stop, bulk duplicate, failure retention, lock redaction and snapshot/restore were exercised separately from the pictures.
+
+[Current evidence and limitations](desktop/gui-rewrite/README.md) · [Coverage](desktop/gui-rewrite/coverage.json) · [Historical image archive](archive.md)

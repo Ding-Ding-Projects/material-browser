@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+  "current": [
+    {
+      "document": "README.md",
+      "imageIds": [
+        "profile-overview",
+        "settings-notifications",
+        "minimum-bilingual-dark",
+        "launch-review"
+      ]
+    },
+    {
+      "document": "docs/evidence/desktop/README.md",
+      "imageIds": [
+        "profile-overview",
+        "settings-notifications"
+      ]
+    },
+    {
+      "document": "docs/evidence/desktop/worldlens/README.md",
+      "imageIds": [
+        "profile-overview",
+        "super-metadata-result",
+        "synchronization",
+        "setup-fresh",
+        "launch-review",
+        "settings-notifications",
+        "settings-notifications-lower",
+        "appearance-light",
+        "appearance-contrast",
+        "minimum-bilingual-dark"
+      ]
+    },
+    {
+      "delivery": "hosted and portable handbook",
+      "imageAuthority": "apps/docs/approved-assets.json"
+    },
+    {
+      "delivery": "https://ding-ding-projects.github.io/material-browser-evidence/",
+      "imageAuthority": "docs/evidence/desktop/worldlens/inventory.json"
+    }
+  ],
+  "historicalArticles": [
+    "docs/evidence/archive.md",
+    "docs/evidence/desktop/archive.md",
+    "docs/evidence/desktop/archive-5922074.md",
+    "docs/evidence/desktop/archive-baa9512.md",
+    "docs/evidence/desktop/gui-rewrite/README.md"
+  ],
+  "policy": "Earlier originals retain their original bytes and source identities; current presentation uses the exact new inventory."
+}

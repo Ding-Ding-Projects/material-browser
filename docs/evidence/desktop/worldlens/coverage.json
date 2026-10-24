@@ -1,0 +1,817 @@
+{
+  "inventorySha256": "f878a2785c9a6559caecda87bca2db227a9ed410861c7f433e1bdd3bf53c26a7",
+  "sourceCommit": "284fc88f94487a7716099469daadeec258d97b07",
+  "sourceStable": true,
+  "artifactStable": true,
+  "inventoryStates": 241,
+  "coveredStateIds": [
+    "CAT-escape-close",
+    "CAT-open-empty-query",
+    "OV-canceled",
+    "OV-modal-open",
+    "PR-A-effective-unknown",
+    "PR-A-saved-off",
+    "PR-D-cancellation",
+    "PR-D-launch-consent",
+    "PR-D-remove-review",
+    "PR-D-stop-review",
+    "PR-F-create",
+    "PR-F-rename",
+    "PR-L-empty",
+    "PR-L-filtered",
+    "PR-L-multiple-selected",
+    "PR-L-no-match",
+    "PR-L-one-selected",
+    "PR-L-populated",
+    "PR-O-narrow-detail",
+    "PR-O-observed-stopped-or-unavailable",
+    "PR-O-overview",
+    "PR-R-revisions-empty",
+    "SH-connected",
+    "SH-locked",
+    "SH-narrow-navigation-closed",
+    "SH-narrow-navigation-open",
+    "SP-D-delete",
+    "SP-D-launch-consent",
+    "SP-L-empty",
+    "SP-L-populated",
+    "SP-L-selected",
+    "SP-O-overview",
+    "SP-R-current-revision",
+    "SP-R-revisions-populated",
+    "SP-S-sessions-empty",
+    "SP-W-capability-failed",
+    "SP-W-environment",
+    "SP-W-metadata-save",
+    "SP-W-review",
+    "SP-W-startup-files",
+    "SP-W-template",
+    "ST-A-fresh-default",
+    "ST-A-theme-contrast",
+    "ST-A-theme-dark",
+    "ST-A-theme-light",
+    "ST-B-about",
+    "ST-B-coverage-unavailable",
+    "ST-F-focus-default-off",
+    "ST-H-native-unavailable",
+    "ST-L-language",
+    "ST-L-voice-unavailable",
+    "ST-L-wording-empty",
+    "ST-N-notification-empty",
+    "ST-N-sound-preview",
+    "ST-P-privacy-access",
+    "ST-S-schedule-empty",
+    "ST-T-integration-unavailable",
+    "ST-X-accessibility",
+    "SU-vault-create",
+    "SY-conflicts-empty",
+    "SY-folder-missing"
+  ],
+  "unknownStateIds": [],
+  "uncoveredNormalBaselines": [
+    {
+      "state": "SH-backend-unavailable",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SH-empty-tabs",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SH-open-tabs",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SH-active-tab",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-L-loading-or-refresh-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-L-sorted",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-L-action-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-L-partial-success",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-L-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-O-observed-running",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "PR-O-width-control",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-R-revisions-loading",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-R-revisions-populated",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-R-revisions-filtered",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-R-revisions-failure",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-R-snapshot-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-A-saved-on",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-A-effective-known",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "PR-A-restart-required",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "PR-A-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-A-failure",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-F-create-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-F-create-password-manager",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-F-create-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-F-create-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-F-duplicate",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-D-restore-review",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "PR-D-failed-confirmation",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-L-filtered",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-L-no-match",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-L-refresh-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-L-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-O-capabilities-available",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-O-capabilities-unavailable",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-O-active-session-restrictions",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-O-narrow-detail",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-S-provisioning",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-running",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-readiness-unknown",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-stopped",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-retained-output",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-collecting",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-saved",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-cleanup-pending",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-S-locked-finalization",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-R-revisions-empty",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-R-restore-eligible",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-R-restore-blocked",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-edit",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-resume-valid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-resume-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-capability-checking",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-save-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-W-save-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-D-save-preview-loading",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-D-save-preview-ready",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-D-save-preview-failed",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-D-save-categories-selected",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-D-stop",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-D-discard",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-D-restore",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SP-D-finalize-exact-operation",
+      "reason": "Requires installed managed engines or Windows WSL/Sandbox runtime lifecycle; unavailable on this Linux host."
+    },
+    {
+      "state": "SP-D-cancel",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-folder-configured",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-chooser-canceled",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-upload-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-download-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-success",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-failure",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-conflicts-populated",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-filtered",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-no-match",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-candidate-review",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-resolve-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SY-resolve-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-vault-unlock",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-vault-join",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-backend-unavailable",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-invalid-password",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-chooser-canceled",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-profile-create",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-synchronization",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-synchronization-skip",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-ready",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "SU-resume",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-L-voice-loaded",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-L-narration-sample",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-L-narration-queue",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-L-wording-loaded",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-L-wording-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-A-theme-system",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-A-saved-choice",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-A-font-density-scale",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-A-motion",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-A-appearance-overrides",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-X-target-size",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-X-focus",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-X-reduced-motion",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-X-hide-entry-review",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-X-restore-entry",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-dim-navigation",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-reduced-stimulation",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-elapsed-time",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-next-action",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-idle-reminder",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-F-snoozed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-notification-populated",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-unread",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-selected",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-filter",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-dismiss",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-bulk-dismiss",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-export",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-quiet-hours",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-sound-on",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-sound-off",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-N-audio-unavailable",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-schedule-edit",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-valid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-overnight",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-precedence-active",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-S-unavailable-external-source",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-history-empty",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-history-populated",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-H-filtered",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-undo-redo",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-H-restore-preview",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-H-import-valid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-import-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-export",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-H-protected-locked",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-H-protected-unlocked",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-P-protected-confirmation",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-P-unavailable-capability",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-T-integration-configured",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-T-integration-unconfigured",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-T-integration-test-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-T-integration-test-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-B-coverage-available",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-dock-top",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-dock-right",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-dock-bottom",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-dock-left",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-grouped",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-pinned",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-closed-restorable",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-reordered",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-overflow",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-narrow-disclosure",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-global-find",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-local-find",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-NAV-no-match",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-inherited-value",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-base-value",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-scheduled-override",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-changed-value",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-ROW-reset",
+      "reason": "Requires Windows native preferences/credential/editor/speech capabilities unavailable on this Linux route."
+    },
+    {
+      "state": "ST-ROW-explanation-open",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-practice-unsaved",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-practice-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-practice-reset",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-practice-close",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-practice-reopen-isolated",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "ST-ROW-save-failed",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "CAT-results",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "CAT-no-match",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "CAT-regex-open",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "CAT-regex-invalid",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "CAT-destination-activation",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-modal-long-content",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-confirm-disabled",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-pending",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-error",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-focus-restored",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-notification-toast",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-keyboard-help",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    },
+    {
+      "state": "OV-narration-controls",
+      "reason": "Not exercised in this bounded Linux run; no verification claim."
+    }
+  ],
+  "matrix": {
+    "expectedRepresentativeTuples": 72,
+    "actualTuples": 72,
+    "surface": "Appearance settings",
+    "note": "Representative Cartesian viewport/language/theme/Electron zoom matrix only; every inventory state at every tuple was not exercised."
+  },
+  "captures": 143,
+  "automationFailures": [],
+  "runtime": {
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "limits": [
+    "Linux Xvfb Electron, unpackaged route. No Windows installation, HWND, Lowlevel, or OS-scale proof.",
+    "Actual Linux Rust backend; synthetic disposable records created through genuine host methods. No substituted runtime responses.",
+    "Theme/language settings variants use the real legacy presentation reader with explicit seeded preferences. Native Windows mutex persistence is unavailable; settings save, sound mute restart, history/credentials not verified.",
+    "No audible-sound or screen-reader output proof.",
+    "Not every captured screenshot is visually inspected; inspection list is maintained separately."
+  ],
+  "runs": [
+    "final-284fc88",
+    "supplement-284fc88"
+  ],
+  "scope": "137 main plus6 supplement measurements;72 Appearance tuples; not full inventory Cartesian coverage."
+}
