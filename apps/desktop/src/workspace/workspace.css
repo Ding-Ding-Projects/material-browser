@@ -175,3 +175,11 @@ md-linear-progress { display:block; width:100%; margin-block:20px; --md-linear-p
 .icon-control,.rail-create,.profile-card,.template-card { transition:border-radius 200ms var(--md-sys-motion-easing-emphasized); }
 .icon-control:active,.rail-create:active { border-radius:12px; }
 @media (max-width:899px), (max-height:479px) { .workspace-plane { padding:0 8px 8px; gap:8px; } .super-workspace .super-columns { grid-template-columns:minmax(0,1fr); } }
+
+md-filter-chip { min-height:44px; --md-filter-chip-container-height:44px; }
+md-chip-set { max-width:100%; }
+.catalog-filter { margin-bottom:12px; }
+.catalog-results { max-height:55dvh; overflow:auto; }
+.catalog-results md-outlined-button { background:var(--md-sys-color-surface-container); --md-outlined-button-container-shape:4px; border-radius:4px; }
+.catalog-results md-outlined-button:first-child { --md-outlined-button-container-shape:20px 20px 4px 4px; border-radius:20px 20px 4px 4px; }
+.catalog-results md-outlined-button:last-child { --md-outlined-button-container-shape:4px 4px 20px 20px; border-radius:4px 4px 20px 20px; }

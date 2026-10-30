@@ -124,4 +124,7 @@ export const workspaceZh: Record<string, string> = {
   "Sort profiles": "排列設定檔",
   "Ascending": "遞增",
   "Descending": "遞減",
+  "Destinations": "目的地",
+  "All": "全部",
+  "Actions": "操作",
 };

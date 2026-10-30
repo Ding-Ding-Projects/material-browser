@@ -102,6 +102,7 @@ function App() {
     [folder, setFolder] = useState(""),
     [conflicts, setConflicts] = useState<any[]>([]);
   const [commandRows, setCommandRows] = useState<number[]>([]);
+  const [commandFilter, setCommandFilter] = useState("all");
   const [workspaceTabs, setWorkspaceTabs] = useState<
     {
       id: string;
@@ -281,6 +282,7 @@ function App() {
     label.startsWith("Settings: ")
       ? `${t("Settings")}: ${t(label.slice(10))}`
       : t(label);
+  const filteredCommandRows = commandRows.filter((i) => commandFilter === "all" || (commandFilter === "actions" ? !commands[i].page : commandFilter === "profiles" ? ["profiles", "super-profiles"].includes(commands[i].page || "") : commands[i].page === "settings"));
   const profileForm = (
     <>
       <Field label={t("Name")} value={name} onChange={setName} required />
@@ -629,9 +631,16 @@ function App() {
             onResults={setCommandRows}
             t={t}
           />
-          <div className="catalog-results">
-            {commandRows.length === 0 && <p role="status">{t("No matches")}</p>}
-            {commandRows.map((i) => (
+          <div className="catalog-filter">{React.createElement("md-chip-set", { "aria-label": t("Destinations") }, [["all", "All"], ["profiles", "Profiles"], ["settings", "Settings"], ["actions", "Actions"]].map(([value, label]) => React.createElement("md-filter-chip", { key: value, label: t(label), selected: commandFilter === value, onClick: () => setCommandFilter(value) })))}</div>
+          <div className="catalog-results" onKeyDown={(event) => {
+            const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("md-outlined-button"));
+            const index = buttons.indexOf(document.activeElement as HTMLElement);
+            if (index < 0 || !buttons.length) return;
+            const next = event.key === "ArrowDown" ? (index + 1) % buttons.length : event.key === "ArrowUp" ? (index + buttons.length - 1) % buttons.length : -1;
+            if (next >= 0) { event.preventDefault(); buttons[next].focus(); }
+          }}>
+            {filteredCommandRows.length === 0 && <p role="status">{t("No matches")}</p>}
+            {filteredCommandRows.map((i) => (
               <Button
                 key={commands[i].id}
                 secondary
