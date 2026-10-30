@@ -48,7 +48,7 @@ Short completion and failure tones are configurable in **Settings → Notificati
 
 ## Current desktop screenshot acceptance
 
-Actual running-application screenshots of the new design are pending. The task-owned hidden runtime service launch was rejected by automatic approval review before execution. No design preview, generated illustration or historical screenshot is presented as current runtime proof. Inspected current captures must be embedded here and pushed before visual acceptance is complete.
+Five genuine native Windows captures were collected from released version 0.1.58, source `555fa30`, using an isolated hidden desktop and the direct native CLI. They show setup, language Settings, Appearance, empty Profiles and the locked Super Profiles boundary. The seven-process run exited normally. [Observed states and remaining evidence requirements](docs/evidence/desktop/native-preservation.md) distinguish those results from formal promotion. Current screenshot embedding remains pending the required diagnostic/layout receipts.
 
 [Historical WorldLens captures, original inventory and provenance](docs/evidence/desktop/worldlens/README.md) remain preserved for their original source. [Earlier desktop image archive](docs/evidence/archive.md).
 

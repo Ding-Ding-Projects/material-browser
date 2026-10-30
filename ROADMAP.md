@@ -2,6 +2,9 @@
 
 ## Current repository design migration
 
+- [x] Preserve five genuine native runtime captures and normal-exit receipts privately
+- [ ] Complete formal image promotion and screenshot-bearing README/gallery delivery
+
 - [x] Preserve the initial renderer migration on its task branch with verified remote reference
 - [x] Import the current design references at commit `0ab6165` into the implementation branch
 - [ ] Verify all eight rebuilt surfaces against those references in the actual running application

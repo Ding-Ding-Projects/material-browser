@@ -1,5 +1,5 @@
 # Material Browser handoff
-
+> Current preservation state: [2026-10-30 closeout](#preservation-closeout-2026-10-30). Five genuine native captures exist; formal promotion and complete UI acceptance remain unfinished.
 ## Repository-owned design migration, 2026-10-30, in progress
 
 Current direction: remake the entire desktop GUI from the latest remote `design/` folder,
@@ -214,3 +214,13 @@ Focused launch1 and health8 checks passed. Native repaired readiness remains nex
 workspace-wide formatting check reports existing unrelated formatting drift; no broad
 formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
 immutable f1816d6, with its final receipt and teardown inventory pending inspection.
+
+## Preservation closeout, 2026-10-30
+
+The user requested preservation and task-owned cleanup, and cleared the implementation goal. The entire GUI migration remains unfinished. Preserve it on main as an explicitly incomplete checkpoint, retaining the active task branch/worktree for remaining verification.
+
+Current design authority remains repository `design/` at `0ab6165`. The original ZIP is obsolete. Product source `445b803` passed the exact Desktop build and all 131 desktop tests, zero skipped. Documentation source `555fa30` built 48 articles and passed six documentation tests. Both hosted runs succeeded and published normal development packages.
+
+The actual 0.1.58 package subsequently ran through the direct native CLI: five inspected PNGs, real native navigation, no credentials/private wording/personal records, and normal seven-process/desktop exit proof. See the native runtime observation article. Their formal promotion lacks required diagnostics/layout receipt coverage, so the current README image request remains incomplete. The existing public gallery was verified reachable and unchanged; its publication lane excluded these captures pending valid receipts.
+
+Next owner: complete an appropriate fresh browser-window observation/receipt workflow, inspect actual controls and layout against all eight current artboards, complete the supported matrix and persistence checks, then embed accepted originals in README and publish the gallery update. Preserve every historical original and the private native receipts. No full UI, installer, installed-update or deployment acceptance is claimed by this closeout.
