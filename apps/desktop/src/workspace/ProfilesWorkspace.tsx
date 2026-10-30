@@ -2,6 +2,7 @@ import "./surfaces.css";
 import { Icon } from "../Icon";
 import { mdiPlus } from "@mdi/js";
 import { ProfileTable } from "./ProfileTable";
+import { ConfirmAction } from "../settings/ConfirmAction";
 import { ProfileInspector } from "./ProfileInspector";
 import React, { useEffect, useRef, useState } from "react";
 import { Profile, request } from "../api";
@@ -230,7 +231,7 @@ export function ProfilesWorkspace({
   const focusDetail = () => requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".detail-title")?.focus());
   const returnToList = (show: boolean) => {
     setShowDetail(show);
-    if (!show) requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>("tr.selected .record-name")?.focus());
+    if (!show) requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".profile-card.selected .record-name")?.focus());
   };
   const select = (id: string) => {
     onSelect(id);
@@ -299,6 +300,7 @@ export function ProfilesWorkspace({
             refresh,
             setResults,
             act,
+            onLaunch,
           }}
         />
         <ProfileInspector
@@ -342,7 +344,14 @@ export function ProfilesWorkspace({
           </ul>
         </section>
       )}
-      {review && (
+      {review?.method === "profiles.remove" && <ConfirmAction title={t("Remove")} description={`${t("Remove these profiles and their revision history? This cannot be undone.")} ${review.targets.map((p) => p.name).join(", ")}`} t={t}
+        onCancel={() => { if (!busy) setReview(null); }} onConfirm={async () => {
+          if (!unlocked || busy) return { ok: false, message: t("Unavailable") };
+          const success = await execute(review.method, review.targets);
+          if (success) setReview(null);
+          return success ? { ok: true } : { ok: false, message: t("Some operations failed") };
+        }}/>} 
+      {review && review.method !== "profiles.remove" && (
         <Modal
           title={t(review.label)}
           closeLabel={t("Cancel")}

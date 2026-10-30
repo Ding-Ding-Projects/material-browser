@@ -42,11 +42,11 @@ export function Synchronization({
   return (
     <div className="sync-workspace">
       <div className="page-heading">
-        <h1>{t("Synchronization")}</h1>
+        <div><h1>{t("Synchronization")}</h1><p>{t("Exchange encrypted snapshots using a shared folder.")}</p></div>
       </div>
       <section className="surface sync-folder-strip" aria-label={t("Folder")}>
         <div>
-          <h2>{t("Folder")}</h2>
+          <h2><Icon path={mdiFolderOpenOutline} size={22}/> {t("Your storage")}</h2><p>{t("Shared folder")}</p>
           <p className="literal">{folder || t("Unavailable")}</p>
         </div>
         <div className="actions">
@@ -76,6 +76,11 @@ export function Synchronization({
             </Button>
           ))}
         </div>
+      </section>
+      <section className="surface sync-device">
+        <h2>{t("This computer")}</h2><dl><dt>{t("Vault")}</dt><dd>{t(status?.unlocked ? "Vault unlocked" : "Locked")}</dd><dt>{t("Profiles")}</dt><dd>{profiles.length}</dd></dl>
+        <p>{t("Upload and download are separate actions. Review conflicts before choosing a revision.")}</p>
+        <details><summary>{t("Incomplete capability")}</summary><p>{t("Server connection status, device enrollment and keep-both resolution are unavailable in this build. No server or device state is simulated.")}</p></details>
       </section>
       <section className="surface sync-conflicts" aria-label={t("Conflicts")}>
         <div className="page-heading">

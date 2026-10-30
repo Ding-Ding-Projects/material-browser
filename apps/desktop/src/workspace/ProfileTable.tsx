@@ -1,5 +1,5 @@
 import { Icon } from "../Icon";
-import { mdiArrowUp, mdiArrowDown, mdiRefresh } from "@mdi/js";
+import { mdiArrowUp, mdiArrowDown, mdiRefresh, mdiPlay, mdiDotsVertical } from "@mdi/js";
 import React from "react";
 import { Profile } from "../api";
 import { Button } from "../components";
@@ -27,6 +27,7 @@ type Props = {
   date: (value?: number | string) => string;
   refresh: () => Promise<void>;
   setResults: (results: any[]) => void;
+  onLaunch: (profile: Profile) => void;
   act: (method: string, label: string, targets: Profile[]) => void;
 };
 export function ProfileTable({
@@ -51,6 +52,7 @@ export function ProfileTable({
   refresh,
   setResults,
   act,
+  onLaunch,
 }: Props) {
   return (
     <section className="surface profile-list" aria-label={t("Profiles")}>
@@ -119,114 +121,28 @@ export function ProfileTable({
           </Button>
         </div>
       )}
-      <div className="table-scroll">
-        <table className="workspace-table">
-          <caption className="sr-only">{t("Profiles")}</caption>
-          <thead>
-            <tr>
-              <th scope="col">
-                <label className="check-target">
-                  <input
-                    type="checkbox"
-                    aria-label={t("Select visible profiles")}
-                    checked={
-                      rows.length > 0 &&
-                      rows.every((p) => checked.includes(p.id))
-                    }
-                    disabled={!rows.length}
-                    onChange={(e) =>
-                      setChecked((current) =>
-                        e.target.checked
-                          ? Array.from(
-                              new Set([...current, ...rows.map((p) => p.id)]),
-                            )
-                          : current.filter(
-                              (id) => !rows.some((p) => p.id === id),
-                            ),
-                      )
-                    }
-                  />
-                </label>
-              </th>
-              {[
-                ["name", "Name"],
-                ["engine", "Engine"],
-                ["runtime", "Runtime"],
-                ["automation", "Saved preference"],
-                ["updatedAt", "Updated"],
-              ].map(([key, label]) => (
-                <th
-                  key={key}
-                  scope="col"
-                  aria-sort={
-                    key === sort.key
-                      ? sort.direction === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  {key === "runtime" ? (
-                    t(label)
-                  ) : (
-                    <button onClick={() => sortBy(key)}>
-                      {t(label)}
-                      {key === sort.key
-                        ? sort.direction === "asc"
-                          ? <Icon path={mdiArrowUp} size={16} />
-                          : <Icon path={mdiArrowDown} size={16} />
-                        : ""}
-                    </button>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((p) => (
-              <tr
-                key={p.id}
-                aria-selected={selected === p.id}
-                className={selected === p.id ? "selected" : ""}
-              >
-                <td>
-                  <label className="check-target">
-                    <input
-                      type="checkbox"
-                      aria-label={`${t("Select")} ${p.name}`}
-                      checked={checked.includes(p.id)}
-                      disabled={pending.includes(p.id)}
-                      onChange={(e) =>
-                        setChecked((ids) =>
-                          e.target.checked
-                            ? [...ids, p.id]
-                            : ids.filter((id) => id !== p.id),
-                        )
-                      }
-                    />
-                  </label>
-                </td>
-                <th scope="row">
-                  <button className="record-name" onClick={() => select(p.id)}>
-                    {p.name}
-                  </button>
-                </th>
-                <td>{p.engine}</td>
-                <td>
-                  <span className="state-badge">
-                    {t(
-                      p.id === selected
-                        ? observedRuntime(runtime)
-                        : "Unavailable",
-                    )}
-                  </span>
-                </td>
-                <td>{p.automation}</td>
-                <td>{date(p.updatedAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="card-list-controls">
+        <label className="check-target"><input type="checkbox" aria-label={t("Select visible profiles")}
+          checked={rows.length > 0 && rows.every((p) => checked.includes(p.id))} disabled={!rows.length}
+          onChange={(e) => setChecked((current) => e.target.checked ? Array.from(new Set([...current, ...rows.map((p) => p.id)])) : current.filter((id) => !rows.some((p) => p.id === id)))} />{t("Select visible profiles")}</label>
+        <button className="sort-control" onClick={() => sortBy("name")}>{t("Name")} <Icon path={sort.direction === "asc" ? mdiArrowUp : mdiArrowDown} size={16} /></button>
+        <button className="sort-control" onClick={() => sortBy("updatedAt")}>{t("Updated")}</button>
+      </div>
+      <div className="profile-cards" role="list">
+        {rows.map((p) => {
+          const state = p.id === selected ? observedRuntime(runtime) : "Unavailable";
+          return <article role="listitem" key={p.id} className={`profile-card${selected === p.id ? " selected" : ""}`}>
+            <label className="check-target"><input type="checkbox" aria-label={`${t("Select")} ${p.name}`} checked={checked.includes(p.id)} disabled={pending.includes(p.id)}
+              onChange={(e) => setChecked((ids) => e.target.checked ? [...new Set([...ids, p.id])] : ids.filter((id) => id !== p.id))} /></label>
+            <button className="profile-card-main record-name" aria-pressed={selected === p.id} onClick={() => select(p.id)}>
+              <span className="profile-avatar" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
+              <span className="profile-card-copy"><strong>{p.name}</strong><small>{p.engine} · {p.automation === "off" ? t("Off") : p.automation}{p.passwordManager ? " · KeePassXC" : ""}</small><small>{t("Updated")}: {date(p.updatedAt)}</small></span>
+            </button>
+            <span className="state-badge" data-running={state === "Running"}>{t(state)}</span>
+            <Button secondary disabled={pending.includes("*") || pending.includes(p.id) || !unlocked} onClick={() => onLaunch({ ...p })}><Icon path={mdiPlay} size={18} />{t("Launch")}</Button>
+            <button className="icon-control" aria-label={`${t("Profile details")}: ${p.name}`} title={t("Profile details")} onClick={() => select(p.id)}><Icon path={mdiDotsVertical} size={20} /></button>
+          </article>;
+        })}
       </div>
       {!rows.length && (
         <div className="empty">

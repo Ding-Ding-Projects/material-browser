@@ -187,8 +187,7 @@ export function SettingsWorkspace({
           </Button>
         </div>
       )}
-      <details className="settings-global-finder">
-        <summary>{t("Search all settings")}</summary>
+      <section className="settings-global-finder" aria-label={t("Search all settings")}>
         <Search
           label={t("Search settings")}
           items={definitions.map(
@@ -198,7 +197,7 @@ export function SettingsWorkspace({
           onResults={setGlobalMatches}
           t={t}
         />
-        <div className="finder-results">
+        <details><summary>{t("Search results")} ({globalMatches.length})</summary><div className="finder-results">
           {globalMatches.map((i) => {
             const d = definitions[i];
             return (
@@ -217,8 +216,8 @@ export function SettingsWorkspace({
               </Button>
             );
           })}
-        </div>
-      </details>
+        </div></details>
+      </section>
       <SettingsTabs value={section} onChange={c.selectSection} t={t}>
         <section
           role="tabpanel"

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   mdiAccountMultipleOutline,
   mdiLayersTripleOutline,
@@ -10,6 +10,15 @@ import {
   mdiTabPlus,
   mdiMenu,
   mdiChevronDown,
+  mdiMagnify,
+  mdiBellOutline,
+  mdiAccessibility,
+  mdiShieldLockOutline,
+  mdiPlus,
+  mdiMinus,
+  mdiWindowMaximize,
+  mdiWindowRestore,
+  mdiClose,
 } from "@mdi/js";
 import { APP_VERSION } from "../build-version";
 import { Button } from "../components";
@@ -22,7 +31,14 @@ export function WorkspaceHeader({
   t,
   status,
   setPalette,
+  onNotifications,
 }: any) {
+  const [maximized, setMaximized] = useState(false);
+  const [windowError, setWindowError] = useState(false);
+  useEffect(() => window.materialBrowser?.onEvent((event: any) => { if (event?.type === "window-state") setMaximized(event.maximized === true); }), []);
+  const windowAction = async (action: "minimize" | "maximize" | "restore" | "close") => {
+    try { const state = await window.materialBrowser?.windowAction?.(action); if (state) setMaximized(state.maximized); else setWindowError(true); } catch { setWindowError(true); }
+  };
   return (
     <header className="app-header">
       <div className="brand-mark" aria-hidden="true">
@@ -31,7 +47,7 @@ export function WorkspaceHeader({
         ) : prefs.logoPreset === "compass" ? (
           <Icon path={mdiCompassOutline} />
         ) : (
-          "M"
+          <Icon path={mdiShieldLockOutline} />
         )}
       </div>
       <div className="identity">
@@ -40,20 +56,20 @@ export function WorkspaceHeader({
           {t("Version")} {APP_VERSION} · {t("Updated")}: {t("Unavailable")}
         </small>
       </div>
+      <button className="global-search" onClick={() => setPalette(true)}>
+        <Icon path={mdiMagnify} size={21} /><span>{t("Search profiles, settings, help")}</span><kbd>Ctrl+Shift+F</kbd>
+      </button>
       <span className="connection" data-connected={status?.unlocked === true}>
-        <span className="connection-dot" aria-hidden="true" />
-        {t(
-          status
-            ? status.unlocked
-              ? "Connected"
-              : "Locked"
-            : "Backend unavailable",
-        )}
+        <span className="connection-dot" aria-hidden="true" />{t(status ? status.unlocked ? "Vault unlocked" : "Locked" : "Backend unavailable")}
       </span>
-      <Button secondary onClick={() => setPalette(true)}>
-        <Icon path={mdiTabPlus} size={20} /> {t("New tab")}{" "}
-        <kbd>Ctrl Shift F</kbd>
-      </Button>
+      <button className="icon-control" aria-label={t("Notifications")} title={t("Notifications")} onClick={onNotifications}><Icon path={mdiBellOutline} size={22} /></button>
+      {prefs.accessibilityVisible && <button className="icon-control" aria-label={t("Accessibility")} title={t("Accessibility")} onClick={() => window.dispatchEvent(new Event("settings-accessibility"))}><Icon path={mdiAccessibility} size={22} /></button>}
+      {window.materialBrowser?.windowAction && <div className="window-controls">
+        <button aria-label={t("Minimize")} title={t("Minimize")} onClick={() => void windowAction("minimize")}><Icon path={mdiMinus} size={20}/></button>
+        <button aria-label={t(maximized ? "Restore window" : "Maximize")} title={t(maximized ? "Restore window" : "Maximize")} onClick={() => void windowAction(maximized ? "restore" : "maximize")}><Icon path={maximized ? mdiWindowRestore : mdiWindowMaximize} size={18}/></button>
+        <button aria-label={t("Close window")} title={t("Close window")} onClick={() => void windowAction("close")}><Icon path={mdiClose} size={20}/></button>
+      </div>}
+      {windowError && <span role="alert">{t("Window action unavailable")}</span>}
     </header>
   );
 }
@@ -68,6 +84,7 @@ export function WorkspaceNavigation({
   busy,
   perform,
   refresh,
+  onCreate,
 }: any) {
   const [expanded, setExpanded] = useState(false);
   const disclosure = useRef<HTMLButtonElement>(null);
@@ -111,6 +128,7 @@ export function WorkspaceNavigation({
         <span>{t("Workspace")}</span>
         <Icon path={mdiChevronDown} size={20} />
       </button>
+      <button className="rail-create" aria-label={t("Create profile")} title={t("Create profile")} disabled={!status?.unlocked || busy} onClick={onCreate}><Icon path={mdiPlus} size={24} /></button>
       <div id="workspace-destinations" className="workspace-destinations">
         <div className="workspace-primary">
           {destinations.map(([id, label, shortLabel, icon]) => (

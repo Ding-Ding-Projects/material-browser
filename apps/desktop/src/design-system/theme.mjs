@@ -1,4 +1,4 @@
-import { COLOR_SCHEMES } from './vendor/colors.ts';
+import { COLOR_SCHEMES } from './zip-colors.mjs';
 
 /** Saved explicit accents and scheduled overrides win in tonal themes, never in contrast. */
 export function resolvePresentationTheme(prefs, record, systemDark = false) {

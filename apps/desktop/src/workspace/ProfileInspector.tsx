@@ -103,10 +103,7 @@ export function ProfileInspector({
           </div>
           <Tabs
             panelPrefix={panelPrefix}
-            items={["overview", "revisions", "automation"].map((key) => [
-              key,
-              t(key[0].toUpperCase() + key.slice(1)),
-            ])}
+            items={[["overview", t("Details")], ["identity", t("Identity")], ["revisions", t("History")], ["automation", t("Automation")]]}
             value={tab}
             onChange={(value) => {
               setTab(value);
@@ -218,6 +215,8 @@ export function ProfileInspector({
                   </dl>
                 </details>
               </>
+            ) : tab === "identity" ? (
+              <><h3>{t("Profile identity")}</h3><p>{t("Stable browser identity is unavailable in this build.")}</p><dl><dt>ID</dt><dd className="literal">{profile.id}</dd>{Object.entries(profile.identity || {}).map(([key, value]) => <React.Fragment key={key}><dt>{key}</dt><dd>{typeof value === "object" ? JSON.stringify(value) : String(value)}</dd></React.Fragment>)}</dl></>
             ) : tab === "revisions" ? (
               <>
                 <Search
