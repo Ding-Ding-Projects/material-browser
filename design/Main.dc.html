@@ -4,118 +4,124 @@
 <meta charset="utf-8">
 <title>Material Browser · Profiles</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Roboto+Mono:wght@400&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
-<style>
-body{margin:0}
-a{color:#006A6A}a:hover{color:#004F4F}
-.mb{--p:#006A6A;--op:#FFFFFF;--pc:#9CF1F0;--opc:#002020;--sc:#CCE8E7;--osc:#051F1F;--t:#7A5900;--tc:#FFDEA6;--otc:#261900;--bg:#F4FBFA;--s0:#FFFFFF;--s1:#EFF5F4;--s2:#E9EFEE;--s3:#E3E9E8;--s4:#DDE4E3;--on:#161D1D;--onv:#3F4948;--ol:#6F7979;--olv:#BEC9C8;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
-.mb.dark{--p:#80D5D4;--op:#003737;--pc:#004F4F;--opc:#9CF1F0;--sc:#324B4B;--osc:#CCE8E7;--t:#F0BF48;--tc:#5C4300;--otc:#FFDEA6;--bg:#0E1514;--s0:#090F0F;--s1:#161D1D;--s2:#1A2121;--s3:#252B2B;--s4:#2F3636;--on:#DDE4E3;--onv:#BEC9C8;--ol:#889392;--olv:#3F4948;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
-.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
-.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.ib:hover{background:var(--s3)}
-.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
-.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
-.rail a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--onv);font:500 12px/16px 'Roboto Flex',sans-serif;text-align:center}
-.rail a .pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
-.rail a.on{color:var(--on)}.rail a.on .pill{background:var(--sc);color:var(--osc)}
-.tab{display:flex;align-items:center;gap:10px;height:40px;padding:0 8px 0 12px;border-radius:20px;color:var(--onv);font-size:14px}
-.tab.on{background:var(--s4);color:var(--on);font-weight:500}
-.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--olv);font-size:13px;color:var(--onv);background:transparent}
-.card{background:var(--s1);border-radius:16px}
-.lbl{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv)}
-.av{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;flex-shrink:0}
-.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:6px 0}
-.kv span:first-child{color:var(--onv)}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
 </helmet>
-<div class="mb {{theme}}" style="min-height: 960px; height: 100vh; display: flex; flex-direction: column; overflow: hidden">
-  <header style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; background: var(--s2); flex-shrink: 0">
-    <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--p); color: var(--op); display: flex; align-items: center; justify-content: center" aria-hidden="true"><span class="ms" style="font-size: 20px; font-variation-settings: 'FILL' 1">shield_lock</span></div>
-    <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; font-weight: 600">Material Browser</span><span style="font-size: 11px; color: var(--onv)">v0.1.1 · updated [UPDATED-AT]</span></div>
-    <div style="flex: 1; display: flex; justify-content: center; min-width: 0"><button style="width: min(560px, 100%); height: 40px; border-radius: 20px; border: 0; background: var(--s4); color: var(--onv); display: flex; align-items: center; gap: 12px; padding: 0 16px; font: 14px 'Roboto Flex',sans-serif; cursor: pointer"><span class="ms" aria-hidden="true">search</span><span style="flex: 1; text-align: left">Search profiles, settings, help</span><kbd style="font: 500 12px 'Roboto Flex',sans-serif; background: var(--s1); border-radius: 6px; padding: 4px 8px">Ctrl+Shift+F</kbd></button></div>
-    <span class="chip" style="border-color: transparent; background: var(--sc); color: var(--osc)"><span class="ms" style="font-size: 18px">lock_open</span>Vault unlocked</span>
-    <button class="ib" aria-label="Notifications"><span class="ms">notifications</span></button>
-    <button class="ib" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
-    <div style="display: flex; height: 56px; margin-left: 4px"><button class="ib" aria-label="Minimise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">remove</span></button><button class="ib" aria-label="Maximise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 18px">crop_square</span></button><button class="ib" aria-label="Close" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">close</span></button></div>
+<div class="m3 win {{theme}}">
+  <header class="tbar">
+    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
+    <button class="chip assist sl hide-c"><span class="ms fill">lock_open</span>Vault unlocked</button>
+    <button class="ib sl" aria-label="Notifications, 2 new"><span class="ms">notifications</span><span class="badge">2</span></button>
+    <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
+    <div class="wctl"><button aria-label="Minimize"><span class="ms s20">minimize</span></button><button aria-label="Maximize"><span class="ms s18">crop_square</span></button><button aria-label="Close"><span class="ms s20">close</span></button></div>
   </header>
-  <div style="flex: 1; display: flex; min-height: 0">
-    <nav class="rail" aria-label="Destinations" style="width: 88px; flex-shrink: 0; background: var(--s2); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0">
-      <button class="btn" style="width: 56px; height: 56px; padding: 0; justify-content: center; border-radius: 16px; background: var(--tc); color: var(--otc); margin-bottom: 12px" aria-label="Create profile"><span class="ms">person_add</span></button>
-      <a class="on" href="Main.dc.html"><span class="pill"><span class="ms" style="font-variation-settings: 'FILL' 1">group</span></span>Profiles</a>
-      <a href="SuperProfiles.dc.html"><span class="pill"><span class="ms">layers</span></span>Super<br>Profiles</a>
-      <a href="Sync.dc.html"><span class="pill"><span class="ms">sync</span></span>Sync</a>
-      <a href="Settings.dc.html"><span class="pill"><span class="ms">settings</span></span>Settings</a>
-      <div style="flex: 1"></div>
-      <a href="Vault.dc.html"><span class="pill"><span class="ms">tune</span></span>Setup</a>
-      <a href="Vault.dc.html"><span class="pill"><span class="ms">lock</span></span>Lock vault</a>
+  <div class="body">
+    <nav class="rail" aria-label="Destinations">
+      <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
+      <button class="fab flat sl rail-x" aria-label="Create profile" style="margin: 4px 0 20px"><span class="ms">person_add</span></button>
+      <a class="ri on" href="Main.dc.html" aria-current="page"><span class="ind"><span class="ms">group</span></span>Profiles</a>
+      <a class="ri" href="SuperProfiles.dc.html"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
+      <a class="ri" href="Sync.dc.html"><span class="ind"><span class="ms">sync</span><span class="badge dot" aria-label="Needs attention"></span></span>Sync</a>
+      <a class="ri" href="Settings.dc.html"><span class="ind"><span class="ms">settings</span></span>Settings</a>
+      <div class="rail-x" style="flex: 1"></div>
+      <a class="ri rail-x" href="Vault.dc.html"><span class="ind"><span class="ms">lock</span></span>Lock</a>
     </nav>
-    <aside aria-label="Tabs" style="width: 232px; flex-shrink: 0; background: var(--s1); display: flex; flex-direction: column; gap: 4px; padding: 12px 8px; border-right: 1px solid var(--olv)">
-      <div style="display: flex; align-items: center; gap: 4px; padding: 0 4px 8px"><span class="lbl" style="flex: 1">Tabs</span><button class="ib" aria-label="Search tabs" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">manage_search</span></button><button class="ib" aria-label="Dock tab strip to another edge" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">dock_to_left</span></button><button class="ib" aria-label="New tab" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">add</span></button></div>
-      <span class="lbl" style="padding: 4px 12px">Pinned</span>
-      <div class="tab on"><span class="ms" style="font-size: 20px">group</span><span style="flex: 1">Profiles</span><span class="ms" style="font-size: 16px; color: var(--onv)" aria-label="Pinned">push_pin</span></div>
-      <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px"><span style="width: 10px; height: 10px; border-radius: 5px; background: var(--t)" aria-hidden="true"></span><span class="lbl" style="flex: 1">Running</span><span class="ms" style="font-size: 18px; color: var(--onv)" aria-hidden="true">expand_more</span></div>
-      <div class="tab"><span class="ms" style="font-size: 20px">public</span><span style="flex: 1">Work · Chromium</span></div>
-      <div class="tab"><span class="ms" style="font-size: 20px">smart_toy</span><span style="flex: 1">Testing · Puppeteer</span></div>
-      <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px"><span style="width: 10px; height: 10px; border-radius: 5px; background: var(--p)" aria-hidden="true"></span><span class="lbl" style="flex: 1">Utilities</span><span class="ms" style="font-size: 18px; color: var(--onv)" aria-hidden="true">chevron_right</span></div>
-      <div style="flex: 1"></div>
-      <button class="btn txt" style="justify-content: flex-start"><span class="ms" style="font-size: 20px">tab_close</span>Close tabs containing…</button>
-    </aside>
-    <main style="flex: 1; min-width: 0; overflow: auto; padding: 24px 32px; display: flex; gap: 24px; flex-wrap: wrap; align-content: flex-start">
-      <section style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
-        <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap">
-          <div style="flex: 1; min-width: 240px"><h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 500">Profiles</h1><p style="margin: 4px 0 0; color: var(--onv); font-size: 14px">3 profiles · encrypted in your local vault</p></div>
-          <button class="btn out"><span class="ms" style="font-size: 20px">upload</span>Import</button>
-          <button class="btn fill"><span class="ms" style="font-size: 20px">add</span>Create profile</button>
+    <div class="panes">
+      <aside class="pane hide-m" aria-label="Tabs" style="width: 248px; flex-shrink: 0; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+        <div style="display: flex; align-items: center; gap: 2px; padding: 4px 0 8px 12px"><span class="title-s" style="flex: 1">Tabs</span><button class="ib sm sl" aria-label="Find a tab"><span class="ms">manage_search</span></button><button class="ib sm sl" aria-label="Move the tab strip to another edge"><span class="ms">dock_to_left</span></button><button class="ib sm tonal sl" aria-label="New tab"><span class="ms">add</span></button></div>
+        <div class="nd" role="tablist" aria-orientation="vertical" aria-label="Open tabs">
+          <button class="ndi c on sl" role="tab" aria-selected="true"><span class="ms s20">group</span><span class="lbl">Profiles</span><span class="ms s18" aria-label="Pinned">keep</span></button>
+          <div class="nd-head"><span class="grp-dot" style="background: var(--tertiary)"></span><span style="flex: 1">Running</span><span class="ms s20" aria-hidden="true">expand_more</span></div>
+          <button class="ndi c sl" role="tab" aria-selected="false"><span class="ms s20">public</span><span class="lbl">Work · Chromium</span></button>
+          <button class="ndi c sl" role="tab" aria-selected="false"><span class="ms s20">smart_toy</span><span class="lbl">Testing · Puppeteer</span><span class="ms s18" aria-label="Locked">lock</span></button>
+          <div class="nd-head"><span class="grp-dot" style="background: var(--primary)"></span><span style="flex: 1">Utilities</span><span class="ms s20" aria-hidden="true">chevron_right</span></div>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
-          <label style="flex: 1; min-width: 240px; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 6px 0 16px; border-radius: 22px; background: var(--s4)"><span class="ms" style="font-size: 20px; color: var(--onv)">search</span><input aria-label="Search profiles" placeholder="Search profiles" style="flex: 1; min-width: 0; border: 0; background: transparent; color: var(--on); font: 14px 'Roboto Flex',sans-serif; outline: none"><button class="ib" aria-label="Regex builder for profile search" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">regular_expression</span></button></label>
-          <button class="chip" style="background: var(--sc); color: var(--osc); border-color: transparent"><span class="ms" style="font-size: 18px">check</span>All engines</button><button class="chip">Chromium</button><button class="chip">Firefox</button><button class="chip"><span class="ms" style="font-size: 18px">checklist</span>Select</button>
+        <div style="flex: 1"></div>
+        <button class="btn text sl" style="justify-content: flex-start"><span class="ms">tab_close</span>Close tabs containing…</button>
+      </aside>
+      <section class="pane scroll" aria-labelledby="profiles-h" style="flex: 1; display: flex; flex-direction: column; position: relative">
+        <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 28px 24px 16px">
+          <div style="flex: 1; min-width: 220px"><h1 id="profiles-h" class="headline-m em">Profiles</h1><p class="body-m on-sv">3 profiles, encrypted in your vault</p></div>
+          <button class="btn outlined sl"><span class="ms">upload</span>Import</button>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px">
-          <article class="card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--sc); color: var(--osc); outline: 2px solid var(--p)">
-            <div class="av" style="background: var(--p); color: var(--op)">W</div>
-            <div style="flex: 1; min-width: 200px"><div style="font-weight: 500; font-size: 16px">Work</div><div style="font-size: 13px">Chromium · no automation · KeePassXC</div></div>
-            <span class="chip" style="border-color: transparent; background: var(--tc); color: var(--otc)"><span class="ms" style="font-size: 16px">circle</span>Running</span>
-            <button class="ib" aria-label="More actions for Work" style="color: var(--osc)"><span class="ms">more_vert</span></button>
-          </article>
-          <article class="card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-            <div class="av" style="background: var(--tc); color: var(--otc)">R</div>
-            <div style="flex: 1; min-width: 200px"><div style="font-weight: 500; font-size: 16px">Research</div><div style="font-size: 13px; color: var(--onv)">Firefox · Selenium</div></div>
-            <span style="font-size: 13px; color: var(--onv)">Stopped</span>
-            <button class="btn ton" style="height: 36px"><span class="ms" style="font-size: 18px">play_arrow</span>Launch</button>
-            <button class="ib" aria-label="More actions for Research"><span class="ms">more_vert</span></button>
-          </article>
-          <article class="card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-            <div class="av" style="background: var(--s4); color: var(--on)">T</div>
-            <div style="flex: 1; min-width: 200px"><div style="font-weight: 500; font-size: 16px">Testing</div><div style="font-size: 13px; color: var(--onv)">Chromium · Puppeteer</div></div>
-            <span class="chip" style="border-color: transparent; background: var(--tc); color: var(--otc)"><span class="ms" style="font-size: 16px">circle</span>Running</span>
-            <button class="ib" aria-label="More actions for Testing"><span class="ms">more_vert</span></button>
-          </article>
+        <div style="padding: 0 24px; display: flex; flex-direction: column; gap: 12px">
+          <label class="search"><span class="ms">search</span><input aria-label="Search profiles" placeholder="Search profiles"><button class="ib sl" aria-label="Open regex builder for profile search"><span class="ms">regular_expression</span></button></label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+            <button class="chip on sl" aria-pressed="true"><span class="ms">check</span>All engines</button>
+            <button class="chip sl" aria-pressed="false">Chromium</button>
+            <button class="chip sl" aria-pressed="false">Firefox</button>
+            <button class="chip sl">Automation<span class="ms">arrow_drop_down</span></button>
+            <div style="flex: 1"></div>
+            <button class="chip lead sl"><span class="ms">bar_chart</span>Statistics</button>
+          </div>
+        </div>
+        <div class="seglist" style="padding: 16px 24px 112px">
+          <div class="li tall sel">
+            <button class="cbt sl" role="checkbox" aria-checked="true" aria-label="Select Work"><span class="cb"><span class="ms">check</span></span></button>
+            <div class="av l p shape-cookie" aria-hidden="true">W</div>
+            <div class="txt"><a href="Launch.dc.html" class="title-m" style="color: inherit; text-decoration: none">Work</a><span class="sup">Chromium · No automation · KeePassXC</span></div>
+            <span class="stat" style="color: var(--on-secondary-container)"><span class="ms fill">circle</span>Running · 42 min</span>
+            <button class="ib sl" aria-label="More actions for Work" style="color: var(--on-secondary-container)"><span class="ms">more_vert</span></button>
+          </div>
+          <div class="li tall">
+            <button class="cbt sl" role="checkbox" aria-checked="false" aria-label="Select Research"><span class="cb"></span></button>
+            <div class="av l t shape-sunny" aria-hidden="true">R</div>
+            <div class="txt"><a href="Launch.dc.html" class="title-m" style="color: inherit; text-decoration: none">Research</a><span class="sup">Firefox · Selenium</span></div>
+            <span class="stat on-sv"><span class="ms">pause_circle</span>Stopped</span>
+            <div class="split"><a class="btn tonal sl" href="Launch.dc.html"><span class="ms">play_arrow</span>Launch</a><button class="btn tonal sl" aria-label="Launch options for Research"><span class="ms">keyboard_arrow_down</span></button></div>
+          </div>
+          <div class="li tall">
+            <button class="cbt sl" role="checkbox" aria-checked="false" aria-label="Select Testing"><span class="cb"></span></button>
+            <div class="av l s shape-sq" aria-hidden="true">T</div>
+            <div class="txt"><a href="Launch.dc.html" class="title-m" style="color: inherit; text-decoration: none">Testing</a><span class="sup">Chromium · Puppeteer · locked</span></div>
+            <span class="stat c-tertiary"><span class="ms fill">circle</span>Running · 6 min</span>
+            <button class="ib sl" aria-label="More actions for Testing"><span class="ms">more_vert</span></button>
+          </div>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center; pointer-events: none">
+          <div class="ftb vibrant" role="toolbar" aria-label="1 profile selected" style="pointer-events: auto">
+            <span class="label-l" style="padding: 0 8px 0 12px">1 selected</span>
+            <button class="ib sl" aria-label="Duplicate"><span class="ms">content_copy</span></button>
+            <button class="ib sl" aria-label="Snapshot"><span class="ms">photo_camera</span></button>
+            <button class="ib sl" aria-label="Export"><span class="ms">ios_share</span></button>
+            <button class="ib sl" aria-label="Stop"><span class="ms">stop_circle</span></button>
+            <span class="sep"></span>
+            <button class="ib sl" aria-label="Delete"><span class="ms">delete</span></button>
+          </div>
         </div>
       </section>
-      <aside class="card" aria-label="Profile inspector" style="flex: 1 1 320px; padding: 24px; display: flex; flex-direction: column; gap: 16px; align-self: flex-start; background: var(--s0); border: 1px solid var(--olv)">
-        <div style="display: flex; align-items: center; gap: 12px"><div class="av" style="background: var(--p); color: var(--op); width: 56px; height: 56px; font-size: 20px">W</div><div style="flex: 1"><h2 style="margin: 0; font-size: 22px; font-weight: 500">Work</h2><span style="font-size: 13px; color: var(--onv)">Running for 42 min</span></div><button class="ib" aria-label="Edit Work"><span class="ms">edit</span></button></div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn fill" style="flex: 1"><span class="ms" style="font-size: 20px">open_in_new</span>Show window</button><button class="btn out" style="flex: 1"><span class="ms" style="font-size: 20px">stop</span>Stop</button></div>
-        <div role="tablist" aria-label="Inspector sections" style="display: flex; border-bottom: 1px solid var(--olv)"><button role="tab" aria-selected="true" style="flex: 1; height: 44px; border: 0; background: transparent; color: var(--p); font: 500 14px 'Roboto Flex',sans-serif; border-bottom: 3px solid var(--p)">Details</button><button role="tab" aria-selected="false" style="flex: 1; height: 44px; border: 0; background: transparent; color: var(--onv); font: 500 14px 'Roboto Flex',sans-serif">Identity</button><button role="tab" aria-selected="false" style="flex: 1; height: 44px; border: 0; background: transparent; color: var(--onv); font: 500 14px 'Roboto Flex',sans-serif">History</button></div>
-        <div>
-          <div class="kv"><span>Engine</span><span>Chromium 158.0.8111.0</span></div>
-          <div class="kv"><span>Automation</span><span>Off</span></div>
-          <div class="kv"><span>Password manager</span><span>KeePassXC · installed</span></div>
-          <div class="kv"><span>Passkeys</span><span>Through KeePassXC</span></div>
-          <div class="kv"><span>Sync</span><span>Up to date</span></div>
-          <div class="kv"><span>Created</span><span>[DATE]</span></div>
+      <aside class="pane scroll hide-s" aria-label="Work details" style="width: 380px; flex-shrink: 0; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <div class="av xl p shape-cookie" aria-hidden="true">W</div>
+          <div style="flex: 1; min-width: 0"><h2 class="headline-s em">Work</h2><p class="body-m on-sv">Running for 42 min</p></div>
+          <button class="ib sl" aria-label="Rename Work"><span class="ms">edit</span></button>
         </div>
-        <div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--s2); font-size: 13px; color: var(--onv)"><span class="ms" style="font-size: 18px">info</span><span>Browser data stays encrypted at rest. Stopping the browser saves it back to the vault.</span></div>
+        <div style="display: flex; gap: 8px"><button class="btn filled m sl" style="flex: 1"><span class="ms">open_in_new</span>Show window</button><button class="btn tonal m sl" aria-label="Stop Work" style="padding: 0 20px"><span class="ms">stop</span></button></div>
+        <div class="tabs" role="tablist" aria-label="Profile sections">
+          <button class="tab sl on" role="tab" aria-selected="true"><span class="tl">Overview</span></button>
+          <button class="tab sl" role="tab" aria-selected="false"><span class="tl">Identity</span></button>
+          <button class="tab sl" role="tab" aria-selected="false"><span class="tl">Revisions</span></button>
+        </div>
+        <div class="seglist">
+          <div class="li"><span class="ms">public</span><div class="txt"><span class="ov">Engine</span><span>Chromium 158.0.8111.0</span></div></div>
+          <div class="li"><span class="ms">smart_toy</span><div class="txt"><span class="ov">Automation</span><span>Off</span></div></div>
+          <div class="li"><span class="ms">key</span><div class="txt"><span class="ov">Password manager</span><span>KeePassXC · installed copy</span></div></div>
+          <div class="li"><span class="ms">passkey</span><div class="txt"><span class="ov">Passkeys</span><span>Stored in KeePassXC</span></div></div>
+          <div class="li"><span class="ms">cloud_done</span><div class="txt"><span class="ov">Sync</span><span>Up to date · 3 min ago</span></div></div>
+          <div class="li"><span class="ms">calendar_today</span><div class="txt"><span class="ov">Created</span><span>[DATE]</span></div></div>
+        </div>
+        <div class="card tint" style="padding: 16px; display: flex; gap: 12px; border-radius: 20px"><span class="ms">info</span><p class="body-m">Browser data stays encrypted at rest. Stopping the browser saves it back to the vault.</p></div>
       </aside>
-    </main>
+    </div>
   </div>
-  <footer style="height: 32px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--s2); color: var(--onv); font-size: 12px; flex-shrink: 0">
-    <span style="display: flex; align-items: center; gap: 6px"><span class="ms" style="font-size: 16px; color: var(--p)">verified_user</span>Native host connected</span><span>2 browsers running</span><div style="flex: 1"></div><span>English · Funny level 5</span><span>v0.1.1 · updated [UPDATED-AT]</span>
-  </footer>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span>2 browsers running</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated [UPDATED-AT]</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>

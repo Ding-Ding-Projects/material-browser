@@ -4,83 +4,86 @@
 <meta charset="utf-8">
 <title>Material Browser · Launch a profile</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
-<style>
-body{margin:0}
-.mb{--p:#006A6A;--op:#FFFFFF;--pc:#9CF1F0;--opc:#002020;--sc:#CCE8E7;--osc:#051F1F;--t:#7A5900;--tc:#FFDEA6;--otc:#261900;--bg:#F4FBFA;--s0:#FFFFFF;--s1:#EFF5F4;--s2:#E9EFEE;--s3:#E3E9E8;--s4:#DDE4E3;--on:#161D1D;--onv:#3F4948;--ol:#6F7979;--olv:#BEC9C8;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
-.mb.dark{--p:#80D5D4;--op:#003737;--pc:#004F4F;--opc:#9CF1F0;--sc:#324B4B;--osc:#CCE8E7;--t:#F0BF48;--tc:#5C4300;--otc:#FFDEA6;--bg:#0E1514;--s0:#090F0F;--s1:#161D1D;--s2:#1A2121;--s3:#252B2B;--s4:#2F3636;--on:#DDE4E3;--onv:#BEC9C8;--ol:#889392;--olv:#3F4948;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
-.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
-.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;text-decoration:none}
-.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
-.rail a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--onv);font:500 12px/16px 'Roboto Flex',sans-serif;text-align:center}
-.rail a .pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
-.rail a.on{color:var(--on)}.rail a.on .pill{background:var(--sc);color:var(--osc)}
-.opt{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;border:1px solid var(--olv);background:var(--s0);color:var(--on);text-align:left;font:14px 'Roboto Flex',sans-serif;cursor:pointer}
-.opt.on{border:2px solid var(--p);background:var(--sc);color:var(--osc)}
-.opt strong{display:block;font-weight:500;font-size:15px}
-.cap{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv)}
-.chk{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:20px}
-.chk input{width:18px;height:18px;margin-top:1px;accent-color:var(--p);flex-shrink:0}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
 </helmet>
-<div class="mb {{theme}}" style="min-height: 960px; height: 100vh; display: flex; flex-direction: column; overflow: hidden">
-  <header style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; background: var(--s2); flex-shrink: 0">
-    <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--p); color: var(--op); display: flex; align-items: center; justify-content: center" aria-hidden="true"><span class="ms" style="font-size: 20px; font-variation-settings: 'FILL' 1">shield_lock</span></div>
-    <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; font-weight: 600">Material Browser</span><span style="font-size: 11px; color: var(--onv)">v0.1.1 · updated [UPDATED-AT]</span></div>
-    <div style="flex: 1; display: flex; justify-content: center; min-width: 0"><button style="width: min(560px, 100%); height: 40px; border-radius: 20px; border: 0; background: var(--s4); color: var(--onv); display: flex; align-items: center; gap: 12px; padding: 0 16px; font: 14px 'Roboto Flex',sans-serif"><span class="ms" aria-hidden="true">search</span><span style="flex: 1; text-align: left">Search profiles, settings, help</span><kbd style="font: 500 12px 'Roboto Flex',sans-serif; background: var(--s1); border-radius: 6px; padding: 4px 8px">Ctrl+Shift+F</kbd></button></div>
-    <button class="ib" aria-label="Notifications"><span class="ms">notifications</span></button>
-    <div style="display: flex; height: 56px"><button class="ib" aria-label="Minimise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">remove</span></button><button class="ib" aria-label="Maximise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 18px">crop_square</span></button><button class="ib" aria-label="Close" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">close</span></button></div>
+<div class="m3 win {{theme}}">
+  <header class="tbar">
+    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
+    <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
+    <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
+    <div class="wctl"><button aria-label="Minimize"><span class="ms s20">minimize</span></button><button aria-label="Maximize"><span class="ms s18">crop_square</span></button><button aria-label="Close"><span class="ms s20">close</span></button></div>
   </header>
-  <div style="flex: 1; display: flex; min-height: 0">
-    <nav class="rail" aria-label="Destinations" style="width: 88px; flex-shrink: 0; background: var(--s2); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0">
-      <div style="height: 68px"></div>
-      <a class="on" href="Main.dc.html"><span class="pill"><span class="ms" style="font-variation-settings: 'FILL' 1">group</span></span>Profiles</a>
-      <a href="SuperProfiles.dc.html"><span class="pill"><span class="ms">layers</span></span>Super<br>Profiles</a>
-      <a href="Sync.dc.html"><span class="pill"><span class="ms">sync</span></span>Sync</a>
-      <a href="Settings.dc.html"><span class="pill"><span class="ms">settings</span></span>Settings</a>
+  <div class="body">
+    <nav class="rail" aria-label="Destinations">
+      <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
+      <button class="fab flat sl rail-x" aria-label="Create profile" style="margin: 4px 0 20px"><span class="ms">person_add</span></button>
+      <a class="ri on" href="Main.dc.html" aria-current="page"><span class="ind"><span class="ms">group</span></span>Profiles</a>
+      <a class="ri" href="SuperProfiles.dc.html"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
+      <a class="ri" href="Sync.dc.html"><span class="ind"><span class="ms">sync</span></span>Sync</a>
+      <a class="ri" href="Settings.dc.html"><span class="ind"><span class="ms">settings</span></span>Settings</a>
     </nav>
-    <main style="flex: 1; min-width: 0; overflow: auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px">
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><a href="Main.dc.html" class="btn txt" style="padding: 0 8px"><span class="ms" style="font-size: 20px">arrow_back</span>Profiles</a><span style="color: var(--onv)">/</span><span style="font-size: 14px">Research</span></div>
-      <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap"><div style="flex: 1; min-width: 260px"><h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 500">Launch Research</h1><p style="margin: 4px 0 0; color: var(--onv); font-size: 14px">Choose how this profile opens. Your choice is saved for next time.</p></div></div>
-      <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start">
-        <section style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
-          <div style="display: flex; flex-direction: column; gap: 10px"><span class="cap">Browser engine</span>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px">
-              <button class="opt"><span class="ms" style="color: var(--onv)">radio_button_unchecked</span><span style="flex: 1"><strong>Chromium</strong>158.0.8111.0 · bundled</span></button>
-              <button class="opt on"><span class="ms">radio_button_checked</span><span style="flex: 1"><strong>Firefox</strong>158.0 · bundled</span></button>
-            </div>
+    <div class="panes">
+      <section class="pane scroll" aria-labelledby="launch-h" style="flex: 1; padding: 16px 32px 32px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: -12px"><a class="ib sl" href="Main.dc.html" aria-label="Back to Profiles"><span class="ms">arrow_back</span></a><span class="label-l on-sv">Profiles</span></div>
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap">
+          <div class="av xl t shape-sunny" aria-hidden="true">R</div>
+          <div style="flex: 1; min-width: 240px"><h1 id="launch-h" class="display-s em">Launch Research</h1><p class="body-l on-sv">Choose how this profile opens. Your choice is remembered.</p></div>
+        </div>
+        <section style="display: flex; flex-direction: column; gap: 12px" aria-labelledby="engine-h">
+          <h2 id="engine-h" class="title-m">Browser engine</h2>
+          <div class="seglist" role="radiogroup" aria-labelledby="engine-h">
+            <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="ms">public</span><span class="txt"><span>Chromium</span><span class="sup">158.0.8111.0 · bundled with the app</span></span></button>
+            <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="ms">travel_explore</span><span class="txt"><span>Firefox</span><span class="sup">158.0 · bundled with the app</span></span><span class="trail">Last used</span></button>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 10px"><span class="cap">Automation</span>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 12px">
-              <button class="opt"><span class="ms" style="color: var(--onv)">radio_button_unchecked</span><span><strong>Off</strong>Normal browsing</span></button>
-              <button class="opt on"><span class="ms">radio_button_checked</span><span><strong>Selenium</strong>WebDriver</span></button>
-              <button class="opt"><span class="ms" style="color: var(--onv)">radio_button_unchecked</span><span><strong>Puppeteer</strong>Node scripts</span></button>
-            </div>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 16px; background: var(--tc); color: var(--otc)">
-            <div style="display: flex; align-items: center; gap: 10px; font-weight: 500"><span class="ms">fact_check</span>Review before launch</div>
-            <label class="chk"><input type="checkbox" checked>Automation can read and control pages in this profile while it runs.</label>
-            <label class="chk"><input type="checkbox">Allow the driver to listen on this computer only (127.0.0.1).</label>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn fill"><span class="ms" style="font-size: 20px">play_arrow</span>Launch Firefox</button><button class="btn txt">Cancel</button></div>
         </section>
-        <aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px">
-          <section style="padding: 20px; border-radius: 16px; background: var(--s1); display: flex; flex-direction: column; gap: 12px"><h2 style="margin: 0; font-size: 16px; font-weight: 500">What happens</h2>
-            <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px"><li>The vault decrypts this profile into a private working folder.</li><li>Firefox starts with the Selenium driver attached.</li><li>When you stop, changes are encrypted back and the working folder is removed.</li></ol>
-          </section>
-          <section style="padding: 20px; border-radius: 16px; background: var(--s1); display: flex; flex-direction: column; gap: 8px"><h2 style="margin: 0 0 4px; font-size: 16px; font-weight: 500">Running now</h2>
-            <div style="display: flex; align-items: center; gap: 10px; font-size: 14px"><span class="ms" style="color: var(--t)">circle</span><span style="flex: 1">Work · Chromium</span><button class="btn txt" style="height: 36px">Stop</button></div>
-            <div style="display: flex; align-items: center; gap: 10px; font-size: 14px"><span class="ms" style="color: var(--t)">circle</span><span style="flex: 1">Testing · Puppeteer</span><button class="btn txt" style="height: 36px">Stop</button></div>
-          </section>
-        </aside>
-      </div>
-    </main>
+        <section style="display: flex; flex-direction: column; gap: 12px" aria-labelledby="auto-h">
+          <h2 id="auto-h" class="title-m">Automation</h2>
+          <div class="cbg" role="radiogroup" aria-labelledby="auto-h">
+            <button role="radio" aria-checked="false">Off</button>
+            <button class="on" role="radio" aria-checked="true"><span class="ms">check</span>Selenium</button>
+            <button role="radio" aria-checked="false">Puppeteer</button>
+          </div>
+          <p class="body-m on-sv">Selenium attaches a WebDriver session you can script from your own tools.</p>
+        </section>
+        <section class="card tint-t" style="padding: 20px 20px 12px; border-radius: 24px; display: flex; flex-direction: column; gap: 4px" aria-labelledby="review-h">
+          <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 8px"><span class="ms">fact_check</span><h2 id="review-h" class="title-m">Review before launch</h2></div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-left: -10px"><button class="cbt sl" role="checkbox" aria-checked="true" aria-labelledby="c1"><span class="cb"><span class="ms">check</span></span></button><span id="c1" class="body-m">Automation can read and control pages in this profile while it runs.</span></div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-left: -10px"><button class="cbt sl" role="checkbox" aria-checked="false" aria-labelledby="c2"><span class="cb"></span></button><span id="c2" class="body-m">The driver listens on this computer only (127.0.0.1).</span></div>
+        </section>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
+          <button class="btn filled m sl"><span class="ms">rocket_launch</span>Launch Firefox</button>
+          <a class="btn text sl" href="Main.dc.html">Cancel</a>
+          <span class="body-s on-sv">One review left to confirm</span>
+        </div>
+      </section>
+      <aside class="pane scroll hide-s" aria-label="About launching" style="width: 380px; flex-shrink: 0; padding: 28px 24px; display: flex; flex-direction: column; gap: 24px">
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <h2 class="title-l">What happens</h2>
+          <div class="seglist">
+            <div class="li tall"><div class="av s" aria-hidden="true">1</div><span class="txt body-m">The vault decrypts Research into a private working folder.</span></div>
+            <div class="li tall"><div class="av s" aria-hidden="true">2</div><span class="txt body-m">Firefox starts with the Selenium driver attached.</span></div>
+            <div class="li tall"><div class="av s" aria-hidden="true">3</div><span class="txt body-m">When you stop, changes are encrypted back and the folder is removed.</span></div>
+          </div>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <h2 class="title-l">Running now</h2>
+          <div class="seglist">
+            <div class="li"><div class="av p shape-cookie" aria-hidden="true">W</div><span class="txt"><span>Work</span><span class="sup">Chromium · 42 min</span></span><button class="btn text sl">Stop</button></div>
+            <div class="li"><div class="av s shape-sq" aria-hidden="true">T</div><span class="txt"><span>Testing</span><span class="sup">Puppeteer · 6 min</span></span><button class="btn text sl">Stop</button></div>
+          </div>
+        </section>
+      </aside>
+    </div>
   </div>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span style="flex: 1"></span><span>English · Funny level 5</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>

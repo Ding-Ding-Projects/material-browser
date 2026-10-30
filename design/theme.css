@@ -1,0 +1,24 @@
+/* Material Browser colour scheme: Material 3 tonal palette from a teal seed. */
+.m3{
+  --primary:#006A6A;--on-primary:#FFFFFF;--primary-container:#9CF1F0;--on-primary-container:#004F4F;
+  --secondary:#4A6363;--on-secondary:#FFFFFF;--secondary-container:#CCE8E7;--on-secondary-container:#324B4B;
+  --tertiary:#4B607C;--on-tertiary:#FFFFFF;--tertiary-container:#D3E4FF;--on-tertiary-container:#334863;
+  --error:#BA1A1A;--on-error:#FFFFFF;--error-container:#FFDAD6;--on-error-container:#93000A;
+  --surface:#F4FBFA;--surface-dim:#D5DBDA;--surface-bright:#F4FBFA;
+  --surface-container-lowest:#FFFFFF;--surface-container-low:#EFF5F4;--surface-container:#E9EFEE;--surface-container-high:#E3E9E8;--surface-container-highest:#DDE4E3;
+  --on-surface:#161D1D;--on-surface-variant:#3F4948;--outline:#6F7979;--outline-variant:#BEC9C8;
+  --inverse-surface:#2B3231;--inverse-on-surface:#ECF2F1;--inverse-primary:#80D5D4;--scrim:#000000;
+  --e1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);
+  --e2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);
+  --e3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);
+}
+.m3.dark{
+  --primary:#80D5D4;--on-primary:#003737;--primary-container:#004F4F;--on-primary-container:#9CF1F0;
+  --secondary:#B0CCCB;--on-secondary:#1B3534;--secondary-container:#324B4B;--on-secondary-container:#CCE8E7;
+  --tertiary:#B3C8E8;--on-tertiary:#1C314B;--tertiary-container:#334863;--on-tertiary-container:#D3E4FF;
+  --error:#FFB4AB;--on-error:#690005;--error-container:#93000A;--on-error-container:#FFDAD6;
+  --surface:#0E1514;--surface-dim:#0E1514;--surface-bright:#343A3A;
+  --surface-container-lowest:#090F0F;--surface-container-low:#161D1D;--surface-container:#1A2121;--surface-container-high:#252B2B;--surface-container-highest:#2F3636;
+  --on-surface:#DDE4E3;--on-surface-variant:#BEC9C8;--outline:#889392;--outline-variant:#3F4948;
+  --inverse-surface:#DDE4E3;--inverse-on-surface:#2B3231;--inverse-primary:#006A6A;
+}
