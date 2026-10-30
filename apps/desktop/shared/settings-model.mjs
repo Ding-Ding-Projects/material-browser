@@ -178,8 +178,9 @@ export const definitions = [
     "fontFamily",
     "appearance",
     "Interface font",
-    "Roboto",
+    "Roboto Flex",
     [
+      ["Roboto Flex", "Roboto Flex"],
       ["Roboto", "Roboto"],
       ["system", "System interface"],
       ["sans-serif", "Generic sans-serif"],

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "../components";
 import { Search } from "../Search";
 import { Icon } from "../Icon";
-import { mdiClose, mdiPin, mdiPinOutline, mdiPlus, mdiAccountMultipleOutline } from "@mdi/js";
+import { mdiClose, mdiPin, mdiPinOutline, mdiPlus, mdiAccountMultipleOutline } from "../icons";
 export type WorkspaceTab = { id: string; label: string; page: string; setting?: string; section?: string };
 export function WorkspaceTabs({ tabs, active, page, onSelect, onClose, onHome, onNew, label, t }: {
   tabs: WorkspaceTab[]; active: string; page: string; onSelect: (tab: WorkspaceTab) => void;
@@ -21,7 +21,7 @@ export function WorkspaceTabs({ tabs, active, page, onSelect, onClose, onHome, o
     <div className="dock-heading"><strong>{t("Open tabs")}</strong><button className="icon-control" onClick={onNew} aria-label={t("New tab")} title={t("New tab")}><Icon path={mdiPlus} size={22} /></button></div>
     <button className={`dock-home${page === "profiles" && !active ? " active" : ""}`} onClick={onHome}><Icon path={mdiAccountMultipleOutline} size={20}/>{t("Profiles")}<Icon path={mdiPin} size={16}/></button>
     <Search label={t("Search tabs")} items={tabs.map((x) => label(x.label))} itemKeys={tabs.map((x) => x.id)} onKeys={setMatches} t={t}/>
-    <label className="dock-group-toggle"><MaterialInput type="checkbox" checked={grouped} onChange={(e) => { setGrouped(e.target.checked); try { localStorage.setItem("workspace.grouped.v1", String(e.target.checked)); } catch {} }}/>{t("Group by destination")}</label>
+    <label className="dock-group-toggle"><MaterialInput type="checkbox" aria-label={t("Group by destination")} checked={grouped} onChange={(e) => { setGrouped(e.target.checked); try { localStorage.setItem("workspace.grouped.v1", String(e.target.checked)); } catch {} }}/>{t("Group by destination")}</label>
     <div className="workspace-tab-strip" role="tablist" aria-label={t("Open tabs")} aria-orientation="vertical" onKeyDown={(event) => {
       const controls = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
       const index = controls.indexOf(document.activeElement as HTMLButtonElement); if (index < 0 || !controls.length) return;

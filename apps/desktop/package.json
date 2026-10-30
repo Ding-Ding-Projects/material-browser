@@ -15,6 +15,9 @@
     "test": "node --test src/*.test.mjs electron/*.test.cjs"
   },
   "dependencies": {
+    "@fontsource-variable/material-symbols-rounded": "5.3.9",
+    "@fontsource-variable/noto-sans-hk": "5.3.1",
+    "@fontsource-variable/roboto-flex": "5.3.0",
     "@fontsource/roboto": "5.3.0",
     "@fontsource/roboto-mono": "5.3.0",
     "@material/web": "2.5.0",

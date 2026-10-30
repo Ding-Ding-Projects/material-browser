@@ -528,7 +528,7 @@ export function SettingsTabs({
             <label>
               <MaterialInput
                 type="checkbox"
-                checked={inverse}
+                aria-label={t("Close tabs not matching")} checked={inverse}
                 onChange={(e) => setInverse(e.target.checked)}
               />
               {t("Close tabs not matching")}
@@ -536,7 +536,7 @@ export function SettingsTabs({
             <label>
               <MaterialInput
                 type="checkbox"
-                checked={includePinned}
+                aria-label={t("Include pinned tabs")} checked={includePinned}
                 onChange={(e) => setIncludePinned(e.target.checked)}
               />
               {t("Include pinned tabs")}

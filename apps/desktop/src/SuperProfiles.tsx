@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureTitle, MaterialInput } from "./MaterialPrimitives";
 import { Icon } from "./Icon";
-import { mdiArrowLeft, mdiPlus, mdiRefresh } from "@mdi/js";
+import { mdiArrowLeft, mdiPlus, mdiRefresh } from "./icons";
 import React, { useEffect, useRef, useState, useId } from "react";
 import { request, SuperProfile, SuperRevision, SuperSession } from "./api";
 import { Button, Modal, Tabs } from "./components";
@@ -689,7 +689,7 @@ export function SuperProfiles({
               <label>
                 <MaterialInput
                   type="checkbox"
-                  checked={identityConsent}
+                  aria-label={t("Use standard identity for this launch only")} checked={identityConsent}
                   onChange={(e) => setIdentityConsent(e.target.checked)}
                   disabled={busy}
                 />
@@ -722,7 +722,7 @@ export function SuperProfiles({
                     <label key={c.id}>
                       <MaterialInput
                         type="checkbox"
-                        checked={saveCategories.includes(c.id)}
+                        aria-label={t(c.id)} checked={saveCategories.includes(c.id)}
                         onChange={(e) =>
                           setSaveCategories((previous) =>
                             e.target.checked

@@ -109,7 +109,7 @@ export function SettingsWorkspace({
     ["serif", t("Generic serif")],
     ["monospace", t("Generic monospace")],
     // Bundled webfonts are available independently of the native font inventory.
-    ...[...new Set(["Roboto", "Roboto Mono", ...fonts.map((f) => f.family)])].map(
+    ...[...new Set(["Roboto Flex", "Roboto", "Roboto Mono", "Noto Sans HK Variable", ...fonts.map((f) => f.family)])].map(
       (f) => [f, f] as [string, string],
     ),
   ];

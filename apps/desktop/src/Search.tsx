@@ -110,6 +110,7 @@ export function Search({
           <label>
             <MaterialInput
               type="checkbox"
+              aria-label={t("Use regular expression")}
               checked={regex}
               onChange={(e) => setRegex(e.target.checked)}
             />

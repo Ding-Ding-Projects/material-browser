@@ -19,7 +19,7 @@ Workspace destinations are restored by matching stored identifiers to the curren
 
 ## Theme and platform integration
 
-`src/design-system/reference-colors.mjs` owns the current teal and blue-tertiary light/dark roles. `material-browser.css` provides initial dark paint and local component typography. Existing explicit saved accents and theme choices retain priority; contrast remains a distinct accessible scheme. Historical vendored reference files are retained and are no longer the tonal appearance authority. Fonts and icons remain locally bundled; no remote font or design support script is loaded.
+`src/design-system/reference-colors.mjs` owns the current teal and blue-tertiary light/dark roles. `material-browser.css` provides initial dark paint and local component typography. Existing explicit saved accents and theme choices retain priority; contrast remains a distinct accessible scheme. Historical vendored reference files are retained and are no longer the tonal appearance authority. Pinned local Fontsource packages provide Roboto Flex 5.3.0, Noto Sans HK 5.3.1 and Material Symbols Rounded 5.3.9, each under OFL-1.1 with registry integrity recorded in the lockfile. Roboto Flex is the fresh-install default; saved font values remain intact. Stable renderer icon identifiers map to local symbol names. No remote font or design support script is loaded.
 
 The frameless native shell exposes only minimize, maximize, restore and close. Each request is checked against the existing trusted main-frame sender and exact action allowlist. Native lifecycle and security preferences remain intact. The renderer receives actual maximized-state events and shows a truthful message if an action is unavailable.
 
@@ -34,3 +34,5 @@ Server enrollment, unified sync, keep-both conflict resolution, stable identity,
 Source compilation and focused regression results are recorded by the task handoff. Genuine built interaction, native control drive, restart persistence and the full language/theme/scale layout matrix remain unverified until captured from the built application. Historical `design/current-screens` images used a stub bridge and do not prove this implementation.
 
 Registered Material Web checkboxes, radio controls, sliders, progress indicators and filter chips replace visible native form widgets. File and color selection use a Material button opening the platform picker; its native input is hidden. Expandable secondary content uses an accessible Material-button composition rather than native disclosure widgets.
+
+The native window-control fixture exercises trusted and untrusted callers, rejects non-allowlisted actions, observes actual requested action order and verifies maximize/restore state notifications. Selection, scope and range controls carry explicit localized accessible labels. Engine and automation sorting remain available alongside name and update time.

@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureTitle, MaterialInput } from "../MaterialPrimitives";
 import { Icon } from "../Icon";
-import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "@mdi/js";
+import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "../icons";
 import React, { useState, useId } from "react";
 import { Profile } from "../api";
 import { Button, Select, Tabs } from "../components";
@@ -92,6 +92,7 @@ export function ProfileInspector({
                 {t("Inspector width")}
                 <MaterialInput
                   type="range"
+                  aria-label={t("Inspector width")}
                   min="320"
                   max="360"
                   step="4"

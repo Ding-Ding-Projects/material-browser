@@ -263,7 +263,7 @@ export function ProtectedHistory({
                 <label>
                   <MaterialInput
                     type="checkbox"
-                    checked={selected.includes(row.id)}
+                    aria-label={`${t("Select")} ${row.label || row.action}`} checked={selected.includes(row.id)}
                     onChange={(event) =>
                       setSelected(
                         event.target.checked

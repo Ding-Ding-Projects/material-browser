@@ -20,6 +20,9 @@ function fixture({
   let hostSpawns = 0;
   const exitCodes = [];
   let appUserModelId;
+  const windowActions = [];
+  const windowEvents = new Map();
+  let maximized = false;
   const contents = {
     mainFrame: {
       url: pathToFileURL(path.join("/test", "../dist/index.html")).href,
@@ -47,6 +50,12 @@ function fixture({
     isDestroyed() {
       return destroyed;
     }
+    on(name, handler) { windowEvents.set(name, handler); }
+    isMaximized() { return maximized; }
+    minimize() { windowActions.push("minimize"); }
+    maximize() { maximized = true; windowActions.push("maximize"); windowEvents.get("maximize")?.(); }
+    unmaximize() { maximized = false; windowActions.push("restore"); windowEvents.get("unmaximize")?.(); }
+    close() { windowActions.push("close"); }
     loadFile() {}
   }
   const electron = {
@@ -95,7 +104,7 @@ function fixture({
       process: { resourcesPath: "/test", argv, platform: "win32", execPath: "C:\\fixture\\MaterialBrowser\\app-0.1.1\\MaterialBrowser.exe" },
     },
   );
-  return { handlers, options, contents, host, dataDirectory, sent: () => sent, hostSpawns, exitCodes, appUserModelId };
+  return { windowActions, windowEvents, handlers, options, contents, host, dataDirectory, sent: () => sent, hostSpawns, exitCodes, appUserModelId };
 }
 
 test('Squirrel maintenance never opens a workspace or starts its native host', () => {
@@ -198,4 +207,22 @@ test("explicit data directory accepts only one absolute non-root directory", () 
     [`--material-data-dir=${directory}`, `--material-data-dir=${directory}`],
   ])
     assert.throws(() => fixture({ argv }), /INVALID_DATA_DIRECTORY/);
+});
+
+test("custom window actions retain trusted-frame and exact-action boundaries", () => {
+  const f = fixture();
+  assert.equal(f.options.frame, false);
+  const call = f.handlers.get("material:window");
+  const trusted = { sender: f.contents, senderFrame: f.contents.mainFrame };
+  for (const action of ["minimize", "maximize", "restore", "close"]) {
+    assert.throws(() => call({ sender: {}, senderFrame: {} }, action), /INVALID_REQUEST/);
+    assert.throws(() => call({ sender: f.contents, senderFrame: {} }, action), /INVALID_REQUEST/);
+  }
+  for (const action of ["destroy", "executeJavaScript", "", null, {}]) assert.throws(() => call(trusted, action), /INVALID_REQUEST/);
+  assert.deepEqual(f.windowActions, []);
+  assert.equal(call(trusted, "maximize").maximized, true);
+  assert.equal(call(trusted, "restore").maximized, false);
+  call(trusted, "minimize"); call(trusted, "close");
+  assert.deepEqual(f.windowActions, ["maximize", "restore", "minimize", "close"]);
+  assert.equal(f.sent(), 2);
 });

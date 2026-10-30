@@ -1,6 +1,6 @@
 import "./surfaces.css";
 import { Icon } from "../Icon";
-import { mdiPlus } from "@mdi/js";
+import { mdiPlus } from "../icons";
 import { ProfileTable } from "./ProfileTable";
 import { ConfirmAction } from "../settings/ConfirmAction";
 import { ProfileInspector } from "./ProfileInspector";

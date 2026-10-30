@@ -2,7 +2,7 @@ import { LinearProgress } from "../MaterialPrimitives";
 import "./surfaces.css";
 import React from "react";
 import { Icon } from "../Icon";
-import { mdiShieldLockOutline } from "@mdi/js";
+import { mdiShieldLockOutline } from "../icons";
 import { Button, Field } from "../components";
 import { request } from "../api";
 export function Onboarding({

@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import React, { useEffect, useRef } from "react";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
@@ -75,14 +76,7 @@ export function Field({
           ref.current?.focus();
         },
       },
-      React.createElement(
-        "svg",
-        { viewBox: "0 0 24 24", width: 24, height: 24, "aria-hidden": true },
-        React.createElement("path", {
-          fill: "currentColor",
-          d: "M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4l-6.3 6.3-1.4-1.4L9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z",
-        }),
-      ),
+      <Icon path="close" />,
     ),
   );
 }

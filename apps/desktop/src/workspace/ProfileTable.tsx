@@ -1,6 +1,6 @@
 import { MaterialInput } from "../MaterialPrimitives";
 import { Icon } from "../Icon";
-import { mdiArrowUp, mdiArrowDown, mdiRefresh, mdiPlay, mdiDotsVertical } from "@mdi/js";
+import { mdiArrowUp, mdiArrowDown, mdiRefresh, mdiPlay, mdiDotsVertical } from "../icons";
 import React from "react";
 import { Profile } from "../api";
 import { Button } from "../components";
@@ -119,8 +119,7 @@ export function ProfileTable({
         <label className="check-target"><MaterialInput type="checkbox" aria-label={t("Select visible profiles")}
           checked={rows.length > 0 && rows.every((p) => checked.includes(p.id))} disabled={!rows.length}
           onChange={(e) => setChecked((current) => e.target.checked ? Array.from(new Set([...current, ...rows.map((p) => p.id)])) : current.filter((id) => !rows.some((p) => p.id === id)))} />{t("Select visible profiles")}</label>
-        <button className="sort-control" onClick={() => sortBy("name")}>{t("Name")} <Icon path={sort.direction === "asc" ? mdiArrowUp : mdiArrowDown} size={16} /></button>
-        <button className="sort-control" onClick={() => sortBy("updatedAt")}>{t("Updated")}</button>
+        {React.createElement("md-chip-set", { "aria-label": t("Sort profiles") }, [["name", "Name"], ["engine", "Engine"], ["automation", "Automation"], ["updatedAt", "Updated"]].map(([key, label]) => React.createElement("md-filter-chip", { key, label: `${t(label)}${sort.key === key ? sort.direction === "asc" ? " ↑" : " ↓" : ""}`, "aria-label": `${t(label)}: ${t(sort.key === key && sort.direction === "desc" ? "Descending" : "Ascending")}`, selected: sort.key === key, onClick: () => sortBy(key) })))}
       </div>
       <div className="profile-cards" role="list">
         {rows.map((p) => {

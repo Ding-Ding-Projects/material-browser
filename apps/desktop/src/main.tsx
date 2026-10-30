@@ -15,7 +15,7 @@ import {
 import { Button, Field, Select, Modal } from "./components";
 import { Search } from "./Search";
 import { Icon } from "./Icon";
-import { mdiClose, mdiArrowTopRight } from "@mdi/js";
+import { mdiClose, mdiArrowTopRight } from "./icons";
 import { request, Profile } from "./api";
 import type { PasswordManagerDetection } from "./api";
 import {

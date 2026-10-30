@@ -14,7 +14,7 @@ export function MaterialInput(props: React.InputHTMLAttributes<HTMLInputElement>
     const converted = { ...event, target, currentTarget: target, nativeEvent: event, preventDefault: () => event.preventDefault(), stopPropagation: () => event.stopPropagation() };
     onChange?.(converted as unknown as React.ChangeEvent<HTMLInputElement>);
   };
-  return React.createElement(tag, { ...rest, onChange: forward, onInput: type === "range" ? (event: Event) => { forward(event); onInput?.(event as unknown as React.FormEvent<HTMLInputElement>); } : onInput });
+  return React.createElement(tag, { ...rest, onChange: type === "range" ? undefined : forward, onInput: type === "range" ? (event: Event) => { forward(event); onInput?.(event as unknown as React.FormEvent<HTMLInputElement>); } : onInput });
 }
 export function DisclosureTitle({ children }: React.PropsWithChildren<{ title?: string }>) { return <>{children}</>; }
 export function Disclosure({ children, open, onToggle, className = "", ...rest }: any) {

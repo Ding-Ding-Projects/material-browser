@@ -1,7 +1,7 @@
 import { Disclosure, DisclosureTitle } from "../MaterialPrimitives";
 import "./surfaces.css";
 import { Icon } from "../Icon";
-import { mdiFolderOpenOutline, mdiRefresh } from "@mdi/js";
+import { mdiFolderOpenOutline, mdiRefresh } from "../icons";
 import React, { useState, useEffect } from "react";
 import { Profile, request } from "../api";
 import { Button, Modal } from "../components";

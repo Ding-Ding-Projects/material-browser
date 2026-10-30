@@ -120,4 +120,8 @@ export const workspaceZh: Record<string, string> = {
   "Identity": "識別資料",
   "Search results": "搜尋結果",
   "Search destinations and settings": "搜尋目的地及設定",
+  "More options": "更多選項",
+  "Sort profiles": "排列設定檔",
+  "Ascending": "遞增",
+  "Descending": "遞減",
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal } from './components';
 import { Icon } from './Icon';
-import { mdiShieldCheckOutline, mdiWeb, mdiRobotOutline } from '@mdi/js';
+import { mdiShieldCheckOutline, mdiWeb, mdiRobotOutline } from './icons';
 import type { Profile } from './api';
 export function ProfileLaunch({ profile, busy, onClose, onLaunch, t }: {
   profile: Profile; busy: boolean; onClose: () => void; onLaunch: (id: string) => void; t: (text: string) => string;

@@ -45,7 +45,7 @@ export function NotificationCenter({
       <label>
         <MaterialInput
           type="checkbox"
-          checked={unread}
+          aria-label={t("Undismissed only")} checked={unread}
           onChange={(e) => setUnread(e.target.checked)}
         />
         {t("Undismissed only")}
@@ -137,7 +137,7 @@ export function NotificationCenter({
               <label>
                 <MaterialInput
                   type="checkbox"
-                  checked={selected.includes(n.id)}
+                  aria-label={`${t("Select")} ${t(n.kind)} ${new Date(n.at).toLocaleString()}`} checked={selected.includes(n.id)}
                   onClick={(e) =>
                     select(n.id, !selected.includes(n.id), e.shiftKey)
                   }

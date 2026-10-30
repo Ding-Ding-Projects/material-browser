@@ -10,7 +10,7 @@ const record = () => readPresentationRecord(null);
 test('fresh dark uses every reference role; default accent does not override light', () => {
   const r = record();
   assert.equal(defaults.theme, 'dark');
-  assert.equal(defaults.fontFamily, 'Roboto');
+  assert.equal(defaults.fontFamily, 'Roboto Flex');
   assert.deepEqual(resolvePresentationTheme(r.preferences, r).roles, COLOR_SCHEMES.dark);
   assert.deepEqual(resolvePresentationTheme({ ...r.preferences, theme: 'light' }, r).roles, COLOR_SCHEMES.light);
 });

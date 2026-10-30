@@ -19,7 +19,7 @@ import {
   mdiWindowMaximize,
   mdiWindowRestore,
   mdiClose,
-} from "@mdi/js";
+} from "../icons";
 import { APP_VERSION } from "../build-version";
 import { Button } from "../components";
 import { Icon } from "../Icon";
