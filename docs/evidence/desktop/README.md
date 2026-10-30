@@ -1,6 +1,8 @@
-# Current desktop evidence
+# Desktop evidence and current acceptance gap
 
-The current WorldLens desktop captures come from source `284fc88f94487a7716099469daadeec258d97b07`. See the [complete inspected set and verification limits](worldlens/README.md), [exact image inventory](worldlens/inventory.json) and [coverage record](worldlens/coverage.json).
+The repository-owned design remake currently has no accepted runtime screenshots. Automatic approval review rejected its task-owned hidden-runtime service launch before execution. Actual rebuilt-application captures, inspection, layout parity and README delivery remain pending. The captures below are historical WorldLens evidence for their stated source.
+
+The historical WorldLens desktop captures come from source `284fc88f94487a7716099469daadeec258d97b07`. See the [complete inspected set and verification limits](worldlens/README.md), [exact image inventory](worldlens/inventory.json) and [coverage record](worldlens/coverage.json).
 
 ![Selected profile and inspector in the WorldLens desktop design](worldlens/profile-overview.png)
 

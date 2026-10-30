@@ -1,5 +1,12 @@
 # Desktop workspace
 
+The current renderer migration follows the latest reviewed eight artboards in `design/`,
+currently design commit `0ab6165`. The original attachment is obsolete. Source candidate
+`445b803` passed the exact Desktop build and all 131 desktop checks; actual running-interface
+screenshots, layout parity and README image delivery remain pending because the hidden
+runtime launch was rejected before execution. Historical screenshots retain their original
+source and provenance. See the [current migration record](../docs/features/desktop/zip-gui-remake.md).
+
 The desktop redesign centers daily work on the profile inventory, contextual inspector
 and real actions. See the complete [desktop workflow article](../docs/features/desktop/profile-workspace.md).
 

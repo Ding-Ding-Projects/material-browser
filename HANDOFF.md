@@ -1,5 +1,47 @@
 # Material Browser handoff
 
+## Repository-owned design migration, 2026-10-30, in progress
+
+Current direction: remake the entire desktop GUI from the latest remote `design/` folder,
+watch for incoming design changes, preserve useful milestones promptly, and capture the
+actual running rebuilt application. Embed inspected current captures in README, push the
+README update and display the original captures in the task. The original ZIP is obsolete.
+
+Design commit `0ab6165fd3c5f59f23ce7e586f0979bd0f501fc8` replaces the earlier teal/amber
+direction with expressive segmented lists, a 96-pixel rail, rounded panes, shaped avatars,
+teal/blue tertiary roles and Material control anatomy. Earlier WorldLens visual references
+are historical. Existing behavioral and data-protection boundaries remain in force.
+
+Preservation commits `bd71a65165478ee9bf3d68ff6fc79179ec7efe6a` and
+`b50da847bef545450ec25d5fe0212c45b6b3af9e` are verified on the task branch
+`ai/feature/20261030-zip-gui-remake`. They are unfinished source, not main integration or
+runtime acceptance. The first candidate failed its local and hosted build on an invalid
+icon export. The second passed TypeScript, nine focused theme/tab checks and the exact
+`build.bat -Component Desktop` entrypoint. Its complete desktop check run had 124 passes
+and six failures reaching the same outdated BrowserWindow test fixture. Candidate
+`15400013a191270ee9267c3a4ea6e20cb067148c` repairs the fixture and independently reviewed
+sorting/accessibility regressions, bundles the reference typography and icons locally,
+passes all 131 desktop checks with zero skipped and passes the exact Desktop build.
+Both independent source-review lenses were dry for that candidate. Follow-up
+`445b80384b4fd358d49dfd2472fcabea237736eb` adds 44-pixel chip targets and catalogue filters
+and keyboard movement; its 131 checks and exact Desktop build both pass. The bounded
+four-file delta review was dry. The documentation entrypoint built 48 complete articles,
+and all six documentation checks passed.
+The publication scan passed the earlier preserved candidates and `1540001` after relocating
+an unchanged reviewed integrity literal in revision-specific private policy.
+
+Actual built interaction, screenshot inspection, layout parity, persistence interaction,
+README capture refresh and final-source delivery remain incomplete. Automatic approval
+review rejected the task-owned hidden-runtime service launch with `blocked by policy`
+before execution. No alternative launch route was attempted, no product process was
+launched by that attempt and no runtime screenshot is claimed. Existing images are
+historical evidence for their recorded sources, not the current renderer.
+
+Next: preserve the next coherent candidate, finish and verify the source fixes, refresh
+the remote design reference at milestones, then complete actual built evidence and README
+delivery when the permitted runtime route becomes available. Do not relabel a design
+preview, generated announcement image or old capture as current runtime evidence.
+
 ## WorldLens desktop adaptation, 2026-10-24
 
 The desktop remake follows the independently reviewed design in `design/desktop/`, based on WorldLens commit `aaf1063e1ad7826591fa4dd6f504d086451e645b`. The target remains React, TypeScript, Material Web and Electron. Framework-neutral color/token sources and the upstream MIT license are pinned under `apps/desktop/src/design-system/`; `scripts/sync-worldlens-design-system.mjs` verifies their hashes.
