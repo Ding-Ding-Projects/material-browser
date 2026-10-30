@@ -1,3 +1,5 @@
+import { PlatformPicker } from "../MaterialPrimitives";
+import { Disclosure, DisclosureTitle } from "../MaterialPrimitives";
 import React, { useState, useEffect } from "react";
 import { Button, Tabs } from "../components";
 import { Search } from "../Search";
@@ -107,7 +109,7 @@ export function SettingsWorkspace({
     ["serif", t("Generic serif")],
     ["monospace", t("Generic monospace")],
     // Bundled webfonts are available independently of the native font inventory.
-    ...[...new Set(["Roboto", "Roboto Mono", ...fonts.map((f) => f.family)])].map(
+    ...[...new Set(["Roboto Flex", "Roboto", "Roboto Mono", "Noto Sans HK Variable", ...fonts.map((f) => f.family)])].map(
       (f) => [f, f] as [string, string],
     ),
   ];
@@ -187,8 +189,7 @@ export function SettingsWorkspace({
           </Button>
         </div>
       )}
-      <details className="settings-global-finder">
-        <summary>{t("Search all settings")}</summary>
+      <section className="settings-global-finder" aria-label={t("Search all settings")}>
         <Search
           label={t("Search settings")}
           items={definitions.map(
@@ -198,7 +199,7 @@ export function SettingsWorkspace({
           onResults={setGlobalMatches}
           t={t}
         />
-        <div className="finder-results">
+        <Disclosure><DisclosureTitle>{t("Search results")} ({globalMatches.length})</DisclosureTitle><div className="finder-results">
           {globalMatches.map((i) => {
             const d = definitions[i];
             return (
@@ -217,8 +218,8 @@ export function SettingsWorkspace({
               </Button>
             );
           })}
-        </div>
-      </details>
+        </div></Disclosure>
+      </section>
       <SettingsTabs value={section} onChange={c.selectSection} t={t}>
         <section
           role="tabpanel"
@@ -355,7 +356,7 @@ export function SettingsWorkspace({
                 </p>
                 <label className="file-control">
                   {t(wordingLoaded ? "Replace" : "Upload")}
-                  <input
+                  <PlatformPicker
                     type="file"
                     accept=".json,application/json"
                     onChange={(e) => {

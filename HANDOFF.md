@@ -1,4 +1,46 @@
 # Material Browser handoff
+> Current preservation state: [2026-10-30 closeout](#preservation-closeout-2026-10-30). Five genuine native captures exist; formal promotion and complete UI acceptance remain unfinished.
+## Repository-owned design migration, 2026-10-30, in progress
+
+Current direction: remake the entire desktop GUI from the latest remote `design/` folder,
+watch for incoming design changes, preserve useful milestones promptly, and capture the
+actual running rebuilt application. Embed inspected current captures in README, push the
+README update and display the original captures in the task. The original ZIP is obsolete.
+
+Design commit `0ab6165fd3c5f59f23ce7e586f0979bd0f501fc8` replaces the earlier teal/amber
+direction with expressive segmented lists, a 96-pixel rail, rounded panes, shaped avatars,
+teal/blue tertiary roles and Material control anatomy. Earlier WorldLens visual references
+are historical. Existing behavioral and data-protection boundaries remain in force.
+
+Preservation commits `bd71a65165478ee9bf3d68ff6fc79179ec7efe6a` and
+`b50da847bef545450ec25d5fe0212c45b6b3af9e` are verified on the task branch
+`ai/feature/20261030-zip-gui-remake`. They are unfinished source, not main integration or
+runtime acceptance. The first candidate failed its local and hosted build on an invalid
+icon export. The second passed TypeScript, nine focused theme/tab checks and the exact
+`build.bat -Component Desktop` entrypoint. Its complete desktop check run had 124 passes
+and six failures reaching the same outdated BrowserWindow test fixture. Candidate
+`15400013a191270ee9267c3a4ea6e20cb067148c` repairs the fixture and independently reviewed
+sorting/accessibility regressions, bundles the reference typography and icons locally,
+passes all 131 desktop checks with zero skipped and passes the exact Desktop build.
+Both independent source-review lenses were dry for that candidate. Follow-up
+`445b80384b4fd358d49dfd2472fcabea237736eb` adds 44-pixel chip targets and catalogue filters
+and keyboard movement; its 131 checks and exact Desktop build both pass. The bounded
+four-file delta review was dry. The documentation entrypoint built 48 complete articles,
+and all six documentation checks passed.
+The publication scan passed the earlier preserved candidates and `1540001` after relocating
+an unchanged reviewed integrity literal in revision-specific private policy.
+
+Actual built interaction, screenshot inspection, layout parity, persistence interaction,
+README capture refresh and final-source delivery remain incomplete. Automatic approval
+review rejected the task-owned hidden-runtime service launch with `blocked by policy`
+before execution. No alternative launch route was attempted, no product process was
+launched by that attempt and no runtime screenshot is claimed. Existing images are
+historical evidence for their recorded sources, not the current renderer.
+
+Next: preserve the next coherent candidate, finish and verify the source fixes, refresh
+the remote design reference at milestones, then complete actual built evidence and README
+delivery when the permitted runtime route becomes available. Do not relabel a design
+preview, generated announcement image or old capture as current runtime evidence.
 
 ## WorldLens desktop adaptation, 2026-10-24
 
@@ -172,3 +214,13 @@ Focused launch1 and health8 checks passed. Native repaired readiness remains nex
 workspace-wide formatting check reports existing unrelated formatting drift; no broad
 formatting rewrite was applied. GUI cancellation/stopped workspace-only save completed on
 immutable f1816d6, with its final receipt and teardown inventory pending inspection.
+
+## Preservation closeout, 2026-10-30
+
+The user requested preservation and task-owned cleanup, and cleared the implementation goal. The entire GUI migration remains unfinished. Preserve it on main as an explicitly incomplete checkpoint, retaining the active task branch/worktree for remaining verification.
+
+Current design authority remains repository `design/` at `0ab6165`. The original ZIP is obsolete. Product source `445b803` passed the exact Desktop build and all 131 desktop tests, zero skipped. Documentation source `555fa30` built 48 articles and passed six documentation tests. Both hosted runs succeeded and published normal development packages.
+
+The actual 0.1.58 package subsequently ran through the direct native CLI: five inspected PNGs, real native navigation, no credentials/private wording/personal records, and normal seven-process/desktop exit proof. See the native runtime observation article. Their formal promotion lacks required diagnostics/layout receipt coverage, so the current README image request remains incomplete. The existing public gallery was verified reachable and unchanged; its publication lane excluded these captures pending valid receipts.
+
+Next owner: complete an appropriate fresh browser-window observation/receipt workflow, inspect actual controls and layout against all eight current artboards, complete the supported matrix and persistence checks, then embed accepted originals in README and publish the gallery update. Preserve every historical original and the private native receipts. No full UI, installer, installed-update or deployment acceptance is claimed by this closeout.

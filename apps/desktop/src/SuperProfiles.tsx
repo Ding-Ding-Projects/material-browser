@@ -1,5 +1,6 @@
+import { Disclosure, DisclosureTitle, MaterialInput } from "./MaterialPrimitives";
 import { Icon } from "./Icon";
-import { mdiArrowLeft, mdiPlus, mdiRefresh } from "@mdi/js";
+import { mdiArrowLeft, mdiPlus, mdiRefresh } from "./icons";
 import React, { useEffect, useRef, useState, useId } from "react";
 import { request, SuperProfile, SuperRevision, SuperSession } from "./api";
 import { Button, Modal, Tabs } from "./components";
@@ -342,72 +343,19 @@ export function SuperProfiles({
             />
             {!profiles.length && <p className="workflow-empty">{t("No Super Profiles yet")}</p>}
             {profiles.length > 0 && !rows.length && <p className="workflow-empty">{t("No results")}</p>}
-            <div className="table-scroll">
-              <table className="workspace-table">
-                <caption className="sr-only">{t("Super Profiles")}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col" aria-sort={sort === "name" ? "ascending" : "none"}>
-                      <button onClick={() => setSort("name")}>
-                        {t("Name")}
-                      </button>
-                    </th>
-                    <th scope="col">{t("Environment")}</th>
-                    <th scope="col">{t("Sessions")}</th>
-                    <th scope="col" aria-sort={sort === "updatedAt" ? "descending" : "none"}>
-                      <button onClick={() => setSort("updatedAt")}>
-                        {t("Updated")}
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows
-                    .map((i) => profiles[i])
-                    .filter(Boolean)
-                    .sort((a, b) =>
-                      sort === "name"
-                        ? a.name.localeCompare(b.name)
-                        : b.updatedAt - a.updatedAt,
-                    )
-                    .map((p) => (
-                      <tr
-                        key={p.id}
-                        aria-selected={selected === p.id}
-                        className={selected === p.id ? "selected" : ""}
-                      >
-                        <th scope="row">
-                          <button
-                            className="record-name"
-                            disabled={busy}
-                            onClick={() => {
-                              setSelected(p.id);
-                              setShowDetail(true);
-                              setDetail("overview");
-                              requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".detail-title")?.focus());
-                            }}
-                          >
-                            {p.name}
-                          </button>
-                        </th>
-                        <td>
-                          {p.settings.backend}
-                          <small>
-                            {t(p.settings.launchMode || "terminal")}
-                          </small>
-                        </td>
-                        <td>
-                          {
-                            sessions.filter(
-                              (session) => session.profileId === p.id,
-                            ).length
-                          }
-                        </td>
-                        <td>{new Date(p.updatedAt * 1000).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+            <div className="card-list-controls"><Button secondary onClick={() => setSort("name")}>{t("Name")}</Button><Button secondary onClick={() => setSort("updatedAt")}>{t("Updated")}</Button></div>
+            <div className="template-cards">
+              {rows.map((i) => profiles[i]).filter(Boolean).sort((a, b) => sort === "name" ? a.name.localeCompare(b.name) : b.updatedAt - a.updatedAt).map((p) => (
+                <article key={p.id} className={`template-card${selected === p.id ? " selected" : ""}`}>
+                  <button className="record-name" aria-pressed={selected === p.id} disabled={busy} onClick={() => {
+                    setSelected(p.id); setShowDetail(true); setDetail("overview");
+                    requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".detail-title")?.focus());
+                  }}><span className="template-symbol" aria-hidden="true">{p.settings.backend === "wsl2" ? ">_" : "▣"}</span><strong>{p.name}</strong></button>
+                  <p>{p.settings.backend} · {t(p.settings.launchMode || "terminal")}</p>
+                  <span className="state-badge">{sessions.filter((session) => session.profileId === p.id).length} {t("Sessions")}</span>
+                  <small>{t("Updated")}: {new Date(p.updatedAt * 1000).toLocaleString()}</small>
+                </article>
+              ))}
             </div>
           </section>
           <section className="surface super-inspector">
@@ -417,7 +365,7 @@ export function SuperProfiles({
                   className="back-to-list"
                   onClick={() => {
                     setShowDetail(false);
-                    requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>("tr.selected .record-name")?.focus());
+                    requestAnimationFrame(() => workspaceRef.current?.querySelector<HTMLElement>(".template-card.selected .record-name")?.focus());
                   }}
                 >
                   <Icon path={mdiArrowLeft} size={20} /> {t("Back to profiles")}
@@ -555,8 +503,8 @@ export function SuperProfiles({
                             </p>
                           )}
                           {s.events?.length ? (
-                            <details>
-                              <summary>{t("Session progress")}</summary>
+                            <Disclosure>
+                              <DisclosureTitle>{t("Session progress")}</DisclosureTitle>
                               <ol>
                                 {s.events.map((event) => (
                                   <li key={event.sequence}>
@@ -567,7 +515,7 @@ export function SuperProfiles({
                                   </li>
                                 ))}
                               </ol>
-                            </details>
+                            </Disclosure>
                           ) : null}
                           <div className="super-actions">
                             <Button
@@ -652,8 +600,8 @@ export function SuperProfiles({
           </section>
         </div>
       )}
-      <details className="surface">
-        <summary>{t("Host capabilities")}</summary>
+      <Disclosure className="surface">
+        <DisclosureTitle>{t("Host capabilities")}</DisclosureTitle>
         <p>
           {t(
             "Capability availability is not proof that a session launched successfully.",
@@ -680,7 +628,7 @@ export function SuperProfiles({
             "WSL graphical modes require WSLg and the selected guest programs. Sandbox must already be enabled.",
           )}
         </p>
-      </details>
+      </Disclosure>
       {confirm && profile && (
         <Modal
           title={t(
@@ -739,9 +687,9 @@ export function SuperProfiles({
                 )}
               </p>
               <label>
-                <input
+                <MaterialInput
                   type="checkbox"
-                  checked={identityConsent}
+                  aria-label={t("Use standard identity for this launch only")} checked={identityConsent}
                   onChange={(e) => setIdentityConsent(e.target.checked)}
                   disabled={busy}
                 />
@@ -772,9 +720,9 @@ export function SuperProfiles({
                   .filter((c) => ["browser", "workspace"].includes(c.id))
                   .map((c) => (
                     <label key={c.id}>
-                      <input
+                      <MaterialInput
                         type="checkbox"
-                        checked={saveCategories.includes(c.id)}
+                        aria-label={t(c.id)} checked={saveCategories.includes(c.id)}
                         onChange={(e) =>
                           setSaveCategories((previous) =>
                             e.target.checked

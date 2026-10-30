@@ -1,5 +1,6 @@
+import { Disclosure, DisclosureTitle, MaterialInput } from "../MaterialPrimitives";
 import { Icon } from "../Icon";
-import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "@mdi/js";
+import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "../icons";
 import React, { useState, useId } from "react";
 import { Profile } from "../api";
 import { Button, Select, Tabs } from "../components";
@@ -82,15 +83,16 @@ export function ProfileInspector({
                 {profile.engine} · {t(observedRuntime(runtime))}
               </p>
             </div>
-            <details className="inspector-resize">
-              <summary title={t("Inspector width")}>
+            <Disclosure className="inspector-resize">
+              <DisclosureTitle title={t("Inspector width")}>
                 <Icon path={mdiArrowExpandHorizontal} size={20} />
                 <span className="sr-only">{t("Inspector width")}</span>
-              </summary>
+              </DisclosureTitle>
               <label>
                 {t("Inspector width")}
-                <input
+                <MaterialInput
                   type="range"
+                  aria-label={t("Inspector width")}
                   min="320"
                   max="360"
                   step="4"
@@ -99,14 +101,11 @@ export function ProfileInspector({
                 />
                 <output>{width} px</output>
               </label>
-            </details>
+            </Disclosure>
           </div>
           <Tabs
             panelPrefix={panelPrefix}
-            items={["overview", "revisions", "automation"].map((key) => [
-              key,
-              t(key[0].toUpperCase() + key.slice(1)),
-            ])}
+            items={[["overview", t("Details")], ["identity", t("Identity")], ["revisions", t("History")], ["automation", t("Automation")]]}
             value={tab}
             onChange={(value) => {
               setTab(value);
@@ -198,8 +197,8 @@ export function ProfileInspector({
                     "Actions depend on native host capabilities. An unavailable action reports its actual reason.",
                   )}
                 </p>
-                <details>
-                  <summary>{t("Profile identity")}</summary>
+                <Disclosure>
+                  <DisclosureTitle>{t("Profile identity")}</DisclosureTitle>
                   <dl>
                     <dt>ID</dt>
                     <dd className="literal">{profile.id}</dd>
@@ -216,8 +215,10 @@ export function ProfileInspector({
                       ),
                     )}
                   </dl>
-                </details>
+                </Disclosure>
               </>
+            ) : tab === "identity" ? (
+              <><h3>{t("Profile identity")}</h3><p>{t("Stable browser identity is unavailable in this build.")}</p><dl><dt>ID</dt><dd className="literal">{profile.id}</dd>{Object.entries(profile.identity || {}).map(([key, value]) => <React.Fragment key={key}><dt>{key}</dt><dd>{typeof value === "object" ? JSON.stringify(value) : String(value)}</dd></React.Fragment>)}</dl></>
             ) : tab === "revisions" ? (
               <>
                 <Search

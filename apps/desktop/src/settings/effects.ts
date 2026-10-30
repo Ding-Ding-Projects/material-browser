@@ -19,7 +19,8 @@ export function usePresentationEffects(prefs: Preferences, record?: SettingsReco
     root.dataset.focusMode = String(prefs.focus);
     root.dataset.lowStimulation = String(prefs.lowStimulation);
     const families: Record<string, string> = {
-      Roboto: 'Roboto,"Microsoft JhengHei","PingFang HK",sans-serif',
+      "Roboto Flex": '"Roboto Flex Variable","Noto Sans HK Variable","Microsoft JhengHei",sans-serif',
+      Roboto: 'Roboto,"Noto Sans HK Variable","Microsoft JhengHei","PingFang HK",sans-serif',
       system: '"Segoe UI",system-ui,"Microsoft JhengHei",sans-serif',
       "sans-serif": 'Arial,"Microsoft JhengHei",sans-serif',
       serif: 'Georgia,"Microsoft JhengHei",serif',
@@ -27,7 +28,7 @@ export function usePresentationEffects(prefs: Preferences, record?: SettingsReco
     };
     const font =
       families[prefs.fontFamily] ||
-      `${JSON.stringify(prefs.fontFamily)},"Microsoft JhengHei",sans-serif`;
+      `${JSON.stringify(prefs.fontFamily)},"Noto Sans HK Variable","Microsoft JhengHei",sans-serif`;
     root.style.setProperty("--interface-font", font);
     root.style.setProperty("--md-ref-typeface-plain", font);
     root.style.setProperty("--md-ref-typeface-brand", font);

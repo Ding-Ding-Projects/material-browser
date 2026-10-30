@@ -1,3 +1,4 @@
+import { PlatformPicker } from "../../MaterialPrimitives";
 import React, { useState, useRef } from "react";
 import { Button, Field } from "../../components";
 import { Choice } from "../SettingControl";
@@ -77,7 +78,7 @@ export function HistoryTransfer({
           </Button>
           <label className="file-control">
             {t("Import preferences")}
-            <input
+            <PlatformPicker
               type="file"
               accept=".json,application/json"
               onChange={(e) => {

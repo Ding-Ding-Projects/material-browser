@@ -1,9 +1,15 @@
-# WorldLens design system adapter
+# Material Browser reference design adapter
 
-The vendor directory contains unchanged `colors.ts`, `tokens.css` and the MIT license from WorldLens commit `aaf1063e1ad7826591fa4dd6f504d086451e645b`. Exact source paths and SHA-256 digests are in `provenance.json`. No Vue or Vuetify dependency is imported.
+The active visual authority is the current remote `design/` folder. The renderer was reconciled with design commit `0ab6165fd3c5f59f23ce7e586f0979bd0f501fc8`, including its `theme.css` and `m3.css`. Earlier archive references are historical only.
 
-Import `worldlens.css` before application rules. It imports bundled Roboto and Roboto Mono from the installed Fontsource packages, declares an exact dark initial paint, and adapts shape/elevation/component tokens for Material Web. `settings/effects.ts` applies the complete theme role set through `theme.mjs`; high contrast overrides a custom accent, while saved preferences remain unchanged. Pass the settings record alongside effective preferences so compiled defaults can be distinguished from saved accents and scheduled overrides. System theme follows the operating-system media query.
+Import `material-browser.css` before application rules. `reference-colors.mjs` owns the current teal and blue-tertiary light/dark roles. `settings/effects.ts` applies every role through `theme.mjs`; explicit saved accents, font choices and scheduled overrides remain effective, and high contrast remains independent.
 
-From the repository root, run `node scripts/sync-worldlens-design-system.mjs` to verify vendored hashes. To verify against a checkout, append `--source <WorldLens checkout>`. To restore the pinned bytes, append `--write`; both the checkout commit and all source hashes are checked before any destination changes. Updating the upstream pin requires an explicit manifest and integration review, not an automatic latest-version fetch.
+## Offline assets
 
-Roboto and Roboto Mono are supplied by their pinned Fontsource dependencies under the SIL Open Font License included in those packages. WorldLens MIT attribution is retained in `vendor/LICENSE`. Source provenance establishes origin, not runtime conformance. See `design/desktop/` for the design review and required built-layout evidence.
+Pinned Fontsource packages provide Roboto Flex 5.3.0, Noto Sans HK 5.3.1 and Material Symbols Rounded 5.3.9. All are OFL-1.1 and their package integrity values are recorded in `package-lock.json`. CSS imports bundle local font files into the renderer; there are no font CDN requests. Existing Roboto and Roboto Mono remain available for saved preferences and technical text. `icons.ts` preserves renderer identifiers while mapping to the locally bundled rounded symbols.
+
+## Historical provenance
+
+The unchanged vendor directory retains `colors.ts`, `tokens.css` and the WorldLens MIT license from commit `aaf1063e1ad7826591fa4dd6f504d086451e645b`. The vendor provenance manifest remains accurate. Its contrast scheme and foundational shape/type tokens are reused; its tonal palette and historical `worldlens.css` are not the active product styling authority. The existing synchronization script verifies the retained historical files only.
+
+Source provenance establishes origin, not runtime conformance. Built interaction and visual evidence remain required for design acceptance.

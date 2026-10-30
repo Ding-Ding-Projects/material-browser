@@ -1,5 +1,15 @@
 # Earlier presentation archive
 
+## WorldLens presentation retained during the repository-design migration
+
+The former current README images remain unchanged in the
+[WorldLens evidence collection](desktop/worldlens/README.md), together with its
+[inventory](desktop/worldlens/inventory.json), [provenance](desktop/worldlens/provenance.json)
+and original source binding `284fc88f94487a7716099469daadeec258d97b07`. This includes the
+profile overview, notification settings, minimum bilingual layout and launch-review images.
+Their recorded capture dates and verification limits remain those of the original receipts.
+They are historical references and do not prove the new repository-owned design at `0ab6165`.
+
 The earlier desktop and offline-handbook presentation is preserved below as source text. Its original claims and dates are historical, not relabelled as current verification.
 
 [Historical desktop images and provenance](desktop/archive.md) · [Historical portable handbook images and provenance](handbook/README.md)

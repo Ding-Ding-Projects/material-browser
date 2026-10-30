@@ -1,5 +1,26 @@
 # Roadmap
 
+## Current repository design migration
+
+- [x] Preserve five genuine native runtime captures and normal-exit receipts privately
+- [ ] Complete formal image promotion and screenshot-bearing README/gallery delivery
+
+- [x] Preserve the initial renderer migration on its task branch with verified remote reference
+- [x] Import the current design references at commit `0ab6165` into the implementation branch
+- [ ] Verify all eight rebuilt surfaces against those references in the actual running application
+- [x] Build candidate `b50da84` through the exact Desktop build entrypoint
+- [x] Bundle reference typography and icons locally and compile candidate `1540001`
+- [x] Repair independently reviewed sorting and accessible-name source regressions
+- [x] Pass all 131 desktop checks with the updated native window-control fixture
+- [ ] Capture and inspect the actual running rebuilt application across the supported layout matrix
+- [ ] Embed current verified screenshots in README, push that update and display the originals in the task
+- [ ] Verify final-source build, remote workflow and completed-work integration into main
+
+The active visual authority is the latest reviewed `design/` folder on the repository remote.
+The original attachment is outdated and is not implementation input. Current built interaction
+is blocked because automatic approval review rejected the task-owned hidden-runtime service
+launch before execution. Historical screenshots below do not establish current design parity.
+
 ## WorldLens desktop adaptation
 
 - [x] Adapt pinned WorldLens colors, typography, shapes and motion to React and Material Web

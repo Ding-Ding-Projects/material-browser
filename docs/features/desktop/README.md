@@ -3,7 +3,8 @@
 - [Profile launch and identity capabilities](profile-launch.md)
 - [Super Profiles](super-profiles.md)
 - [Action sounds and quiet controls](action-sounds.md)
-- [Desktop visual design and accessibility](worldlens-design.md)
+- [Current repository-owned design migration](zip-gui-remake.md)
+- [Historical WorldLens visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
 The desktop shell provides an isolated React interface backed by the native host. It never seeds demonstration profiles. A standalone web preview cannot operate the vault and explicitly reports that the native host is unavailable.
@@ -22,7 +23,7 @@ Settings upload and window-wide file drop use the same full validator. Schema: `
 
 ## Verification status
 
-Design reference is `design/desktop/REFERENCE.md`. Source implementation and package compilation are separate from native runtime, installer and screenshot verification. No visual parity or installation claim is made until actual built-surface evidence exists.
+The active reference is the latest reviewed `design/IMPLEMENTATION_HANDOFF.md` and its eight artboards, currently at `0ab6165`. Older WorldLens references are historical. Source implementation and compilation are separate from native runtime, installer and screenshot verification. No visual parity or installation claim is made until actual built-surface evidence exists.
 
 ## Capability inventory and outstanding acceptance
 

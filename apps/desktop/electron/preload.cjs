@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld(
   Object.freeze({
     request: (method, params = {}) =>
       ipcRenderer.invoke("material:request", method, params),
+    windowAction: (action) => ipcRenderer.invoke("material:window", action),
     chooseDirectory: () => ipcRenderer.invoke("material:directory"),
     chooseDatabaseFile: () => ipcRenderer.invoke("material:database-file"),
     settingsService: (operation, params = {}) =>

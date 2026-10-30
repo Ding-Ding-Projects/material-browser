@@ -1,5 +1,8 @@
+import { LinearProgress } from "../MaterialPrimitives";
 import "./surfaces.css";
 import React from "react";
+import { Icon } from "../Icon";
+import { mdiShieldLockOutline } from "../icons";
 import { Button, Field } from "../components";
 import { request } from "../api";
 export function Onboarding({
@@ -22,6 +25,7 @@ export function Onboarding({
 }: any) {
   return (
     <section className="surface wizard setup-wizard">
+      <div className="setup-symbol" aria-hidden="true"><Icon path={mdiShieldLockOutline} size={32}/></div>
       <div className="eyebrow">
         {t("Setup progress")} {setup + 1}/4
       </div>
@@ -35,7 +39,8 @@ export function Onboarding({
           ][setup],
         )}
       </h1>
-      <progress max={4} value={setup + 1} aria-label={t("Setup progress")} />
+      <ol className="setup-steps" aria-label={t("Setup progress")}>{["Vault", "Profiles", "Synchronization", "Workspace ready"].map((label, index) => <li key={label} aria-current={index === setup ? "step" : undefined}><strong>{index + 1}</strong><span>{t(label)}</span></li>)}</ol>
+      <LinearProgress max={4} value={setup + 1} label={t("Setup progress")} />
       {!status && <p role="status">{t("Backend unavailable")}</p>}
       {setup === 0 && (
         <>

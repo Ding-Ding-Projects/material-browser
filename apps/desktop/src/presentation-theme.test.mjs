@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolvePresentationTheme, applyPresentationTheme } from './design-system/theme.mjs';
-import { COLOR_SCHEMES } from './design-system/vendor/colors.ts';
+import { COLOR_SCHEMES } from './design-system/reference-colors.mjs';
 import { defaults, validatePreferences } from './settings/model.mjs';
 import { readPresentationRecord } from './settings/record.mjs';
 
@@ -10,7 +10,7 @@ const record = () => readPresentationRecord(null);
 test('fresh dark uses every reference role; default accent does not override light', () => {
   const r = record();
   assert.equal(defaults.theme, 'dark');
-  assert.equal(defaults.fontFamily, 'Roboto');
+  assert.equal(defaults.fontFamily, 'Roboto Flex');
   assert.deepEqual(resolvePresentationTheme(r.preferences, r).roles, COLOR_SCHEMES.dark);
   assert.deepEqual(resolvePresentationTheme({ ...r.preferences, theme: 'light' }, r).roles, COLOR_SCHEMES.light);
 });
@@ -54,10 +54,10 @@ test('theme transitions replace all roles rather than retaining a previous custo
   applyPresentationTheme(root, { ...defaults, highContrast: true }, record(), false);
   for (const [key, value] of Object.entries(COLOR_SCHEMES.contrast)) assert.equal(values.get(`--md-sys-color-${key}`), value);
   applyPresentationTheme(root, { ...defaults, theme: 'light' }, record(), false);
-  assert.equal(values.get('--md-sys-color-primary'), '#00639B');
+  assert.equal(values.get('--md-sys-color-primary'), '#006A6A');
   assert.equal(root.style.colorScheme, 'light');
 });
 test('initial-paint CSS matches all dark roles before effects run', () => {
-  const css = readFileSync(new URL('./design-system/worldlens.css', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('./design-system/material-browser.css', import.meta.url), 'utf8');
   for (const [key, value] of Object.entries(COLOR_SCHEMES.dark)) assert.ok(css.includes(`--md-sys-color-${key}: ${value};`), key);
 });

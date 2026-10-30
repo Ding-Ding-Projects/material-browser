@@ -1,5 +1,8 @@
+import { restoreWorkspaceTabs } from "./workspace/workspace-tabs-model.mjs";
+import { Disclosure, DisclosureTitle } from "./MaterialPrimitives";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
+import { WorkspaceTabs } from "./workspace/WorkspaceTabs";
 import { ProfilesWorkspace } from "./workspace/ProfilesWorkspace";
 import { Onboarding } from "./workspace/Onboarding";
 import { Synchronization } from "./workspace/Synchronization";
@@ -12,7 +15,7 @@ import {
 import { Button, Field, Select, Modal } from "./components";
 import { Search } from "./Search";
 import { Icon } from "./Icon";
-import { mdiClose, mdiArrowTopRight } from "@mdi/js";
+import { mdiClose, mdiArrowTopRight } from "./icons";
 import { request, Profile } from "./api";
 import type { PasswordManagerDetection } from "./api";
 import {
@@ -34,7 +37,7 @@ type PasswordManagerForm = {
 };
 import { translate, Language } from "./i18n";
 import { parseVocabulary, replaceLabel } from "./vocabulary.mjs";
-import "./design-system/worldlens.css";
+import "./design-system/material-browser.css";
 import "./style.css";
 import "./settings/settings.css";
 import { useSettings } from "./settings/store";
@@ -48,6 +51,7 @@ import {
 import { styledMessage } from "./settings/messages.mjs";
 import { definitions, categories } from "./settings/model.mjs";
 import { SuperProfiles } from "./SuperProfiles";
+import { NotificationCenter } from "./settings/sections/NotificationCenter";
 import { ProfileLaunch } from "./ProfileLaunch";
 import { operationFailure } from "./operation-errors.mjs";
 import { useDisplayName } from "./settings/useDisplayName";
@@ -84,6 +88,7 @@ function App() {
     [celebration, setCelebration] = useState(""),
     [create, setCreate] = useState(false),
     [palette, setPalette] = useState(false),
+    [notificationsOpen, setNotificationsOpen] = useState(false),
     [setup, setSetup] = useState(() => read("setup", 0)),
     [showSetup, setShowSetup] = useState(() => !read("setupComplete", false)),
     [password, setPassword] = useState(""),
@@ -97,6 +102,7 @@ function App() {
     [folder, setFolder] = useState(""),
     [conflicts, setConflicts] = useState<any[]>([]);
   const [commandRows, setCommandRows] = useState<number[]>([]);
+  const [commandFilter, setCommandFilter] = useState("all");
   const [workspaceTabs, setWorkspaceTabs] = useState<
     {
       id: string;
@@ -105,7 +111,12 @@ function App() {
       setting?: string;
       section?: string;
     }[]
-  >([]);
+  >(() => {
+    const saved = read("workspace.tabs.v1", []);
+    const catalogue = catalogDestinations(definitions, categories);
+    return restoreWorkspaceTabs(saved, catalogue);
+  });
+  useEffect(() => { try { localStorage.setItem("workspace.tabs.v1", JSON.stringify(workspaceTabs.map((tab) => tab.id))); } catch {} }, [workspaceTabs]);
   const [launchTarget, setLaunchTarget] = useState<Profile | null>(null);
   const launchInFlight = useRef(false);
   const [pendingOperations, setPendingOperations] = useState<string[]>([]);
@@ -160,6 +171,7 @@ function App() {
     refresh().catch(() => setStatus(null));
     const off = window.materialBrowser?.onEvent((event: any) => {
       if (
+        event?.type !== "window-state" &&
         event?.type !== "settings-updated" &&
         event?.type !== "super-profile-session"
       )
@@ -270,6 +282,7 @@ function App() {
     label.startsWith("Settings: ")
       ? `${t("Settings")}: ${t(label.slice(10))}`
       : t(label);
+  const filteredCommandRows = commandRows.filter((i) => commandFilter === "all" || (commandFilter === "actions" ? !commands[i].page : commandFilter === "profiles" ? ["profiles", "super-profiles"].includes(commands[i].page || "") : commands[i].page === "settings"));
   const profileForm = (
     <>
       <Field label={t("Name")} value={name} onChange={setName} required />
@@ -283,16 +296,16 @@ function App() {
         ]}
       />
       <p>{t("Automation is off until explicitly enabled for this profile.")}</p>
-      <details
+      <Disclosure
         className="password-manager-option"
         open={managerForm.enabled}
-        onToggle={(event) => {
+        onToggle={(event: { currentTarget: { open: boolean } }) => {
           const open = (event.currentTarget as HTMLDetailsElement).open;
           updateManager({ enabled: open });
           if (open && !managerDetection) void detectPasswordManager();
         }}
       >
-        <summary>{t("Password manager (optional)")}</summary>
+        <DisclosureTitle>{t("Password manager (optional)")}</DisclosureTitle>
         <p>
           {t(
             "Pair this profile with a KeePassXC database. The database password is never stored by this application.",
@@ -394,7 +407,7 @@ function App() {
             "The browser still asks once to enable the extension. Nothing is installed silently.",
           )}
         </p>
-      </details>
+      </Disclosure>
       <Button
         disabled={
           busy ||
@@ -414,9 +427,9 @@ function App() {
     !showSetup && workspaceTabs.find((tab) => tab.id === activeTab);
   return (
     <div className={`app-shell palette-${prefs.paletteSize}`}>
-      <WorkspaceHeader {...{ prefs, displayName, t, status, setPalette }} />
+      <WorkspaceHeader {...{ prefs, displayName, t, status, setPalette }} onNotifications={() => setNotificationsOpen(true)} />
       <div className="body">
-        <WorkspaceNavigation
+        <WorkspaceNavigation onCreate={() => setCreate(true)}
           {...{
             t,
             page,
@@ -436,102 +449,15 @@ function App() {
           }}
         />
         <div className="workspace-plane">
-          {workspaceTabs.length > 0 && (
-            <div
-              className="workspace-tab-strip"
-              role="tablist"
-              aria-label={t("Open tabs")}
-              aria-orientation="horizontal"
-              onKeyDown={(event) => {
-                const tabs = Array.from(
-                  event.currentTarget.querySelectorAll<HTMLButtonElement>(
-                    '[role="tab"]',
-                  ),
-                );
-                const index = tabs.indexOf(
-                  document.activeElement as HTMLButtonElement,
-                );
-                if (index < 0) return;
-                const next =
-                  event.key === "ArrowRight"
-                    ? (index + 1) % tabs.length
-                    : event.key === "ArrowLeft"
-                      ? (index + tabs.length - 1) % tabs.length
-                      : event.key === "Home"
-                        ? 0
-                        : event.key === "End"
-                          ? tabs.length - 1
-                          : -1;
-                if (next >= 0) {
-                  event.preventDefault();
-                  tabs[next].focus();
-                  tabs[next].click();
-                }
-              }}
-            >
-              {workspaceTabs.map((target) => (
-                <div
-                  key={target.id}
-                  className={activeTab === target.id ? "active" : ""}
-                >
-                  <button
-                    role="tab"
-                    id={`work-tab-${target.id}`}
-                    aria-selected={activeTab === target.id}
-                    aria-controls="workspace-content"
-                    tabIndex={
-                      activeTab === target.id ||
-                      (!activeTab && workspaceTabs[0].id === target.id)
-                        ? 0
-                        : -1
-                    }
-                    onClick={() => {
-                      setActiveTab(target.id);
-                      setShowSetup(false);
-                      setPage(target.page);
-                      if (target.section)
-                        settingsController.selectSection(target.section);
-                      if (target.setting) {
-                        settingsController.selectSection(target.section!);
-                        setTimeout(
-                          () =>
-                            window.dispatchEvent(
-                              new CustomEvent("settings-reveal", {
-                                detail: target.setting,
-                              }),
-                            ),
-                          0,
-                        );
-                      }
-                    }}
-                  >
-                    {commandLabel(target.label)}
-                  </button>
-                  <button
-                    aria-label={`${t("Close")} ${commandLabel(target.label)}`}
-                    onClick={() => {
-                      setWorkspaceTabs((tabs) =>
-                        tabs.filter((tab) => tab.id !== target.id),
-                      );
-                      if (activeTab === target.id) setActiveTab("");
-                      requestAnimationFrame(() => {
-                        const next = document.querySelector<HTMLButtonElement>(
-                          '.workspace-tab-strip [role="tab"][tabindex="0"]',
-                        );
-                        if (next) next.focus();
-                        else
-                          document
-                            .querySelector<HTMLElement>(".workspace-main")
-                            ?.focus();
-                      });
-                    }}
-                  >
-                    <Icon path={mdiClose} size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <WorkspaceTabs tabs={workspaceTabs} active={activeTab} page={page} t={t} label={commandLabel}
+            onNew={() => setPalette(true)} onHome={() => { setActiveTab(""); setPage("profiles"); setShowSetup(false); }}
+            onSelect={(target) => {
+              setActiveTab(target.id); setShowSetup(false); setPage(target.page);
+              if (target.section) settingsController.selectSection(target.section);
+              if (target.setting) setTimeout(() => window.dispatchEvent(new CustomEvent("settings-reveal", { detail: target.setting })), 0);
+            }}
+            onClose={(id) => { setWorkspaceTabs((tabs) => tabs.filter((tab) => tab.id !== id)); if (activeTab === id) setActiveTab(""); requestAnimationFrame(() => document.querySelector<HTMLElement>(".dock-home")?.focus()); }}
+          />
           <main
             className="workspace-main"
             id="workspace-content"
@@ -665,6 +591,7 @@ function App() {
         <span className={busy ? "pulse" : ""}>{busy ? "●" : "○"}</span>
         {notice || t("Local settings")}
       </footer>
+      {notificationsOpen && <Modal title={t("Notifications")} onClose={() => setNotificationsOpen(false)}><NotificationCenter controller={settingsController} t={t} /></Modal>}
       {create && (
         <Modal title={t("Create profile")} onClose={() => setCreate(false)}>
           {profileForm}
@@ -704,9 +631,16 @@ function App() {
             onResults={setCommandRows}
             t={t}
           />
-          <div className="catalog-results">
-            {commandRows.length === 0 && <p role="status">{t("No matches")}</p>}
-            {commandRows.map((i) => (
+          <div className="catalog-filter">{React.createElement("md-chip-set", { "aria-label": t("Destinations") }, [["all", "All"], ["profiles", "Profiles"], ["settings", "Settings"], ["actions", "Actions"]].map(([value, label]) => React.createElement("md-filter-chip", { key: value, label: t(label), selected: commandFilter === value, onClick: () => setCommandFilter(value) })))}</div>
+          <div className="catalog-results" onKeyDown={(event) => {
+            const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("md-outlined-button"));
+            const index = buttons.indexOf(document.activeElement as HTMLElement);
+            if (index < 0 || !buttons.length) return;
+            const next = event.key === "ArrowDown" ? (index + 1) % buttons.length : event.key === "ArrowUp" ? (index + buttons.length - 1) % buttons.length : -1;
+            if (next >= 0) { event.preventDefault(); buttons[next].focus(); }
+          }}>
+            {filteredCommandRows.length === 0 && <p role="status">{t("No matches")}</p>}
+            {filteredCommandRows.map((i) => (
               <Button
                 key={commands[i].id}
                 secondary

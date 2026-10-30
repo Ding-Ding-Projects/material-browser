@@ -40,25 +40,17 @@ Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop check
 
 Builds enter through build.bat; installer production enters through build-installer.bat. Hosted builds run on every branch push and manual dispatch, use increasing package versions and publish normal development releases. Tests and lint run locally, not in the hosted workflow. Each release asset is transferred separately and checked against its published byte count and SHA-256.
 
-## WorldLens desktop design
+## Repository-owned desktop design
 
-The desktop now adopts WorldLens's blue Material Design 3 color roles, locally bundled Roboto typography, compact icon rail, flat workspace panels and rounded controls. New installations open in dark mode; saved appearance choices remain effective. Profiles, Super Profiles, synchronization, setup and Settings keep their native workflows. [Design and compatibility details](docs/features/desktop/worldlens-design.md).
+The entire desktop interface is being migrated to the current eight artboards and shared styles in [the design folder](design/IMPLEMENTATION_HANDOFF.md). The original attachment is obsolete. The active design source is `0ab6165`; later design updates are reviewed at implementation milestones. Locally bundled reference typography, teal color roles, expressive lists and left-docked tabs retain existing native workflows and saved choices. See [the migration and its limits](docs/features/desktop/zip-gui-remake.md).
 
 Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
 
-## Current desktop screenshots
+## Current desktop screenshot acceptance
 
-The current WorldLens adaptation is documented in the [source-bound Linux desktop evidence](docs/evidence/desktop/worldlens/README.md). The captures show the production renderer with a real native Linux host and isolated synthetic records. They establish rendered Linux behavior; Windows packaging and preference persistence are separate checks.
+Five genuine native Windows captures were collected from released version 0.1.58, source `555fa30`, using an isolated hidden desktop and the direct native CLI. They show setup, language Settings, Appearance, empty Profiles and the locked Super Profiles boundary. The seven-process run exited normally. [Observed states and remaining evidence requirements](docs/evidence/desktop/native-preservation.md) distinguish those results from formal promotion. Current screenshot embedding remains pending the required diagnostic/layout receipts.
 
-![Dark profile workspace with the selected inspector beside the table](docs/evidence/desktop/worldlens/profile-overview.png)
-
-![Notification settings with the action sound switch and volume controls](docs/evidence/desktop/worldlens/settings-notifications.png)
-
-![Bilingual appearance controls at the minimum window size and 200 percent interface zoom](docs/evidence/desktop/worldlens/minimum-bilingual-dark.png)
-
-![Standard browser identity review before launching a profile](docs/evidence/desktop/worldlens/launch-review.png)
-
-[Exact capture inventory and limits](docs/evidence/desktop/worldlens/inventory.json) · [Earlier desktop images and provenance](docs/evidence/archive.md)
+[Historical WorldLens captures, original inventory and provenance](docs/evidence/desktop/worldlens/README.md) remain preserved for their original source. [Earlier desktop image archive](docs/evidence/archive.md).
 
 ## Documentation and remaining work
 

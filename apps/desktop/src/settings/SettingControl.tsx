@@ -1,3 +1,5 @@
+import { Icon } from "../Icon";
+import { PlatformPicker } from "../MaterialPrimitives";
 import React, { useState, useId, useRef, useEffect } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
@@ -42,12 +44,13 @@ export function Choice({
   return (
     <div className="settings-choice">
       {showLabel && <span className="field-label">{label}</span>}
+      {options.length >= 2 && options.length <= 4 && !previewFont && <div className="connected-choices" role="group" aria-label={label}>{options.map(([id, name]) => React.createElement("md-outlined-button", { key: id, "aria-pressed": id === value, onClick: () => onChange(id) }, name))}</div>}
       {React.createElement(
         "md-outlined-button",
         {
           ref: opener,
           id,
-          "aria-label": choiceAccessibleName(
+          "aria-label": options.length >= 2 && options.length <= 4 && !previewFont ? `${t("More options")}: ${label}` : choiceAccessibleName(
             label,
             value,
             options,
@@ -57,7 +60,7 @@ export function Choice({
           "aria-expanded": open,
           "aria-controls": `${id}-options`,
         },
-        options.find((x) => x[0] === value)?.[1] ||
+        options.length >= 2 && options.length <= 4 && !previewFont ? t("More options") : options.find((x) => x[0] === value)?.[1] ||
           value ||
           t("Choose automatically"),
       )}
@@ -264,7 +267,7 @@ export function SettingInput({
   if (d.type === "color")
     return (
       <div className="range-control">
-        <input
+        <PlatformPicker
           type="color"
           value={value}
           aria-label={t(d.label)}
@@ -358,12 +361,7 @@ export function SettingControl({
                 setSampleResult("");
               },
             },
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M11 17h2v-6h-2v6zm1-15a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-11h2V7h-2v2z"
-              />
-            </svg>,
+            <Icon path="info" />,
           )}
           <Button
             secondary

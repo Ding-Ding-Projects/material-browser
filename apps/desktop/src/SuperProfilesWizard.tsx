@@ -1,3 +1,5 @@
+import { LinearProgress } from "./MaterialPrimitives";
+import { MaterialInput } from "./MaterialPrimitives";
 import React, { useState } from 'react';
 import { Button, Field, Select } from './components';
 import { requestSuperProfile as request, PasswordManager, SuperProfile, SuperProfileSettings } from './api';
@@ -18,7 +20,7 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
   return <section className="surface super-wizard" aria-label={t('Super Profile wizard')}>
     <h2>{t(profile ? 'Edit template' : 'Create Super Profile')}</h2>
     <p className="eyebrow">{t('Step')} {draft.step+1} / 4: {t(titles[draft.step])}</p>
-    <progress max={4} value={draft.step+1} aria-label={t('Setup progress')}/>
+    <LinearProgress max={4} value={draft.step+1} label={t('Setup progress')}/>
     <div className="super-actions">
       {!profile && <Button secondary disabled={busy} onClick={()=>{try {const saved=readSuperProfileDraft(localStorage.getItem(key));setDraft(saved);setMessage('Draft restored');}catch {setMessage('No valid saved draft');}}}>{t('Resume draft')}</Button>}
       <Button secondary disabled={busy} onClick={()=>{try{localStorage.setItem(key,JSON.stringify(superProfileResumeMetadata(draft)));setMessage('Resume metadata saved');}catch{setMessage('Draft could not be saved');}}}>{t('Save progress')}</Button>
@@ -41,17 +43,17 @@ export function SuperProfilesWizard({profile,t,busy,onSave,onCancel}: {profile?:
         {check&&<p role="status">{check.backend}: {t(check.available?'Available':'Unavailable')} · {t('Supported modes')}: {check.modes.map(t).join(', ')}. {t('Capability availability is not proof that a session launched successfully.')}</p>}
         <p>{t('Each backend keeps its own configuration. Saving selects the backend shown here for the next launch.')}</p>
         <Field label={t('Workspace folder path')} value={draft.settings.workspacePath||''} onChange={workspacePath=>setting({workspacePath})}/>
-        <label className="super-check"><input type="checkbox" disabled={draft.settings.backend!=='windows-sandbox'} checked={draft.settings.networking!==false} onChange={e=>setting({networking:e.target.checked})}/>{t('Allow network access')}</label>
-        <label className="super-check"><input type="checkbox" disabled checked={draft.settings.clipboard===true} onChange={e=>setting({clipboard:e.target.checked})}/>{t('Allow clipboard sharing')}</label>
+        <label className="super-check"><MaterialInput type="checkbox" aria-label={t('Allow network access')} disabled={draft.settings.backend!=='windows-sandbox'} checked={draft.settings.networking!==false} onChange={e=>setting({networking:e.target.checked})}/>{t('Allow network access')}</label>
+        <label className="super-check"><MaterialInput type="checkbox" aria-label={t('Allow clipboard sharing')} disabled checked={draft.settings.clipboard===true} onChange={e=>setting({clipboard:e.target.checked})}/>{t('Allow clipboard sharing')}</label>
         <p>{t('Clipboard sharing and per-session memory limits are not configurable. WSL networking follows the existing host configuration.')}</p><Field disabled label={t('Memory limit (MB)')} type="number" value={String(draft.settings.memoryMb||4096)} onChange={s=>setting({memoryMb:Number(s)})}/>
       </>}
       {draft.step===2 && <>
         {lines('Installer paths, one per line','installers')}
-        <label className="super-check"><input type="checkbox" disabled={draft.settings.backend!=='wsl2'} checked={!!draft.settings.passwordManager} onChange={e=>setting({passwordManager:e.target.checked?buildGuestPasswordManager({enabled:true,databasePath:'/home/materialbrowser/.material-browser/workspace/vault.kdbx',databaseMode:'existing',extension:true,passkeys:true}):null})}/>{t('Pair the guest browser with KeePassXC inside the guest')}</label>
+        <label className="super-check"><MaterialInput type="checkbox" aria-label={t('Pair the guest browser with KeePassXC inside the guest')} disabled={draft.settings.backend!=='wsl2'} checked={!!draft.settings.passwordManager} onChange={e=>setting({passwordManager:e.target.checked?buildGuestPasswordManager({enabled:true,databasePath:'/home/materialbrowser/.material-browser/workspace/vault.kdbx',databaseMode:'existing',extension:true,passkeys:true}):null})}/>{t('Pair the guest browser with KeePassXC inside the guest')}</label>
         {draft.settings.passwordManager && <>
           <Field label={t('Guest database path (.kdbx)')} value={draft.settings.passwordManager.database.path} onChange={path=>{try{setting({passwordManager:buildGuestPasswordManager({enabled:true,databasePath:path,databaseMode:draft.settings.passwordManager!.database.mode,extension:draft.settings.passwordManager!.extension,passkeys:draft.settings.passwordManager!.passkeys})});setMessage('');}catch{setMessage(t('Guest database path must end with .kdbx'));}}}/>
-          <label className="super-check"><input type="checkbox" checked={draft.settings.passwordManager.extension} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,extension:e.target.checked}})}/>{t('Install the KeePassXC browser extension')}</label>
-          <label className="super-check"><input type="checkbox" checked={draft.settings.passwordManager.passkeys} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,passkeys:e.target.checked}})}/>{t('Enable passkeys')}</label>
+          <label className="super-check"><MaterialInput type="checkbox" aria-label={t('Install the KeePassXC browser extension')} checked={draft.settings.passwordManager.extension} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,extension:e.target.checked}})}/>{t('Install the KeePassXC browser extension')}</label>
+          <label className="super-check"><MaterialInput type="checkbox" aria-label={t('Enable passkeys')} checked={draft.settings.passwordManager.passkeys} onChange={e=>setting({passwordManager:{...draft.settings.passwordManager!,passkeys:e.target.checked}})}/>{t('Enable passkeys')}</label>
           <p>{t('Add a KeePassXC package from the maintained lineage to the installers above; the guest must provide /usr/bin/keepassxc-proxy before launch.')}</p>
         </>}
         {lines('Setup commands, one per line','setupCommands')}

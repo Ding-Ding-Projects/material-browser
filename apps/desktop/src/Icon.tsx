@@ -1,17 +1,5 @@
 import React from "react";
-
-/** Decorative Material Design icon; the containing control supplies its name. */
+/** Decorative local symbol; the containing control owns its accessible name. */
 export function Icon({ path, size = 24 }: { path: string; size?: number }) {
-  return (
-    <svg
-      className="material-icon"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path fill="currentColor" d={path} />
-    </svg>
-  );
+  return <span className="material-icon material-symbol" style={{ fontSize: size, width: size, height: size }} aria-hidden="true">{path}</span>;
 }

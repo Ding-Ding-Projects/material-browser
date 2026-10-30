@@ -1,3 +1,5 @@
+import { PlatformPicker } from "../MaterialPrimitives";
+import { Disclosure, DisclosureTitle, MaterialInput } from "../MaterialPrimitives";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
@@ -190,8 +192,8 @@ export function SettingsTabs({
           }
         }}
       >
-        <details>
-          <summary>{t("Tab controls")}</summary>
+        <Disclosure>
+          <DisclosureTitle>{t("Tab controls")}</DisclosureTitle>
           <Choice
             label={t("Dock tabs")}
             value={state.edge}
@@ -218,7 +220,7 @@ export function SettingsTabs({
           <Button secondary onClick={() => setBulk(!bulk)}>
             {t("Close tabs by text")}
           </Button>
-        </details>
+        </Disclosure>
         {error && <p role="alert">{t(error)}</p>}
         {React.createElement(
           "material-settings-tabs",
@@ -328,8 +330,8 @@ export function SettingsTabs({
             </Button>
           </div>
         )}
-        <details>
-          <summary>{t("Find tabs and groups")}</summary>
+        <Disclosure>
+          <DisclosureTitle>{t("Find tabs and groups")}</DisclosureTitle>
           <Search
             key={`${instance}:master`}
             label={t("Search all open tabs")}
@@ -409,7 +411,7 @@ export function SettingsTabs({
             value={groupName}
             onChange={setGroupName}
           />
-          <input
+          <PlatformPicker
             type="color"
             value={groupColor}
             aria-label={t("Group color")}
@@ -469,7 +471,7 @@ export function SettingsTabs({
           >
             {t("Remove group")}
           </Button>
-        </details>
+        </Disclosure>
       </aside>
       <div
         ref={content}
@@ -524,17 +526,17 @@ export function SettingsTabs({
               />
             </div>
             <label>
-              <input
+              <MaterialInput
                 type="checkbox"
-                checked={inverse}
+                aria-label={t("Close tabs not matching")} checked={inverse}
                 onChange={(e) => setInverse(e.target.checked)}
               />
               {t("Close tabs not matching")}
             </label>
             <label>
-              <input
+              <MaterialInput
                 type="checkbox"
-                checked={includePinned}
+                aria-label={t("Include pinned tabs")} checked={includePinned}
                 onChange={(e) => setIncludePinned(e.target.checked)}
               />
               {t("Include pinned tabs")}

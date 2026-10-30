@@ -181,6 +181,15 @@ ipcMain.handle("material:request", (event, method, params) => {
     });
   });
 });
+ipcMain.handle("material:window", (event, action) => {
+  if (!trusted(event) || !["minimize", "maximize", "restore", "close"].includes(action))
+    throw new Error("INVALID_REQUEST");
+  if (action === "minimize") window.minimize();
+  else if (action === "maximize") window.maximize();
+  else if (action === "restore") window.unmaximize();
+  else window.close();
+  return { maximized: window && !window.isDestroyed() ? window.isMaximized() : false };
+});
 ipcMain.handle("material:directory", async (event) => {
   if (!trusted(event)) throw new Error("INVALID_REQUEST");
   const result = await dialog.showOpenDialog(window, {
@@ -209,7 +218,8 @@ app.whenReady().then(() => {
     height: 800,
     minWidth: 760,
     minHeight: 580,
-    backgroundColor: "#0b0e11",
+    backgroundColor: "#0E1514",
+    frame: false,
     icon: path.join(__dirname, "../assets/material-browser.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
@@ -221,6 +231,13 @@ app.whenReady().then(() => {
   });
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   window.webContents.on("will-navigate", (event) => event.preventDefault());
+  const reportWindowState = () => {
+    if (window && !window.isDestroyed() && !window.webContents.isDestroyed())
+      window.webContents.send("material:event", { type: "window-state", maximized: window.isMaximized() });
+  };
+  window.on("maximize", reportWindowState);
+  window.on("unmaximize", reportWindowState);
+  window.webContents.on("did-finish-load", reportWindowState);
   window.loadFile(rendererFile);
 });
 app.on("window-all-closed", () => app.quit());

@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureTitle } from "../../MaterialPrimitives";
 import React, { useState } from "react";
 import { Button, Field } from "../../components";
 import type { ProtectedHistoryController } from "../protected-history";
@@ -93,8 +94,8 @@ export function HistoryAccess({
           >
             {t("Lock history")}
           </Button>
-          <details>
-            <summary>{t("Change history password or PIN")}</summary>
+          <Disclosure>
+            <DisclosureTitle>{t("Change history password or PIN")}</DisclosureTitle>
             <p>
               {t(
                 "Changing this password revokes older sessions in other processes. It does not change the encryption key or computer sign-in.",
@@ -127,7 +128,7 @@ export function HistoryAccess({
             >
               {t("Change history password or PIN")}
             </Button>
-          </details>
+          </Disclosure>
         </>
       )}
     </section>
