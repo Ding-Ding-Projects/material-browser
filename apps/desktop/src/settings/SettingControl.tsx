@@ -1,3 +1,4 @@
+import { PlatformPicker } from "../MaterialPrimitives";
 import React, { useState, useId, useRef, useEffect } from "react";
 import { Button, Field } from "../components";
 import { Search } from "../Search";
@@ -42,6 +43,7 @@ export function Choice({
   return (
     <div className="settings-choice">
       {showLabel && <span className="field-label">{label}</span>}
+      {options.length >= 2 && options.length <= 4 && !previewFont && <div className="connected-choices" role="group" aria-label={label}>{options.map(([id, name]) => React.createElement("md-outlined-button", { key: id, "aria-pressed": id === value, onClick: () => onChange(id) }, name))}</div>}
       {React.createElement(
         "md-outlined-button",
         {
@@ -264,7 +266,7 @@ export function SettingInput({
   if (d.type === "color")
     return (
       <div className="range-control">
-        <input
+        <PlatformPicker
           type="color"
           value={value}
           aria-label={t(d.label)}

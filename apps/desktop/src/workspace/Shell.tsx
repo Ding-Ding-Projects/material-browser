@@ -12,7 +12,7 @@ import {
   mdiChevronDown,
   mdiMagnify,
   mdiBellOutline,
-  mdiAccessibility,
+  mdiHuman,
   mdiShieldLockOutline,
   mdiPlus,
   mdiMinus,
@@ -57,13 +57,13 @@ export function WorkspaceHeader({
         </small>
       </div>
       <button className="global-search" onClick={() => setPalette(true)}>
-        <Icon path={mdiMagnify} size={21} /><span>{t("Search profiles, settings, help")}</span><kbd>Ctrl+Shift+F</kbd>
+        <Icon path={mdiMagnify} size={21} /><span>{t("Search destinations and settings")}</span><kbd>Ctrl+Shift+F</kbd>
       </button>
       <span className="connection" data-connected={status?.unlocked === true}>
         <span className="connection-dot" aria-hidden="true" />{t(status ? status.unlocked ? "Vault unlocked" : "Locked" : "Backend unavailable")}
       </span>
       <button className="icon-control" aria-label={t("Notifications")} title={t("Notifications")} onClick={onNotifications}><Icon path={mdiBellOutline} size={22} /></button>
-      {prefs.accessibilityVisible && <button className="icon-control" aria-label={t("Accessibility")} title={t("Accessibility")} onClick={() => window.dispatchEvent(new Event("settings-accessibility"))}><Icon path={mdiAccessibility} size={22} /></button>}
+      {prefs.accessibilityVisible && <button className="icon-control" aria-label={t("Accessibility")} title={t("Accessibility")} onClick={() => window.dispatchEvent(new Event("settings-accessibility"))}><Icon path={mdiHuman} size={22} /></button>}
       {window.materialBrowser?.windowAction && <div className="window-controls">
         <button aria-label={t("Minimize")} title={t("Minimize")} onClick={() => void windowAction("minimize")}><Icon path={mdiMinus} size={20}/></button>
         <button aria-label={t(maximized ? "Restore window" : "Maximize")} title={t(maximized ? "Restore window" : "Maximize")} onClick={() => void windowAction(maximized ? "restore" : "maximize")}><Icon path={maximized ? mdiWindowRestore : mdiWindowMaximize} size={18}/></button>

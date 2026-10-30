@@ -1,3 +1,4 @@
+import { MaterialInput } from "../../MaterialPrimitives";
 import React, { useState } from "react";
 import { Button } from "../../components";
 import { resolveSearchRecords } from "../interaction-model.mjs";
@@ -42,7 +43,7 @@ export function NotificationCenter({
         )}
       </p>
       <label>
-        <input
+        <MaterialInput
           type="checkbox"
           checked={unread}
           onChange={(e) => setUnread(e.target.checked)}
@@ -134,7 +135,7 @@ export function NotificationCenter({
           return (
             <article className="settings-record" key={n.id}>
               <label>
-                <input
+                <MaterialInput
                   type="checkbox"
                   checked={selected.includes(n.id)}
                   onClick={(e) =>

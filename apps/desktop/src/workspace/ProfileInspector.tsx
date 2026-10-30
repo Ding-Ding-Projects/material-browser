@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureTitle, MaterialInput } from "../MaterialPrimitives";
 import { Icon } from "../Icon";
 import { mdiArrowLeft, mdiArrowExpandHorizontal, mdiPlay } from "@mdi/js";
 import React, { useState, useId } from "react";
@@ -82,14 +83,14 @@ export function ProfileInspector({
                 {profile.engine} · {t(observedRuntime(runtime))}
               </p>
             </div>
-            <details className="inspector-resize">
-              <summary title={t("Inspector width")}>
+            <Disclosure className="inspector-resize">
+              <DisclosureTitle title={t("Inspector width")}>
                 <Icon path={mdiArrowExpandHorizontal} size={20} />
                 <span className="sr-only">{t("Inspector width")}</span>
-              </summary>
+              </DisclosureTitle>
               <label>
                 {t("Inspector width")}
-                <input
+                <MaterialInput
                   type="range"
                   min="320"
                   max="360"
@@ -99,7 +100,7 @@ export function ProfileInspector({
                 />
                 <output>{width} px</output>
               </label>
-            </details>
+            </Disclosure>
           </div>
           <Tabs
             panelPrefix={panelPrefix}
@@ -195,8 +196,8 @@ export function ProfileInspector({
                     "Actions depend on native host capabilities. An unavailable action reports its actual reason.",
                   )}
                 </p>
-                <details>
-                  <summary>{t("Profile identity")}</summary>
+                <Disclosure>
+                  <DisclosureTitle>{t("Profile identity")}</DisclosureTitle>
                   <dl>
                     <dt>ID</dt>
                     <dd className="literal">{profile.id}</dd>
@@ -213,7 +214,7 @@ export function ProfileInspector({
                       ),
                     )}
                   </dl>
-                </details>
+                </Disclosure>
               </>
             ) : tab === "identity" ? (
               <><h3>{t("Profile identity")}</h3><p>{t("Stable browser identity is unavailable in this build.")}</p><dl><dt>ID</dt><dd className="literal">{profile.id}</dd>{Object.entries(profile.identity || {}).map(([key, value]) => <React.Fragment key={key}><dt>{key}</dt><dd>{typeof value === "object" ? JSON.stringify(value) : String(value)}</dd></React.Fragment>)}</dl></>

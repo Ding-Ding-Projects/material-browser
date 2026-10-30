@@ -119,4 +119,5 @@ export const workspaceZh: Record<string, string> = {
   "Details": "詳情",
   "Identity": "識別資料",
   "Search results": "搜尋結果",
+  "Search destinations and settings": "搜尋目的地及設定",
 };

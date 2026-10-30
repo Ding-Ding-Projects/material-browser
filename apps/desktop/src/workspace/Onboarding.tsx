@@ -1,3 +1,4 @@
+import { LinearProgress } from "../MaterialPrimitives";
 import "./surfaces.css";
 import React from "react";
 import { Icon } from "../Icon";
@@ -39,7 +40,7 @@ export function Onboarding({
         )}
       </h1>
       <ol className="setup-steps" aria-label={t("Setup progress")}>{["Vault", "Profiles", "Synchronization", "Workspace ready"].map((label, index) => <li key={label} aria-current={index === setup ? "step" : undefined}><strong>{index + 1}</strong><span>{t(label)}</span></li>)}</ol>
-      <progress max={4} value={setup + 1} aria-label={t("Setup progress")} />
+      <LinearProgress max={4} value={setup + 1} label={t("Setup progress")} />
       {!status && <p role="status">{t("Backend unavailable")}</p>}
       {setup === 0 && (
         <>

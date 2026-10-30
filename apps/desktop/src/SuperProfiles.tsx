@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureTitle, MaterialInput } from "./MaterialPrimitives";
 import { Icon } from "./Icon";
 import { mdiArrowLeft, mdiPlus, mdiRefresh } from "@mdi/js";
 import React, { useEffect, useRef, useState, useId } from "react";
@@ -502,8 +503,8 @@ export function SuperProfiles({
                             </p>
                           )}
                           {s.events?.length ? (
-                            <details>
-                              <summary>{t("Session progress")}</summary>
+                            <Disclosure>
+                              <DisclosureTitle>{t("Session progress")}</DisclosureTitle>
                               <ol>
                                 {s.events.map((event) => (
                                   <li key={event.sequence}>
@@ -514,7 +515,7 @@ export function SuperProfiles({
                                   </li>
                                 ))}
                               </ol>
-                            </details>
+                            </Disclosure>
                           ) : null}
                           <div className="super-actions">
                             <Button
@@ -599,8 +600,8 @@ export function SuperProfiles({
           </section>
         </div>
       )}
-      <details className="surface">
-        <summary>{t("Host capabilities")}</summary>
+      <Disclosure className="surface">
+        <DisclosureTitle>{t("Host capabilities")}</DisclosureTitle>
         <p>
           {t(
             "Capability availability is not proof that a session launched successfully.",
@@ -627,7 +628,7 @@ export function SuperProfiles({
             "WSL graphical modes require WSLg and the selected guest programs. Sandbox must already be enabled.",
           )}
         </p>
-      </details>
+      </Disclosure>
       {confirm && profile && (
         <Modal
           title={t(
@@ -686,7 +687,7 @@ export function SuperProfiles({
                 )}
               </p>
               <label>
-                <input
+                <MaterialInput
                   type="checkbox"
                   checked={identityConsent}
                   onChange={(e) => setIdentityConsent(e.target.checked)}
@@ -719,7 +720,7 @@ export function SuperProfiles({
                   .filter((c) => ["browser", "workspace"].includes(c.id))
                   .map((c) => (
                     <label key={c.id}>
-                      <input
+                      <MaterialInput
                         type="checkbox"
                         checked={saveCategories.includes(c.id)}
                         onChange={(e) =>

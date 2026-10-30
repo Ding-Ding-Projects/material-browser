@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureTitle } from "../MaterialPrimitives";
 import "./surfaces.css";
 import { Icon } from "../Icon";
 import { mdiFolderOpenOutline, mdiRefresh } from "@mdi/js";
@@ -80,7 +81,7 @@ export function Synchronization({
       <section className="surface sync-device">
         <h2>{t("This computer")}</h2><dl><dt>{t("Vault")}</dt><dd>{t(status?.unlocked ? "Vault unlocked" : "Locked")}</dd><dt>{t("Profiles")}</dt><dd>{profiles.length}</dd></dl>
         <p>{t("Upload and download are separate actions. Review conflicts before choosing a revision.")}</p>
-        <details><summary>{t("Incomplete capability")}</summary><p>{t("Server connection status, device enrollment and keep-both resolution are unavailable in this build. No server or device state is simulated.")}</p></details>
+        <Disclosure><DisclosureTitle>{t("Incomplete capability")}</DisclosureTitle><p>{t("Server connection status, device enrollment and keep-both resolution are unavailable in this build. No server or device state is simulated.")}</p></Disclosure>
       </section>
       <section className="surface sync-conflicts" aria-label={t("Conflicts")}>
         <div className="page-heading">

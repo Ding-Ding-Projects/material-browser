@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolvePresentationTheme, applyPresentationTheme } from './design-system/theme.mjs';
-import { COLOR_SCHEMES } from './design-system/zip-colors.mjs';
+import { COLOR_SCHEMES } from './design-system/reference-colors.mjs';
 import { defaults, validatePreferences } from './settings/model.mjs';
 import { readPresentationRecord } from './settings/record.mjs';
 

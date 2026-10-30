@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureTitle, MaterialInput } from "../../MaterialPrimitives";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Field, Modal } from "../../components";
 import { Search } from "../../Search";
@@ -260,7 +261,7 @@ export function ProtectedHistory({
             {visible.map((row) => (
               <article className="settings-record" key={row.id}>
                 <label>
-                  <input
+                  <MaterialInput
                     type="checkbox"
                     checked={selected.includes(row.id)}
                     onChange={(event) =>
@@ -299,8 +300,8 @@ export function ProtectedHistory({
                 </Button>
               </article>
             ))}
-            <details>
-              <summary>{t("History retention")}</summary>
+            <Disclosure>
+              <DisclosureTitle>{t("History retention")}</DisclosureTitle>
               <p>
                 {t(
                   "Default: show all retained records. A limit of 1–36500 days changes visibility only; encrypted records are not physically deleted.",
@@ -327,7 +328,7 @@ export function ProtectedHistory({
               >
                 {t("Save retention visibility")}
               </Button>
-            </details>
+            </Disclosure>
           </section>
         </>
       )}

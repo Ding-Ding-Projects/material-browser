@@ -350,7 +350,7 @@ export function ProfilesWorkspace({
           const success = await execute(review.method, review.targets);
           if (success) setReview(null);
           return success ? { ok: true } : { ok: false, message: t("Some operations failed") };
-        }}/>} 
+        }}/>}
       {review && review.method !== "profiles.remove" && (
         <Modal
           title={t(review.label)}

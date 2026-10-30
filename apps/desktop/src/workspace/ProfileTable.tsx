@@ -1,3 +1,4 @@
+import { MaterialInput } from "../MaterialPrimitives";
 import { Icon } from "../Icon";
 import { mdiArrowUp, mdiArrowDown, mdiRefresh, mdiPlay, mdiDotsVertical } from "@mdi/js";
 import React from "react";
@@ -64,14 +65,7 @@ export function ProfileTable({
         t={t}
       />
       <div className="table-toolbar">
-        <label>
-          {t("Engine")}{" "}
-          <select value={engine} onChange={(e) => setEngine(e.target.value)}>
-            <option value="all">{t("All engines")}</option>
-            <option value="chromium">Chromium</option>
-            <option value="firefox">Firefox</option>
-          </select>
-        </label>
+        {React.createElement("md-chip-set", { "aria-label": t("Engine") }, ["all", "chromium", "firefox"].map((value) => React.createElement("md-filter-chip", { key: value, label: value === "all" ? t("All engines") : value === "chromium" ? "Chromium" : "Firefox", selected: engine === value, onClick: () => setEngine(value) })))}
         <span className="table-count">
           {rows.length} / {profiles.length}
         </span>
@@ -122,7 +116,7 @@ export function ProfileTable({
         </div>
       )}
       <div className="card-list-controls">
-        <label className="check-target"><input type="checkbox" aria-label={t("Select visible profiles")}
+        <label className="check-target"><MaterialInput type="checkbox" aria-label={t("Select visible profiles")}
           checked={rows.length > 0 && rows.every((p) => checked.includes(p.id))} disabled={!rows.length}
           onChange={(e) => setChecked((current) => e.target.checked ? Array.from(new Set([...current, ...rows.map((p) => p.id)])) : current.filter((id) => !rows.some((p) => p.id === id)))} />{t("Select visible profiles")}</label>
         <button className="sort-control" onClick={() => sortBy("name")}>{t("Name")} <Icon path={sort.direction === "asc" ? mdiArrowUp : mdiArrowDown} size={16} /></button>
@@ -132,7 +126,7 @@ export function ProfileTable({
         {rows.map((p) => {
           const state = p.id === selected ? observedRuntime(runtime) : "Unavailable";
           return <article role="listitem" key={p.id} className={`profile-card${selected === p.id ? " selected" : ""}`}>
-            <label className="check-target"><input type="checkbox" aria-label={`${t("Select")} ${p.name}`} checked={checked.includes(p.id)} disabled={pending.includes(p.id)}
+            <label className="check-target"><MaterialInput type="checkbox" aria-label={`${t("Select")} ${p.name}`} checked={checked.includes(p.id)} disabled={pending.includes(p.id)}
               onChange={(e) => setChecked((ids) => e.target.checked ? [...new Set([...ids, p.id])] : ids.filter((id) => id !== p.id))} /></label>
             <button className="profile-card-main record-name" aria-pressed={selected === p.id} onClick={() => select(p.id)}>
               <span className="profile-avatar" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>

@@ -1,3 +1,5 @@
+import { restoreWorkspaceTabs } from "./workspace/workspace-tabs-model.mjs";
+import { Disclosure, DisclosureTitle } from "./MaterialPrimitives";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { WorkspaceTabs } from "./workspace/WorkspaceTabs";
@@ -111,7 +113,7 @@ function App() {
   >(() => {
     const saved = read("workspace.tabs.v1", []);
     const catalogue = catalogDestinations(definitions, categories);
-    return Array.isArray(saved) ? saved.slice(0, 200).map((id) => catalogue.find((item) => item.id === id && item.page)).filter(Boolean).map((item: any) => ({ ...item, page: item.page })) : [];
+    return restoreWorkspaceTabs(saved, catalogue);
   });
   useEffect(() => { try { localStorage.setItem("workspace.tabs.v1", JSON.stringify(workspaceTabs.map((tab) => tab.id))); } catch {} }, [workspaceTabs]);
   const [launchTarget, setLaunchTarget] = useState<Profile | null>(null);
@@ -292,16 +294,16 @@ function App() {
         ]}
       />
       <p>{t("Automation is off until explicitly enabled for this profile.")}</p>
-      <details
+      <Disclosure
         className="password-manager-option"
         open={managerForm.enabled}
-        onToggle={(event) => {
+        onToggle={(event: { currentTarget: { open: boolean } }) => {
           const open = (event.currentTarget as HTMLDetailsElement).open;
           updateManager({ enabled: open });
           if (open && !managerDetection) void detectPasswordManager();
         }}
       >
-        <summary>{t("Password manager (optional)")}</summary>
+        <DisclosureTitle>{t("Password manager (optional)")}</DisclosureTitle>
         <p>
           {t(
             "Pair this profile with a KeePassXC database. The database password is never stored by this application.",
@@ -403,7 +405,7 @@ function App() {
             "The browser still asks once to enable the extension. Nothing is installed silently.",
           )}
         </p>
-      </details>
+      </Disclosure>
       <Button
         disabled={
           busy ||

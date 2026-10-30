@@ -1,3 +1,4 @@
+import { MaterialInput } from "./MaterialPrimitives";
 import React, { useEffect, useState } from "react";
 import { Button, Field } from "./components";
 export function Search({
@@ -107,7 +108,7 @@ export function Search({
       {open && (
         <section className="regex-panel">
           <label>
-            <input
+            <MaterialInput
               type="checkbox"
               checked={regex}
               onChange={(e) => setRegex(e.target.checked)}
