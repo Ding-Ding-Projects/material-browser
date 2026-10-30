@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Palette, menus and notifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Roboto+Mono:wght@400&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+.mb{--p:#006A6A;--op:#FFFFFF;--pc:#9CF1F0;--opc:#002020;--sc:#CCE8E7;--osc:#051F1F;--t:#7A5900;--tc:#FFDEA6;--otc:#261900;--bg:#F4FBFA;--s0:#FFFFFF;--s1:#EFF5F4;--s2:#E9EFEE;--s3:#E3E9E8;--s4:#DDE4E3;--on:#161D1D;--onv:#3F4948;--ol:#6F7979;--olv:#BEC9C8;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;--inv:#2B3231;--oninv:#ECF2F1;--ip:#80D5D4;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
+.mb.dark{--p:#80D5D4;--op:#003737;--pc:#004F4F;--opc:#9CF1F0;--sc:#324B4B;--osc:#CCE8E7;--t:#F0BF48;--tc:#5C4300;--otc:#FFDEA6;--bg:#0E1514;--s0:#090F0F;--s1:#161D1D;--s2:#1A2121;--s3:#252B2B;--s4:#2F3636;--on:#DDE4E3;--onv:#BEC9C8;--ol:#889392;--olv:#3F4948;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6;--inv:#DDE4E3;--oninv:#2B3231;--ip:#006A6A}
+.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
+.ib{width:40px;height:40px;border:0;border-radius:20px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--olv);font:500 13px 'Roboto Flex',sans-serif;color:var(--onv);background:transparent}
+.chip.on{background:var(--sc);color:var(--osc);border-color:transparent}
+.res{display:flex;align-items:center;gap:14px;min-height:56px;padding:0 20px;font-size:15px}
+.res small{display:block;font-size:12px;color:var(--onv)}
+.res .tx{flex:1;min-width:0}
+.grp{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv);padding:12px 20px 4px}
+.mi{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;font-size:14px}
+.mi .k{font-size:12px;color:var(--onv)}.mi .tx{flex:1}
+kbd{font:500 12px 'Roboto Flex',sans-serif;background:var(--s3);border-radius:6px;padding:3px 7px;color:var(--onv)}
+</style>
+</helmet>
+<div class="mb {{theme}}" style="min-height: 960px; padding: 32px; box-sizing: border-box; display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; position: relative">
+  <section role="dialog" aria-label="Command palette" style="flex: 2 1 560px; max-width: 720px; background: var(--s1); border-radius: 28px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; overflow: hidden">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 20px"><span class="ms" style="color: var(--onv)">search</span><input aria-label="Search everything" value="launch" style="flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; color: var(--on); font: 18px 'Roboto Flex',sans-serif; outline: none"><button class="ib" aria-label="Regex builder" aria-pressed="false"><span class="ms">regular_expression</span></button><button class="ib" aria-label="Full window view"><span class="ms">open_in_full</span></button><button class="ib" aria-label="Close palette"><span class="ms">close</span></button></div>
+    <div style="display: flex; gap: 8px; padding: 0 20px 8px; flex-wrap: wrap"><button class="chip on">All</button><button class="chip">Profiles</button><button class="chip">Settings</button><button class="chip">Help</button></div>
+    <div class="grp">Profiles</div>
+    <div class="res" style="background: var(--sc); color: var(--osc)"><span class="ms">play_arrow</span><div class="tx">Launch Research<small style="color: var(--osc)">Firefox · Selenium</small></div><kbd>Enter</kbd></div>
+    <div class="res"><span class="ms" style="color: var(--onv)">play_arrow</span><div class="tx">Launch Work<small>Already running · shows its window</small></div></div>
+    <div class="grp">Settings</div>
+    <div class="res"><span class="ms" style="color: var(--onv)">rule</span><div class="tx">Review before launch<small>Settings › Privacy and access</small></div><button class="ib" aria-label="Toggle review before launch" style="width: 52px"><span class="ms" style="color: var(--p); font-size: 32px">toggle_on</span></button></div>
+    <div class="grp">Locked</div>
+    <div class="res" style="color: var(--onv)"><span class="ms">lock</span><div class="tx">Launch Testing<small>Locked · asks for its unlock first</small></div><button class="chip">Unlock…</button></div>
+    <div style="display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-top: 1px solid var(--olv); font-size: 12px; color: var(--onv); flex-wrap: wrap; margin-top: 8px"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> go to it</span><span><kbd>Esc</kbd> clear, then close</span></div>
+  </section>
+  <div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 24px">
+    <div role="menu" aria-label="Research profile" style="background: var(--s2); border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); padding: 8px 0">
+      <div style="display: flex; align-items: center; gap: 4px; margin: 0 8px 8px; padding: 0 4px 0 12px; height: 40px; border-radius: 20px; background: var(--s4)"><span class="ms" style="font-size: 18px; color: var(--onv)">filter_list</span><input aria-label="Filter menu" placeholder="Filter" style="flex: 1; min-width: 0; border: 0; background: transparent; color: var(--on); font: 14px 'Roboto Flex',sans-serif; outline: none"><button class="ib" aria-label="Regex builder for this menu" style="width: 32px; height: 32px"><span class="ms" style="font-size: 18px">regular_expression</span></button></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">play_arrow</span><span class="tx">Launch</span><span class="k">Enter</span></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">edit</span><span class="tx">Rename</span><span class="k">F2</span></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">content_copy</span><span class="tx">Duplicate</span><span class="k">Ctrl+D</span></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">ios_share</span><span class="tx">Export…</span></div>
+      <div style="height: 1px; background: var(--olv); margin: 8px 0"></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">format_paint</span><span class="tx">Edit appearance…</span></div>
+      <div class="mi"><span class="ms" style="font-size: 20px; color: var(--onv)">lock</span><span class="tx">Lock this element…</span></div>
+      <div style="height: 1px; background: var(--olv); margin: 8px 0"></div>
+      <div class="mi" style="color: var(--e)"><span class="ms" style="font-size: 20px">delete</span><span class="tx">Delete profile…</span><span class="k" style="color: var(--e)">Del</span></div>
+      <div role="status" style="padding: 4px 12px 0; font-size: 12px; color: var(--onv)">7 items</div>
+    </div>
+    <section aria-label="Notification centre" style="background: var(--s1); border-radius: 28px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 20px 20px 8px"><h2 style="margin: 0; font-size: 20px; font-weight: 500; flex: 1">Notifications</h2><button class="btn txt" style="height: 36px">Mark all read</button></div>
+      <div style="display: flex; gap: 12px; padding: 12px 20px; background: var(--s0)"><span class="ms" style="color: var(--p)">save</span><div style="flex: 1"><div style="font-weight: 500; font-size: 14px">Work saved back to the vault</div><div style="font-size: 13px; color: var(--onv)">2 min ago</div></div></div>
+      <div style="display: flex; gap: 12px; padding: 12px 20px 20px"><span class="ms" style="color: var(--e)">merge</span><div style="flex: 1"><div style="font-size: 14px">1 sync conflict to review</div><div style="font-size: 13px; color: var(--onv)">Open Sync to choose</div></div></div>
+    </section>
+  </div>
+  <div style="position: absolute; right: 32px; bottom: 32px; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; max-width: calc(100% - 64px)">
+    <div role="status" aria-label="Dim sum surprise: Siu mai" style="width: 340px; max-width: 100%; background: var(--s0); border-radius: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); display: flex; gap: 12px; padding: 12px; align-items: center"><div role="img" aria-label="Siu mai, open-topped pork and shrimp dumplings" style="width: 72px; height: 72px; border-radius: 14px; background: var(--s3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--onv)">[PHOTO]</div><div style="flex: 1"><div style="font-weight: 500">Siu mai · 燒賣</div><div style="font-size: 12px; color: var(--onv)">A dim sum surprise. Closes by itself.</div></div><button class="ib" aria-label="Dismiss"><span class="ms" style="font-size: 20px">close</span></button></div>
+    <div role="status" style="min-width: 300px; max-width: 100%; background: var(--inv); color: var(--oninv); border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; font-size: 14px"><span style="flex: 1">Research renamed</span><button class="btn" style="height: 36px; padding: 0 12px; background: transparent; color: var(--ip)">Undo</button></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>
