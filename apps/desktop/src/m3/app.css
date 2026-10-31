@@ -22,7 +22,7 @@ body { background: var(--md-sys-color-surface-container); overflow: hidden; }
 
 /* Panes and main pane bodies */
 .m3 .pane.scroll { overflow: auto; }
-.m3 .panes > .pane { max-height: 100%; }
+.m3 .panes .pane { max-height: 100%; }
 .m3 .page-head { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 28px 24px 16px; }
 .m3 .page-head > div:first-child { flex: 1; min-width: 220px; }
 .m3 .ov-label { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: .1px; color: var(--primary); padding: 0 16px 8px; }
@@ -66,8 +66,8 @@ body { background: var(--md-sys-color-surface-container); overflow: hidden; }
 /* Compact window: a single pane at a time */
 @media (max-width: 860px) {
   .m3 .panes { flex-direction: column; overflow: auto; }
-  .m3 .panes > .pane { width: auto !important; flex: none !important; max-height: none; }
-  .m3 .panes > .pane.compact-hidden { display: none !important; }
+  .m3 .panes .pane { width: auto !important; flex: none !important; max-height: none; overflow: visible; }
+  .m3 .panes .pane.compact-hidden { display: none !important; }
 }
 .m3 .compact-back { display: none; }
 @media (max-width: 860px) { .m3 .compact-back { display: inline-flex; } }
@@ -87,3 +87,6 @@ body { background: var(--md-sys-color-surface-container); overflow: hidden; }
 .m3 .search:focus-within { box-shadow: inset 0 0 0 2px var(--primary); }
 .m3-dialog { --tf-bg: var(--surface-container-high); }
 .m3 .pane { --tf-bg: var(--surface); }
+
+/* Pane content keeps its natural height; the pane itself scrolls. */
+.m3 .pane > *:not(.scroll) { flex-shrink: 0; }

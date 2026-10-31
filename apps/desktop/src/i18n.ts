@@ -1,6 +1,7 @@
 import { workspaceZh } from "./workspace/locale";
 import { superProfilesZh } from "./SuperProfiles.locale";
 import { settingsZh } from "./settings/locale.mjs";
+import { appZh } from "./app/locale";
 export type Language = "en" | "yue" | "both";
 export const zh: Record<string, string> = {
   Profiles: "設定檔",
@@ -100,6 +101,8 @@ export const zh: Record<string, string> = {
   "Setup progress": "設定進度",
 };
 Object.assign(zh, settingsZh, superProfilesZh, workspaceZh);
+// Reviewed earlier wording wins over the redesign table where both exist.
+for (const [key, value] of Object.entries(appZh)) if (!Object.hasOwn(zh, key)) zh[key] = value;
 export function translate(s: string, l: Language) {
   return l === "en"
     ? s
