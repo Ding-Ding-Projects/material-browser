@@ -40,17 +40,30 @@ Both bundled engines passed Off, Selenium and Puppeteer launch/normal-stop check
 
 Builds enter through build.bat; installer production enters through build-installer.bat. Hosted builds run on every branch push and manual dispatch, use increasing package versions and publish normal development releases. Tests and lint run locally, not in the hosted workflow. Each release asset is transferred separately and checked against its published byte count and SHA-256.
 
-## Repository-owned desktop design
+## Desktop design
 
-The entire desktop interface is being migrated to the current eight artboards and shared styles in [the design folder](design/IMPLEMENTATION_HANDOFF.md). The original attachment is obsolete. The active design source is `0ab6165`; later design updates are reviewed at implementation milestones. Locally bundled reference typography, teal color roles, expressive lists and left-docked tabs retain existing native workflows and saved choices. See [the migration and its limits](docs/features/desktop/zip-gui-remake.md).
+The desktop interface follows the eight Material 3 Expressive artboards in [the design folder](design/IMPLEMENTATION_HANDOFF.md): a custom title bar with search, a 96 dp navigation rail, rounded panes, segmented lists, connected button groups and the two-key confirmation. The vendored `design/m3.css` anatomy drives the renderer directly, with colour roles bridged to the saved theme, accent and contrast choices.
 
 Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
 
-## Current desktop screenshot acceptance
+## Current desktop screenshots
 
-Five genuine native Windows captures were collected from released version 0.1.58, source `555fa30`, using an isolated hidden desktop and the direct native CLI. They show setup, language Settings, Appearance, empty Profiles and the locked Super Profiles boundary. The seven-process run exited normally. [Observed states and remaining evidence requirements](docs/evidence/desktop/native-preservation.md) distinguish those results from formal promotion. Current screenshot embedding remains pending the required diagnostic/layout receipts.
+Captured from the running application (real Electron shell and native host, disposable data) at source `264d81d` on Linux. [Capture method, hashes and limits](docs/evidence/desktop/m3-redesign/README.md).
 
-[Historical WorldLens captures, original inventory and provenance](docs/evidence/desktop/worldlens/README.md) remain preserved for their original source. [Earlier desktop image archive](docs/evidence/archive.md).
+| | |
+| --- | --- |
+| ![Profiles list and inspector](docs/evidence/desktop/m3-redesign/03-profiles.png) | ![Launch page with review](docs/evidence/desktop/m3-redesign/04-launch.png) |
+| Profiles: list-detail, split launch buttons, floating toolbar | Launch: engine, automation and the review card |
+| ![Super Profiles](docs/evidence/desktop/m3-redesign/05-super-profiles.png) | ![Synchronization](docs/evidence/desktop/m3-redesign/06-sync.png) |
+| Super Profiles: template, overview and revision history | Synchronization: storage, this computer and conflicts |
+| ![Settings](docs/evidence/desktop/m3-redesign/07-settings.png) | ![Command palette](docs/evidence/desktop/m3-redesign/08-command-palette.png) |
+| Settings: navigation drawer and segmented lists | Command palette with the regex builder |
+| ![Super confirmation](docs/evidence/desktop/m3-redesign/09-super-confirmation.png) | ![Unlock ladder](docs/evidence/desktop/m3-redesign/10-unlock-ladder.png) |
+| Two-key confirmation before a delete | Unlock ladder for an element lock |
+| ![Create the vault](docs/evidence/desktop/m3-redesign/01-create-vault.png) | ![Compact window](docs/evidence/desktop/m3-redesign/11-compact.png) |
+| First start: create the vault | Compact window |
+
+Earlier native Windows captures from released version 0.1.58 remain described in [the preservation record](docs/evidence/desktop/native-preservation.md); [historical WorldLens captures](docs/evidence/desktop/worldlens/README.md) and the [earlier image archive](docs/evidence/archive.md) are kept for their original sources.
 
 ## Documentation and remaining work
 
