@@ -69,6 +69,22 @@ function component(relative, name, state = {}, props = {}) {
                     Choice: "Choice",
                     SettingInput: "SettingInput",
                     ConfirmAction: "ConfirmAction",
+                    Btn: "Button",
+                    IconBtn: "IconBtn",
+                    Dialog: "Modal",
+                    Ms: "Ms",
+                    Slider: "Slider",
+                    Switch: "Switch",
+                    Checkbox: "Checkbox",
+                    Chip: "Chip",
+                    ButtonGroup: "ButtonGroup",
+                    Dropdown: "Dropdown",
+                    TextField: "TextField",
+                    SegList: "SegList",
+                    Item: "Item",
+                    SearchBar: "SearchBar",
+                    useSearch: () => ({ query: "", setQuery() {}, state: { regex: false, flags: "i" }, setState() {}, indices: [], status: { valid: true, count: 0 } }),
+                    cx: (...parts) => parts.filter(Boolean).join(" "),
                   },
     crypto: { randomUUID: () => "fixture-schedule" },
     requestAnimationFrame: (fn) => fn(),
@@ -432,7 +448,7 @@ test("compact production setting row keeps saved edits separate from practice an
   assert.equal(saved.length, 1);
   view.find("Reset this setting").props.onClick();
   assert.deepEqual(resets, ["language"]);
-  const info = view.nodes.find((node) => node.type === "md-icon-button");
+  const info = view.nodes.find((node) => node.type === "IconBtn" && node.props["aria-controls"]);
   const help = view.nodes.find((node) => node.props.role === "region");
   assert.equal(info.props["aria-controls"], help.props.id);
 });
@@ -450,8 +466,8 @@ test("compact choice keeps its exact owning accessible name without repeating it
       showLabel: false,
     },
   );
-  const opener = view.nodes.find((node) => node.type === "md-outlined-button");
-  assert.equal(opener.props["aria-label"], "Language: English");
+  const opener = view.nodes.find((node) => node.type === "Dropdown");
+  assert.equal(opener.props.ariaLabel, "Language: English");
   assert.equal(
     view.nodes.some((node) => node.props.className === "field-label"),
     false,

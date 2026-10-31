@@ -1,0 +1,83 @@
+/* Application layer on top of the vendored design anatomy (design-system/m3.css).
+   Only behaviour the static artboards cannot show lives here: overlays, popovers,
+   disabled states, motion, scrolling and the presentation preferences. */
+
+html, body, #root { margin: 0; height: 100%; }
+body { background: var(--md-sys-color-surface-container); overflow: hidden; }
+.m3.win { height: 100vh; font-size: calc(14px * var(--text-scale, 1)); }
+.m3 [hidden] { display: none !important; }
+.m3 button:disabled, .m3 .btn[aria-disabled="true"] { cursor: default; opacity: .38; }
+.m3 .sl:disabled::after { opacity: 0 !important; }
+.m3 .li.sl, .m3 .ndi, .m3 .mi, .m3 .ri { cursor: pointer; }
+.m3 a.btn { text-decoration: none; }
+.m3 input::placeholder { color: var(--on-surface-variant); }
+.m3 .tf input { color: var(--on-surface); }
+.m3 .tf input::-ms-reveal { display: none; }
+.m3 .scroll { scrollbar-width: thin; scrollbar-color: var(--outline-variant) transparent; }
+.m3 .title-m.link, .m3 .rowlink { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; text-align: left; cursor: pointer; }
+.m3 .rowlink:hover { text-decoration: underline; }
+.tbar { -webkit-app-region: drag; }
+.tbar button, .tbar input, .tbar label, .tbar a, .tbar [role] { -webkit-app-region: no-drag; }
+.tbar .logo img { width: 24px; height: 24px; }
+
+/* Panes and main pane bodies */
+.m3 .pane.scroll { overflow: auto; }
+.m3 .panes > .pane { max-height: 100%; }
+.m3 .page-head { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 28px 24px 16px; }
+.m3 .page-head > div:first-child { flex: 1; min-width: 220px; }
+.m3 .ov-label { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: .1px; color: var(--primary); padding: 0 16px 8px; }
+
+/* Overlays */
+.m3-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: color-mix(in srgb, var(--md-sys-color-scrim) 32%, transparent); animation: m3-fade 150ms cubic-bezier(.2,0,0,1); }
+.m3-dialog { max-height: calc(100vh - 32px); overflow: auto; outline: none; animation: m3-rise 250ms cubic-bezier(.05,.7,.1,1); }
+.m3-dialog-body { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.m3-dialog-body > p { font-size: 14px; line-height: 20px; letter-spacing: .25px; color: var(--on-surface-variant); }
+.m3-popover { animation: m3-fade 120ms cubic-bezier(.2,0,0,1); }
+.m3-popover .mg { background: var(--surface-container); }
+@keyframes m3-fade { from { opacity: 0; } }
+@keyframes m3-rise { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+
+/* Loading indicator: the Expressive morphing shape */
+.loading > .loading-shape { width: 34px; height: 34px; background: var(--primary); clip-path: polygon(50% 0%,61% 12%,77% 7%,80% 23%,96% 27%,89% 42%,100% 55%,86% 64%,90% 80%,74% 81%,66% 96%,52% 88%,38% 98%,30% 83%,14% 85%,15% 69%,0% 60%,10% 47%,4% 31%,20% 27%,24% 11%,39% 13%); animation: m3-spin 1.6s linear infinite; }
+@keyframes m3-spin { to { transform: rotate(360deg); } }
+.wavy-move path { stroke-dasharray: 12 4; animation: m3-dash 900ms linear infinite; }
+@keyframes m3-dash { to { stroke-dashoffset: -32; } }
+
+/* Floating layers */
+.m3-toasts { position: fixed; right: 16px; bottom: 44px; z-index: 45; display: flex; flex-direction: column; gap: 8px; width: min(360px, calc(100vw - 32px)); }
+.m3-celebrate { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.m3-celebrate > div { padding: 32px 48px; border-radius: 28px; background: var(--primary-container); color: var(--on-primary-container); box-shadow: var(--e3); animation: m3-rise 350ms cubic-bezier(.05,.7,.1,1); }
+.m3-panel { position: fixed; z-index: 48; right: 16px; top: 72px; width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 120px); overflow: auto; border-radius: 28px; background: var(--surface-container-low); box-shadow: var(--e3); padding: 12px; }
+
+/* Presentation preferences */
+:root[data-motion="reduced"] .m3 *, :root[data-low-stimulation="true"] .m3 * { animation: none !important; transition: none !important; }
+:root[data-focus="true"] .m3 :focus-visible { outline-width: 4px; outline-color: var(--primary); }
+:root[data-targets="true"] .m3 .ib { width: 48px; height: 48px; }
+:root[data-targets="true"] .m3 .chip { height: 40px; }
+:root[data-targets="true"] .m3 .btn { height: 48px; }
+:root[data-density="compact"] .m3 .li { min-height: 48px; padding-top: 4px; padding-bottom: 4px; }
+:root[data-density="compact"] .m3 .li.tall { min-height: 60px; }
+:root[data-density="comfortable"] .m3 .li { min-height: 64px; }
+:root[data-low-stimulation="true"] .m3 { --primary-container: var(--md-sys-color-surface-container-highest); --on-primary-container: var(--md-sys-color-on-surface); }
+:root[data-accessibility-visible="false"] .m3 [data-accessibility-entry] { display: none !important; }
+:root[data-resolved-theme="contrast"] .m3 .li, :root[data-resolved-theme="contrast"] .m3 .pane, :root[data-resolved-theme="contrast"] .m3 .card { outline: 1px solid var(--outline); }
+.m3 .focus-dim { opacity: .38; }
+
+/* Compact window: a single pane at a time */
+@media (max-width: 860px) {
+  .m3 .panes { flex-direction: column; overflow: auto; }
+  .m3 .panes > .pane { width: auto !important; flex: none !important; max-height: none; }
+  .m3 .panes > .pane.compact-hidden { display: none !important; }
+}
+.m3 .compact-back { display: none; }
+@media (max-width: 860px) { .m3 .compact-back { display: inline-flex; } }
+
+/* Expanded navigation rail: labels sit beside icons. */
+.m3 .rail.rail-open { width: 220px; align-items: stretch; padding: 4px 12px 16px; }
+.m3 .rail.rail-open > .ib { align-self: flex-start; }
+.m3 .rail.rail-open .fab { align-self: flex-start; }
+.m3 .rail.rail-open .ri { flex-direction: row; width: auto; gap: 12px; padding: 0 16px 0 0; height: 56px; font-size: 14px; }
+.m3 .rail.rail-open .ri .ind { width: 56px; }
+.m3 .rail.rail-open .ri.on { background: var(--secondary-container); color: var(--on-secondary-container); border-radius: 999px; }
+.m3 .rail.rail-open .ri.on .ind { background: transparent; }
+.m3 .ri:disabled { opacity: .38; }

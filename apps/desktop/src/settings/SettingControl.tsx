@@ -1,20 +1,62 @@
-import { Icon } from "../Icon";
-import { PlatformPicker } from "../MaterialPrimitives";
 import React, { useState, useId, useRef, useEffect } from "react";
-import { Button, Field } from "../components";
-import { Search } from "../Search";
+import { Btn, ButtonGroup, Dropdown, IconBtn, Ms, Slider, Switch, TextField } from "../m3";
 import { validateValue } from "./model.mjs";
-import {
-  settingInstanceId,
-  choiceAccessibleName,
-  parseNumericDraft,
-  resolveSearchRecords,
-} from "./interaction-model.mjs";
+import { choiceAccessibleName, parseNumericDraft } from "./interaction-model.mjs";
 import { preferenceProvenance } from "./record.mjs";
 import type { SettingsController } from "./store";
-import "@material/web/switch/switch.js";
-import "@material/web/slider/slider.js";
-import "@material/web/iconbutton/icon-button.js";
+
+export const SETTING_ICONS: Record<string, string> = {
+  language: "translate",
+  funnyEnglish: "sentiment_very_satisfied",
+  funnyCantonese: "sentiment_satisfied",
+  dialogEmoji: "add_reaction",
+  narration: "record_voice_over",
+  narratorLanguage: "voice_selection",
+  voiceEnglish: "graphic_eq",
+  voiceCantonese: "graphic_eq",
+  speechRate: "speed",
+  speechPitch: "tune",
+  screenReaderMode: "hearing",
+  theme: "dark_mode",
+  density: "density_medium",
+  accent: "palette",
+  fontFamily: "font_download",
+  fontScale: "format_size",
+  fontWeight: "format_bold",
+  motion: "animation",
+  logoPreset: "shield_lock",
+  accessibilityVisible: "accessibility_new",
+  textScale: "text_increase",
+  highContrast: "contrast",
+  strongFocus: "center_focus_strong",
+  largeTargets: "touch_app",
+  focus: "center_focus_weak",
+  lowStimulation: "do_not_disturb_on",
+  timeAwareness: "timer",
+  oneThing: "filter_1",
+  nextAction: "flag",
+  momentum: "trending_up",
+  idleMinutes: "hourglass_empty",
+  snoozeMinutes: "snooze",
+  actionSounds: "music_note",
+  actionSoundVolume: "volume_up",
+  toastSeconds: "timelapse",
+  quietEnabled: "bedtime",
+  quietStart: "schedule",
+  quietEnd: "alarm",
+  paletteSize: "open_in_full",
+};
+
+const ACCENTS: [string, string][] = [
+  ["#006A6A", "Teal"],
+  ["#4B607C", "Slate blue"],
+  ["#8F4C38", "Clay"],
+  ["#6750A4", "Violet"],
+  ["#386A20", "Leaf"],
+  ["#984061", "Rose"],
+];
+
+/** Picker for a single value. Two to four options become a connected button group. */
 export function Choice({
   label,
   value,
@@ -32,188 +74,43 @@ export function Choice({
   previewFont?: boolean;
   showLabel?: boolean;
 }) {
-  const [open, setOpen] = useState(false),
-    [matches, setMatches] = useState<string[]>([]),
-    [page, setPage] = useState(0);
-  const id = useId();
-  const opener = useRef<HTMLElement | null>(null);
-  const choices = resolveSearchRecords(
-    matches,
-    options.map(([id, label]) => ({ id, label })),
-  );
+  if (options.length >= 2 && options.length <= 4 && !previewFont)
+    return <ButtonGroup label={label} value={value} onChange={onChange} options={options} showLabel={showLabel && false} />;
   return (
-    <div className="settings-choice">
-      {showLabel && <span className="field-label">{label}</span>}
-      {options.length >= 2 && options.length <= 4 && !previewFont && <div className="connected-choices" role="group" aria-label={label}>{options.map(([id, name]) => React.createElement("md-outlined-button", { key: id, "aria-pressed": id === value, onClick: () => onChange(id) }, name))}</div>}
-      {React.createElement(
-        "md-outlined-button",
-        {
-          ref: opener,
-          id,
-          "aria-label": options.length >= 2 && options.length <= 4 && !previewFont ? `${t("More options")}: ${label}` : choiceAccessibleName(
-            label,
-            value,
-            options,
-            t("Choose automatically"),
-          ),
-          onClick: () => setOpen(!open),
-          "aria-expanded": open,
-          "aria-controls": `${id}-options`,
-        },
-        options.length >= 2 && options.length <= 4 && !previewFont ? t("More options") : options.find((x) => x[0] === value)?.[1] ||
-          value ||
-          t("Choose automatically"),
-      )}
-      {open && (
-        <div
-          id={`${id}-options`}
-          className="choice-popover"
-          role="dialog"
-          aria-label={label}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setOpen(false);
-              opener.current?.focus();
-            }
-          }}
-        >
-          <Search
-            key={id}
-            label={t("Search options")}
-            items={options.map((x) => x[1])}
-            itemKeys={options.map(([id]) => id)}
-            onKeys={(ids) => {
-              setMatches(ids);
-              setPage(0);
-            }}
-            t={t}
-          />
-          <div className="choice-options">
-            {choices.slice(page * 50, (page + 1) * 50).map((option: any) => (
-              <Button
-                secondary
-                key={option.id}
-                onClick={() => {
-                  onChange(option.id);
-                  setOpen(false);
-                  opener.current?.focus();
-                }}
-              >
-                <span
-                  style={
-                    previewFont
-                      ? {
-                          fontFamily: `${JSON.stringify(option.id)},sans-serif`,
-                        }
-                      : undefined
-                  }
-                >
-                  {option.label}
-                </span>
-              </Button>
-            ))}
-            {choices.length === 0 && (
-              <p role="status">{t("No matching options")}</p>
-            )}
-          </div>
-          {choices.length > 50 && (
-            <div className="actions">
-              <Button
-                secondary
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                {t("Previous")}
-              </Button>
-              <span role="status">
-                {page * 50 + 1}–{Math.min((page + 1) * 50, choices.length)} /{" "}
-                {choices.length}
-              </span>
-              <Button
-                secondary
-                disabled={(page + 1) * 50 >= choices.length}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                {t("Next")}
-              </Button>
-            </div>
-          )}
-          <Button
-            secondary
-            onClick={() => {
-              setOpen(false);
-              opener.current?.focus();
-            }}
-          >
-            {t("Close picker")}
-          </Button>
-        </div>
-      )}
-    </div>
+    <Dropdown
+      label={showLabel ? label : t("Choice")}
+      ariaLabel={choiceAccessibleName(label, value, options, t("Choose automatically"))}
+      value={value}
+      onChange={onChange}
+      options={options.length ? options : [["", t("Choose automatically")]]}
+    />
   );
 }
-function NumericInput({
-  definition: d,
-  value,
-  onChange,
-  t,
-}: {
-  definition: any;
-  value: number;
-  onChange: (v: number) => void;
-  t: (s: string) => string;
-}) {
-  const [draft, setDraft] = useState(String(value));
-  useEffect(
-    () => setDraft(Number.isFinite(value) ? String(value) : ""),
-    [value],
-  );
+
+function NumericInput({ definition: d, value, onChange, t }: { definition: any; value: number; onChange: (v: number) => void; t: (s: string) => string }) {
+  const current = Number.isFinite(value) ? value : d.initial;
+  const decimals = String(d.step).includes(".") ? String(d.step).split(".")[1].length : 0;
   return (
-    <div className="range-control">
-      {React.createElement("md-slider", {
-        min: d.min,
-        max: d.max,
-        step: d.step,
-        value: Number.isFinite(value) ? value : d.initial,
-        onInput: (e: any) => {
-          setDraft(String(e.target.value));
-          onChange(Number(e.target.value));
-        },
-        "aria-label": t(d.label),
-      })}
-      <Field
-        label={t(d.label)}
-        value={draft}
-        type="text"
-        inputMode="decimal"
-        clearLabel={`${t("Clear field")}: ${t(d.label)}`}
-        onChange={(text) => {
-          setDraft(text);
-          onChange(parseNumericDraft(text));
-        }}
-      />
-    </div>
+    <Slider
+      label={t(d.label)}
+      value={current}
+      min={d.min}
+      max={d.max}
+      step={d.step}
+      valueText={current.toFixed(decimals)}
+      onChange={(v) => onChange(Number(v.toFixed(decimals)))}
+    />
   );
 }
-function DraftField({
-  definition: d,
-  value,
-  onChange,
-  t,
-}: {
-  definition: any;
-  value: string;
-  onChange: (value: string) => void;
-  t: (s: string) => string;
-}) {
+
+function DraftField({ definition: d, value, onChange, t }: { definition: any; value: string; onChange: (value: string) => void; t: (s: string) => string }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
   return (
-    <Field
+    <TextField
       label={t(d.label)}
       value={draft}
       type={d.type === "time" ? "time" : "text"}
-      clearLabel={`${t("Clear field")}: ${t(d.label)}`}
       onChange={(text) => {
         setDraft(text);
         onChange(text);
@@ -221,6 +118,46 @@ function DraftField({
     />
   );
 }
+
+function AccentInput({ value, onChange, t }: { value: string; onChange: (v: string) => void; t: (s: string) => string }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      <div role="radiogroup" aria-label={t("Accent colour")} style={{ display: "flex", gap: 6 }}>
+        {ACCENTS.map(([hex, name]) => {
+          const on = value.toUpperCase() === hex;
+          return (
+            <button
+              key={hex}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              aria-label={t(name)}
+              title={t(name)}
+              className="sl"
+              onClick={() => onChange(hex)}
+              style={{ width: 32, height: 32, borderRadius: on ? 10 : 999, border: on ? "3px solid var(--on-surface)" : "0", background: hex, cursor: "pointer" }}
+            />
+          );
+        })}
+      </div>
+      <div style={{ width: 132 }}>
+        <TextField
+          label={t("Hex")}
+          value={draft}
+          mono
+          maxLength={7}
+          onChange={(text) => {
+            setDraft(text);
+            if (/^#[\da-f]{6}$/i.test(text)) onChange(text);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function SettingInput({
   definition: d,
   value,
@@ -236,48 +173,32 @@ export function SettingInput({
   voices?: [string, string][];
   compact?: boolean;
 }) {
-  const id = useId();
-  if (d.type === "boolean")
-    return React.createElement("md-switch", {
-      selected: value,
-      onChange: (e: any) => onChange(e.target.selected),
-      "aria-label": t(d.label),
-      "data-setting": d.key,
-    });
-  if (d.type === "number")
-    return (
-      <NumericInput definition={d} value={value} onChange={onChange} t={t} />
-    );
+  if (d.type === "boolean") return <Switch checked={value === true} onChange={onChange} label={t(d.label)} />;
+  if (d.type === "number") return <NumericInput definition={d} value={value} onChange={onChange} t={t} />;
   if (d.type === "select" || d.type === "voice" || d.type === "font")
     return (
       <Choice
         label={t(d.label)}
         value={value}
-        options={
-          d.type === "voice" || d.type === "font"
-            ? voices
-            : d.options.map(([v, l]: [string, string]) => [v, t(l)])
-        }
+        showLabel={!compact}
+        previewFont={d.type === "font" || d.type === "voice"}
+        options={d.type === "voice" || d.type === "font" ? voices : d.options.map(([v, l]: [string, string]) => [v, t(l)])}
         onChange={onChange}
         t={t}
-        previewFont={d.type === "font"}
-        showLabel={!compact}
       />
     );
-  if (d.type === "color")
-    return (
-      <div className="range-control">
-        <PlatformPicker
-          type="color"
-          value={value}
-          aria-label={t(d.label)}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        <DraftField definition={d} value={value} onChange={onChange} t={t} />
-      </div>
-    );
-  return <DraftField definition={d} value={value} onChange={onChange} t={t} />;
+  if (d.type === "color") return <AccentInput value={String(value || "")} onChange={onChange} t={t} />;
+  return <DraftField definition={d} value={String(value ?? "")} onChange={onChange} t={t} />;
 }
+
+function defaultText(d: any, t: (s: string) => string) {
+  if (d.type === "voice" && !d.initial) return t("Choose automatically");
+  if (d.type === "boolean") return t(d.initial ? "On" : "Off");
+  if (d.options) return t(d.options.find(([v]: [string, string]) => v === d.initial)?.[1] || String(d.initial));
+  return String(d.initial);
+}
+
+/** One setting as a segmented list item: icon, label, current state, control, help and reset. */
 export function SettingControl({
   definition: d,
   controller: c,
@@ -290,160 +211,98 @@ export function SettingControl({
   voices?: [string, string][];
 }) {
   const [help, setHelp] = useState(false),
-    [sample, setSample] = useState(d.initial),
+    [sample, setSample] = useState<any>(d.initial),
     [sampleResult, setSampleResult] = useState(""),
     [error, setError] = useState(""),
     [resetVersion, setResetVersion] = useState(0);
-  const instance = useId();
-  const info = useRef<HTMLElement | null>(null),
-    id = settingInstanceId(d.key, instance);
+  const id = useId();
+  const info = useRef<HTMLButtonElement | null>(null);
   const p = preferenceProvenance(c.record, d.key, c.preferences);
-  const apply = (value: any) => {
+  const value = c.record.preferences[d.key];
+  const apply = (next: any) => {
     try {
-      validateValue(d.key, value);
-      if (d.key === "accessibilityVisible" && !value) {
-        window.dispatchEvent(new CustomEvent("settings-hide-accessibility"));
+      validateValue(d.key, next);
+      if (d.key === "accessibilityVisible" && !next) {
+        window.dispatchEvent(new Event("settings-accessibility"));
         return;
       }
-      c.update(d.key, value);
+      c.update(d.key, next);
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid value");
     }
   };
+  const below = d.type === "number" || d.type === "color" || (d.type === "select" && d.options.length <= 4) || d.type === "text" || d.type === "time";
+  const current =
+    d.type === "number"
+      ? `${Number.isFinite(value) ? value : d.initial}${d.key.includes("Minutes") ? ` ${t("min")}` : d.key === "toastSeconds" ? ` s` : d.key === "actionSoundVolume" ? "%" : ` ${t("of")} ${d.max}`}`
+      : d.type === "boolean" || d.type === "select" || d.type === "voice"
+        ? ""
+        : "";
+  const changed = p.source === "saved-local" && JSON.stringify(value) !== JSON.stringify(d.initial);
+  const control = (
+    <SettingInput compact key={resetVersion} definition={d} value={value} onChange={apply} t={t} voices={voices} />
+  );
   return (
-    <section
-      className="setting-card setting-row"
-      id={id}
-      tabIndex={-1}
-      data-setting-id={d.key}
-    >
-      <div className="setting-metadata">
-        <h2>{t(d.label)}</h2>
-        <p className="provenance">
-          {t(p.source === "saved-local" ? "Saved locally" : "Compiled default")}{" "}
-          · {t("Default")}:{" "}
-          <code>
-            {d.type === "voice" && !d.initial
-              ? t("Choose automatically")
-              : d.type === "boolean"
-                ? t(d.initial ? "On" : "Off")
-                : d.options
-                  ? t(
-                      d.options.find(
-                        ([v]: [string, string]) => v === d.initial,
-                      )?.[1] || String(d.initial),
-                    )
-                  : String(d.initial)}
-          </code>
-          {p.temporarilyOverridden && (
-            <>
-              {" "}
-              · {t("Scheduled override")}:{" "}
-              <code>{String(p.effectiveValue)}</code>
-            </>
-          )}
-        </p>
+    <div className="li setting-row" id={id} tabIndex={-1} data-setting-id={d.key} style={{ flexWrap: "wrap", alignItems: below ? "flex-start" : "center", padding: "12px 16px" }}>
+      <Ms name={SETTING_ICONS[d.key] || "tune"} style={{ marginTop: below ? 2 : 0 }} />
+      <div className="txt" style={{ minWidth: 160 }}>
+        <span>{t(d.label)}</span>
+        <span className="sup">
+          {current ? `${current} · ` : ""}
+          {t(p.source === "saved-local" ? "Saved locally" : "Default")}
+          {p.source === "saved-local" ? ` · ${t("default")} ${defaultText(d, t)}` : ""}
+          {p.temporarilyOverridden ? ` · ${t("Scheduled now")}: ${String(p.effectiveValue)}` : ""}
+        </span>
       </div>
-      <div className="setting-editor">
-        <div className="setting-editor-toolbar">
-          {React.createElement(
-            "md-icon-button",
-            {
-              ref: info,
-              "aria-label": `${t("Explanation and example")}: ${t(d.label)}`,
-              "aria-expanded": help,
-              "aria-controls": `${id}-help`,
-              title: t("Explanation and example"),
-              onClick: () => {
-                setHelp(!help);
-                setSample(d.initial);
-                setSampleResult("");
-              },
-            },
-            <Icon path="info" />,
-          )}
-          <Button
-            secondary
-            onClick={() => {
-              c.reset(d.key);
-              setError("");
-              setResetVersion((v) => v + 1);
-            }}
-          >
-            {t("Reset this setting")}
-          </Button>
-        </div>
-        {help && (
-          <div
-            className="setting-help"
-            id={`${id}-help`}
-            role="region"
-            aria-label={`${t("Explanation and example")}: ${t(d.label)}`}
-          >
-            <p>{t(d.help)}</p>
-            <h3>{t("Practice only")}</h3>
-            <p>{t("This example does not change your settings.")}</p>
-            <SettingInput
-              definition={d}
-              value={sample}
-              onChange={setSample}
-              t={t}
-              voices={voices}
-            />
-            <div className="actions">
-              <Button
-                secondary
-                onClick={() => {
-                  try {
-                    validateValue(d.key, sample);
-                    setSampleResult(t("Valid value") + ": " + String(sample));
-                  } catch (e) {
-                    setSampleResult(
-                      e instanceof Error ? e.message : "Invalid value",
-                    );
-                  }
-                }}
-              >
-                {t("Try example")}
-              </Button>
-              <Button
-                secondary
-                onClick={() => {
-                  setSample(d.initial);
-                  setSampleResult("");
-                }}
-              >
-                {t("Reset example")}
-              </Button>
-              <Button
-                secondary
-                onClick={() => {
-                  setHelp(false);
-                  info.current?.focus();
-                }}
-              >
-                {t("Close explanation")}
-              </Button>
-            </div>
-            <p role="status">{sampleResult}</p>
+      <IconBtn
+        ref={info}
+        icon="info"
+        size="sm"
+        label={`${t("Explanation and example")}: ${t(d.label)}`}
+        aria-expanded={help}
+        aria-controls={`${id}-help`}
+        onClick={() => {
+          setHelp(!help);
+          setSample(d.initial);
+          setSampleResult("");
+        }}
+      />
+      {changed && (
+        <IconBtn icon="restart_alt" size="sm" label={`${t("Reset this setting")}: ${t(d.label)}`} onClick={() => { c.reset(d.key); setResetVersion((v) => v + 1); }} />
+      )}
+      {!below && <div style={{ marginLeft: 8 }}>{control}</div>}
+      {below && <div style={{ flexBasis: "100%", paddingLeft: 40, paddingTop: 8 }}>{control}</div>}
+      {help && (
+        <div
+          id={`${id}-help`}
+          role="region"
+          aria-label={`${t("Explanation and example")}: ${t(d.label)}`}
+          className="card filled"
+          style={{ flexBasis: "100%", marginTop: 12, padding: 16, borderRadius: 16, display: "flex", flexDirection: "column", gap: 10, background: "var(--surface-container-high)", ["--tf-bg" as string]: "var(--surface-container-high)" }}
+        >
+          <p className="body-m">{t(d.help)}</p>
+          <p className="label-l">{t("Practice only")} · <span className="on-sv" style={{ fontWeight: 400 }}>{t("This example does not change your settings.")}</span></p>
+          <SettingInput definition={d} value={sample} onChange={setSample} t={t} voices={voices} />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Btn variant="tonal" size="xs" onClick={() => {
+              try {
+                validateValue(d.key, sample);
+                setSampleResult(t("Valid value") + ": " + String(sample));
+              } catch (e) {
+                setSampleResult(e instanceof Error ? e.message : "Invalid value");
+              }
+            }}>{t("Try example")}</Btn>
+            <Btn variant="text" size="xs" onClick={() => { setSample(d.initial); setSampleResult(""); }}>{t("Reset example")}</Btn>
+            <Btn variant="text" size="xs" onClick={() => { c.reset(d.key); setError(""); setResetVersion((v) => v + 1); }}>{t("Reset this setting")}</Btn>
+            <Btn variant="text" size="xs" onClick={() => { setHelp(false); info.current?.focus(); }}>{t("Close explanation")}</Btn>
           </div>
-        )}
-        <SettingInput
-          compact
-          key={resetVersion}
-          definition={d}
-          value={c.record.preferences[d.key]}
-          onChange={apply}
-          t={t}
-          voices={voices}
-        />
-        {error && (
-          <p className="validation" role="alert">
-            {t(error)}
-          </p>
-        )}
-      </div>
-    </section>
+          <p className="body-s on-sv" role="status">{sampleResult}</p>
+        </div>
+      )}
+      {error && <p className="body-s c-error" role="alert" style={{ flexBasis: "100%", paddingLeft: 40 }}>{t(error)}</p>}
+    </div>
   );
 }
+
+export { parseNumericDraft };

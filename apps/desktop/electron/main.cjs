@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, session, shell } = require("electron");
 if (require("./squirrel-events.cjs").handleSquirrelEvent({
   app, argv: process.argv, execPath: process.execPath, platform: process.platform,
 })) return;
@@ -11,6 +11,7 @@ const { pathToFileURL } = require("node:url");
 const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
 const { registerSettingsIpc } = require("./settings-ipc.cjs");
+const { registerElementLocksIpc } = require("./services/element-locks.cjs");
 const publishSessionEvents = require("./session-events.cjs").createSessionEvents(event => {
   if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
     window.webContents.send("material:event", event);
@@ -70,6 +71,7 @@ const allowed = new Set([
   "revisions.list",
   "revisions.restore",
   "sync.configure",
+  "sync.status",
   "sync.push",
   "sync.pull",
   "sync.conflicts",
@@ -152,6 +154,7 @@ registerSettingsIpc({
   resourcesPath: process.resourcesPath,
   explicitDataDirectory: dataArguments.length === 1,
 });
+registerElementLocksIpc({ ipcMain, app, shell, trusted });
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||

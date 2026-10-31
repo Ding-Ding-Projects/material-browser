@@ -74,6 +74,7 @@ function fixture({
     },
     ipcMain: { handle: (name, fn) => handlers.set(name, fn) },
     dialog: { showOpenDialog: async () => ({ canceled: true, filePaths: [] }) },
+    shell: { openPath: async () => "" },
     session: {
       defaultSession: {
         setPermissionRequestHandler() {},
@@ -90,6 +91,7 @@ function fixture({
         ({
           electron,
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
+          "./services/element-locks.cjs": desktopRequire("../electron/services/element-locks.cjs"),
           "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
           "node:child_process": { spawn: () => { hostSpawns++; return host; } },
           "node:path": path,
@@ -225,4 +227,15 @@ test("custom window actions retain trusted-frame and exact-action boundaries", (
   call(trusted, "minimize"); call(trusted, "close");
   assert.deepEqual(f.windowActions, ["maximize", "restore", "minimize", "close"]);
   assert.equal(f.sent(), 2);
+});
+
+test("element lock storage refuses untrusted frames and unknown operations", async () => {
+  const f = fixture();
+  const call = f.handlers.get("material:element-locks");
+  const trusted = { sender: f.contents, senderFrame: f.contents.mainFrame };
+  await assert.rejects(call({ sender: {}, senderFrame: {} }, "read", { kind: "locks" }), /INVALID_REQUEST/);
+  await assert.rejects(call({ sender: f.contents, senderFrame: {} }, "folder"), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "delete", {}), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "read", { kind: "../vault" }), /INVALID_REQUEST/);
+  assert.equal((await call(trusted, "folder")).path.endsWith("element-locks"), true);
 });

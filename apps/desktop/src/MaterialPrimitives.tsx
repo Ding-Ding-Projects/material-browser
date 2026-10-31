@@ -1,40 +1,78 @@
+/* Compatibility primitives mapped onto the design's Material 3 anatomy. */
 import React, { useId, useRef, useState } from "react";
-import "@material/web/checkbox/checkbox.js";
-import "@material/web/radio/radio.js";
-import "@material/web/slider/slider.js";
-import "@material/web/progress/linear-progress.js";
-import "@material/web/chips/chip-set.js";
-import "@material/web/chips/filter-chip.js";
-import { Button } from "./components";
+import { Btn, Checkbox, LinearProgress as M3Progress, Ms, Slider } from "./m3";
+
 export function MaterialInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  const { type, onChange, onInput, ...rest } = props;
-  const tag = type === "checkbox" ? "md-checkbox" : type === "radio" ? "md-radio" : "md-slider";
-  const forward = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    const converted = { ...event, target, currentTarget: target, nativeEvent: event, preventDefault: () => event.preventDefault(), stopPropagation: () => event.stopPropagation() };
-    onChange?.(converted as unknown as React.ChangeEvent<HTMLInputElement>);
+  const { type, onChange, checked, disabled, min, max, step, value } = props;
+  const label = props["aria-label"] || "";
+  const emit = (next: unknown) => {
+    const target = { checked: next, value: String(next) } as unknown as HTMLInputElement;
+    onChange?.({ target, currentTarget: target, preventDefault() {}, stopPropagation() {} } as unknown as React.ChangeEvent<HTMLInputElement>);
   };
-  return React.createElement(tag, { ...rest, onChange: type === "range" ? undefined : forward, onInput: type === "range" ? (event: Event) => { forward(event); onInput?.(event as unknown as React.FormEvent<HTMLInputElement>); } : onInput });
+  if (type === "checkbox" || type === "radio")
+    return <Checkbox checked={checked === true} disabled={disabled} label={label} onChange={(v) => emit(v)} />;
+  return (
+    <Slider
+      label={label}
+      value={Number(value) || 0}
+      min={Number(min) || 0}
+      max={Number(max) || 100}
+      step={Number(step) || 1}
+      disabled={disabled}
+      onChange={(v) => {
+        emit(v);
+        props.onInput?.({ target: { value: String(v) } } as unknown as React.FormEvent<HTMLInputElement>);
+      }}
+    />
+  );
 }
-export function DisclosureTitle({ children }: React.PropsWithChildren<{ title?: string }>) { return <>{children}</>; }
+
+export function DisclosureTitle({ children }: React.PropsWithChildren<{ title?: string }>) {
+  return <>{children}</>;
+}
+
 export function Disclosure({ children, open, onToggle, className = "", ...rest }: any) {
   const [expanded, setExpanded] = useState(false);
   const id = useId();
   const shown = open === undefined ? expanded : open;
   const nodes = React.Children.toArray(children);
   const title = nodes.find((node) => React.isValidElement(node) && node.type === DisclosureTitle);
-  return <section {...rest} className={`material-disclosure ${className}`}>
-    {React.createElement("md-outlined-button", { "aria-expanded": shown, "aria-controls": id, onClick: () => { setExpanded(!shown); onToggle?.({ currentTarget: { open: !shown } }); } }, title)}
-    <div id={id} hidden={!shown}>{nodes.filter((node) => node !== title)}</div>
-  </section>;
+  return (
+    <section {...rest} className={className} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <Btn
+        variant="text"
+        aria-expanded={shown}
+        aria-controls={id}
+        style={{ alignSelf: "flex-start" }}
+        onClick={() => {
+          setExpanded(!shown);
+          onToggle?.({ currentTarget: { open: !shown } });
+        }}
+      >
+        <Ms name={shown ? "expand_less" : "expand_more"} />
+        {title}
+      </Btn>
+      <div id={id} hidden={!shown} style={{ display: shown ? "flex" : "none", flexDirection: "column", gap: 12 }}>
+        {nodes.filter((node) => node !== title)}
+      </div>
+    </section>
+  );
 }
+
 export function LinearProgress({ value, max = 1, label }: { value: number; max?: number; label: string }) {
-  return React.createElement("md-linear-progress", { value: Math.max(0, Math.min(1, value / max)), "aria-label": label });
+  return <M3Progress value={Math.max(0, Math.min(1, value / max))} label={label} />;
 }
 
 export function PlatformPicker(props: React.InputHTMLAttributes<HTMLInputElement>) {
   const input = useRef<HTMLInputElement>(null);
-  const language = document.documentElement.dataset.language;
+  const language = typeof document !== "undefined" ? document.documentElement.dataset.language : "en";
   const title = props["aria-label"] || (language === "yue" ? "選擇檔案" : language === "both" ? "Choose file · 選擇檔案" : "Choose file");
-  return <span className="platform-picker"><input {...props} ref={input} hidden tabIndex={-1}/><Button secondary disabled={props.disabled} onClick={() => input.current?.click()}>{props.type === "color" && <span className="color-swatch" style={{ backgroundColor: String(props.value) }} aria-hidden="true"/>}{title}</Button></span>;
+  return (
+    <span>
+      <input {...props} ref={input} hidden tabIndex={-1} />
+      <Btn variant="outlined" icon="upload_file" disabled={props.disabled} onClick={() => input.current?.click()}>
+        {title}
+      </Btn>
+    </span>
+  );
 }

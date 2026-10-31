@@ -14,6 +14,8 @@ const explanations = {
   PROFILE_ACTIVE: ['This profile already has an active browser process.', '呢個設定檔已經有運行中嘅瀏覽器程序。'],
   PROFILE_NOT_FOUND: ['This profile is no longer available. Select a current profile and try again.', '呢個設定檔已經唔存在，請選擇現有設定檔再試。'],
   VAULT_LOCKED: ['Unlock the vault before using this action.', '請先解鎖保管庫再使用呢個操作。'],
+  CAPABILITY_UNAVAILABLE: ['This host cannot do that yet. Nothing was changed.', '呢部電腦暫時做唔到呢樣嘢，乜都冇改。'],
+  LOCK_REQUIRED: ['Unlock this element first.', '請先解開呢個元素嘅鎖。'],
   BACKEND_UNAVAILABLE: ['The native host is unavailable. Reconnect before trying again.', '原生主程式未能連接，請重新連接後再試。'],
 };
 const fallback = ['The action could not be completed. Try again after checking the profile and native host.', '未能完成操作，請檢查設定檔同原生主程式後再試。'];

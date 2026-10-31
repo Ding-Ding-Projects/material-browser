@@ -1,18 +1,24 @@
 import React, { useState, useRef } from "react";
-import { Button, Modal } from "../components";
+import { Btn, Dialog, Ms, Slider } from "../m3";
 import type { SaveResult } from "./types";
+
+/** Super confirmation: turn both keys, then slide all the way. Emergency exit always works. */
 export function ConfirmAction({
   title,
   description,
   t,
   onCancel,
   onConfirm,
+  icon = "warning",
+  confirmLabel = "Confirm",
 }: {
   title: string;
   description: string;
   t: (s: string) => string;
   onCancel: () => void;
   onConfirm: () => Promise<SaveResult>;
+  icon?: string;
+  confirmLabel?: string;
 }) {
   const [first, setFirst] = useState(false),
     [second, setSecond] = useState(false),
@@ -41,65 +47,73 @@ export function ConfirmAction({
       setSaving(false);
     }
   }
+  const key = (on: boolean, label: string, turned: string, toggle: () => void) => (
+    <Btn
+      size="m"
+      variant={on ? "error" : undefined}
+      aria-pressed={on}
+      onClick={toggle}
+      style={{
+        height: 72,
+        borderRadius: 20,
+        flexDirection: "column",
+        gap: 2,
+        ...(on ? {} : { background: "var(--surface-container-highest)", color: "var(--on-surface)" }),
+      }}
+    >
+      <Ms name="key" fill={on} />
+      {t(on ? turned : label)}
+    </Btn>
+  );
+  const ready = first && second;
   return (
-    <Modal title={title} onClose={onCancel}>
+    <Dialog title={title} icon={icon} onClose={onCancel} width={400} className="super-confirm">
       <p>{description}</p>
-      <div className="confirmation-keys">
-        <label>
-          {React.createElement("md-switch", {
-            "aria-label": t("Confirm affected data"),
-            selected: first,
-            onChange: (e: any) => {
-              setFirst(e.target.selected);
-              setPosition(0);
-            },
-          })}
-          {t("Confirm affected data")}
-        </label>
-        <label>
-          {React.createElement("md-switch", {
-            "aria-label": t("Confirm this action"),
-            selected: second,
-            onChange: (e: any) => {
-              setSecond(e.target.selected);
-              setPosition(0);
-            },
-          })}
-          {t("Confirm this action")}
-        </label>
+      <p className="label-l">{t("Turn both keys")}</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+        {key(first, "Key one", "Key one turned", () => {
+          setFirst(!first);
+          setPosition(0);
+        })}
+        {key(second, "Key two", "Key two turned", () => {
+          setSecond(!second);
+          setPosition(0);
+        })}
       </div>
-      {React.createElement("md-slider", {
-        min: 0,
-        max: 100,
-        step: 1,
-        value: position,
-        disabled: !first || !second,
-        "aria-label": t("Slide to authorize"),
-        onInput: (e: any) => setPosition(Number(e.target.value)),
-      })}
-      <p role="status">{position}%</p>
+      <p className="label-l on-sv">{t("Then slide all the way")}</p>
+      <Slider
+        label={ready ? t("Slide to authorize") : `${t("Slide to authorize")}, ${t("waiting for both keys")}`}
+        value={position}
+        min={0}
+        max={100}
+        step={1}
+        stops={false}
+        disabled={!ready}
+        valueText={`${position}%`}
+        onChange={setPosition}
+      />
+      <p className="body-s on-sv" role="status">{position}%</p>
       {error && (
-        <p ref={errorRef} role="alert" tabIndex={-1}>
+        <p ref={errorRef} role="alert" tabIndex={-1} className="body-m c-error">
           {t(error)}
         </p>
       )}
-      <div className="actions">
-        <Button secondary onClick={onCancel}>
+      <div className="acts">
+        <Btn variant="outlined" icon="logout" onClick={onCancel}>
           {t("Emergency exit")}
-        </Button>
-        <Button
-          disabled={!first || !second || position !== 100 || saving}
-          onClick={confirm}
-        >
-          {t(
-            saving
-              ? "Saving preferences"
-              : error
-                ? "Retry confirmation"
-                : "Confirm",
-          )}
-        </Button>
+        </Btn>
+        {ready && position === 100 && (
+          <Btn variant="error" disabled={saving} onClick={confirm}>
+            {t(
+              saving
+                ? "Saving preferences"
+                : error
+                  ? "Retry confirmation"
+                  : confirmLabel,
+            )}
+          </Btn>
+        )}
       </div>
-    </Modal>
+    </Dialog>
   );
 }

@@ -1,15 +1,9 @@
-import { Icon } from "./Icon";
-import React, { useEffect, useRef } from "react";
-import "@material/web/button/filled-button.js";
-import "@material/web/button/outlined-button.js";
-import "@material/web/textfield/outlined-text-field.js";
-import "@material/web/select/outlined-select.js";
-import "@material/web/select/select-option.js";
-import "@material/web/dialog/dialog.js";
-import "@material/web/elevation/elevation.js";
-import "@material/web/tabs/tabs.js";
-import "@material/web/tabs/primary-tab.js";
-import "@material/web/iconbutton/icon-button.js";
+/* Compatibility layer: the long-standing section components (schedules, history,
+   notification centre, editor integration) render through the design's Material 3
+   anatomy so every surface shares one look. */
+import React from "react";
+import { Btn, Dialog, Dropdown, IconBtn, Tabs as M3Tabs, TextField } from "./m3";
+
 export function Button({
   children,
   onClick,
@@ -20,12 +14,13 @@ export function Button({
   disabled?: boolean;
   secondary?: boolean;
 }>) {
-  return React.createElement(
-    secondary ? "md-outlined-button" : "md-filled-button",
-    { onClick, disabled },
-    children,
+  return (
+    <Btn variant={secondary ? "outlined" : "filled"} disabled={disabled} onClick={onClick}>
+      {children}
+    </Btn>
   );
 }
+
 export function Field({
   label,
   value,
@@ -45,41 +40,26 @@ export function Field({
   inputMode?: string;
   disabled?: boolean;
 }) {
-  const ref = useRef<HTMLElement | null>(null);
-  const mode = document.documentElement.dataset.language;
-  const clear =
-    mode === "yue" ? "清除" : mode === "both" ? "Clear · 清除" : "Clear";
-  return React.createElement(
-    "md-outlined-text-field",
-    {
-      ref,
-      label,
-      value,
-      type,
-      required,
-      inputMode,
-      disabled,
-      onInput: (e: Event) => {
-        if (!disabled) onChange((e.target as HTMLInputElement).value);
-      },
-    },
-    React.createElement(
-      "md-icon-button",
-      {
-        slot: "trailing-icon",
-        "aria-label": clearLabel || `${clear} ${label}`,
-        title: clearLabel || `${clear} ${label}`,
-        disabled,
-        onClick: () => {
-          if (disabled) return;
-          onChange("");
-          ref.current?.focus();
-        },
-      },
-      <Icon path="close" />,
-    ),
+  const mode = typeof document !== "undefined" ? document.documentElement.dataset.language : "en";
+  const clear = mode === "yue" ? "清除" : mode === "both" ? "Clear · 清除" : "Clear";
+  return (
+    <TextField
+      label={label}
+      value={value}
+      onChange={onChange}
+      type={type}
+      required={required}
+      disabled={disabled}
+      inputMode={inputMode as React.HTMLAttributes<HTMLInputElement>["inputMode"]}
+      trailing={
+        value ? (
+          <IconBtn icon="close" label={clearLabel || `${clear} ${label}`} disabled={disabled} onClick={() => onChange("")} />
+        ) : undefined
+      }
+    />
   );
 }
+
 export function Select({
   label,
   value,
@@ -91,28 +71,14 @@ export function Select({
   onChange: (s: string) => void;
   options: [string, string][];
 }) {
-  return React.createElement(
-    "md-outlined-select",
-    {
-      label,
-      value,
-      onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value),
-    },
-    options.map(([v, l]) =>
-      React.createElement(
-        "md-select-option",
-        { key: v, value: v, selected: value === v },
-        React.createElement("div", { slot: "headline" }, l),
-      ),
-    ),
-  );
+  return <Dropdown label={label} value={value} onChange={onChange} options={options} />;
 }
+
 export function Modal({
   title,
   children,
   onClose,
   closeLabel = "Close",
-  accessibilityLabel = "Accessibility",
   actions,
 }: React.PropsWithChildren<{
   title: string;
@@ -121,68 +87,23 @@ export function Modal({
   accessibilityLabel?: string;
   actions?: React.ReactNode;
 }>) {
-  const ref = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    const el = ref.current as any;
-    const origin = document.activeElement as HTMLElement | null;
-    el?.show();
-    const closed = () => onClose();
-    el?.addEventListener("closed", closed);
-    return () => {
-      el?.removeEventListener("closed", closed);
-      queueMicrotask(() => {
-        if (
-          !el?.isConnected &&
-          origin?.isConnected &&
-          (document.activeElement === document.body ||
-            !document.activeElement?.isConnected)
-        ) {
-          origin.focus();
-        }
-      });
-    };
-  }, []);
-  return React.createElement(
-    "md-dialog",
-    { ref },
-    React.createElement(
-      "div",
-      { slot: "headline" },
-      document.documentElement.dataset.dialogEmoji === "true"
-        ? React.createElement("span", { "aria-hidden": true }, "ℹ️ ")
-        : null,
-      title,
-    ),
-    React.createElement(
-      "div",
-      { slot: "content", className: "dialog-content" },
-      children,
-    ),
-    React.createElement(
-      "div",
-      { slot: "actions", className: "dialog-actions" },
-      document.documentElement.dataset.accessibilityVisible !== "false" && (
-        <Button
-          secondary
-          onClick={() =>
-            window.dispatchEvent(new Event("settings-accessibility"))
-          }
-        >
-          {accessibilityLabel}
-        </Button>
-      ),
-      <Button
-        secondary
-        onClick={() => {
-          (ref.current as any)?.close();
-        }}
-      >
-        {closeLabel}
-      </Button>,
-      actions,
-    ),
+  return (
+    <Dialog
+      title={title}
+      onClose={onClose}
+      width={560}
+      actions={
+        <>
+          <Btn variant="text" onClick={onClose}>{closeLabel}</Btn>
+          {actions}
+        </>
+      }
+    >
+      {children}
+    </Dialog>
   );
 }
+
 export function Tabs({
   items,
   value,
@@ -194,22 +115,5 @@ export function Tabs({
   value: string;
   onChange: (v: string) => void;
 }) {
-  return React.createElement(
-    "md-tabs",
-    {
-      className: "tabs",
-      activeTabIndex: items.findIndex((x) => x[0] === value),
-      onChange: (e: Event) => {
-        const index = (e.target as any).activeTabIndex;
-        if (items[index]) onChange(items[index][0]);
-      },
-    },
-    items.map(([id, label]) =>
-      React.createElement(
-        "md-primary-tab",
-        { key: id, id: `${panelPrefix}-tab-${id}`, "aria-controls": panelPrefix + "-" + id },
-        label,
-      ),
-    ),
-  );
+  return <M3Tabs label="Sections" idPrefix={panelPrefix} value={value} onChange={onChange} tabs={items} />;
 }

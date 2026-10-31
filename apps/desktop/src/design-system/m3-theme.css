@@ -1,0 +1,40 @@
+/* Material 3 colour roles for the vendored design anatomy. Values come from the
+   resolved presentation theme (design-system/theme.mjs), which already carries
+   the design/theme.css teal scheme and honours accent and contrast choices. */
+.m3{
+  --primary:var(--md-sys-color-primary);
+  --on-primary:var(--md-sys-color-on-primary);
+  --primary-container:var(--md-sys-color-primary-container);
+  --on-primary-container:var(--md-sys-color-on-primary-container);
+  --secondary:var(--md-sys-color-secondary);
+  --on-secondary:var(--md-sys-color-on-secondary);
+  --secondary-container:var(--md-sys-color-secondary-container);
+  --on-secondary-container:var(--md-sys-color-on-secondary-container);
+  --tertiary:var(--md-sys-color-tertiary);
+  --on-tertiary:var(--md-sys-color-on-tertiary);
+  --tertiary-container:var(--md-sys-color-tertiary-container);
+  --on-tertiary-container:var(--md-sys-color-on-tertiary-container);
+  --error:var(--md-sys-color-error);
+  --on-error:var(--md-sys-color-on-error);
+  --error-container:var(--md-sys-color-error-container);
+  --on-error-container:var(--md-sys-color-on-error-container);
+  --surface:var(--md-sys-color-surface);
+  --surface-dim:var(--md-sys-color-surface-dim);
+  --surface-bright:var(--md-sys-color-surface-bright);
+  --surface-container-lowest:var(--md-sys-color-surface-container-lowest);
+  --surface-container-low:var(--md-sys-color-surface-container-low);
+  --surface-container:var(--md-sys-color-surface-container);
+  --surface-container-high:var(--md-sys-color-surface-container-high);
+  --surface-container-highest:var(--md-sys-color-surface-container-highest);
+  --on-surface:var(--md-sys-color-on-surface);
+  --on-surface-variant:var(--md-sys-color-on-surface-variant);
+  --outline:var(--md-sys-color-outline);
+  --outline-variant:var(--md-sys-color-outline-variant);
+  --inverse-surface:var(--md-sys-color-inverse-surface);
+  --inverse-on-surface:var(--md-sys-color-inverse-on-surface);
+  --inverse-primary:var(--md-sys-color-inverse-primary);
+  --scrim:var(--md-sys-color-scrim);
+  --e1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);
+  --e2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);
+  --e3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);
+}

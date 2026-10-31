@@ -649,6 +649,11 @@ impl Manager {
                 self.state.sync_folder = Some(folder);
                 Ok(json!({"configured":true}))
             }
+            "sync.status" => Ok(json!({
+                "configured": self.state.sync_folder.is_some(),
+                "folder": self.state.sync_folder.as_ref().map(|f| f.to_string_lossy().to_string()),
+                "conflicts": self.state.heads.values().filter(|h| h.len() > 1).count(),
+            })),
             "sync.push" => self.push(),
             "sync.pull" => self.pull(),
             "sync.conflicts" => Ok(json!(
@@ -1233,9 +1238,17 @@ mod tests {
             .with_browser_key(&id, |key| Zeroizing::new(*key))
             .unwrap();
         let shared = t.path().join("browser-key-transport");
+        assert_eq!(
+            source.execute("sync.status", json!({})).unwrap()["configured"],
+            false
+        );
         source
             .execute("sync.configure", json!({"folder":shared}))
             .unwrap();
+        let status = source.execute("sync.status", json!({})).unwrap();
+        assert_eq!(status["configured"], true);
+        assert!(status["folder"].as_str().unwrap().ends_with("browser-key-transport"));
+        assert_eq!(status["conflicts"], 0);
         source.execute("sync.push", json!({})).unwrap();
         let mut target = Manager::new(t.path().join("browser-key-peer")).unwrap();
         target

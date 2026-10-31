@@ -37,6 +37,7 @@ export type Bridge = {
     params?: Record<string, unknown>,
   ) => Promise<any>;
   onEvent: (listener: (event: unknown) => void) => () => void;
+  elementLocks?: (operation: "read" | "write" | "folder" | "open", params?: Record<string, unknown>) => Promise<any>;
 };
 declare global {
   interface Window {
