@@ -3,7 +3,8 @@
 - [Profile launch and identity capabilities](profile-launch.md)
 - [Super Profiles](super-profiles.md)
 - [Action sounds and quiet controls](action-sounds.md)
-- [Current repository-owned design migration](zip-gui-remake.md)
+- [Material 3 Expressive desktop design](zip-gui-remake.md)
+- [Element locks, unlock ladder and Support Tickets](element-locks.md)
 - [Historical WorldLens visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
@@ -23,7 +24,7 @@ Settings upload and window-wide file drop use the same full validator. Schema: `
 
 ## Verification status
 
-The active reference is the latest reviewed `design/IMPLEMENTATION_HANDOFF.md` and its eight artboards, currently at `0ab6165`. Older WorldLens references are historical. Source implementation and compilation are separate from native runtime, installer and screenshot verification. No visual parity or installation claim is made until actual built-surface evidence exists.
+The renderer follows the eight artboards of `design/IMPLEMENTATION_HANDOFF.md` using the vendored design stylesheet. [Runtime captures](../../evidence/desktop/m3-redesign/README.md) from the real Electron shell and native host on Linux are recorded with their method and limits. Windows installation, native preference persistence on Windows and browser launches with bundled engines need their own evidence.
 
 ## Capability inventory and outstanding acceptance
 

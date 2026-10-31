@@ -1,38 +1,41 @@
-# Remote design desktop remake
+# Material 3 Expressive desktop
 
-The sole active visual authority is the current remote `design/` folder, reconciled at design commit `0ab6165fd3c5f59f23ce7e586f0979bd0f501fc8`. The original ZIP and its earlier layout are obsolete historical material, never the implementation authority. These references describe intended appearance, not runtime evidence. Subsequent design updates must be reconciled before visual acceptance.
+The desktop renderer follows the eight artboards in the repository's `design/` folder (Main, Launch, SuperProfiles, Sync, Settings, Vault, Palette and Safety). The design's own stylesheet, `design/m3.css`, is vendored as `apps/desktop/src/design-system/m3.css`, so the running application uses the same component anatomy as the artboards: the custom title bar, the 96 dp navigation rail with a contextual FAB, rounded panes on a surface-container window, segmented lists, connected button groups, the expressive slider, switches with a handle icon, split buttons, the vibrant floating toolbar, segmented menus and dialogs with a hero icon.
 
-## Working surfaces
+Colour roles come from `design-system/m3-theme.css`, which maps every role used by the artboards onto the resolved presentation theme. Saved theme, accent and high-contrast choices therefore keep working. Fonts and Material Symbols Rounded are bundled locally; nothing is fetched from a CDN.
 
-| Reference | Renderer implementation | Behavior retained |
+## Destinations
+
+| Artboard | Renderer | Behaviour |
 | --- | --- | --- |
-| Main | Compact header, 96-pixel navigation rail, left workspace dock, profile segmented lists, inspector | Actual profile IDs, search, selection, bulk actions, launch review, runtime detail, revisions and automation preferences |
-| Launch | Engine and automation summary, prominent consent review, next-step explanation | Standard-identity consent, explicit launch only, operation reservation and vault checks |
-| SuperProfiles | Template segmented lists, session and revision inspector | Existing environment discovery, expected revision checks, save-back preview, session stop and recovery |
-| Sync | Storage and computer cards, revision candidate cards | Separate upload/download, actual folder selection, conflict revision confirmation |
-| Settings | Persistent section tabs, visible global search, grouped setting rows | Every existing definition, native persistence, schedules, local history, wording, reset and accessibility controls |
-| Vault | Four-step progress indicators, vault panel and setup actions | Empty password handling, creation/unlock/join, saved setup progress, Back/Next and optional sync skipping |
-| Palette | Persistent header search, explicit destination catalogue, notification dialog | Existing destinations and settings reveal, independent search, notification history and supported undo |
-| Safety | Two-key and slider confirmation on profile removal | Explicit affected profile names, operation registry, genuine result handling and emergency exit |
+| Main | `app/Profiles.tsx`, `app/Shell.tsx` | Vertical tab pane with pinned home, a Running group of live browsers and utility tabs; profile list with shaped avatars, run state, split Launch buttons, shift-click range selection, Ctrl+A and Escape; vibrant floating toolbar; context menu (right-click, Shift+F10 or the overflow button) with Enter, F2, Ctrl+D and Delete shortcuts; import and export of profile settings; inspector with Overview, Identity and Revisions |
+| Launch | `app/Launch.tsx` | Engine radio list (the engine is fixed at creation, so the other engine is shown but not selectable), automation button group that is saved before launch, a review card whose items must all be confirmed, What happens and Running now with Stop |
+| SuperProfiles | `app/SuperProfiles.tsx`, `app/TemplateWizard.tsx` | Template list, Overview, Session card with the loading indicator, save-back preview, split Save button with category choice, discard through the two-key confirmation, revision history with restore, host capabilities and a four-step template wizard |
+| Sync | `app/Sync.tsx` | Storage card with wavy progress during push and pull, this computer with automatic sync every 10 minutes, the real sync folder from `sync.status`, join instructions and the conflict pane with a radio list of candidate revisions |
+| Settings | `app/Settings.tsx`, `settings/SettingControl.tsx` | Navigation drawer with search and the regex builder, two-column grouped segmented lists, info and reset per row, section reset through the two-key confirmation |
+| Vault | `app/Vault.tsx` | Create or unlock with a passphrase field that reports Caps Lock, join from another computer, and the four-step first run with linear progress |
+| Palette | `app/Palette.tsx`, `app/Live.tsx` | Command palette with live rows (switches for on/off settings, Launch, Stop and Unlock actions), filter chips, regex builder, remembered card or full-window size; notification panel; snackbar with Undo; the dim sum surprise |
+| Safety | `settings/ConfirmAction.tsx`, `app/Safety.tsx` | Two-key super confirmation with Emergency exit, the lock wizard with all six credential mixes, the unlock ladder and Support Tickets |
 
-Workspace destinations are restored by matching stored identifiers to the current catalogue. Stored labels or arbitrary page metadata are never executed. Pinning and grouping remain local. Opening rail destinations does not create new tabs.
+The window size classes from the design are honoured: below 1180 px the tab pane hides, below 860 px one pane shows at a time with a back button, and below 600 px the rail becomes a bottom navigation bar.
 
-## Theme and platform integration
+## New features carried by the design
 
-`src/design-system/reference-colors.mjs` owns the current teal and blue-tertiary light/dark roles. `material-browser.css` provides initial dark paint and local component typography. Existing explicit saved accents and theme choices retain priority; contrast remains a distinct accessible scheme. Historical vendored reference files are retained and are no longer the tonal appearance authority. Pinned local Fontsource packages provide Roboto Flex 5.3.0, Noto Sans HK 5.3.1 and Material Symbols Rounded 5.3.9, each under OFL-1.1 with registry integrity recorded in the lockfile. Roboto Flex is the fresh-install default; saved font values remain intact. Stable renderer icon identifiers map to local symbol names. No remote font or design support script is loaded.
+- [Element locks, unlock ladder and Support Tickets](element-locks.md)
+- School mode: plain wording, no emoji and no dim sum surprises, kept per computer and optionally protected by a section lock.
+- Passwords and passkeys: defaults offered to new profiles for KeePassXC pairing.
+- Per-profile appearance: avatar shape and colour, saved on this computer.
+- Release code names: each version shows a dim sum code name in About.
+- Synchronization status: the core's `sync.status` reports whether a folder is configured, its path and the number of conflicts, so the screen shows real data instead of placeholders.
 
-The frameless native shell exposes only minimize, maximize, restore and close. Each request is checked against the existing trusted main-frame sender and exact action allowlist. Native lifecycle and security preferences remain intact. The renderer receives actual maximized-state events and shows a truthful message if an action is unavailable.
+## Placeholders from the artboards
 
-## Explicit limits
+The artboards use bracketed placeholders and sample records. In the application they come from real data: the version and source date in the title bar, the profile creation date, the sync folder and join date, and the device's running browsers. The dim sum surprise has no bundled photograph and says so.
 
-The artboards contain illustrative records and unavailable capabilities. No sample profile, device, revision, connection, timestamp or running state is shipped as live data. Profile list items show unavailable runtime until the current inspector has actually fetched that profile. The engine is chosen at profile creation, not silently changed at launch. Automation remains editable through the real inspector preference controller.
+## Limits
 
-Server enrollment, unified sync, keep-both conflict resolution, stable identity, element locks, unlock ladder, support tickets, complete advanced appearance and full regex parity remain incomplete. Existing unavailable explanations remain visible. The palette has real destination and settings navigation; it does not claim every rich inline setting editor from the reference.
+- Native preference storage depends on a Windows-only lock. On other platforms Settings reports that storage needs attention; section navigation still works but changes are not saved.
+- Stable browser identity, keep-both conflict resolution, a server-backed sync connection and QR pairing remain unavailable; the screens say so rather than imitating them.
+- Showing a running browser's window (`profiles.focus`) is not implemented by the native host; the button reports that plainly.
 
-## Verification state
-
-Source compilation and focused regression results are recorded by the task handoff. Genuine built interaction, native control drive, restart persistence and the full language/theme/scale layout matrix remain unverified until captured from the built application. Historical `design/current-screens` images used a stub bridge and do not prove this implementation.
-
-Registered Material Web checkboxes, radio controls, sliders, progress indicators and filter chips replace visible native form widgets. File and color selection use a Material button opening the platform picker; its native input is hidden. Expandable secondary content uses an accessible Material-button composition rather than native disclosure widgets.
-
-The native window-control fixture exercises trusted and untrusted callers, rejects non-allowlisted actions, observes actual requested action order and verifies maximize/restore state notifications. Selection, scope and range controls carry explicit localized accessible labels. Engine and automation sorting remain available alongside name and update time.
+[Runtime captures, method and hashes](../../evidence/desktop/m3-redesign/README.md).
