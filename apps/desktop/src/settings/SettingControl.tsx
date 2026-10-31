@@ -78,7 +78,7 @@ export function Choice({
     return <ButtonGroup label={label} value={value} onChange={onChange} options={options} showLabel={showLabel && false} />;
   return (
     <Dropdown
-      label={showLabel ? label : t("Choice")}
+      label={showLabel ? label : t(previewFont ? "Voice" : "Choice")}
       ariaLabel={choiceAccessibleName(label, value, options, t("Choose automatically"))}
       value={value}
       onChange={onChange}
@@ -180,7 +180,7 @@ export function SettingInput({
       <Choice
         label={t(d.label)}
         value={value}
-        showLabel={!compact}
+        showLabel={!compact && d.type !== "font"}
         previewFont={d.type === "font" || d.type === "voice"}
         options={d.type === "voice" || d.type === "font" ? voices : d.options.map(([v, l]: [string, string]) => [v, t(l)])}
         onChange={onChange}
@@ -232,13 +232,24 @@ export function SettingControl({
       setError(e instanceof Error ? e.message : "Invalid value");
     }
   };
-  const below = d.type === "number" || d.type === "color" || (d.type === "select" && d.options.length <= 4) || d.type === "text" || d.type === "time";
+  const below = d.type === "number" || d.type === "color" || (d.type === "select" && d.options.length <= 4) || d.type === "text";
+  const number = Number.isFinite(value) ? value : d.initial;
   const current =
-    d.type === "number"
-      ? `${Number.isFinite(value) ? value : d.initial}${d.key.includes("Minutes") ? ` ${t("min")}` : d.key === "toastSeconds" ? ` s` : d.key === "actionSoundVolume" ? "%" : ` ${t("of")} ${d.max}`}`
-      : d.type === "boolean" || d.type === "select" || d.type === "voice"
-        ? ""
-        : "";
+    d.type !== "number"
+      ? ""
+      : d.key.includes("Minutes")
+        ? `${number} ${t("min")}`
+        : d.key === "toastSeconds"
+          ? `${number} s`
+          : d.key === "actionSoundVolume"
+            ? `${number}%`
+            : ["fontScale", "textScale"].includes(d.key)
+              ? `${Math.round(number * 100)}%`
+              : ["speechRate", "speechPitch"].includes(d.key)
+                ? `${Number(number).toFixed(1)}×`
+                : d.key === "fontWeight"
+                  ? String(number)
+                  : `${number} ${t("of")} ${d.max}`;
   const changed = p.source === "saved-local" && JSON.stringify(value) !== JSON.stringify(d.initial);
   const control = (
     <SettingInput compact key={resetVersion} definition={d} value={value} onChange={apply} t={t} voices={voices} />
@@ -271,7 +282,7 @@ export function SettingControl({
       {changed && (
         <IconBtn icon="restart_alt" size="sm" label={`${t("Reset this setting")}: ${t(d.label)}`} onClick={() => { c.reset(d.key); setResetVersion((v) => v + 1); }} />
       )}
-      {!below && <div style={{ marginLeft: 8 }}>{control}</div>}
+      {!below && <div style={{ marginLeft: 8, width: ["voice", "font", "time"].includes(d.type) || d.type === "select" ? 220 : undefined }}>{control}</div>}
       {below && <div style={{ flexBasis: "100%", paddingLeft: 40, paddingTop: 8 }}>{control}</div>}
       {help && (
         <div

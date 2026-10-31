@@ -1,3 +1,4 @@
+import { Chip } from "../../m3";
 import React, { useState, useRef } from "react";
 import { Button, Field } from "../../components";
 import { Search } from "../../Search";
@@ -156,19 +157,20 @@ export function Schedules({
             {t("Every day")}
           </Button>
           {days.map((day, i) => (
-            <label key={day}>
-              {React.createElement("md-switch", {
-                "aria-label": t(day),
-                selected: weekdays.includes(i),
-                onChange: (e: any) =>
-                  setWeekdays(
-                    e.target.selected
-                      ? [...weekdays, i]
-                      : weekdays.filter((x) => x !== i),
-                  ),
-              })}
-              {t(day)}
-            </label>
+            <Chip
+              key={day}
+              on={weekdays.includes(i)}
+              aria-label={t(day)}
+              onClick={() =>
+                setWeekdays(
+                  weekdays.includes(i)
+                    ? weekdays.filter((x) => x !== i)
+                    : [...weekdays, i],
+                )
+              }
+            >
+              {t(day).slice(0, 3)}
+            </Chip>
           ))}
         </div>
         <Choice

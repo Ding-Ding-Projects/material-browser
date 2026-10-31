@@ -36,12 +36,16 @@ const ORDER = [
 const SECTION_OF: Record<string, string> = { focus: "accessibility", privacy: "locks" };
 
 export function SettingsPage({
+  section: sectionProp,
+  onSection,
   wordingLoaded,
   onWordingFile,
   onClearWording,
   onSetup,
   onTickets,
 }: {
+  section: string;
+  onSection: (id: string) => void;
   wordingLoaded: boolean;
   onWordingFile: (f: File) => void;
   onClearWording: () => void;
@@ -50,7 +54,8 @@ export function SettingsPage({
 }) {
   const app = useApp();
   const { t, settings: c, narrator, displayName, locks, requireUnlock } = app;
-  const raw = c.record.section;
+  const select = onSection;
+  const raw = sectionProp;
   const section = ORDER.some(([id]) => id === raw) ? raw : SECTION_OF[raw] || "language";
   const [fonts, setFonts] = useState<{ family: string }[]>([]);
   const [resetting, setResetting] = useState(false);
@@ -65,7 +70,7 @@ export function SettingsPage({
       const d = (definitions as any[]).find((x) => x.key === key);
       if (!d) return;
       search.setQuery("");
-      void c.selectSection(SECTION_OF[d.category] || d.category);
+      select(SECTION_OF[d.category] || d.category);
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           const el = document.querySelector<HTMLElement>(`[data-setting-id="${key}"]`);
@@ -192,7 +197,7 @@ export function SettingsPage({
               aria-current={!filtering && section === id ? "page" : undefined}
               onClick={() => {
                 search.setQuery("");
-                const go = () => void c.selectSection(id);
+                const go = () => select(id);
                 if (locks.locks[`settings:${id}`]) requireUnlock(`settings:${id}`, go);
                 else go();
               }}
@@ -222,7 +227,7 @@ export function SettingsPage({
           {!filtering && keysOf(current).length > 0 && <Btn variant="outlined" icon="restart_alt" onClick={() => setResetting(true)}>{t("Reset section")}</Btn>}
         </div>
         <div className="compact-back" style={{ flexWrap: "wrap", gap: 8 }}>
-          <Dropdown label={t("Section")} value={section} onChange={(id) => void c.selectSection(id)} options={ORDER.map(([id, label]) => [id, t(label)] as [string, string])} />
+          <Dropdown label={t("Section")} value={section} onChange={(id) => select(id)} options={ORDER.map(([id, label]) => [id, t(label)] as [string, string])} />
         </div>
         {c.storageError && (
           <div className="card tint-e" role="alert" style={{ padding: 16, borderRadius: 20, display: "flex", gap: 12, alignItems: "center" }}>

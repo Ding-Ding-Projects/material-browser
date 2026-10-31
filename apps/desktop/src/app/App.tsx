@@ -73,6 +73,10 @@ export function App() {
   const [showSetup, setShowSetup] = useState(false);
   const [dock, setDock] = useState<"left" | "right">(() => (read("tabs.dock", "left") === "right" ? "right" : "left"));
   const [activeTab, setActiveTab] = useState("");
+  const [settingsSection, setSettingsSection] = useState<string>(() => settings.record.section || "language");
+  useEffect(() => {
+    if (settings.storageReady) setSettingsSection(settings.record.section || "language");
+  }, [settings.storageReady]);
   const [tabs, setTabsState] = useState<WorkspaceTab[]>(() =>
     restoreWorkspaceTabs(read("workspace.tabs.v1", []), catalogDestinations(definitions, categories)),
   );
@@ -251,7 +255,10 @@ export function App() {
       if (next === "launch") setLaunchTarget(options.profile);
       else setSelected(options.profile);
     }
-    if (options.section) void settings.selectSection(options.section);
+    if (options.section) {
+      setSettingsSection(options.section);
+      void settings.selectSection(options.section);
+    }
     if (options.setting) setTimeout(() => window.dispatchEvent(new CustomEvent("settings-reveal", { detail: options.setting })), 0);
     setPage(next);
     requestAnimationFrame(() => document.getElementById("workspace-content")?.focus({ preventScroll: true }));
@@ -325,6 +332,11 @@ export function App() {
                 {page === "sync" && <SyncPage />}
                 {page === "settings" && (
                   <SettingsPage
+                    section={settingsSection}
+                    onSection={(id) => {
+                      setSettingsSection(id);
+                      void settings.selectSection(id);
+                    }}
                     wordingLoaded={Object.keys(entries).length > 0}
                     onWordingFile={(file) => void importWording(file)}
                     onClearWording={() => {
