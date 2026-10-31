@@ -182,7 +182,7 @@ function Ladder({ record, onClose, onCleared, onTickets }: { record: LockRecord;
   const [rung, setRung] = useState("sums");
   const [done, setDone] = useState<string[]>([]);
   const runs = ladderRunsLeft(record, now);
-  const minutes = Math.ceil(waiting(record, now) / 60000);
+  const minutes = Math.ceil(waiting(record, Math.max(now, Date.now())) / 60000);
   const finish = async (name: string) => {
     setDone([...done, name]);
     const result = completeRung(record, Date.now());

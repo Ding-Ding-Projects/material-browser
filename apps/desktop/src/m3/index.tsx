@@ -495,7 +495,7 @@ export function TextField({
         className={cx("tf", focus && !error && "focus", error && "error")}
         htmlFor={fieldId}
       >
-        <span className="lab">
+        <span className="lab" id={`${fieldId}-label`}>
           {label}
           {required ? " *" : ""}
         </span>
@@ -513,6 +513,7 @@ export function TextField({
           placeholder={placeholder}
           inputMode={inputMode}
           maxLength={maxLength}
+          aria-labelledby={`${fieldId}-label`}
           aria-invalid={error ? true : undefined}
           aria-describedby={supporting || error ? `${fieldId}-sup` : undefined}
           onFocus={() => setFocus(true)}
@@ -783,7 +784,7 @@ export function Item({
 }
 
 const AVATAR_SHAPES = ["shape-cookie", "shape-sunny", "shape-sq", "shape-arch", "shape-pill"];
-const AVATAR_TONES = ["p", "t", "s", ""];
+const AVATAR_TONES = ["p", "t", "p", "t"];
 export function avatarStyle(seed: string) {
   let hash = 0;
   for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;

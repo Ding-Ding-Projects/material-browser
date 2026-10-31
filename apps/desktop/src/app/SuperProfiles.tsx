@@ -5,6 +5,7 @@ import { operationFailure } from "../operation-errors.mjs";
 import { ConfirmAction } from "../settings/ConfirmAction";
 import { Avatar, Btn, Checkbox, Dialog, IconBtn, Item, Loading, Menu, Ms, SegList, Tabs, cx } from "../m3";
 import { SearchBar, useSearch } from "../m3/search";
+const MODE_LABEL: Record<string, string> = { terminal: "Terminal", browser: "Browser window", desktop: "Desktop" };
 import { useApp, ago, dateOf } from "./context";
 import { TemplateWizard } from "./TemplateWizard";
 
@@ -226,7 +227,7 @@ export function SuperProfilesPage() {
                   <div className={cx("av l", tones[index % 3])} aria-hidden="true"><Ms name={ICON(p)} /></div>
                   <span className="txt">
                     <span>{p.name}</span>
-                    <span className="sup">{BACKEND(p.settings.backend)} · {t(p.settings.launchMode)}</span>
+                    <span className="sup">{BACKEND(p.settings.backend)} · {t(MODE_LABEL[p.settings.launchMode] || p.settings.launchMode)}</span>
                   </span>
                   {open && <span className="stat"><Ms name="circle" fill />{t("Open")}</span>}
                 </button>
@@ -251,7 +252,7 @@ export function SuperProfilesPage() {
               <div style={{ flex: 1, minWidth: 220 }}>
                 <h2 id="dev-h" className="headline-l em">{profile.name}</h2>
                 <p className="body-m on-sv">
-                  {[BACKEND(profile.settings.backend), t(profile.settings.launchMode), profile.engine === "firefox" ? "Firefox" : "Chromium", `${revisions.length} ${t(revisions.length === 1 ? "revision" : "revisions")}`].join(" · ")}
+                  {[BACKEND(profile.settings.backend), t(MODE_LABEL[profile.settings.launchMode] || profile.settings.launchMode), profile.engine === "firefox" ? "Firefox" : "Chromium", `${revisions.length} ${t(revisions.length === 1 ? "revision" : "revisions")}`].join(" · ")}
                 </p>
               </div>
               <IconBtn icon="edit" label={t("Edit template")} disabled={busy || activeSession} onClick={() => setWizard("edit")} />
@@ -266,7 +267,7 @@ export function SuperProfilesPage() {
                 <>
                   <SegList>
                     <Item icon="dns" overline={t("Environment")} title={BACKEND(profile.settings.backend)} support={profile.settings.backend === "wsl2" ? t(profile.settings.rootfsPath ? "Custom root filesystem" : "Verified managed base") : undefined} />
-                    <Item icon="open_in_browser" overline={t("Opens as")} title={t(profile.settings.launchMode)} />
+                    <Item icon="open_in_browser" overline={t("Opens as")} title={t(MODE_LABEL[profile.settings.launchMode] || profile.settings.launchMode)} />
                     <Item icon="public" overline={t("Engine")} title={profile.engine === "firefox" ? "Firefox" : "Chromium"} />
                     <Item icon="folder" overline={t("Workspace folder")} title={profile.settings.workspacePath || t("None")} mono={!!profile.settings.workspacePath} />
                     <Item icon="terminal" overline={t("Commands")} title={`${(profile.settings.setupCommands || []).length} ${t("setup")} · ${(profile.settings.startupCommands || []).length} ${t("startup")} · ${(profile.settings.installers || []).length} ${t("installers")}`} />

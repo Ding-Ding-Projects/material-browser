@@ -194,6 +194,11 @@ export function App() {
     return () => clearInterval(timer);
   }, [status?.unlocked, profiles.length]);
   useEffect(() => {
+    if (!notice || busy) return;
+    const timer = setTimeout(() => setNotice(""), 6000);
+    return () => clearTimeout(timer);
+  }, [notice, busy]);
+  useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 15000);
     return () => clearInterval(timer);
   }, []);
@@ -299,7 +304,7 @@ export function App() {
           <div className="body">
             <Rail fabIcon={fab[0]} fabLabel={fab[1]} onFab={fab[2]} />
             <div className="panes">
-              <TabsPane
+              {page === "profiles" && <TabsPane
                 tabs={tabs}
                 setTabs={setTabs}
                 active={activeTab}
@@ -312,7 +317,7 @@ export function App() {
                   navigate(tab.page as Page, { section: tab.section, setting: tab.setting });
                   setActiveTab(tab.id);
                 }}
-              />
+              />}
               <main id="workspace-content" tabIndex={-1} style={{ display: "contents" }}>
                 {page === "profiles" && <ProfilesPage />}
                 {page === "launch" && <LaunchPage />}
@@ -342,7 +347,7 @@ export function App() {
         <LiveLayer snackbar={snackbar} clearSnack={() => setSnackbar(null)} />
         <AttentionBar />
         {accessibility && <AccessibilityPanel onClose={() => setAccessibility(false)} />}
-        {creating && <CreateProfileDialog onClose={() => setCreating(false)} onCreated={(id) => { setSelected(id); if (setupScreen) setSetupStep(3); }} />}
+        {creating && <CreateProfileDialog onClose={() => setCreating(false)} onCreated={(id) => { setSelected(id); if (setupScreen) { setSetupDone(true); setShowSetup(false); } }} />}
         {palette !== null && (
           <Palette
             initial={palette}

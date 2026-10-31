@@ -3,6 +3,7 @@ import { request, type PasswordManager, type SuperProfile, type SuperProfileSett
 import { readSuperProfileDraft, superProfileResumeMetadata, switchSuperProfileBackend, persistSuperProfileConfiguration } from "../SuperProfiles.model.mjs";
 import { buildGuestPasswordManager } from "../password-manager-model.mjs";
 import { Btn, ButtonGroup, Dialog, Item, LinearProgress, Ms, SegList, Switch, TextField } from "../m3";
+const MODE_LABEL: Record<string, string> = { terminal: "Terminal", browser: "Browser window", desktop: "Desktop" };
 import { useApp } from "./context";
 
 const KEY = "super-profile-draft-v1";
@@ -107,7 +108,7 @@ export function TemplateWizard({ profile, busy, onSave, onCancel }: { profile?: 
       {draft.step === 1 && (
         <>
           <span className="label-l">{t("Opens as")}</span>
-          <ButtonGroup label={t("Opens as")} value={s.launchMode} onChange={(launchMode) => setting({ launchMode: launchMode as SuperProfileSettings["launchMode"] })} options={modes.map((m) => [m, t(m)] as [string, string])} />
+          <ButtonGroup label={t("Opens as")} value={s.launchMode} onChange={(launchMode) => setting({ launchMode: launchMode as SuperProfileSettings["launchMode"] })} options={modes.map((m) => [m, t(MODE_LABEL[m])] as [string, string])} />
           {wsl && (
             <>
               <TextField label={t("Root filesystem archive path")} value={s.rootfsPath || ""} onChange={(rootfsPath) => setting({ rootfsPath })} mono supporting={t("Leave both empty to use the verified managed base.")} />
@@ -166,7 +167,7 @@ export function TemplateWizard({ profile, busy, onSave, onCancel }: { profile?: 
           <SegList>
             <Item icon="badge" overline={t("Name")} title={draft.name} />
             <Item icon="dns" overline={t("Environment")} title={wsl ? "WSL 2" : "Windows Sandbox"} />
-            <Item icon="open_in_browser" overline={t("Opens as")} title={t(s.launchMode)} />
+            <Item icon="open_in_browser" overline={t("Opens as")} title={t(MODE_LABEL[s.launchMode] || s.launchMode)} />
             <Item icon="public" overline={t("Engine")} title={draft.engine === "firefox" ? "Firefox" : "Chromium"} />
             <Item icon="terminal" overline={t("Commands")} title={`${(s.setupCommands || []).length} ${t("setup")} · ${(s.startupCommands || []).length} ${t("startup")} · ${(s.installers || []).length} ${t("installers")}`} />
           </SegList>

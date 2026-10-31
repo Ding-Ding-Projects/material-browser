@@ -245,7 +245,16 @@ export function ProfilesPage() {
             {!profiles.length && <Btn icon="person_add" onClick={app.openCreate}>{t("Create profile")}</Btn>}
           </div>
         ) : (
-          <div className="seglist" role="list" aria-label={t("Profiles")} style={{ padding: "16px 24px 112px" }}>
+          <div className="seglist" role="list" aria-label={t("Profiles")} style={{ padding: "16px 24px 112px" }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && checked.length) {
+                event.preventDefault();
+                setChecked([]);
+              } else if (event.ctrlKey && event.key.toLowerCase() === "a" && !(event.target as HTMLElement).matches("input")) {
+                event.preventDefault();
+                setChecked(rows.map((p) => p.id));
+              }
+            }}>
             {rows.map((p) => {
               const runtime = runtimeOf(p.id);
               const on = checked.includes(p.id);
@@ -340,7 +349,6 @@ export function ProfilesPage() {
           <div style={{ position: "sticky", bottom: 24, marginTop: "auto", display: "flex", justifyContent: "center", pointerEvents: "none" }}>
             <div className="ftb vibrant" role="toolbar" aria-label={`${checked.length} ${t("selected")}`} style={{ pointerEvents: "auto" }}>
               <span className="label-l" style={{ padding: "0 8px 0 12px" }}>{checked.length} {t("selected")}</span>
-              <IconBtn icon="select_all" label={t("Select all shown")} onClick={() => setChecked([...new Set([...checked, ...rows.map((p) => p.id)])])} />
               <IconBtn icon="content_copy" label={t("Duplicate")} onClick={() => void execute("profiles.duplicate", targets)} />
               <IconBtn icon="photo_camera" label={t("Snapshot")} disabled={targets.some((p) => runtimeOf(p.id))} onClick={() => void execute("profiles.snapshot", targets)} />
               <IconBtn icon="ios_share" label={t("Export")} onClick={() => exportProfiles(targets)} />
@@ -349,7 +357,6 @@ export function ProfilesPage() {
               <span className="sep" />
               <IconBtn icon="delete" label={t("Delete")} disabled={targets.some((p) => runtimeOf(p.id))}
                 onClick={() => guarded(targets, () => setReview({ method: "profiles.remove", targets }))} />
-              <IconBtn icon="close" label={t("Clear selection")} onClick={() => setChecked([])} />
             </div>
           </div>
         )}
