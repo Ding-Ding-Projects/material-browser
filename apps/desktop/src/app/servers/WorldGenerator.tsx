@@ -52,7 +52,7 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
   const { t, snack } = useApp();
   const [releases, setReleases] = useState<string[]>([]);
   const [version, setVersion] = useState("");
-  const [cat, setCat] = useState<WorldCatalogue | null>(null);
+  const [catalogue, setCatalogue] = useState<WorldCatalogue | null>(null);
   const [loading, setLoading] = useState("");
   const [o, setO] = useState<Options | null>(null);
   const [eula, setEula] = useState(false);
@@ -78,12 +78,12 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
   }, []);
   useEffect(() => {
     if (!version) return;
-    setCat(null);
+    setCatalogue(null);
     setO(null);
     setLoading(t("Reading this version's world settings from its server…"));
     worldgen<WorldCatalogue>("catalogue", { version })
       .then((c) => {
-        setCat(c);
+        setCatalogue(c);
         if (c.supported) setO({ ...c.defaults, area: { ...c.defaults.area, ...DEFAULT_SIZE } });
       })
       .catch((e) => snack(t(explain(e))))
@@ -118,13 +118,13 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
         </div>
       </div>
       {loading && <p className="body-m on-sv">{loading}</p>}
-      {cat && !cat.supported && <div className="card tint" style={{ padding: 16, borderRadius: 20, display: "flex", gap: 12 }}><Ms name="block" /><p className="body-m" style={{ margin: 0 }}>{t(cat.reason || "")}</p></div>}
-      {cat?.supported && o && (
+      {catalogue && !catalogue.supported && <div className="card tint" style={{ padding: 16, borderRadius: 20, display: "flex", gap: 12 }}><Ms name="block" /><p className="body-m" style={{ margin: 0 }}>{t(catalogue.reason || "")}</p></div>}
+      {catalogue?.supported && o && (
         <>
-          <span className="chip" style={{ pointerEvents: "none", alignSelf: "flex-start" }}><Ms name="verified" />Java {cat.version} · {t("lists read from this version's server")}</span>
+          <span className="chip" style={{ pointerEvents: "none", alignSelf: "flex-start" }}><Ms name="verified" />Java {catalogue.version} · {t("lists read from this version's server")}</span>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
             <SizePanel o={o} set={set} />
-            <WorldPanel o={o} set={set} cat={cat} />
+            <WorldPanel o={o} set={set} catalogue={catalogue} />
           </div>
           <section className="pane low" aria-labelledby="out-h" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
             <h2 id="out-h" className="title-l" style={{ margin: 0 }}>{t("Save to")}</h2>
@@ -296,20 +296,20 @@ function Stepper({ label, value, step = 1, min, max, onChange, unit }: { label: 
   );
 }
 
-function WorldPanel({ o, set, cat }: { o: Options; set: <K extends keyof Options>(k: K, v: Options[K]) => void; cat: WorldCatalogue }) {
+function WorldPanel({ o, set, catalogue }: { o: Options; set: <K extends keyof Options>(k: K, v: Options[K]) => void; catalogue: WorldCatalogue }) {
   const { t } = useApp();
-  const presets = cat.presets.map((p) => p.replace("minecraft:", ""));
-  const ruleSearch = useSearch(cat.gameRules.map((r) => r.name));
-  const shownRules = ruleSearch.query ? ruleSearch.indices.map((i) => cat.gameRules[i]) : cat.gameRules;
+  const presets = catalogue.presets.map((p) => p.replace("minecraft:", ""));
+  const ruleSearch = useSearch(catalogue.gameRules.map((r) => r.name));
+  const shownRules = ruleSearch.query ? ruleSearch.indices.map((i) => catalogue.gameRules[i]) : catalogue.gameRules;
   const layersTopDown = o.flat.layers.slice().reverse();
   const setLayers = (topDown: Layer[]) => set("flat", { ...o.flat, layers: topDown.slice().reverse() });
   const total = o.flat.layers.reduce((n, l) => n + l.height, 0);
   const applyFlatPreset = (id: string) => {
-    const s = cat.flatPresets.find((p) => p.id === id)?.settings;
+    const s = catalogue.flatPresets.find((p) => p.id === id)?.settings;
     if (!s) return;
     const so = Array.isArray(s.structure_overrides) ? s.structure_overrides : typeof s.structure_overrides === "string" && !s.structure_overrides.startsWith("#") ? [s.structure_overrides] : [];
     set("flat", { biome: s.biome, features: !!s.features, lakes: !!s.lakes, layers: s.layers });
-    set("structures", so.filter((x: string) => cat.structureSets.includes(x)));
+    set("structures", so.filter((x: string) => catalogue.structureSets.includes(x)));
   };
   const toggleStructure = (id: string) => set("structures", o.structures.includes(id) ? o.structures.filter((s) => s !== id) : [...o.structures, id]);
   const dim = o.dimension;
@@ -326,12 +326,12 @@ function WorldPanel({ o, set, cat }: { o: Options; set: <K extends keyof Options
         <div className="card outlined" style={{ padding: 16, borderRadius: 20, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}><h3 className="title-m" style={{ margin: 0, flex: 1 }}>{t("Superflat layers")}</h3><span className="label-s on-sv">{t("Top to bottom")}</span></div>
           <div role="group" aria-label={t("Start from a preset")} style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {cat.flatPresets.map((p) => <Chip key={p.id} onClick={() => applyFlatPreset(p.id)}>{pretty(p.id)}</Chip>)}
+            {catalogue.flatPresets.map((p) => <Chip key={p.id} onClick={() => applyFlatPreset(p.id)}>{pretty(p.id)}</Chip>)}
           </div>
           <div className="seglist">
             {layersTopDown.map((l, i) => (
               <div key={i} className="li plain" style={{ gap: 6, flexWrap: "wrap" }}>
-                <RegistryPicker label={`${t("Block for layer")} ${i + 1}`} value={l.block} options={cat.blocks} onChange={(b) => setLayers(layersTopDown.map((x, j) => (j === i ? { ...x, block: b } : x)))} />
+                <RegistryPicker label={`${t("Block for layer")} ${i + 1}`} value={l.block} options={catalogue.blocks} onChange={(b) => setLayers(layersTopDown.map((x, j) => (j === i ? { ...x, block: b } : x)))} />
                 <Stepper label={`${t("Height of layer")} ${i + 1}`} unit={t("Height")} value={l.height} min={1} max={dim.height} onChange={(h) => setLayers(layersTopDown.map((x, j) => (j === i ? { ...x, height: h } : x)))} />
                 <IconBtn icon="arrow_upward" size="sm" label={`${t("Move layer up")} ${i + 1}`} disabled={i === 0} onClick={() => { const n = layersTopDown.slice(); [n[i - 1], n[i]] = [n[i], n[i - 1]]; setLayers(n); }} />
                 <IconBtn icon="arrow_downward" size="sm" label={`${t("Move layer down")} ${i + 1}`} disabled={i === layersTopDown.length - 1} onClick={() => { const n = layersTopDown.slice(); [n[i + 1], n[i]] = [n[i], n[i + 1]]; setLayers(n); }} />
@@ -344,17 +344,17 @@ function WorldPanel({ o, set, cat }: { o: Options; set: <K extends keyof Options
             <span className={cx("body-s", total > dim.height ? "c-error" : "on-sv")}>{t("Total height")} {total} / {dim.height} {t("blocks")}</span>
           </div>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
-            <RegistryPicker label={t("Biome")} value={o.flat.biome} options={cat.biomes} onChange={(b) => set("flat", { ...o.flat, biome: b })} />
+            <RegistryPicker label={t("Biome")} value={o.flat.biome} options={catalogue.biomes} onChange={(b) => set("flat", { ...o.flat, biome: b })} />
             <div className="li plain" style={{ gap: 8 }}><span className="txt body-m">{t("Features")}</span><Switch checked={o.flat.features} onChange={(v) => set("flat", { ...o.flat, features: v })} label={t("Features")} /></div>
             <div className="li plain" style={{ gap: 8 }}><span className="txt body-m">{t("Lakes")}</span><Switch checked={o.flat.lakes} onChange={(v) => set("flat", { ...o.flat, lakes: v })} label={t("Lakes")} /></div>
           </div>
         </div>
       )}
-      {o.preset === "single_biome_surface" && <RegistryPicker label={t("Biome for the whole world")} value={o.singleBiome} options={cat.biomes} onChange={(b) => set("singleBiome", b)} />}
+      {o.preset === "single_biome_surface" && <RegistryPicker label={t("Biome for the whole world")} value={o.singleBiome} options={catalogue.biomes} onChange={(b) => set("singleBiome", b)} />}
       <div className="li plain" style={{ gap: 12 }}><span className="txt body-l">{t("Generate structures")}</span><Switch checked={o.generateStructures} onChange={(v) => set("generateStructures", v)} label={t("Generate structures")} /></div>
       {o.preset === "flat" && (
         <div role="group" aria-label={t("Structures to generate")} style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {cat.structureSets.map((s) => <Chip key={s} on={o.structures.includes(s)} onClick={() => toggleStructure(s)}>{pretty(s)}</Chip>)}
+          {catalogue.structureSets.map((s) => <Chip key={s} on={o.structures.includes(s)} onClick={() => toggleStructure(s)}>{pretty(s)}</Chip>)}
         </div>
       )}
       <details className="card outlined" style={{ padding: "12px 16px", borderRadius: 20 }}>
@@ -364,15 +364,15 @@ function WorldPanel({ o, set, cat }: { o: Options; set: <K extends keyof Options
           <div className="li plain" style={{ gap: 8 }}><span className="txt"><span className="body-l">{t("Underground water and lava pockets")}</span><span className="sup mono">aquifers_enabled</span></span><Switch checked={o.noise.aquifers_enabled} onChange={(v) => set("noise", { ...o.noise, aquifers_enabled: v })} label={t("Underground water and lava pockets")} /></div>
           <div className="li plain" style={{ gap: 8 }}><span className="txt"><span className="body-l">{t("Large ore veins")}</span><span className="sup mono">ore_veins_enabled</span></span><Switch checked={o.noise.ore_veins_enabled} onChange={(v) => set("noise", { ...o.noise, ore_veins_enabled: v })} label={t("Large ore veins")} /></div>
           <div className="li plain" style={{ gap: 8 }}><span className="txt"><span className="body-l">{t("No animals when chunks are first made")}</span><span className="sup mono">disable_mob_generation</span></span><Switch checked={o.noise.disable_mob_generation} onChange={(v) => set("noise", { ...o.noise, disable_mob_generation: v })} label={t("No animals when chunks are first made")} /></div>
-          <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt" style={{ flex: "1 1 160px" }}><span className="body-l">{t("Main block")}</span><span className="sup mono">default_block</span></span><RegistryPicker label={t("Main block")} value={o.noise.default_block} options={cat.blocks} onChange={(v) => set("noise", { ...o.noise, default_block: v })} /></div>
-          <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt" style={{ flex: "1 1 160px" }}><span className="body-l">{t("Sea fluid")}</span><span className="sup mono">default_fluid</span></span><RegistryPicker label={t("Sea fluid")} value={o.noise.default_fluid} options={cat.blocks.filter((b) => b === "minecraft:water" || b === "minecraft:lava" || b === "minecraft:air")} onChange={(v) => set("noise", { ...o.noise, default_fluid: v })} /></div>
+          <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt" style={{ flex: "1 1 160px" }}><span className="body-l">{t("Main block")}</span><span className="sup mono">default_block</span></span><RegistryPicker label={t("Main block")} value={o.noise.default_block} options={catalogue.blocks} onChange={(v) => set("noise", { ...o.noise, default_block: v })} /></div>
+          <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt" style={{ flex: "1 1 160px" }}><span className="body-l">{t("Sea fluid")}</span><span className="sup mono">default_fluid</span></span><RegistryPicker label={t("Sea fluid")} value={o.noise.default_fluid} options={catalogue.blocks.filter((b) => b === "minecraft:water" || b === "minecraft:lava" || b === "minecraft:air")} onChange={(v) => set("noise", { ...o.noise, default_fluid: v })} /></div>
           <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt"><span className="body-l">{t("World height")}</span><span className="sup mono">dimension_type height · {t("multiple of 16")}</span></span><Stepper label={t("World height")} unit={t("Blocks")} step={16} value={dim.height} min={16} max={4064} onChange={(v) => set("dimension", { ...dim, height: v, logical_height: Math.min(dim.logical_height, v) })} /></div>
           <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt"><span className="body-l">{t("Lowest Y")}</span><span className="sup mono">dimension_type min_y · {t("multiple of 16")}</span></span><Stepper label={t("Lowest Y")} unit="Y" step={16} value={dim.min_y} min={-2032} max={2016} onChange={(v) => set("dimension", { ...dim, min_y: v })} /></div>
           <div className="li plain" style={{ gap: 8, flexWrap: "wrap" }}><span className="txt"><span className="body-l">{t("Height for portals and chorus fruit")}</span><span className="sup mono">logical_height</span></span><Stepper label={t("Logical height")} unit={t("Blocks")} value={dim.logical_height} min={0} max={dim.height} onChange={(v) => set("dimension", { ...dim, logical_height: v })} /></div>
         </div>
       </details>
       <details className="card outlined" style={{ padding: "12px 16px", borderRadius: 20 }}>
-        <summary className="title-s" style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center" }}>{t("Game rules")} · {cat.gameRules.length} {t("for this version")}</summary>
+        <summary className="title-s" style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center" }}>{t("Game rules")} · {catalogue.gameRules.length} {t("for this version")}</summary>
         <div style={{ margin: "8px 0" }}><SearchBar small label={t("Search game rules")} placeholder={t("Search game rules")} query={ruleSearch.query} setQuery={ruleSearch.setQuery} state={ruleSearch.state} setState={ruleSearch.setState} status={ruleSearch.status} t={t} /></div>
         <div className="seglist">
           {shownRules.map((r) => {
@@ -397,4 +397,5 @@ function WorldPanel({ o, set, cat }: { o: Options; set: <K extends keyof Options
     </section>
   );
 }
+
 
