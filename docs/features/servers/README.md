@@ -26,8 +26,9 @@ Local vanilla data packs accept explicitly selected ZIP bytes (at most 32 MiB), 
 
 ## Verification and remaining work
 
-Run `node --test apps/desktop/electron/services/game-servers/index.test.cjs`. Thirteen focused tests cover consent, persistence, official integrity checks, historical entries, invalid targets/paths, configuration preservation/duplicates, backup/restore/tampering, interrupted ownership, pinned images, content rejection, strict SSH arguments and injected owned lifecycle start/stop.
+Run `node --test apps/desktop/electron/services/game-servers/index.test.cjs`. Sixteen focused tests cover consent, persistence, official integrity checks, historical entries, invalid targets/paths, configuration preservation/duplicates, backup/restore/tampering, interrupted ownership, pinned images, content rejection, strict SSH arguments and injected owned lifecycle start/stop, restart and disposal admission/in-flight races.
 
 Read-only official discovery on 2026-11-01 returned 921 versions, from 26.4-snapshot-6 to rd-132211. The current host reports Java 26.0.2.1 and provides OpenSSH executables. The local Docker daemon is unavailable because its expected named pipe does not exist. No real server was launched, no real EULA acceptance was invented, and no SSH host/runtime operation was verified. These source and test results are separate from runtime, GUI and deployment acceptance.
 
 Bedrock distribution installation, third-party flavours, runtime provisioning, server readiness, typed administration, players/permissions/metrics, schedules, remote data transfers, complete version-bound configuration and world migration remain incomplete.
+

@@ -121,7 +121,9 @@ function execute(spawn, exe, args, timeout = 30000) {
 }
 async function provision(spawn, ssh, localDir, provisioned) {
   if (!provisioned) {
-    const script = `test ! -e ${quote(ssh.directory)} && mkdir -p -- ${quote(ssh.directory)}`;
+    const marker = `${ssh.directory}/.material-browser-owner`;
+    const identity = ssh.directory.split("/").at(-1);
+    const script = `if test -e ${quote(ssh.directory)}; then test ! -L ${quote(ssh.directory)} && test "$(cat -- ${quote(marker)})" = ${quote(identity)}; else mkdir -p -- ${quote(ssh.directory)} && printf %s ${quote(identity)} > ${quote(marker)}; fi`;
     await execute(spawn, "ssh", [
       ...options(ssh),
       `${ssh.username}@${ssh.host}`,
@@ -132,7 +134,12 @@ async function provision(spawn, ssh, localDir, provisioned) {
   const files = provisioned
     ? ["server.properties"]
     : ["server.jar", "server.properties", "eula.txt"];
-  for (const file of files)
+  for (const file of files) {
+    await execute(spawn, "ssh", [
+      ...options(ssh),
+      `${ssh.username}@${ssh.host}`,
+      `test ! -L ${quote(ssh.directory)} && test ! -L ${quote(ssh.directory + "/" + file)}`,
+    ]);
     await execute(
       spawn,
       "scp",
@@ -143,6 +150,7 @@ async function provision(spawn, ssh, localDir, provisioned) {
       ],
       120000,
     );
+  }
 }
 function launchArgs(ssh, javaArgs, imageDigest, port, memoryMb) {
   const commandArgs = imageDigest

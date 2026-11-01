@@ -23,6 +23,7 @@ function createGameServerService({
   const running = new Map();
   const operations = new Map();
   let queue = Promise.resolve();
+  let closing = false;
   const backups = createBackups(root);
   async function safeRoot() {
     await fs.mkdir(root, { recursive: true });
@@ -382,7 +383,7 @@ function createGameServerService({
         return lifecycle.stop(p);
       case "restart":
         await lifecycle.stop(p);
-        return start(p);
+        return lifecycle.start(p);
       case "configure":
         return configure(p);
       case "listContent":
@@ -480,6 +481,12 @@ function createGameServerService({
   }
   return {
     request(input) {
+      if (closing)
+        return Promise.reject(
+          Object.assign(new Error("Server service is shutting down"), {
+            code: "SERVICE_CLOSING",
+          }),
+        );
       if (
         [
           "cancel",
@@ -491,13 +498,29 @@ function createGameServerService({
         ].includes(input?.action)
       )
         return dispatch(input);
-      const result = queue.then(() => dispatch(input));
+      const result = queue.then(() => {
+        if (closing) fail("SERVICE_CLOSING", "Server service is shutting down");
+        return dispatch(input);
+      });
       queue = result.catch(() => {});
       return result;
     },
     async dispose() {
+      closing = true;
       for (const c of operations.values()) c.abort();
-      for (const [id] of running) await lifecycle.stop({ id });
+      await queue;
+      const results = await Promise.allSettled(
+        [...running.keys()].map((id) => lifecycle.stop({ id })),
+      );
+      const failures = results.filter((result) => result.status === "rejected");
+      if (failures.length)
+        throw Object.assign(
+          new AggregateError(
+            failures.map((result) => result.reason),
+            "Owned server shutdown remains incomplete",
+          ),
+          { code: "STOP_PENDING" },
+        );
     },
   };
 }
