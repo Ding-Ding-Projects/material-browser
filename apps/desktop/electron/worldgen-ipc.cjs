@@ -31,6 +31,25 @@ function createWorldgenService({ root, dialog, getWindow = () => null, emit = ()
     return { latest: java.latest.release, retrievedAt: java.retrievedAt, stale: java.stale, versions: java.versions.filter((v) => v.channel === "release").map((v) => v.id) };
   }
 
+  function quarantine(file, expectedStat) {
+    const base = path.join(root, "rejected-jars");
+    try {
+      fs.mkdirSync(base, { recursive: true });
+      if (!fs.lstatSync(base).isDirectory() || fs.lstatSync(base).isSymbolicLink()) throw util.fail("UNSAFE_JAR_PATH");
+      // Only the same regular unshared cache entry may move. Never adopt a replacement.
+      const current = fs.lstatSync(file);
+      if (!current.isFile() || current.isSymbolicLink() || current.nlink !== 1 ||
+          current.ino !== expectedStat.ino || current.dev !== expectedStat.dev ||
+          current.size !== expectedStat.size || current.mtimeMs !== expectedStat.mtimeMs)
+        throw util.fail("UNSAFE_JAR_PATH");
+      const directory = fs.mkdtempSync(path.join(base, "rejected-"));
+      fs.renameSync(file, path.join(directory, "rejected.jar"));
+    } catch (error) {
+      if (error.code === "UNSAFE_JAR_PATH") throw error;
+      throw util.fail("JAR_QUARANTINE_FAILED");
+    }
+  }
+
   /** The verified vanilla jar for a version, downloaded once into the app's cache. */
   async function cachedJar(version, signal) {
     checkAbort(signal);
@@ -50,7 +69,19 @@ function createWorldgenService({ root, dialog, getWindow = () => null, emit = ()
       try { if (fs.lstatSync(candidate).isSymbolicLink()) throw util.fail("UNSAFE_JAR_PATH"); }
       catch (error) { if (error.code !== "ENOENT") throw error; }
     }
-    if (!fs.existsSync(file)) await util.downloadVerified(detail.server.url, file, { sha1: detail.server.sha1, size: detail.server.size }, { fetchImpl, signal });
+    if (!fs.existsSync(file)) {
+      const jars = path.dirname(file);
+      fs.mkdirSync(jars, { recursive: true });
+      if (fs.lstatSync(jars).isSymbolicLink()) throw util.fail("UNSAFE_JAR_PATH");
+      const acquisition = fs.mkdtempSync(path.join(jars, ".acquire-"));
+      const downloaded = path.join(acquisition, "server.jar");
+      try {
+        await util.downloadVerified(detail.server.url, downloaded, { sha1: detail.server.sha1, size: detail.server.size }, { fetchImpl, signal });
+        checkAbort(signal);
+        // Exclusive promotion never replaces a cache entry created by another writer.
+        fs.linkSync(downloaded, file);
+      } finally { fs.rmSync(acquisition, { recursive: true, force: true }); }
+    }
     checkAbort(signal);
     // Check every cache component and the open file, not just a stale cache receipt.
     let at = path.resolve(root);
@@ -61,16 +92,22 @@ function createWorldgenService({ root, dialog, getWindow = () => null, emit = ()
     const before = fs.lstatSync(file);
     if (!before.isFile() || before.nlink !== 1) throw util.fail("UNSAFE_JAR_PATH");
     const fd = fs.openSync(file, "r");
-    let bytes;
+    let bytes, rejected = false;
     try {
       const opened = fs.fstatSync(fd);
-      if (!opened.isFile() || opened.nlink !== 1 || opened.ino !== before.ino || opened.dev !== before.dev || opened.size !== detail.server.size)
-        throw util.fail("JAR_INTEGRITY_FAILED");
-      bytes = fs.readFileSync(fd);
-      if (bytes.length !== detail.server.size || crypto.createHash("sha1").update(bytes).digest("hex") !== detail.server.sha1)
-        throw util.fail("JAR_INTEGRITY_FAILED");
-      worldgen.verifyJarIdentity(bytes, version);
+      if (!opened.isFile() || opened.nlink !== 1 || opened.ino !== before.ino || opened.dev !== before.dev)
+        throw util.fail("UNSAFE_JAR_PATH");
+      if (opened.size !== detail.server.size) rejected = true;
+      else {
+        bytes = fs.readFileSync(fd);
+        rejected = bytes.length !== detail.server.size || crypto.createHash("sha1").update(bytes).digest("hex") !== detail.server.sha1;
+        if (!rejected) {
+          try { worldgen.verifyJarIdentity(bytes, version); }
+          catch (error) { if (error.code !== "JAR_VERSION_MISMATCH") throw error; rejected = true; }
+        }
+      }
     } finally { fs.closeSync(fd); }
+    if (rejected) { quarantine(file, before); throw util.fail("JAR_INTEGRITY_FAILED"); }
     return { file, bytes, integrity: { version, sha1: detail.server.sha1, size: detail.server.size } };
   }
 
