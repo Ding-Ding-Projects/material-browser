@@ -24,7 +24,7 @@ type WorldCatalogue = {
   blocks: string[];
   gameRules: GameRule[];
   flatPresets: { id: string; settings: any }[];
-  defaults: Options;
+  defaults: Options | null;
 };
 type Options = {
   name: string;
@@ -46,7 +46,38 @@ type Options = {
 
 export const DEFAULT_SIZE = { width: 100, depth: 100 };
 const PRESET_LABELS: Record<string, string> = { normal: "Normal", flat: "Superflat", large_biomes: "Large biomes", amplified: "Amplified", single_biome_surface: "Single biome" };
-const pretty = (id: string) => id.replace(/^minecraft:/, "").replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+const pretty = (id: unknown) => typeof id === "string" && id.length > 0 ? id.replace(/^minecraft:/, "").replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "";
+
+const SCHEMA_UNSUPPORTED = "This version uses world-generation settings or pack metadata that the customization builder does not support yet.";
+const registryId = (value: unknown): value is string => typeof value === "string" && /^[a-z0-9_.-]+:[a-z0-9_/.-]+$/.test(value);
+const object = (value: unknown) => !!value && typeof value === "object" && !Array.isArray(value);
+function optionShape(value: unknown): value is Options {
+  if (!object(value)) return false;
+  const o = value as Options;
+  return typeof o.name === "string" && typeof o.seed === "string" && typeof o.preset === "string" && o.preset.length > 0 &&
+    object(o.flat) && registryId(o.flat.biome) && typeof o.flat.features === "boolean" && typeof o.flat.lakes === "boolean" &&
+    Array.isArray(o.flat.layers) && o.flat.layers.every(layer => object(layer) && registryId(layer.block) && Number.isInteger(layer.height)) &&
+    registryId(o.singleBiome) && Array.isArray(o.structures) && o.structures.every(registryId) && typeof o.generateStructures === "boolean" &&
+    object(o.noise) && Number.isInteger(o.noise.sea_level) && registryId(o.noise.default_block) && registryId(o.noise.default_fluid) &&
+    [o.noise.aquifers_enabled, o.noise.ore_veins_enabled, o.noise.disable_mob_generation, o.hardcore, o.worldBorder].every(v => typeof v === "boolean") &&
+    object(o.dimension) && [o.dimension.height, o.dimension.min_y, o.dimension.logical_height].every(Number.isInteger) &&
+    typeof o.difficulty === "string" && object(o.gameRules) && Object.values(o.gameRules).every(v => typeof v === "boolean" || Number.isInteger(v)) &&
+    object(o.area) && [o.area.width, o.area.depth, o.area.centerX, o.area.centerZ].every(Number.isInteger) &&
+    object(o.output) && ["folder", "zip"].includes(o.output.kind) && typeof o.output.destination === "string";
+}
+function registryOptions(o: Options, catalogue: WorldCatalogue) {
+  return catalogue.blocks.includes(o.noise.default_block) && catalogue.blocks.includes(o.noise.default_fluid) &&
+    catalogue.biomes.includes(o.flat.biome) && catalogue.biomes.includes(o.singleBiome) &&
+    o.flat.layers.every(layer => catalogue.blocks.includes(layer.block)) && o.structures.every(id => catalogue.structureSets.includes(id));
+}
+function editableDefaults(catalogue: WorldCatalogue) {
+  const o = catalogue.defaults;
+  if (!optionShape(o) || !Number.isInteger(catalogue.packFormat) || catalogue.packFormat < 1) return false;
+  if (![catalogue.blocks, catalogue.biomes, catalogue.structureSets].every(values => Array.isArray(values) && values.every(registryId))) return false;
+  return registryOptions(o, catalogue) &&
+    Array.isArray(catalogue.gameRules) && catalogue.gameRules.every(rule => object(rule) && typeof rule.name === "string" && typeof rule.parser === "string" && ["boolean", "integer", "unknown"].includes(rule.type)) &&
+    Array.isArray(catalogue.flatPresets) && catalogue.flatPresets.every(preset => object(preset) && registryId(preset.id) && object(preset.settings) && Array.isArray(preset.settings.layers) && preset.settings.layers.every((layer: Layer) => object(layer) && registryId(layer.block) && catalogue.blocks.includes(layer.block) && Number.isInteger(layer.height)) && registryId(preset.settings.biome) && catalogue.biomes.includes(preset.settings.biome));
+}
 
 const PRESET_UNSUPPORTED = "This preset is present in the selected version, but its generator is not implemented by the world customization builder.";
 const presetValue = (id: string) => id.replace(/^minecraft:/, "");
@@ -112,7 +143,7 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
       .then((c) => {
         if (request !== catalogueRequest.current) return;
         setCatalogue(c);
-        if (c.supported) setO({ ...c.defaults, area: { ...c.defaults.area, ...DEFAULT_SIZE } });
+        if (c.supported && editableDefaults(c) && c.defaults) setO({ ...c.defaults, area: { ...c.defaults.area, ...DEFAULT_SIZE } });
       })
       .catch((e) => { if (request === catalogueRequest.current) snack(t(explain(e))); })
       .finally(() => { if (request === catalogueRequest.current) setLoading(""); });
@@ -126,9 +157,12 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
     const dest = await worldgen<string | null>("browse", { kind: o.output.kind, name: o.name });
     if (dest) set("output", { ...o.output, destination: dest });
   };
-  const presetReady = !!(catalogue?.supported && catalogue.version === version && o && presetInventory(catalogue).some(option => option.supported && option.value === o.preset));
+  const defaultsReady = !!(catalogue?.supported && editableDefaults(catalogue));
+  const optionsReady = !!(defaultsReady && catalogue && optionShape(o) && registryOptions(o, catalogue));
+  const presetReady = !!(optionsReady && catalogue && o && catalogue.version === version && presetInventory(catalogue).some(option => option.supported && option.value === o.preset));
   const start = async () => {
     if (!o) return;
+    if (!optionsReady) { snack(t(SCHEMA_UNSUPPORTED)); return; }
     if (!presetReady) { snack(t(PRESET_UNSUPPORTED)); return; }
     try {
       const r = await worldgen<{ batches: number }>("start", { version, options: o, eulaAccepted: eula });
@@ -150,8 +184,9 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
       </div>
       {loading && <p className="body-m on-sv">{loading}</p>}
       {catalogue && !catalogue.supported && <div className="card tint" style={{ padding: 16, borderRadius: 20, display: "flex", gap: 12 }}><Ms name="block" /><p className="body-m" style={{ margin: 0 }}>{t(catalogue.reason || "")}</p></div>}
-      {catalogue && !catalogue.supported && <WorldPresetChoices catalogue={catalogue} value="" onChange={() => {}} />}
-      {catalogue?.supported && o && (
+      {catalogue?.supported && !defaultsReady && <p role="status" className="body-m">{t(SCHEMA_UNSUPPORTED)}</p>}
+      {catalogue && !defaultsReady && <WorldPresetChoices catalogue={{ ...catalogue, supported: false, reason: catalogue.reason || SCHEMA_UNSUPPORTED }} value="" onChange={() => {}} />}
+      {defaultsReady && catalogue && optionShape(o) && (
         <>
           <span className="chip" style={{ pointerEvents: "none", alignSelf: "flex-start" }}><Ms name="verified" />Java {catalogue.version} · {t("lists read from this version's server")}</span>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
@@ -291,14 +326,18 @@ function SizePanel({ o, set }: { o: Options; set: <K extends keyof Options>(k: K
 }
 
 /** Pick one id from a version's registry, with search; never free text. */
-function RegistryPicker({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+function RegistryPicker({ label, value, options, onChange }: { label: string; value: unknown; options: unknown; onChange: (v: string) => void }) {
   const { t } = useApp();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const registryValid = Array.isArray(options) && options.every(registryId);
+  const registry: string[] = registryValid ? options as string[] : [];
+  const available = registryValid && registryId(value) && registry.includes(value);
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase().replace(/\s+/g, "_");
-    return (q ? options.filter((id) => id.includes(q)) : options).slice(0, 8);
+    return (q ? registry.filter((id) => id.includes(q)) : registry).slice(0, 8);
   }, [query, options]);
+  if (!available) return <div style={{ flex: "2 1 200px", minWidth: 0 }}><TextField label={label} value={t("Unavailable value")} disabled onChange={() => {}} /><p className="body-s on-sv" role="status">{t("This value is missing or invalid in the selected version's registry. World generation remains unavailable.")}</p></div>;
   return (
     <div style={{ flex: "2 1 200px", position: "relative" }}>
       <TextField label={label} value={open ? query : pretty(value)} icon="search" onChange={(v) => { setQuery(v); setOpen(true); }} onKeyDown={(e) => e.key === "Escape" && setOpen(false)} />
