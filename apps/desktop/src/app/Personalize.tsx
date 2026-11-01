@@ -17,6 +17,8 @@ import {
   resetOverride,
   setOverride,
   useAppearanceOverrides,
+  useAppearancePersistence,
+  retryAppearancePersistence,
   type ElementChoice,
 } from "./appearance-elements";
 import { ColourPicker, InfoIcon, Stepper, useT } from "./personalize-controls";
@@ -66,6 +68,7 @@ function FocusModesSection() {
     <section className="pane" aria-labelledby="ad-h" style={{ flex: "1 1 420px", minWidth: 0, padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
       <h1 id="ad-h" className="headline-s" style={{ margin: 0 }}>{t("Focus modes")}</h1>
       <p className="body-m on-sv" style={{ margin: 0 }}>{t("Built for ADHD-friendly work. Each mode changes the whole app right away and can be turned off any time.")}</p>
+      {!focus.persisted && <div role="status"><p>{t("Focus changes are session-only because storage failed. Restarting may restore earlier settings. If storage could not be read at startup, reopen the app after restoring storage access.")}</p>{focus.canRetryPersistence && <Btn variant="outlined" onClick={focus.retryPersistence}>{t("Retry saving focus settings")}</Btn>}</div>}
       <div className="seglist">
         {MODES.map((m) => (
           <React.Fragment key={m.id}>
@@ -115,6 +118,7 @@ function computedColour(id: string, part: Part): string | null {
 export function AppearanceEditor({ initial, headingId, heading = true }: { initial?: ElementChoice; headingId?: string; heading?: boolean }) {
   const t = useT();
   const overrides = useAppearanceOverrides();
+  const persistence = useAppearancePersistence();
   const [choices, setChoices] = useState<ElementChoice[]>(() => listElements());
   const [id, setId] = useState(initial?.id || "primary-buttons");
   const [part, setPart] = useState<Part>("background");
@@ -201,7 +205,8 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
         <span style={{ flex: 1 }} />
         <Btn variant="text" size="m" disabled={!Object.keys(overrides).length} onClick={() => setConfirmAll(true)}>{t("Reset all elements")}</Btn>
       </div>
-      <p className="body-s on-sv" style={{ margin: 0 }}>{t("Changes apply right away and are saved on this computer only.")} {label && overrides[id] ? `${t(label)}: ${t("customized")}` : ""}</p>
+      <p className="body-s on-sv" role="status" style={{ margin: 0 }}>{t(persistence === "saved" ? "Changes apply right away and are saved on this computer only." : "Appearance changes and resets are session-only because storage failed. Restarting may restore earlier values. If storage could not be read at startup, reopen the app after restoring storage access.")} {label && overrides[id] ? `${t(label)}: ${t("customized")}` : ""}</p>
+      {persistence === "session-only" && <Btn variant="outlined" onClick={retryAppearancePersistence}>{t("Retry saving appearance")}</Btn>}
       {confirmAll && (
         <Dialog title={t("Reset every element?")} icon="format_color_reset" onClose={() => setConfirmAll(false)}
           actions={<><Btn variant="text" onClick={() => setConfirmAll(false)}>{t("Cancel")}</Btn><Btn onClick={() => { resetAllOverrides(); setConfirmAll(false); }}>{t("Reset all")}</Btn></>}>
