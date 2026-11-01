@@ -24,7 +24,7 @@ for (const [name, mutate] of [
 });
 
 const children = JSON.parse(readFileSync(`${root}/docs/features/acceptance/child-surfaces.json`, 'utf8'));
-const requiredChildren = ['workspace-title','workspace-tabs','profile-list','profile-create','profile-launch','profile-appearance','setup-wizard','super-profile-wizard','synchronization','command-palette','context-menu-primitive','regex-workbench','notification-overlay','accessibility-overlay','attention-controls','unlock-dialog','settings-finder','setting-row','settings-schedules','settings-notifications','settings-history','settings-history-transfer','settings-editors','presentation-effects','settings-presentation-lock','personal-wording-import'];
+const requiredChildren = ['workspace-title','workspace-tabs','profile-list','profile-create','profile-launch','profile-appearance','setup-wizard','super-profile-wizard','synchronization','command-palette','context-menu-primitive','regex-workbench','notification-overlay','accessibility-overlay','attention-controls','unlock-dialog','settings-finder','setting-row','settings-schedules','settings-notifications','settings-history','settings-history-transfer','settings-editors','presentation-effects','settings-presentation-lock','personal-wording-import','server-world-generator'];
 test('child discovery retains the reviewed source-backed inventory', () => {
   assert.deepEqual(children.records.map(x => x.id), requiredChildren);
   assert.deepEqual(validateChildSurfaces(children, data), []);
@@ -39,4 +39,28 @@ for (const [name, change] of [
   const changed = structuredClone(children); change(changed);
   assert.ok(validateChildSurfaces(changed, data).length > 0);
   assert.deepEqual(validateChildSurfaces(children, data), []);
+});
+
+
+test('current catalogue has 112 identities and world generation remains unfinished', () => {
+  assert.equal(required.length, 112);
+  assert.equal(data.features.length, 112);
+  assert.ok(required.includes('minecraft-world-generator'));
+  const generator = data.records.filter(x => x.feature === 'minecraft-world-generator');
+  const manager = data.records.filter(x => x.feature === 'minecraft-server-manager');
+  assert.equal(generator.length, data.surfaces.length);
+  assert.deepEqual(generator.map(x => [x.surface, x.applicability, x.reason]), manager.map(x => [x.surface, x.applicability, x.reason]));
+  for (const row of generator.filter(x => x.applicability === 'applicable')) {
+    assert.equal(row.implementationState, 'missing');
+    assert.ok(row.missing.length > 0);
+    for (const field of ['source','documentation','localization','persistence','tests','runtimeEvidence','screenshots']) assert.deepEqual(row[field], []);
+  }
+});
+test('removing the new world-generator identity or child scope fails', () => {
+  const changed = structuredClone(data);
+  changed.features = changed.features.filter(x => x.id !== 'minecraft-world-generator');
+  changed.records = changed.records.filter(x => x.feature !== 'minecraft-world-generator');
+  assert.ok(validateInventory(changed).errors.length > 0);
+  assert.ok(validateChildSurfaces(children, changed).length > 0);
+  assert.deepEqual(validateInventory(data).errors, []);
 });

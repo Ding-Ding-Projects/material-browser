@@ -365,6 +365,29 @@
       "consumer": "parseVocabulary, wording localStorage, entries and celebration state",
       "review": "Source applies validated local wording and a neutral fallback headline; complete drop event binding, exact outcome sounds, screen-reader state and restart/clear behavior require built verification.",
       "runtimeState": "unverified"
+    },
+    {
+      "id": "server-world-generator",
+      "parent": "desktop-workspace",
+      "purpose": "Required world-generator workflow within the server workspace",
+      "source": "apps/desktop/electron/services/game-servers/index.cjs",
+      "reviewedFeatures": [
+        "minecraft-server-manager",
+        "minecraft-world-generator",
+        "guided-forms",
+        "rich-controls",
+        "exports",
+        "progress-recovery"
+      ],
+      "consumer": "No active generator state consumer found in the reviewed desktop runtime at 37ff81f; the referenced service file identifies the existing server boundary only.",
+      "review": "WorldGenerator.dc.html at product commit 37ff81f is a design reference, not implementation. Extraction, pack writing, real generation, bounded pre-generation, Folder output, ZIP output and GUI acceptance remain independently unfinished.",
+      "runtimeState": "unverified",
+      "reviewCommit": "37ff81f",
+      "designReference": {
+        "path": "design/remaining-features/WorldGenerator.dc.html",
+        "sourceCommit": "37ff81f",
+        "state": "design-only"
+      }
     }
   ]
 }
