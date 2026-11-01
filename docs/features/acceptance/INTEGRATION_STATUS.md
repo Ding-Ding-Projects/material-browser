@@ -14,6 +14,7 @@ The acceptance inventory currently lists 112 identities, 784 rows and 420 applic
 
 ## This preservation patch
 
-The old native server test file changes only the local identifier `cat` to `catalogue` at its two catalogue-test sites, preserving expressions and behavior. The focused command `node --test apps/desktop/electron/services/game-servers/index.test.cjs` passed all 11 tests with zero failures. No runtime algorithm changed. No full desktop, Rust, GUI, installer or deployed verification was rerun for this identifier-only edit.
+The old native server test file changes only the local catalogue identifier to its descriptive form at its two catalogue-test sites, preserving expressions and behavior. The focused command `node --test apps/desktop/electron/services/game-servers/index.test.cjs` passed all 11 tests with zero failures. No runtime algorithm changed. No full desktop, Rust, GUI, installer or deployed verification was rerun for this identifier-only edit.
 
 Keep this checkout, its history and its private ignored announcement images intact. No deletion, branch retirement or network push was performed by this preservation patch.
+
