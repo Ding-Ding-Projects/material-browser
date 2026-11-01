@@ -21,6 +21,15 @@ function innerJar(outer) {
   return outer;
 }
 
+function verifyJarIdentity(bytes, expectedVersion) {
+  const version = readJson(innerJar(openZip(bytes)), "version.json");
+  if (!version || version.id !== expectedVersion) throw fail("JAR_VERSION_MISMATCH");
+}
+
+function probeY(dimension) {
+  return Math.max(dimension.min_y, Math.min(0, dimension.min_y + dimension.height - 1));
+}
+
 function stems(jar, folder) {
   const out = [];
   for (const name of jar.keys()) {
@@ -318,7 +327,8 @@ async function generate({ options, catalogue, jarPath, stagingRoot, eulaAccepted
       send(`forceload add ${bx1} ${bz1} ${bx2} ${bz2}`);
       const tag = `MBGEN-${i}`;
       const done = waitFor(new RegExp(`\\b${tag}\\b`), deps.batchTimeout ?? 300000);
-      const poll = setInterval(() => send(`execute if loaded ${bx1} 0 ${bz1} if loaded ${bx2} 0 ${bz2} if loaded ${bx1} 0 ${bz2} if loaded ${bx2} 0 ${bz1} run say ${tag}`), deps.pollMs ?? 1000);
+      const y = probeY(o.dimension);
+      const poll = setInterval(() => send(`execute if loaded ${bx1} ${y} ${bz1} if loaded ${bx2} ${y} ${bz2} if loaded ${bx1} ${y} ${bz2} if loaded ${bx2} ${y} ${bz1} run say ${tag}`), deps.pollMs ?? 1000);
       try {
         await done;
       } finally {
@@ -359,4 +369,4 @@ async function generate({ options, catalogue, jarPath, stagingRoot, eulaAccepted
   return { ...result, sha256: digest.sha256, chunksRequested: o.area.width * o.area.depth };
 }
 
-module.exports = { NAMESPACE, DEFAULT_AREA, FORCELOAD_MAX, PRESET_IDS, runReports, catalogueFrom, defaults, validate, chunkBounds, planBatches, buildPack, serverProperties, setupCommands, generate, innerJar };
+module.exports = { verifyJarIdentity, probeY, NAMESPACE, DEFAULT_AREA, FORCELOAD_MAX, PRESET_IDS, runReports, catalogueFrom, defaults, validate, chunkBounds, planBatches, buildPack, serverProperties, setupCommands, generate, innerJar };
