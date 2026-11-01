@@ -185,6 +185,9 @@ export function Rail({ onFab, fabIcon, fabLabel }: { onFab: () => void; fabIcon:
         <Ms name={fabIcon} />
         {expanded && <span>{fabLabel}</span>}
       </button>
+      <div className="rail-destinations" onFocusCapture={(event) => {
+        if (event.target instanceof HTMLElement) event.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }}>
       {DESTINATIONS.map(([id, label, icon, name]) => (
         <button
           type="button"
@@ -203,7 +206,7 @@ export function Rail({ onFab, fabIcon, fabLabel }: { onFab: () => void; fabIcon:
           {t(label)}
         </button>
       ))}
-      <div className="rail-x" style={{ flex: 1 }} />
+      </div>
       <button
         type="button"
         className="ri rail-x"

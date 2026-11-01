@@ -90,3 +90,16 @@ body { background: var(--md-sys-color-surface-container); overflow: hidden; }
 
 /* Pane content keeps its natural height; the pane itself scrolls. */
 .m3 .pane > *:not(.scroll) { flex-shrink: 0; }
+
+/* Destinations scroll within the available rail height; persistent actions stay outside. */
+.m3 .rail { min-height: 0; max-height: 100%; overflow: hidden; }
+.m3 .rail > .rail-x { flex-shrink: 0; }
+.m3 .rail-destinations { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; flex: 1 1 0; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; padding: 2px 0; }
+.m3 .rail-destinations > .ri { flex-shrink: 0; min-height: 64px; overflow-wrap: anywhere; }
+.m3 .rail-open .rail-destinations { align-items: stretch; }
+.m3 .rail-open .rail-destinations > .ri { height: auto; min-height: 56px; }
+@media (max-width: 600px) {
+  .m3 .rail { max-height: none; }
+  .m3 .rail-destinations { flex-direction: row; overflow-x: auto; overflow-y: hidden; align-items: stretch; }
+  .m3 .rail-destinations > .ri { flex: 0 0 80px; }
+}
