@@ -1,4 +1,9 @@
 export const serversZh: Record<string, string> = {
+  'SSH host name': 'SSH 主機名稱', 'SSH user': 'SSH 使用者', 'SSH port': 'SSH 連接埠', 'Dedicated remote directory': '專用遠端目錄', 'Remote Java path': '遠端 Java 路徑',
+  'Identity file path (optional)': '身分檔案路徑（可選）', 'Known hosts file path (optional)': '已知主機檔案路徑（可選）',
+  'Use an already trusted SSH host and existing authentication. Host identity checks remain enabled. These connection fields are not saved in the draft.': '請使用已信任嘅 SSH 主機同現有驗證方式。主機身分檢查保持啟用，連線欄位唔會存入草稿。',
+  'Remote content and backup storage operations are not available.': '遠端內容同備份儲存操作仍未提供。',
+
   'motd: printable ASCII only, up to 200 characters': 'motd：只限可顯示 ASCII，最多 200 個字元',
   'Data packs': '資料包', 'Choose data pack ZIP': '選擇資料包 ZIP', 'Install data pack': '安裝資料包', 'Refresh content': '更新內容',
   'File-added data packs have unknown compatibility. Only install files you trust. Plugins and mods are not supported by this adapter.': '從檔案加入嘅資料包相容性未知，請只安裝可信檔案；此介面唔支援插件同模組。',
