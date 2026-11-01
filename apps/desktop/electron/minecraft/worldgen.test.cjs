@@ -18,10 +18,10 @@ function writeTree(root, files) {
 
 /** A bundled jar whose inner jar holds a tiny but real-shaped worldgen data set. */
 const fixturePresetIds = ["normal", "flat", "large_biomes", "amplified", "single_biome_surface", "debug_all_block_states"];
-function catalogue({ presets = true, presetIds = fixturePresetIds } = {}) {
+function catalogue({ presets = true, presetIds = fixturePresetIds, packVersion = { resource: 46, data: 61 }, noiseOverrides = {}, dimensionOverrides = {} } = {}) {
   const inner = tmp(), jarTree = tmp(), out = tmp();
   const files = {
-    "version.json": { id: "1.21.4", pack_version: { resource: 46, data: 61 } },
+    "version.json": { id: "1.21.4", pack_version: packVersion },
     "data/minecraft/worldgen/biome/plains.json": {},
     "data/minecraft/worldgen/biome/desert.json": {},
     "data/minecraft/worldgen/structure_set/villages.json": {},
@@ -30,6 +30,8 @@ function catalogue({ presets = true, presetIds = fixturePresetIds } = {}) {
     "data/minecraft/worldgen/noise_settings/overworld.json": { sea_level: 63, aquifers_enabled: true, ore_veins_enabled: true, disable_mob_generation: false, default_block: { Name: "minecraft:stone" }, default_fluid: { Name: "minecraft:water" }, noise: { min_y: -64, height: 384, size_horizontal: 1, size_vertical: 2 } },
     "data/minecraft/dimension_type/overworld.json": { height: 384, min_y: -64, logical_height: 384, natural: true },
   };
+  Object.assign(files["data/minecraft/worldgen/noise_settings/overworld.json"], noiseOverrides);
+  Object.assign(files["data/minecraft/dimension_type/overworld.json"], dimensionOverrides);
   if (presets) for (const p of presetIds) files[`data/minecraft/worldgen/world_preset/${p}.json`] = { dimensions: {} };
   writeTree(inner, files);
   fs.mkdirSync(path.join(jarTree, "META-INF/versions/1.21.4"), { recursive: true });
@@ -93,6 +95,41 @@ test("preset defaults use an implemented discovered identity and no supported ro
   assert.match(unknown.reason, /No preset in this version/);
   assert.deepEqual(unknown.presets, ["minecraft:future_archipelago"]);
   assert.equal(unknown.presetOptions[0].supported, false);
+});
+
+test("modern string states and graph settings remain discoverable without invalid editable defaults", () => {
+  const c = catalogue({ packVersion: { resource_major: 97, resource_minor: 1, data_major: 121, data_minor: 0 }, noiseOverrides: {
+    default_block: "minecraft:stone", default_fluid: "minecraft:water", aquifers_enabled: undefined,
+    ore_veins_enabled: undefined, aquifers: { barrier: "minecraft:overworld/barrier" }, material_rule: "minecraft:overworld",
+  } });
+  assert.equal(c.supported, false);
+  assert.equal(c.capabilities.customization.available, false);
+  assert.match(c.reason, /customization builder does not support yet/);
+  assert.deepEqual(c.presets, fixturePresetIds.map(id => `minecraft:${id}`).sort());
+  assert.equal(c.blocks.length, 5);
+  assert.equal(c.packFormat, null);
+  assert.throws(() => w.defaults(c), /WORLDGEN_UNSUPPORTED/);
+  assert.throws(() => w.validate({}, c), /WORLDGEN_UNSUPPORTED/);
+});
+
+test("unsupported typed fields never retain a supported customization verdict", () => {
+  for (const noiseOverrides of [{ default_block: "minecraft:stone" }, { default_fluid: null }, { aquifers_enabled: undefined }, { ore_veins_enabled: "false" }, { noise: null }]) {
+    const c = catalogue({ noiseOverrides });
+    assert.equal(c.supported, false);
+    assert.ok(c.capabilities.customization.unsupportedFields.length > 0);
+    assert.throws(() => w.defaults(c), /WORLDGEN_UNSUPPORTED/);
+  }
+  assert.equal(catalogue({ dimensionOverrides: { logical_height: "384" } }).supported, false);
+  assert.equal(catalogue().capabilities.customization.available, true);
+});
+
+test("the legacy metadata writer admits only its documented integer format range", () => {
+  assert.equal(catalogue({ packVersion: { data: 81 } }).supported, true);
+  for (const data of [0, 82, 88, 61.5]) {
+    const c = catalogue({ packVersion: { data } });
+    assert.equal(c.supported, false);
+    assert.ok(c.capabilities.customization.unsupportedFields.includes("pack_format"));
+  }
 });
 
 test("versions without data-driven presets are reported unsupported with a reason", () => {

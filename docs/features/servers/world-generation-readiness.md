@@ -20,6 +20,25 @@ not proof that an unsupported preset can generate a world.
 
 ## Version admission
 
+The current customization writer also requires its legacy typed noise, dimension, block-state
+and flat-setting shapes and an integer data-pack format below 82. This is detected from actual
+selected-version data, not a guessed release-name cutoff. Later graph settings or major/minor
+pack metadata retain discovery but expose `capabilities.customization.available: false`,
+explicit unsupported fields, a localized explanation and no editable defaults. The internal
+defaults/validation helpers also reject the unavailable catalogue.
+
+This boundary was exercised against official 26.3 data. Its string block states, graph aquifers,
+removed ore Boolean and major/minor pack metadata do not fit the existing writer. Marking this
+route unavailable fixes the blank-picker path without claiming modern-schema generation support.
+The renderer separately handles malformed or missing setting values without inventing defaults.
+Official references: [26.3 generation changes](https://www.minecraft.net/en-us/article/minecraft-java-edition-26-3)
+and [1.21.9 pack metadata](https://www.minecraft.net/en-us/article/minecraft-java-edition-1-21-9).
+
+The strict Boolean flat-field checks describe this builder's current admission boundary,
+not universal protocol requiredness of optional fields. An integer format in 1 through 81
+alone does not establish support for a version; its actual registry, shape and readiness
+checks must also pass. Full generation remains subject to separate runtime acceptance.
+
 World presets alone do not establish that a version can execute the generator's readiness probes. The selected server distribution's actual command report must expose `execute if loaded` with a `minecraft:block_pos` argument redirected to `execute`, the root `execute run` form (the vanilla exporter omits an empty root redirect), and an executable `say` message argument. The catalogue retains the selected version and extracted picker data but sets `supported: false` with an explicit readiness-route explanation when that schema is missing or incompatible. Validation rejects generation before spawning a Java server. No guessed version-number threshold substitutes for those reports.
 
 The older preset-bearing route remains unavailable until a compatible implementation is independently verified. Discovery is retained. This change does not add older-version support or remove the user's EULA decision.
