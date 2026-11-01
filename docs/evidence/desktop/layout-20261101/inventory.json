@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "layout-05-minimum-expanded-rail",
+      "active": true,
+      "path": "docs/evidence/desktop/layout-20261101/minimum-bilingual-focus.png",
+      "sourceCommit": "5c6662455bd968edfe4a4ebcad30b1e902d03b20",
+      "artifactSha256": "81a0cda8592aa01635ea22b460b8ea897e16acfb281cdc53afc9a92f5c35f096",
+      "captureSha256": "de47ea847d33a3331a0dd73fcedd705155519ca1e9ab094f133e0b3b56fcd0e2",
+      "screen": "personalize-focus",
+      "state": "Minimum bilingual expanded rail with Settings reached and Lock focused",
+      "theme": "light",
+      "viewportWidth": 760,
+      "viewportHeight": 580,
+      "scale": 1.0000000298023224,
+      "interactionProofId": "layout-05-minimum-expanded-rail",
+      "interactionReceiptSha256": "25a08099a4e5547c38756078461ea5ac38a6445e72e3c905c40eabef08bc07d6",
+      "inspectionStatus": "inspected",
+      "captureStartedAt": "2026-11-01T10:34:11.068Z",
+      "capturedAt": "2026-11-01T10:34:11.111Z",
+      "timezone": "UTC",
+      "language": "bilingual",
+      "requestedScale": 1,
+      "scaleEvidence": "CDP page emulation, not physical display scaling",
+      "limitation": "Renderer Tab navigation began from an explicitly focused menu. This is not physical keyboard proof."
+    },
+    {
+      "id": "layout-10-minimum-appearance",
+      "active": true,
+      "path": "docs/evidence/desktop/layout-20261101/minimum-bilingual-appearance.png",
+      "sourceCommit": "5c6662455bd968edfe4a4ebcad30b1e902d03b20",
+      "artifactSha256": "81a0cda8592aa01635ea22b460b8ea897e16acfb281cdc53afc9a92f5c35f096",
+      "captureSha256": "62a864dbb6d6c1756cf23fff831367da2149ca1618920c7bd799add10ccf20ce",
+      "screen": "personalize-appearance",
+      "state": "Minimum bilingual Appearance pane scrolled into view with horizontal bounds preserved",
+      "theme": "light",
+      "viewportWidth": 760,
+      "viewportHeight": 580,
+      "scale": 1.0000000298023224,
+      "interactionProofId": "layout-10-minimum-appearance",
+      "interactionReceiptSha256": "d8515fe164b2b9835a01d0cd7bd4ab96cdd5783cf0f4fd697ec5cdc2515044d1",
+      "inspectionStatus": "inspected",
+      "captureStartedAt": "2026-11-01T10:34:11.123Z",
+      "capturedAt": "2026-11-01T10:34:11.162Z",
+      "timezone": "UTC",
+      "language": "bilingual",
+      "requestedScale": 1,
+      "scaleEvidence": "CDP page emulation, not physical display scaling",
+      "limitation": "Shows the upper Appearance controls after vertical scrolling. Lower controls remain below the fold; no full visual parity is claimed."
+    }
+  ]
+}
