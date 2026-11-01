@@ -79,6 +79,25 @@ The pointer endpoint remains within the declared hue range. This does not claim 
 
 ![Hue pointer endpoint with the handle at the right edge](docs/evidence/desktop/repair-20261101/issue-14.png)
 
+## Measured minimum-layout repairs
+
+These later captures are bound to source `5c6662455bd968edfe4a4ebcad30b1e902d03b20`.
+The four repair images above retain their original `47e8ae1` source and independent scope.
+The two images below show bilingual light mode at 760 × 580 with an expanded navigation rail
+and requested CDP scale 1. They provide bounded layout and renderer-keyboard evidence, not
+physical display-scale or full accessibility certification.
+[Exact inventory, capture times and verification limits](docs/evidence/desktop/layout-20261101/README.md).
+
+![Minimum bilingual Focus view with Settings reachable and Lock focused](docs/evidence/desktop/layout-20261101/minimum-bilingual-focus.png)
+
+Renderer Tab navigation reached Settings and then Lock, with visible focus. The destination
+list scrolls independently while Lock remains visible.
+
+![Minimum bilingual Appearance controls inside their owning pane](docs/evidence/desktop/layout-20261101/minimum-bilingual-appearance.png)
+
+The upper Appearance controls are shown after vertical scrolling. Lower controls remain below
+the fold; the measured horizontal containment does not claim complete visual parity.
+
 ## Documentation and remaining work
 
 The hosted handbook retains complete documentation/wiki articles and interactive task guides. Automated releases also include a single-file offline handbook. Earlier source-bound handbook interaction and restart observations remain in the archive; current-source companion runtime acceptance is not inferred from packaging success.

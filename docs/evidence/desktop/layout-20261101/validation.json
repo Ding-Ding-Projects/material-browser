@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "5c6662455bd968edfe4a4ebcad30b1e902d03b20",
+  "validatedAt": "2026-11-01T10:47:36.906Z",
+  "validationContext": "Validated before the evidence commit while the target checkout was at the captured source.",
+  "validator": "promote-ui-evidence/verify-evidence-receipt.mjs",
+  "records": [
+    {
+      "id": "layout-05-minimum-expanded-rail",
+      "valid": true,
+      "artifactSha256": "81a0cda8592aa01635ea22b460b8ea897e16acfb281cdc53afc9a92f5c35f096",
+      "captureSha256": "de47ea847d33a3331a0dd73fcedd705155519ca1e9ab094f133e0b3b56fcd0e2",
+      "width": 760,
+      "height": 580,
+      "documentationFiles": 1
+    },
+    {
+      "id": "layout-10-minimum-appearance",
+      "valid": true,
+      "artifactSha256": "81a0cda8592aa01635ea22b460b8ea897e16acfb281cdc53afc9a92f5c35f096",
+      "captureSha256": "62a864dbb6d6c1756cf23fff831367da2149ca1618920c7bd799add10ccf20ce",
+      "width": 760,
+      "height": 580,
+      "documentationFiles": 1
+    }
+  ],
+  "missingIdNegative": {
+    "rejected": true,
+    "restoredOriginalPassed": true,
+    "exactInventoryBytesRestored": true
+  },
+  "scope": "Byte equality, source/build binding, PNG structure, declared observations, exact inventory IDs and documentation links. Visual inspection was performed separately.",
+  "limits": [
+    "CDP scale emulation, not physical display scaling",
+    "Renderer keyboard events, not physical keyboard proof",
+    "Two representative images, not full visual parity"
+  ]
+}
