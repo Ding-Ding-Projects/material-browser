@@ -41,7 +41,8 @@ const ERROR_TEXT: Record<string, string> = {
   BOOKMARKS_INVALID: "This file is not a browser bookmark export",
   NOT_UTF8: "Data files must be UTF-8 text",
   IMAGE_INVALID: "The image could not be decoded",
-  VERIFY_FAILED: "The written file did not pass the check and was removed",
+  VERIFY_FAILED: "The output did not pass verification. Changed files were preserved; check the output folder before retrying.",
+  OUTPUT_FOLDER_CHANGED: "The selected output folder changed. Reselect the output folder before converting again.",
   NOT_A_FILE: "The input is not a regular file",
   ENOENT: "The file could not be read",
   EACCES: "The file could not be read",
@@ -148,8 +149,11 @@ function ConverterPane() {
         }),
       });
       await refresh();
-    } catch {
-      setError(t("The converter is not available in this window."));
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
+      const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";
+      const folderChanged = code === "OUTPUT_FOLDER_CHANGED" || /(?:^|:\s*)OUTPUT_FOLDER_CHANGED(?:\b|$)/.test(message);
+      setError(t(folderChanged ? ERROR_TEXT.OUTPUT_FOLDER_CHANGED : "The converter is not available in this window."));
     }
   };
 
