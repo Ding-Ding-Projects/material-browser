@@ -12,6 +12,8 @@ function fixture({
   argv = [],
   destroyed = false,
   contentsDestroyed = destroyed,
+  serverLifecycle,
+  worldgenLifecycle,
 } = {}) {
   const handlers = new Map();
   let options;
@@ -22,6 +24,8 @@ function fixture({
   let appUserModelId;
   const windowActions = [];
   const windowEvents = new Map();
+  const appEvents = new Map();
+  let quits = 0, hostKills = 0;
   let maximized = false;
   const contents = {
     mainFrame: {
@@ -41,7 +45,7 @@ function fixture({
   const host = new EventEmitter();
   host.stdout = new EventEmitter();
   host.stdin = { writable: true, write() {} };
-  host.kill = () => {};
+  host.kill = () => { hostKills++; };
   class BrowserWindow {
     constructor(value) {
       options = value;
@@ -67,8 +71,8 @@ function fixture({
         dataDirectory = value;
       },
       whenReady: () => ({ then: (fn) => fn() }),
-      on() {},
-      quit() {},
+      on(name, handler) { appEvents.set(name, handler); },
+      quit() { quits++; },
       exit(code) { exitCodes.push(code); },
       setAppUserModelId(value) { appUserModelId = value; },
     },
@@ -92,8 +96,8 @@ function fixture({
           electron,
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
           "./services/element-locks.cjs": desktopRequire("../electron/services/element-locks.cjs"),
-          "./game-servers-ipc.cjs": desktopRequire("../electron/game-servers-ipc.cjs"),
-          "./worldgen-ipc.cjs": desktopRequire("../electron/worldgen-ipc.cjs"),
+          "./game-servers-ipc.cjs": serverLifecycle ? { registerGameServersIpc: () => serverLifecycle } : desktopRequire("../electron/game-servers-ipc.cjs"),
+          "./worldgen-ipc.cjs": worldgenLifecycle ? { registerWorldgenIpc: () => worldgenLifecycle } : desktopRequire("../electron/worldgen-ipc.cjs"),
           "./services/ollama.cjs": desktopRequire("../electron/services/ollama.cjs"),
           "./services/converter.cjs": desktopRequire("../electron/services/converter.cjs"),
           "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
@@ -110,8 +114,53 @@ function fixture({
       process: { resourcesPath: "/test", argv, platform: "win32", execPath: "C:\\fixture\\MaterialBrowser\\app-0.1.1\\MaterialBrowser.exe" },
     },
   );
-  return { windowActions, windowEvents, handlers, options, contents, host, dataDirectory, sent: () => sent, hostSpawns, exitCodes, appUserModelId };
+  return { windowActions, windowEvents, appEvents, quits: () => quits, hostKills: () => hostKills, handlers, options, contents, host, dataDirectory, sent: () => sent, hostSpawns, exitCodes, appUserModelId };
 }
+
+test('quit waits for a generator even when no managed browser server service was opened', async () => {
+  let release, attempts = 0;
+  const f = fixture({
+    serverLifecycle: { active: false, dispose: async () => { attempts++; } },
+    worldgenLifecycle: { active: true, dispose: () => new Promise(resolve => { release = resolve; }) },
+  });
+  let prevented = 0;
+  const event = { preventDefault() { prevented++; } };
+  f.appEvents.get('before-quit')(event);
+  await new Promise(setImmediate);
+  assert.equal(prevented, 1);
+  assert.equal(attempts, 1);
+  assert.equal(f.quits(), 0);
+  assert.equal(f.hostKills(), 0);
+  release();
+  await new Promise(setImmediate);
+  assert.equal(f.quits(), 1);
+  f.appEvents.get('before-quit')(event);
+  assert.equal(prevented, 1);
+  assert.equal(f.hostKills(), 1);
+});
+
+test('quit attempts every owned stop and retains retry after one service rejects', async () => {
+  let serverStops = 0, generatorStops = 0;
+  const f = fixture({
+    serverLifecycle: { active: true, dispose: async () => { if (++serverStops === 1) throw new Error('STOP_PENDING'); } },
+    worldgenLifecycle: { active: true, dispose: async () => { generatorStops++; } },
+  });
+  let prevented = 0;
+  const event = { preventDefault() { prevented++; } };
+  f.appEvents.get('before-quit')(event);
+  f.appEvents.get('before-quit')(event);
+  await new Promise(setImmediate);
+  assert.equal(serverStops, 1);
+  assert.equal(generatorStops, 1);
+  assert.equal(f.quits(), 0);
+  assert.equal(f.hostKills(), 0);
+  assert.equal(f.sent(), 1);
+  f.appEvents.get('before-quit')(event);
+  await new Promise(setImmediate);
+  assert.equal(serverStops, 2);
+  assert.equal(generatorStops, 2);
+  assert.equal(f.quits(), 1);
+});
 
 test('Squirrel maintenance never opens a workspace or starts its native host', () => {
   for (const event of ['--squirrel-install', '--squirrel-updated', '--squirrel-uninstall', '--squirrel-obsolete']) {

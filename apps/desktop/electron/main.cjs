@@ -162,7 +162,14 @@ registerElementLocksIpc({ ipcMain, app, shell, trusted });
 const gameServers = registerGameServersIpc({ ipcMain, app, trusted });
 registerOllamaIpc({ ipcMain, app, trusted, getWindow: () => window });
 registerConverterIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
-registerWorldgenIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
+const worldGenerator = registerWorldgenIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
+const managedServices = [gameServers, worldGenerator];
+let managedShutdownComplete = false;
+let managedShutdownPending = false;
+function needsManagedShutdown() {
+  return !managedShutdownComplete &&
+    (managedShutdownPending || managedServices.some(service => service.active));
+}
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||
@@ -243,7 +250,7 @@ app.whenReady().then(() => {
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   // Keep the workspace open while its owned servers stop, including title-bar close.
   window.on("close", event => {
-    if (gameServers.active && !serverShutdownComplete) {
+    if (needsManagedShutdown()) {
       event.preventDefault();
       app.quit();
     }
@@ -259,19 +266,18 @@ app.whenReady().then(() => {
   window.loadFile(rendererFile);
 });
 app.on("window-all-closed", () => app.quit());
-let serverShutdownComplete = false;
-let serverShutdownPending = false;
 app.on("before-quit", (event) => {
-  if (gameServers.active && !serverShutdownComplete) {
+  if (needsManagedShutdown()) {
     event.preventDefault();
-    if (serverShutdownPending) return;
-    serverShutdownPending = true;
-    gameServers.dispose().then(() => {
-      serverShutdownComplete = true;
+    if (managedShutdownPending) return;
+    managedShutdownPending = true;
+    Promise.allSettled(managedServices.map(service => Promise.resolve().then(() => service.dispose()))).then(results => {
+      if (results.some(result => result.status === "rejected")) throw new Error("STOP_PENDING");
+      managedShutdownComplete = true;
       app.quit();
     }).catch(() => {
-      serverShutdownPending = false;
-      if (window && !window.isDestroyed()) {
+      managedShutdownPending = false;
+      if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
         window.webContents.send("material:event", { type: "server-shutdown-pending", code: "STOP_PENDING" });
       }
     });
