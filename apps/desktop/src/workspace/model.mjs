@@ -92,6 +92,7 @@ export function catalogDestinations(definitions, categories = []) {
       ["profiles", "Profiles"],
       ["super-profiles", "Super Profiles"],
       ["sync", "Synchronization"],
+      ["servers", "Minecraft servers"],
       ["settings", "Settings"],
     ].map(([id, label]) => ({ id: `page:${id}`, label, page: id })),
     ...categories.map((category) => ({

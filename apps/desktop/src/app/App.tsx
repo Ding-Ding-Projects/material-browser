@@ -22,6 +22,7 @@ import { UnlockDialog, SupportTickets } from "./Safety";
 import { useLockStore } from "./locks";
 import { SyncPage } from "./Sync";
 import { SuperProfilesPage } from "./SuperProfiles";
+import { ServersPage } from "./Servers";
 import { SettingsPage } from "./Settings";
 
 const read = (key: string, fallback: any) => {
@@ -287,6 +288,8 @@ export function App() {
       ? ["library_add", t("New template"), () => window.dispatchEvent(new Event("super-profiles-create"))]
       : page === "sync"
         ? ["sync", t("Sync now"), () => window.dispatchEvent(new Event("sync-now"))]
+        : page === "servers"
+          ? ["add", t("New server"), () => window.dispatchEvent(new Event("servers-create"))]
         : ["person_add", t("Create profile"), () => setCreating(true)];
   return (
     <Provider value={value}>
@@ -330,6 +333,7 @@ export function App() {
                 {page === "launch" && <LaunchPage />}
                 {page === "super-profiles" && <SuperProfilesPage />}
                 {page === "sync" && <SyncPage />}
+                {page === "servers" && <ServersPage />}
                 {page === "settings" && (
                   <SettingsPage
                     section={settingsSection}
