@@ -91,3 +91,51 @@ test('a post-placement temporary unlink fault never retries completed placement'
   assert.deepEqual(fs.readdirSync(output).filter((name) => name.endsWith('.json')), ['result.json']);
   assert.equal(fs.readFileSync(placed, 'utf8'), '[1]');
 });
+
+test('a selected directory replaced before enqueue requires reselection without adding jobs', (t) => {
+  const { input, output } = fixture(t);
+  const original = path.join(path.dirname(output), 'original');
+  const queue = converter.createConverter();
+  queue.setOutputFolder(output);
+  fs.renameSync(output, original);
+  fs.mkdirSync(output);
+  assert.throws(() => queue.enqueue([{ path: input, target: 'json' }]), /OUTPUT_FOLDER_CHANGED/);
+  assert.deepEqual(queue.snapshot().jobs, []);
+  assert.deepEqual(fs.readdirSync(output), []);
+  assert.deepEqual(fs.readdirSync(original), []);
+});
+
+test('a writing-stage directory remap does not redirect the queued conversion', async (t) => {
+  const { input, output } = fixture(t);
+  const original = path.join(path.dirname(output), 'original');
+  const other = path.join(path.dirname(output), 'other');
+  fs.mkdirSync(other);
+  let remapped = false;
+  const queue = converter.createConverter({ onChange(state) {
+    if (!remapped && state.jobs.some((job) => job.stage === 'writing')) {
+      remapped = true;
+      fs.renameSync(output, original);
+      fs.symlinkSync(other, output, process.platform === 'win32' ? 'junction' : 'dir');
+    }
+  } });
+  queue.setOutputFolder(output);
+  const [id] = queue.enqueue([{ path: input, target: 'json' }]);
+  await queue.idle();
+  assert.equal(remapped, true);
+  assert.equal(queue.job(id).state, 'failed');
+  assert.equal(queue.job(id).error, 'OUTPUT_FOLDER_CHANGED');
+  assert.deepEqual(fs.readdirSync(original), []);
+  assert.deepEqual(fs.readdirSync(other), []);
+});
+
+test('an initially selected directory junction remains supported while its target is unchanged', async (t) => {
+  const { input, output, destination } = fixture(t);
+  const alias = path.join(path.dirname(output), 'selected-alias');
+  fs.symlinkSync(output, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const queue = converter.createConverter();
+  queue.setOutputFolder(alias);
+  const [id] = queue.enqueue([{ path: input, target: 'json' }]);
+  await queue.idle();
+  assert.equal(queue.job(id).state, 'done');
+  assert.deepEqual(JSON.parse(fs.readFileSync(destination, 'utf8')), [{ key: 'original' }]);
+});
