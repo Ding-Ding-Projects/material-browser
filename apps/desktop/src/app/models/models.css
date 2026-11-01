@@ -13,3 +13,4 @@
 .models-workspace .li { flex-wrap:wrap; }
 .models-workspace [hidden] { display:none; }
 @media(max-width:600px) { .models-workspace { padding:8px; } .models-panel { padding:12px; } .models-main,.models-queue { flex-basis:100%; } }
+.models-layout > .pane { max-width:100%; }
