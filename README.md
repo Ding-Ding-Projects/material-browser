@@ -12,6 +12,8 @@ See [the workflow and current limits](docs/features/desktop/super-profiles.md).
 - [Interactive handbook and complete documentation](https://ding-ding-projects.github.io/material-browser/)
 - [Reviewed interface screenshot gallery](https://ding-ding-projects.github.io/material-browser-evidence/) with its original per-image hashes and capture provenance
 - [Architecture](docs/architecture.md)
+- [Required-feature acceptance and remaining gaps](docs/features/acceptance/README.md)
+- [Server management implementation and verification limits](docs/features/servers/README.md)
 - [Roadmap](ROADMAP.md) and [current handoff](HANDOFF.md)
 - [Windows build and release automation](docs/features/delivery/windows-automation.md)
 - [Browsers and automation runtimes bundled in the installer](docs/features/delivery/bundled-engines.md)

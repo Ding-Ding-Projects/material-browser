@@ -1,5 +1,21 @@
 # Roadmap
 
+## Required-feature verification, November 2026
+
+- [x] Reconcile 111 requirement identities across seven surface families and 26 source-backed child surfaces
+- [x] Add positive and negative acceptance-inventory checks without claiming runtime completion
+- [x] Implement a single protected server bridge, four target adapters and owned lifecycle boundaries
+- [x] Repair restart and shutdown ordering with focused regression tests
+- [x] Repair unsafe restore manifest roots and verify staged replacement rollback
+- [x] Consolidate typed configuration with Unicode, duplicate-key and version-uncertainty checks
+- [ ] Verify the current integrated desktop build and real server workspace interactions
+- [ ] Verify real server runtime lifecycle across all targets with explicit EULA acceptance and approved hosts
+- [ ] Complete Bedrock, flavours, player/plugin workflows and remaining version-bound behavior
+- [ ] Complete every applicable acceptance row, companion surface and current runtime evidence
+
+Checked implementation items describe source plus focused checks only, not completed
+product delivery. The acceptance ledger retains 414 applicable unfinished rows.
+
 ## Current repository design migration
 
 - [x] Preserve five genuine native runtime captures and normal-exit receipts privately

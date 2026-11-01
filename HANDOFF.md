@@ -190,3 +190,25 @@ Current design authority remains repository `design/` at `0ab6165`. The original
 The actual 0.1.58 package subsequently ran through the direct native CLI: five inspected PNGs, real native navigation, no credentials/private wording/personal records, and normal seven-process/desktop exit proof. See the native runtime observation article. Their formal promotion lacks required diagnostics/layout receipt coverage, so the current README image request remains incomplete. The existing public gallery was verified reachable and unchanged; its publication lane excluded these captures pending valid receipts.
 
 Next owner: complete an appropriate fresh browser-window observation/receipt workflow, inspect actual controls and layout against all eight current artboards, complete the supported matrix and persistence checks, then embed accepted originals in README and publish the gallery update. Preserve every historical original and the private native receipts. No full UI, installer, installed-update or deployment acceptance is claimed by this closeout.
+
+## Required-feature implementation in progress, 2026-11-01
+
+The active task implements and verifies all applicable requirements across all product surfaces.
+The acceptance ledger has 111 identities, seven surface families, 26 child surfaces and 414
+applicable unfinished rows. No current runtime row is marked verified.
+
+Server work now uses one registered game-servers authority. Incoming server and GUI source
+from 2cd5263 and abed939 is preserved in merged history; useful configuration work is reused,
+while duplicate runtime registration remains disabled. Four adapters exist in source, with
+local backup/data-pack operations and typed configuration. Bedrock, flavour integration,
+complete player/plugin flows, remote-world transfer and runtime acceptance remain incomplete.
+
+Verification: 103 Rust workspace tests passed after repairing the encryption test's read of
+its empty exclusive operational lock. The earlier Desktop build at 4a85839 passed the exact
+build.bat entrypoint. Later integrated server tests passed 49 checks, desktop security 10.
+Those results do not prove final-source GUI behavior, real server lifecycle or a release.
+Local Docker daemon was unavailable; no actual server EULA acceptance or remote target was
+invented. A fresh integrated build and hidden-desktop verification are next.
+
+Preserve all task branches and ignored announcement images while work is active. New release
+publication and installed update remain outside this task's selected delivery boundary.
