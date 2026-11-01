@@ -26,9 +26,23 @@ as the main canvas. Each artboard has a `dark` toggle.
 - `ServerContent.dc.html`: Plugin manager with catalogue search, licence, compatibility and hash,
   plus a file-added plugin marked as not fully managed. Worlds, export and import, automatic
   backups and restore points.
+- `WorldGenerator.dc.html`: World generator in the server tab. A drawing canvas on a chunk grid
+  (drag to draw an area, drag the area to move it, width and depth steppers with numeric fields,
+  a Default 100 x 100 button and Centre on spawn) with a block, chunk and batch readout and a
+  world-border switch. World settings: seed with a random action, world type, a superflat layer
+  editor with presets, biome, features and lakes, single-biome picker, structures, terrain and
+  dimension values, typed game rules with search, difficulty and hardcore. Output as a Folder or a
+  ZIP file with Browse, never replacing existing files and checked after writing.
 - `Ollama.dc.html`: Local model suite with healthy and not-installed states, store with fit
   verdicts, free pull queue.
 - `Toolbox.dc.html`: Local file converter and offline changelog viewer.
+- `OllamaStates.dc.html`: Ollama header states (checking, installed but not running, not
+  responding, desktop app required), installer download, confirmation with version, size, SHA-256
+  and integrity, installed list with remove confirmation, chat, pull queue item states, pulls at
+  once, clear finished, catalogue unavailable and the store evidence footer.
+- `ToolboxStates.dc.html`: Drop highlight, unavailable category line, Convert to and optional width,
+  output folder row, waiting, failed and canceled rows, Clear finished, changelog release notes,
+  Date not recorded and the no-results state. Image output is PNG or JPEG only.
 - `Personalize.dc.html`: ADHD-friendly focus modes and the per-element appearance editor with a
   colour picker, colour translations and a live contrast check.
 
