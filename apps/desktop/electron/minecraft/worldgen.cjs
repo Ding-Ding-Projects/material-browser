@@ -15,6 +15,7 @@ const DEFAULT_AREA = Object.freeze({ width: 100, depth: 100 });
 const MAX_AREA_CHUNKS = 1000;
 const FORCELOAD_MAX = 256;
 const PRESET_IDS = ["normal", "flat", "large_biomes", "amplified", "single_biome_surface"];
+const PRESET_UNSUPPORTED_REASON = "This preset is present in the selected version, but its generator is not implemented by the world customization builder.";
 
 /** Bundled server jars (1.18 and newer) keep the real server jar inside META-INF/versions. */
 function innerJar(outer) {
@@ -161,10 +162,15 @@ function catalogueFrom(jarBuffer, reportsDir) {
   const version = readJson(jar, "version.json");
   const presets = stems(jar, "data/minecraft/worldgen/world_preset");
   if (!presets.length)
-    return { supported: false, reason: "This version predates data-driven world presets, so only seed, world type and structures can be set.", version: version?.id ?? null };
+    return { supported: false, reason: "This version predates data-driven world presets, so only seed, world type and structures can be set.", version: version?.id ?? null, presets: [], presetOptions: [] };
   const registries = JSON.parse(fs.readFileSync(path.join(reportsDir, "reports", "registries.json"), "utf8"));
   const commands = JSON.parse(fs.readFileSync(path.join(reportsDir, "reports", "commands.json"), "utf8"));
   const readiness = readinessCapability(commands);
+  const presetOptions = presets.map((id) => {
+    const supported = PRESET_IDS.includes(id.slice(10));
+    return { id, supported, reason: supported ? null : PRESET_UNSUPPORTED_REASON };
+  });
+  const hasImplementedPreset = presetOptions.some((entry) => entry.supported);
   const rules = commands?.children?.gamerule?.children || {};
   const gameRules = Object.entries(rules)
     .map(([name, node]) => {
@@ -179,12 +185,13 @@ function catalogueFrom(jarBuffer, reportsDir) {
   const overworldNoise = readJson(jar, "data/minecraft/worldgen/noise_settings/overworld.json");
   const overworldType = readJson(jar, "data/minecraft/dimension_type/overworld.json");
   return {
-    supported: readiness.available,
-    reason: readiness.reason,
+    supported: readiness.available && hasImplementedPreset,
+    reason: readiness.reason || (hasImplementedPreset ? null : "No preset in this version has an implemented customization route."),
     capabilities: { chunkReadiness: readiness },
     version: version.id,
     packFormat: version.pack_version?.data ?? version.pack_version,
-    presets: presets.filter((p) => PRESET_IDS.includes(p.slice(10))),
+    presets,
+    presetOptions,
     biomes: stems(jar, "data/minecraft/worldgen/biome"),
     structureSets: stems(jar, "data/minecraft/worldgen/structure_set"),
     blocks: Object.keys(registries["minecraft:block"]?.entries || {}).sort(),
@@ -206,10 +213,12 @@ function catalogueFrom(jarBuffer, reportsDir) {
 }
 
 function defaults(catalogue) {
+  const supportedPresets = catalogue.presets.filter((id) => PRESET_IDS.includes(id.slice(10)));
+  if (!supportedPresets.length) throw fail("WORLDGEN_UNSUPPORTED", "No preset in this version has an implemented customization route.");
   return {
     name: "Generated world",
     seed: "",
-    preset: "normal",
+    preset: (supportedPresets.includes("minecraft:normal") ? "minecraft:normal" : supportedPresets[0]).slice(10),
     flat: catalogue.flatPresets.find((p) => p.id === "minecraft:classic_flat")?.settings || { biome: "minecraft:plains", features: false, lakes: false, layers: [{ block: "minecraft:bedrock", height: 1 }], structure_overrides: [] },
     singleBiome: "minecraft:plains",
     structures: catalogue.structureSets.slice(),
@@ -234,7 +243,8 @@ function validate(options, catalogue) {
   const o = { ...defaults(catalogue), ...options };
   if (typeof o.name !== "string" || !/^[A-Za-z0-9 _-]{1,40}$/.test(o.name)) throw fail("INVALID_NAME");
   if (typeof o.seed !== "string" || o.seed.length > 64 || /[\r\n]/.test(o.seed)) throw fail("INVALID_SEED");
-  if (!PRESET_IDS.includes(o.preset) || !catalogue.presets.includes(`minecraft:${o.preset}`)) throw fail("INVALID_PRESET");
+  if (!catalogue.presets.includes(`minecraft:${o.preset}`)) throw fail("INVALID_PRESET");
+  if (!PRESET_IDS.includes(o.preset)) throw fail("WORLD_PRESET_UNSUPPORTED", PRESET_UNSUPPORTED_REASON);
   if (!["peaceful", "easy", "normal", "hard"].includes(o.difficulty)) throw fail("INVALID_DIFFICULTY");
   if (typeof o.hardcore !== "boolean" || typeof o.generateStructures !== "boolean" || typeof o.worldBorder !== "boolean") throw fail("INVALID_REQUEST");
   const blocks = new Set(catalogue.blocks), biomes = new Set(catalogue.biomes), sets = new Set(catalogue.structureSets);

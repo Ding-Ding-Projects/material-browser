@@ -17,7 +17,8 @@ function writeTree(root, files) {
 }
 
 /** A bundled jar whose inner jar holds a tiny but real-shaped worldgen data set. */
-function catalogue({ presets = true } = {}) {
+const fixturePresetIds = ["normal", "flat", "large_biomes", "amplified", "single_biome_surface", "debug_all_block_states"];
+function catalogue({ presets = true, presetIds = fixturePresetIds } = {}) {
   const inner = tmp(), jarTree = tmp(), out = tmp();
   const files = {
     "version.json": { id: "1.21.4", pack_version: { resource: 46, data: 61 } },
@@ -29,7 +30,7 @@ function catalogue({ presets = true } = {}) {
     "data/minecraft/worldgen/noise_settings/overworld.json": { sea_level: 63, aquifers_enabled: true, ore_veins_enabled: true, disable_mob_generation: false, default_block: { Name: "minecraft:stone" }, default_fluid: { Name: "minecraft:water" }, noise: { min_y: -64, height: 384, size_horizontal: 1, size_vertical: 2 } },
     "data/minecraft/dimension_type/overworld.json": { height: 384, min_y: -64, logical_height: 384, natural: true },
   };
-  if (presets) for (const p of ["normal", "flat", "large_biomes", "amplified", "single_biome_surface", "debug_all_block_states"]) files[`data/minecraft/worldgen/world_preset/${p}.json`] = { dimensions: {} };
+  if (presets) for (const p of presetIds) files[`data/minecraft/worldgen/world_preset/${p}.json`] = { dimensions: {} };
   writeTree(inner, files);
   fs.mkdirSync(path.join(jarTree, "META-INF/versions/1.21.4"), { recursive: true });
   zip.zipFolder(inner, path.join(jarTree, "META-INF/versions/1.21.4/server-1.21.4.jar"), "");
@@ -60,16 +61,38 @@ test("zip writes, reopens and detects corruption", () => {
   assert.throws(() => zip.verifyZip(out));
 });
 
-test("pickers come from the version's own jar and reports, never a hardcoded list", () => {
+test("catalogue retains complete version-derived registries and labels unsupported presets", () => {
   const c = catalogue();
   assert.equal(c.supported, true);
   assert.equal(c.packFormat, 61);
   assert.deepEqual(c.biomes, ["minecraft:desert", "minecraft:plains"]);
   assert.deepEqual(c.structureSets, ["minecraft:strongholds", "minecraft:villages"]);
-  assert.ok(!c.presets.includes("minecraft:debug_all_block_states"));
+  assert.deepEqual(c.presets, fixturePresetIds.map((id) => `minecraft:${id}`).sort());
+  assert.deepEqual(c.presetOptions.map((entry) => entry.id).sort(), c.presets);
+  assert.equal(c.presetOptions.filter((entry) => entry.supported).length, 5);
+  const debug = c.presetOptions.find((entry) => entry.id === "minecraft:debug_all_block_states");
+  assert.equal(debug.supported, false);
+  assert.match(debug.reason, /generator is not implemented/);
   assert.equal(c.blocks.length, 5);
   assert.deepEqual(c.gameRules.map((r) => [r.name, r.type]), [["futureRule", "unknown"], ["keepInventory", "boolean"], ["randomTickSpeed", "integer"]]);
-  assert.doesNotMatch(fs.readFileSync(path.join(__dirname, "worldgen.cjs"), "utf8"), /minecraft:cherry_grove|minecraft:mushroom_fields/);
+});
+
+test("an unfamiliar discovered preset remains visible and cannot enter the current pack builder", () => {
+  const c = catalogue({ presetIds: [...fixturePresetIds, "future_archipelago"] });
+  assert.deepEqual(c.presets, [...fixturePresetIds, "future_archipelago"].map((id) => `minecraft:${id}`).sort());
+  assert.deepEqual(c.presetOptions.map((entry) => entry.id).sort(), c.presets);
+  assert.equal(c.presetOptions.find((entry) => entry.id === "minecraft:future_archipelago").supported, false);
+  assert.throws(() => w.validate({ ...w.defaults(c), preset: "future_archipelago" }, c), /WORLD_PRESET_UNSUPPORTED/);
+});
+
+test("preset defaults use an implemented discovered identity and no supported route is explicit", () => {
+  const flat = catalogue({ presetIds: ["flat", "future_archipelago"] });
+  assert.equal(w.defaults(flat).preset, "flat");
+  const unknown = catalogue({ presetIds: ["future_archipelago"] });
+  assert.equal(unknown.supported, false);
+  assert.match(unknown.reason, /No preset in this version/);
+  assert.deepEqual(unknown.presets, ["minecraft:future_archipelago"]);
+  assert.equal(unknown.presetOptions[0].supported, false);
 });
 
 test("versions without data-driven presets are reported unsupported with a reason", () => {
