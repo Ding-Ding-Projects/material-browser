@@ -4,7 +4,7 @@ import type { SettingsController } from "../settings/store";
 import type { createOperationRegistry } from "../workspace/model.mjs";
 import type { LockStore } from "./locks";
 
-export type Page = "profiles" | "launch" | "super-profiles" | "sync" | "servers" | "settings";
+export type Page = "profiles" | "launch" | "super-profiles" | "sync" | "servers" | "models" | "tools" | "personalize" | "settings";
 export type Runtime = {
   profileId: string;
   pid: number;

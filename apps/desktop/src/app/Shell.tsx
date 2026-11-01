@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FocusTimerStatus } from "./focus-modes";
 import { APP_VERSION } from "../build-version";
 import { request } from "../api";
 import { Btn, Dialog, IconBtn, Ms, TextField, cx } from "../m3";
@@ -142,6 +143,9 @@ const DESTINATIONS: [Page, string, string, string][] = [
   ["super-profiles", "Super Profiles", "layers", "Super Profiles"],
   ["sync", "Sync", "sync", "Synchronization"],
   ["servers", "Servers", "dns", "Minecraft servers"],
+  ["models", "Models", "neurology", "Local models"],
+  ["tools", "Tools", "construction", "Tools"],
+  ["personalize", "Personalize", "format_paint", "Focus and appearance"],
   ["settings", "Settings", "settings", "Settings"],
 ];
 
@@ -474,6 +478,7 @@ export function StatusBar({ notice }: { notice: string }) {
           {notice}
         </span>
       )}
+      <span aria-live="off"><FocusTimerStatus /></span>
       <span style={{ flex: 1 }} />
       <span className="hide-s">
         {language} · {t("Funny level")} {funny}
