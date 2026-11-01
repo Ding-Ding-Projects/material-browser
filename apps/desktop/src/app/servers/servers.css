@@ -20,3 +20,6 @@
 
 .server-property { padding:16px; min-width:0; overflow-wrap:anywhere; }
 .server-property .server-actions>div { flex:1 1 160px; }
+
+/* Compact shell panes use flex:none; bound intrinsic width to the workspace. */
+.servers-workspace > .pane { max-width:100%; overflow-wrap:anywhere; }
