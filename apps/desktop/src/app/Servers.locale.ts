@@ -6,6 +6,8 @@ export const serversZh: Record<string, string> = {
   Models: "模型",
   "Local models": "本機模型",
   Tools: "工具",
+  Personalize: "個人化",
+  "Focus and appearance": "專注同外觀",
   "Filter by target": "按運行位置篩選",
   "All targets": "所有位置",
   "This PC": "呢部電腦",

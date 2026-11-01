@@ -24,6 +24,7 @@ import { SyncPage } from "./Sync";
 import { SuperProfilesPage } from "./SuperProfiles";
 import { OllamaPage } from "./Ollama";
 import { ToolboxPage } from "./Toolbox";
+import { PersonalizePage, FocusModesProvider, AppearanceContextMenu } from "./Personalize";
 import { SettingsPage } from "./Settings";
 import { ServersPage } from "./servers/ServersPage";
 
@@ -298,6 +299,7 @@ export function App() {
         : ["person_add", t("Create profile"), () => setCreating(true)];
   return (
     <Provider value={value}>
+      <FocusModesProvider>
       <div className="m3 win">
         <TitleBar minimal={vaultScreen} onNotifications={() => setNotifications(!notifications)} unread={unread} onAccessibility={() => setAccessibility(true)} />
         {vaultScreen || setupScreen ? (
@@ -341,6 +343,7 @@ export function App() {
                 {page === "servers" && <ServersPage />}
                 {page === "models" && <OllamaPage />}
                 {page === "tools" && <ToolboxPage />}
+                {page === "personalize" && <PersonalizePage />}
                 {page === "settings" && (
                   <SettingsPage
                     section={settingsSection}
@@ -368,6 +371,7 @@ export function App() {
         <StatusBar notice={notice} />
         {notifications && <NotificationsPanel onClose={() => setNotifications(false)} onOpenAll={() => navigate("settings", { section: "notifications" })} />}
         <LiveLayer snackbar={snackbar} clearSnack={() => setSnackbar(null)} />
+        <AppearanceContextMenu />
         <AttentionBar />
         {accessibility && <AccessibilityPanel onClose={() => setAccessibility(false)} />}
         {creating && <CreateProfileDialog onClose={() => setCreating(false)} onCreated={(id) => { setSelected(id); if (setupScreen) { setSetupDone(true); setShowSetup(false); } }} />}
@@ -404,6 +408,7 @@ export function App() {
           </div>
         )}
       </div>
+      </FocusModesProvider>
     </Provider>
   );
 }

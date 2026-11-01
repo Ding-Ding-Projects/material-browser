@@ -95,6 +95,7 @@ export function catalogDestinations(definitions, categories = []) {
       ["sync", "Synchronization"],
       ["models", "Local models"],
       ["tools", "Tools"],
+      ["personalize", "Focus and appearance"],
       ["settings", "Settings"],
     ].map(([id, label]) => ({ id: `page:${id}`, label, page: id })),
     ...categories.map((category) => ({
