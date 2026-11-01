@@ -525,7 +525,23 @@ const tick = () => new Promise((resolve) => setImmediate(resolve));
 function createConverter({ nativeImage = null, limits = LIMITS, onChange = () => {} } = {}) {
   const jobs = [];
   let outputFolder = null;
+  let outputDirectory = null;
   let running = false;
+
+  const bindDirectory = (selectedPath) => {
+    const resolvedPath = fs.realpathSync(selectedPath);
+    const stat = fs.statSync(resolvedPath, { bigint: true });
+    if (!stat.isDirectory()) throw new Error("INVALID_REQUEST");
+    return Object.freeze({ selectedPath, resolvedPath, dev: stat.dev, ino: stat.ino, birthtimeNs: stat.birthtimeNs });
+  };
+  const checkedDirectory = (binding) => {
+    try {
+      const current = bindDirectory(binding.selectedPath);
+      if (current.resolvedPath === binding.resolvedPath && current.dev === binding.dev &&
+          current.ino === binding.ino && current.birthtimeNs === binding.birthtimeNs) return current.resolvedPath;
+    } catch {}
+    throw new ConversionError("OUTPUT_FOLDER_CHANGED", "The selected output folder changed. Choose it again before converting.");
+  };
 
   const snapshot = () => ({
     outputFolder,
@@ -540,8 +556,9 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
 
   function setOutputFolder(folder) {
     if (typeof folder !== "string" || !path.isAbsolute(folder)) throw new Error("INVALID_REQUEST");
-    if (!fs.statSync(folder).isDirectory()) throw new Error("INVALID_REQUEST");
+    const selected = bindDirectory(folder);
     outputFolder = folder;
+    outputDirectory = selected;
     changed();
     return outputFolder;
   }
@@ -573,6 +590,7 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
     for (const item of items)
       if (!item || typeof item.path !== "string" || !path.isAbsolute(item.path)) throw new Error("INVALID_REQUEST");
     if (!outputFolder && items.some((item) => describe(item.path).available)) throw new Error("NO_OUTPUT_FOLDER");
+    if (items.some((item) => describe(item.path).available)) checkedDirectory(outputDirectory);
     if (jobs.filter((job) => ["queued", "running"].includes(job.state)).length + items.length > MAX_JOBS)
       throw new Error("QUEUE_FULL");
     const added = [];
@@ -605,6 +623,7 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
       }
       Object.defineProperty(job, "plan", { value: plan, enumerable: false, writable: true });
       Object.defineProperty(job, "cancel", { value: false, enumerable: false, writable: true });
+      Object.defineProperty(job, "directory", { value: outputDirectory, enumerable: false });
       job.folder = outputFolder;
       jobs.push(job);
       added.push(job.id);
@@ -661,8 +680,12 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
       bytes = null;
       await step("writing", 0.7);
       const base = path.basename(job.input, path.extname(job.input));
-      written = placeAtomically(job.folder, base, job.plan.extension, result.bytes, (identity) => { writtenIdentity = identity; });
+      // Resolve only the originally selected directory. These checks are not an
+      // atomic filesystem transaction against arbitrary concurrent writers.
+      const folder = checkedDirectory(job.directory);
+      written = placeAtomically(folder, base, job.plan.extension, result.bytes, (identity) => { writtenIdentity = identity; });
       await step("checking", 0.9);
+      checkedDirectory(job.directory);
       const size = verifyOutput(written, result.expect, nativeImage);
       if (job.cancel) throw new ConversionError("CANCELED");
       Object.assign(job, { state: "done", stage: "", progress: 1, output: written, bytes: size });

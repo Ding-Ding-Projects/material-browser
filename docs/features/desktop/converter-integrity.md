@@ -26,6 +26,14 @@ and temporary-file cleanup. A temporary unlink failure cannot generate another f
 It may retain the owned temporary file while the valid final output is successfully returned.
 No claim is made that every filesystem cleanup fault removes every temporary file.
 
+The selected output directory is bound by resolved path and filesystem identity. The queue
+rechecks that binding at enqueue, immediately before writing and before final verification.
+A renamed, replaced or remapped selection stops with `OUTPUT_FOLDER_CHANGED` and asks the
+user to select the output folder again. Jobs retain their own binding if a later job chooses
+another folder. An initially selected junction remains supported while its resolved target
+is unchanged; placement uses that resolved directory. These checks retain the same non-atomic
+filesystem limitation described above.
+
 ## Verification and limits
 
 Five causal regressions failed against the prior source, then passed with the repair. The
@@ -40,3 +48,9 @@ issues [19](https://github.com/Ding-Ding-Projects/material-browser/issues/19),
 [20](https://github.com/Ding-Ding-Projects/material-browser/issues/20),
 [21](https://github.com/Ding-Ding-Projects/material-browser/issues/21) and
 [22](https://github.com/Ding-Ding-Projects/material-browser/issues/22).
+
+The directory-identity follow-up adds three cases: replacement before enqueue, a junction
+remap during the writing-stage yield, and an unchanged initially selected junction. The first
+two reproduced the old behavior before repair; all three pass afterwards. Existing and new
+converter suites now contain 24 passing tests. The injected native-dialog reproduction did
+not use a physical picker or user directories. See [issue 23](https://github.com/Ding-Ding-Projects/material-browser/issues/23).
