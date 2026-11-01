@@ -41,17 +41,24 @@ export function ServerConfiguration({ id, stopped, disabled, onBusy, refresh }: 
   useEffect(() => { let active = true; serverRequest('readConfiguration', { id }).then(result => { if (active) setView(result); }).catch(e => { if (active) setError(errorText(e)); }); return () => { active = false; }; }, [id]);
   const validation = Object.entries(changes).map(([key, value]) => ({ key, result: propertyChange(view?.descriptors.find(d => d.key === key) || {}, value) }));
   const invalid = validation.some(v => v.result.error);
+  async function reload() {
+    if (busy || disabled || Object.keys(changes).length) return;
+    setBusy(true); onBusy(true); setError('');
+    try { setView(await serverRequest('readConfiguration', { id })); setMessage('Configuration readback loaded.'); }
+    catch (e) { setError(errorText(e)); } finally { setBusy(false); onBusy(false); }
+  }
   async function save() {
     if (busy || disabled || !stopped || invalid || !validation.length) return;
     setBusy(true); onBusy(true); setError(''); setMessage('');
+    let saved = false;
     try {
       await serverRequest('configure', { id, properties: Object.fromEntries(validation.map(v => [v.key, v.result.value])) });
-      setChanges({}); setView(null);
+      saved = true; setChanges({}); setView(null);
       setView(await serverRequest('readConfiguration', { id })); await refresh();
       setMessage('Configuration saved. Changes apply at the next start.');
-    } catch (e) { setError(errorText(e)); } finally { setBusy(false); onBusy(false); }
+    } catch (e) { setError(errorText(e)); if (saved) setMessage('Configuration was saved, but readback is unavailable. Reload properties before editing again.'); } finally { setBusy(false); onBusy(false); }
   }
-  return <div className="server-stack"><p>{t('Configuration controls describe declared version support. Runtime behavior remains unverified. All changes are saved while stopped and apply at the next start.')}</p><SearchBar {...search} label={t('Search server properties')} t={t} />{!view && !error && <p role="status">{t('Reading server properties')}</p>}{view && <><div className="server-stack">{search.indices.map(i => view.descriptors[i]).filter(Boolean).map(d => {
+  return <div className="server-stack"><p>{t('Configuration controls describe declared version support. Runtime behavior remains unverified. All changes are saved while stopped and apply at the next start.')}</p><SearchBar {...search} label={t('Search server properties')} t={t} /><Btn variant="outlined" disabled={busy || disabled || !!Object.keys(changes).length} onClick={() => void reload()}>{t('Reload properties')}</Btn>{!view && !error && <p role="status">{t('Reading server properties')}</p>}{view && <><div className="server-stack">{search.indices.map(i => view.descriptors[i]).filter(Boolean).map(d => {
     const changed = Object.hasOwn(changes, d.key);
     const value = changed ? changes[d.key] : d.value;
     const problem = changed ? propertyChange(d, value).error : !d.valid ? d.validationMessage || 'Existing value is invalid or unresolved.' : '';
