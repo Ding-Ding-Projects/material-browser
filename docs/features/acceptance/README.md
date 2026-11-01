@@ -2,6 +2,11 @@
 
 The current catalogue contains **112 identities across seven surface families: 784 rows, with 420 applicable rows unfinished**. The added world-generator identity is missing on every applicable parent-server surface; no completion state was upgraded.
 
+The inventory is a historical discovery baseline, not a claim that later implementation is
+absent. The [November defect-verification record](2026-11-01-defect-verification.md) records
+the later integrated generator, source-bound tests, report-only runtime checks and scoped
+GUI evidence without upgrading unfinished whole-feature rows.
+
 This inventory originally recorded a conservative source-review baseline at `60e65ef`. It is not a certification, implementation report, or release approval. The original inventory contained 111 neutral requirement identities across seven surface families, including the productive workspace, Settings, hosted documentation, offline handbook, storage dashboard, hosting wizard and repository delivery records. Nested dialogs, menus, pickers, tool panels and article routes inherit the owning family's obligations; they still need explicit child-surface inventories before completion.
 
 The independent `required-identities.json` list prevents deleting a feature row to make the inventory appear complete. Names are product-facing descriptions, not an embedded private dictionary. This baseline deliberately does not copy private instruction prose, mappings or local paths.

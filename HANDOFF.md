@@ -238,3 +238,16 @@ restart. Issues5-14 carry ten focused design/implementation handoffs, with runti
 clearly separated from source/helper evidence. All owned test desktops/processes were closed.
 The design contributor owns incoming implementation; this task verifies, repairs and tracks
 findings. No whole-product completion, generation, installer, release or update proof exists.
+
+## Verified repair handoff, source b086d86
+
+The exact Desktop build and all 334 desktop tests passed, with no failed or skipped tests.
+Issues 7, 8 and 11 through 14 are closed after bounded verification. Four current Personalize
+images are published in README with source47e8ae1 and validated evidence receipts; their
+historical presentation is retained separately. Real report-only shutdown also passed on
+b086d86, but issue6 remains open for actual generation cancellation/quit acceptance.
+
+Issues5, 9, 10 and15 through18 remain open. Focused source repairs for5/10 and17/18 are in
+isolated task branches, not yet integrated or runtime-verified at this handoff. See
+docs/features/acceptance/2026-11-01-defect-verification.md for exact evidence and limits.
+No real EULA acceptance, server generation, new release or installed update occurred.

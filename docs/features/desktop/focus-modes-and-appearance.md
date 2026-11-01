@@ -63,13 +63,30 @@ strings are in `Personalize.locale.ts` (`personalizeZh`) and must be merged in `
 modules. Run `node --test src/app/colour.test.mjs src/app/focus-modes.test.mjs` from
 `apps/desktop`.
 
-## Not verified
+## Verified repairs and remaining acceptance
 
-- No running-app capture was made. The page, dialogs, context menu, timer and CSS effects have
-  only been type-checked, not seen or used in Electron.
-- The components are not yet wired into `App.tsx`, `Shell.tsx` or `i18n.ts`, so nothing is reachable
-  in the app until that is done.
-- CSS `zoom` and `:has()` rely on Chromium (Electron) support; they were not checked in the app.
+The components are connected to the shell and localization. At source
+`47e8ae104755d38e9d115fbb08636143bc6278cb`, the exact Desktop build was exercised on a
+hidden Windows desktop with isolated application data. Four inspected, unchanged images
+and their publication inventory are in [the repair evidence](../../evidence/desktop/repair-20261101/README.md).
+
+- A saved red primary-button override applied after a cold process start, including the locked screen.
+- Injected write/removal failures produced visible session-only feedback and retry controls.
+  A failed initial storage read prevents overwriting the unread durable record.
+- The contrast display reported unavailable for a pane whose actual computed opacity was 0.38.
+  Partial-alpha colors are preserved and composited only when the solid backdrop is known.
+- A real CDP pointer interaction reached hue 359 with an accessible maximum and value of 359.
+
+These images use a 1280 by 1200 page viewport at an observed device-pixel ratio close to 1.
+They do not establish physical display-scale coverage or screen-reader output. Source tests
+also cover normalization, failed writes/removals and cold storage-read protection. Malformed
+stored JSON normalization is an existing behavior outside the storage-exception repair.
+
+Still unverified:
+
+- Complete minimum-layout, theme, language and physical display-scale matrices. The known
+  minimum-width defect remains tracked in [issue 10](https://github.com/Ding-Ding-Projects/material-browser/issues/10).
+- Every context-menu target, keyboard-only workflow and appearance size combination.
 - Calm screen hides notification toasts by matching their current markup in `Live.tsx`
   (a `.snack` whose first child is an icon). A change to that markup would need the selector updated.
 - Overrides use `!important` and can lose to inline styles set by components.

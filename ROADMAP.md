@@ -14,7 +14,19 @@
 - [ ] Complete every applicable acceptance row, companion surface and current runtime evidence
 
 Checked implementation items describe source plus focused checks only, not completed
-product delivery. The acceptance ledger retains 414 applicable unfinished rows.
+product delivery. The current acceptance ledger has 112 identities and retains 420 applicable
+unfinished rows. The earlier 111-identity/414-row counts describe the original baseline.
+
+### Focused defect verification, source b086d86
+
+- [x] Pass the exact Desktop build and all 334 desktop tests with no failures or skips
+- [x] Verify cached runtime rejection and explicit recovery with an official report-only JVM
+- [x] Verify exclusive ZIP output and independently inspect CRCs, filenames and bytes
+- [x] Verify and publish four source-bound Personalize repair images with historical originals retained
+- [x] Verify normal application quit during a pending report-only JVM operation
+- [ ] Verify real generation cancellation, custom-dimension generation and area completeness
+- [ ] Repair and repeat the navigation rail, Personalize and handbook minimum-layout cases
+- [ ] Preserve all discovered presets and verify version-specific readiness admission
 
 ## Current repository design migration
 

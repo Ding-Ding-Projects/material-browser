@@ -1,62 +1,67 @@
 # Verification continuation
 
-Latest owner direction: the design contributor owns incoming design and implementation.
-This task owns integration, defect and layout testing, focused repairs, and actionable
-GitHub issues when a finding needs design follow-up. Do not resume parallel feature building.
+The owner assigns incoming design and feature implementation to the design contributor.
+This task leads integration, defect and layout hunting, focused repairs and actionable
+GitHub issues. Do not resume parallel implementation of the same features.
 
-Verified product runtime source: 37ff81f453da0082a9465b6592b82d944cd0e0e2, present on main.
-Exact Host and Desktop build entrypoints passed. Integrated desktop tests: 273 passed,
-zero failed or skipped. Rust workspace: 103 passed.
+## Verified state
 
-Real hidden-desktop verification reached the productive workspace through onboarding,
-verified the empty server state, retrieved 921 Vanilla versions, resolved selected metadata,
-checked name and EULA validation, and cancelled without creating a server. Language changes
-were observed. The repaired 760 x 580 bilingual dark server panes fit at 614 px, ending x722.
-All owned processes and the named hidden desktop were closed; source/build hashes stayed fixed.
+Main source b086d867b5a5441784c92395c8dacae14e319bca is present on origin/main.
+All 334 desktop tests passed with zero failures or skips. The exact root Desktop build
+passed. Historical Rust workspace evidence has 103 passing tests, separately source-bound.
+The documentation build at f0dcd29 assembled 60 articles.
 
-Open design handoff: https://github.com/Ding-Ding-Projects/material-browser/issues/5
-The navigation rail overflows in bilingual mode: 706 px client height, 756 px content height,
-Lock bottom820 against viewport802. Keep this issue open until rebuilt verification passes.
-Public screenshot publication remains pending its provenance checks.
+Issues7,8 and11-14 are closed after bounded verification. Cached official1.21.4 runtime
+corruption caused zero JVM launches and zero downloads; explicit retry safely acquired
+verified bytes and completed report extraction. ZIP output was verified before exclusive
+placement and independently checked with Python, including Unicode and collision cases.
 
-The updated inventory has 112 identities, 784 rows and 420 applicable unfinished rows.
-World-generation designs are not implemented behavior. Actual server lifecycle across four
-targets, Bedrock, broad players/plugins, full scales/themes/keyboard coverage, installation,
-companion delivery and whole-product acceptance remain incomplete. No real EULA acceptance,
-remote test-host adoption, model installation, release or installed update was invented.
+Four genuine Personalize repair images from source47e8ae1 are published in README and
+in docs/evidence/desktop/repair-20261101, with validated receipts. Historical image bytes
+and presentation remain separately archived. Cold appearance, storage-error feedback,
+unknown rendered contrast and hue bounds passed the scoped built interactions.
 
-Separate model alternatives remain inactive and retained for selective reuse on their owning
-branches. Preserve all active/unmerged worktrees and ignored private evidence. New releases
-remain outside this pass; preservation commits use the supported workflow-skip marker.
+On b086d86, a real pending report-only JVM operation was closed through normal application
+Close. The identified application/Java process tree, listener and named hidden desktop were
+observed absent within20.152seconds, an observation upper bound, without forced termination.
+Source and build inputs remained unchanged. Actual generation cancellation is not proven.
 
-Next: monitor incoming design fixes at meaningful checkpoints, independently reproduce and
-refute suspected defects, verify accepted repairs on exact builds, update issue5 and evidence,
-and preserve each coherent verification milestone without rewriting concurrent work.
+## Open findings and active repairs
 
-## Latest completed verification pass
+Issues5,6,9,10,15,16,17 and18 remain open at this handoff.
+-5: navigation rail overflow;10: Personalize minimum width.
+-6: actual generation cancellation/quit;9: actual custom-dimension generation.
+-15: live handbook bilingual reset control overflow at320px.
+-16: silently omitted discovered preset.
+-17: readiness capability not admitted from actual command reports.
+-18: partial area readiness and diagnostic marker echoes accepted as completion.
 
-Source7e66f50135e1331e21e9ab7e284f14ca74202e9b passed all302 desktop tests with zero
-failures or skips and the exact Desktop build. This supersedes the earlier273-test count
-only for this source. Rust103-pass evidence is unchanged and separately source-bound.
+The GUI lane has selective source repairs d094922 and1498eeb for5/10, with9 focused checks,
+TypeScript and independent review. Input-only124ca94 must not be integrated.
+The acceptance lane is preparing a separately reviewed17/18 repair. No runtime verdict
+or integration of those new repairs is claimed by this checkpoint.
 
-Actual Personalize testing confirmed minimum-width content overflow and missing saved
-appearance application after a full process restart. Both owned runs were closed normally
-by2026-11-01T08:13:01Z with unchanged build hashes. The saved appearance key remained present
-but its style was absent on cold startup. Calm, timer, swatch, reset and theme samples worked.
+Full handoff: docs/features/acceptance/2026-11-01-defect-verification.md.
+Task records: https://github.com/Ding-Ding-Projects/material-browser/issues .
+Issue6 runtime update: https://github.com/Ding-Ding-Projects/material-browser/issues/6#issuecomment-6556601825 .
 
-Open handoffs5-14: navigation rail; generator lifecycle/concurrency; cached JAR integrity;
-ZIP temporary-file safety; dimension readiness height; Personalize minimum layout; cold-start
-appearance; persistence-error feedback; partial-alpha contrast; hue accessibility bounds.
-See https://github.com/Ding-Ding-Projects/material-browser/issues . Each finding states its
-source and evidence limits. Source/helper findings are not labelled built-runtime proof.
+## Boundaries and next steps
 
-The owner assigns incoming implementation to the design contributor and assigns integration,
-defect/layout hunting, focused repairs and issue verification to this task. Separate model
-alternatives are inactive and preserved. Do not restart parallel feature implementation.
-Public image promotion, full keyboard/theme/scale coverage, actual world/server generation,
-installation and release acceptance remain incomplete. No release/update was performed here.
+The inventory has112 identities,784 rows and420 applicable unfinished rows. Full target
+lifecycle, Bedrock, version/flavour/player/plugin workflows, actual generation, broad
+keyboard/language/theme/physical-scale coverage, companion delivery and installed acceptance
+remain unfinished. No real EULA was accepted; no remote test host was adopted. No new release
+or installed update is authorized in this pass. Preserve with [skip ci] commits.
 
-Status reporting uses the owner's SSH-only route. Host/container health succeeded, but the
-host-local client received HTTP400 for unsupported private-emission metadata. No accepted
-Hub session update is claimed. Continue using the recorded issue and source handoffs while
-that existing protocol compatibility problem remains unresolved.
+Next: independently inspect and integrate focused repairs one at a time, preserve their
+owning branches, rebuild through exact entrypoints and repeat the affected real tuples.
+Keep source simulation evidence separate from actual generated-world acceptance. Monitor
+incoming designer changes without overwriting them or starting duplicate implementations.
+
+Retain active/unmerged branches, separate inactive model alternatives and every ignored
+private evidence/image variant. Do not retry the previously rejected handbook-profile
+removal. No automatic cleanup candidate is ready while this work remains active.
+
+Status reporting uses SSH to the verified host-local client. It rejected session updates
+with HTTP400 unsupported private-emission metadata. No accepted Hub update is claimed;
+keep the existing protocol issue and continue independent product work.
