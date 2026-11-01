@@ -5,6 +5,7 @@
 - [Action sounds and quiet controls](action-sounds.md)
 - [Material 3 Expressive desktop design](zip-gui-remake.md)
 - [Element locks, unlock ladder and Support Tickets](element-locks.md)
+- [Focus modes and the appearance editor](focus-modes-and-appearance.md)
 - [Historical WorldLens visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
