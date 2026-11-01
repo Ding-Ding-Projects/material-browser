@@ -9,3 +9,13 @@ Configuration currently supports the server port and ASCII message of the day wh
 Docker, SSH, Bedrock, third-party flavours, typed administration, backups and content operations remain incomplete in this first native milestone. Capability responses disclose these limits instead of simulating successful operations. Java provisioning remains an explicit application integration task.
 
 Focused verification: `node --test apps/desktop/electron/services/game-servers/index.test.cjs`. Real official discovery on 2026-11-01 returned 921 version entries. No production server or world was launched for that read-only check.
+
+## Backups and content
+
+Stopped managed servers support bounded backups (10000 files, 10 GiB), SHA-256 inventory verification and same-version restore. Restore creates a rollback backup first. Linked, shared and special files are rejected. Restore is local storage restoration, not proof of safe world downgrade or cross-machine portability.
+
+Java vanilla data packs can be imported from explicitly selected ZIP bytes with caller-provided SHA-256 and an acknowledgement that compatibility is unknown. Imports remain ZIP files and are never extracted by the manager. Their target is the default world data-pack directory. Plugin and mod loaders remain unavailable. Removing unchanged managed content creates a backup first; unrecognized files are never silently adopted or removed.
+
+Local Docker lifecycle uses an explicitly supplied immutable `eclipse-temurin@sha256:` image reference, the Java version probe, a fixed Java entrypoint, bounded memory, a managed bind mount and a loopback-only port publication. Docker daemon/image availability and live container operation remain unverified on the current host. SSH targets remain disabled.
+
+A persisted process receipt after an interrupted application session is reported as unknown and blocks file mutation. A process spawn is starting, never server-ready proof. No previous PID is blindly adopted or terminated. This conservative recovery currently requires external identity reconciliation before reuse.
