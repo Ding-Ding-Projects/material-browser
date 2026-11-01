@@ -81,3 +81,6 @@
 
 /* Preview highlight for the elements an override applies to. */
 .m3 [data-appearance-preview="true"] { outline: 3px dashed var(--primary) !important; outline-offset: 2px; }
+
+/* Compact shell panes use auto width and no flex shrinking; bound their intrinsic size. */
+.m3 .personalize-workspace > .pane { max-width: 100%; overflow-wrap: anywhere; }

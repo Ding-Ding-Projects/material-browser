@@ -220,7 +220,7 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
 /** Page component: focus modes and the appearance editor side by side, as in the artboard. */
 export function PersonalizePage() {
   return (
-    <div className="scroll" style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start", alignContent: "flex-start", overflow: "auto" }}>
+    <div className="scroll personalize-workspace" style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start", alignContent: "flex-start", overflow: "auto" }}>
       <FocusModesSection />
       <section className="pane low" aria-labelledby="ap-h" style={{ flex: "1 1 520px", minWidth: 0, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <AppearanceEditor headingId="ap-h" />
