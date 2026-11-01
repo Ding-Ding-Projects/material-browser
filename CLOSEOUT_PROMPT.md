@@ -23,9 +23,13 @@ original screenshots retain the runtime source binding; earlier images remain ar
   passed 24 focused checks. Actual native dialogs proved directory replacement rejection,
   safe reselection and correct CSV conversion. The integrity-failure GUI outcome still lacks
   direct runtime observation despite component and service evidence.
-- Handbook deployment `af1020fb6a486b5fb73e97fc818a3c1e1f01816c`, from source `65eb448`,
-  passed all 43 delivered-file byte checks and seven live interaction/layout cases. Current
-  documentation/image refresh is the next publication step, not claimed by this handoff.
+- Current handbook deployment `339af17950dd95cf6a89085f62ed960508290e86`, from source
+  `2fe219cd63a8185686e7f6e50f33ebf4db3af0d2`, is built and live. All 46 delivered files
+  match their bytes/hashes. The live reference lists 67 articles; font/verification articles,
+  current three images, six-image archive and internal routes passed focused observation.
+  A 320x844 bilingual reset case passed layout, renderer Tab/Enter and localized feedback.
+  Seven genuine images were inspected. Owned processes, listener and desktop were observed
+  absent after normal Close; profiles remain retained. Physical input/full matrix are unverified.
 
 Evidence: `docs/features/acceptance/2026-11-01-defect-verification.md` and
 `docs/evidence/desktop/current-20261101/README.md`.
@@ -40,8 +44,8 @@ delivery remain unfinished. No EULA was accepted and no generation started. The 
 decision is not approval; user acceptance through the supported app remains required.
 
 Issues 6, 9 and 18 retain real-generation acceptance gaps. Issue 20 retains the unobserved
-integrity-failure GUI outcome. Issues 16, 24, 25 and 26 have the bounded runtime evidence
-above; read back their exact forge state after the handoff update. Issue 1 tracks the wider goal.
+integrity-failure GUI outcome. Issues 16, 24, 25 and 26 are closed with exact comment/state
+readback and the bounded runtime evidence above. Issue 1 tracks the wider goal.
 Modern 26.3 customization remains explicitly unavailable, not implemented by this repair.
 
 No release or installed update belongs to this pass. Preserve with `[skip ci]` commits.
@@ -52,7 +56,7 @@ observed absent. Emulated size/input results do not establish physical display/i
 
 ## Next safe steps
 
-Finish current-source documentation publication and verify its live manifest, assets,
-navigation and exact repository homepage. Read back scoped issue handoffs. Keep the full
-acceptance goal open. Resume authorized runtime checks when their prerequisites and user-owned
-EULA acceptance are available. Preserve every completed unit promptly on main.
+The current documentation publication, live byte checks, focused interaction and exact
+repository homepage readback are complete for source2fe219c. The full acceptance goal stays
+open. Resume authorized runtime checks when their prerequisites and user-owned EULA acceptance
+are available. Preserve completed units on main and avoid duplicate designer implementation.

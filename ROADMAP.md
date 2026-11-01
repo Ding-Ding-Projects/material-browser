@@ -37,7 +37,7 @@ unfinished rows. The earlier 111-identity/414-row counts describe the original b
 - [x] Verify generator minimum layout across12 language/theme/size cases at62563ae
 - [x] Verify emitted font bytes,13 CLI checks and observed renderer startup without font-policy blocks
 - [x] Publish three current source-bound originals in README and archive the earlier six-image presentation
-- [ ] Refresh the hosted handbook from final documentation source and verify its live bytes and interaction
+- [x] Refresh the hosted handbook from source2fe219c: 67 articles, 46 exact live files, current/archive routes and bounded desktop/320px bilingual reset interaction
 
 ## Current repository design migration
 

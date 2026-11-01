@@ -290,3 +290,16 @@ Handbook deploymentaf1020f passed all43 file checks and seven live cases. Curren
 publication is next. No release or installed update is authorized in this repair pass.
 Owned runtime processes/desktops closed normally; profiles and active/unmerged work remain
 intact. Read CLOSEOUT_PROMPT.md and the defect-verification article for exact source bindings.
+
+### Hosted delivery readback
+
+Deployment339af17950dd95cf6a89085f62ed960508290e86 is live from source2fe219c, with67
+articles and46 byte-verified files. The exact stored homepage is
+https://ding-ding-projects.github.io/material-browser/ . Live font/verification articles,
+current three images, six-image archive and internal routes passed focused observation.
+The320x844 bilingual reset passed geometry and renderer Tab/Enter with visible focus.
+Seven images were inspected, with zero observed Settings-reload diagnostic errors. Normal
+Close left owned processes, listener and desktop absent at2026-11-01T15:03:49.8122494Z.
+Profiles remain retained; physical input and a fresh complete language/theme matrix are
+unverified. Issues16,24,25,26 are closed with exact stored-comment/state readback;6,9,18,20
+remain open for the named runtime gaps. The broader required-feature goal is incomplete.
