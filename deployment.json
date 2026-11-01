@@ -1,6 +1,6 @@
 {
-  "source": "65eb448413a6085c8118117a887640bbde188fc3",
-  "preparedAt": "2026-11-01T10:58:52.835Z",
+  "source": "2fe219cd63a8185686e7f6e50f33ebf4db3af0d2",
+  "preparedAt": "2026-11-01T14:57:16.265Z",
   "publicationBytesFromGit": true,
   "files": [
     {
@@ -10,8 +10,8 @@
     },
     {
       "path": "app.js",
-      "bytes": 746427,
-      "sha256": "efd6ff8142d37efb067ba6485f4ebab5187b734d9fb206da825415d9d519ea29"
+      "bytes": 775702,
+      "sha256": "1270c5c78507dfe2335e6c879636a10a26aa58637729016f65e1877d2a863954"
     },
     {
       "path": "assets/00437d253d62757b296212aed76f090673a0ef7b5dc4c463cd9f7993dc78e619.png",
@@ -22,6 +22,11 @@
       "path": "assets/00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140.png",
       "bytes": 70617,
       "sha256": "00a5ebd067339792a0a74266a2c339cfadbb61bc2fef0485279041c807506140"
+    },
+    {
+      "path": "assets/04004458358acf92b4c90bcb1d35de643dea2b82981c1eb8492871188531f14d.png",
+      "bytes": 195994,
+      "sha256": "04004458358acf92b4c90bcb1d35de643dea2b82981c1eb8492871188531f14d"
     },
     {
       "path": "assets/0b60ceeadd1be9af130f7de71c4a9e5cf4a72a6ea3fc85ee6bc378b19158d253.png",
@@ -154,6 +159,11 @@
       "sha256": "ac807b25eb7fd56da6cb5b620cac6db6d3cae13c9ca57fa99173adb0d1d98daa"
     },
     {
+      "path": "assets/ad909a04e9d9e592510a0e636b7bda5b639de3d601133e5c95803bdc0cd94397.png",
+      "bytes": 282695,
+      "sha256": "ad909a04e9d9e592510a0e636b7bda5b639de3d601133e5c95803bdc0cd94397"
+    },
+    {
       "path": "assets/ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79.png",
       "bytes": 53546,
       "sha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79"
@@ -199,14 +209,19 @@
       "sha256": "f0cd418acd9bf02ecb07703ef8caa39d90983d72823b1d8f243394c4438c1110"
     },
     {
+      "path": "assets/fd8c5b6ed5ab7cd247544808d0f9bf2fa886f95667c922c091a0f8a651159873.png",
+      "bytes": 96729,
+      "sha256": "fd8c5b6ed5ab7cd247544808d0f9bf2fa886f95667c922c091a0f8a651159873"
+    },
+    {
       "path": "index.html",
       "bytes": 1093,
       "sha256": "b7e5ab51e97c6dfdcc313fc7f150b46a32683d7c2cb4ad8170aaa678cab7e92e"
     },
     {
       "path": "inventory.json",
-      "bytes": 3017,
-      "sha256": "07411727db399fd9e1421cb5ac56020c5b57aca04ab73cc8178ef61cad11d3de"
+      "bytes": 3189,
+      "sha256": "ad28b602b4a80953c47b53b3b36de6cac7539cae70c05310e00f8c1a705af3b9"
     },
     {
       "path": "regex.worker.js",

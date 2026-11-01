@@ -1,5 +1,5 @@
 {
-  "source": "65eb448413a6085c8118117a887640bbde188fc3",
+  "source": "2fe219cd63a8185686e7f6e50f33ebf4db3af0d2",
   "articles": [
     "docs/architecture.md",
     "docs/evidence/archive.md",
@@ -7,6 +7,8 @@
     "docs/evidence/desktop/archive-5922074.md",
     "docs/evidence/desktop/archive-baa9512.md",
     "docs/evidence/desktop/archive.md",
+    "docs/evidence/desktop/current-20261101/README.md",
+    "docs/evidence/desktop/current-20261101/readme-image-archive.md",
     "docs/evidence/desktop/gui-rewrite/README.md",
     "docs/evidence/desktop/layout-20261101/README.md",
     "docs/evidence/desktop/m3-redesign/README.md",
@@ -29,6 +31,7 @@
     "docs/features/desktop/element-locks.md",
     "docs/features/desktop/file-converter-and-changelog.md",
     "docs/features/desktop/focus-modes-and-appearance.md",
+    "docs/features/desktop/font-delivery.md",
     "docs/features/desktop/history-runtime.md",
     "docs/features/desktop/minecraft-server-manager.md",
     "docs/features/desktop/native-settings-services.md",
