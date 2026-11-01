@@ -44,6 +44,15 @@ try {
     try {
       if(Test-Path 'package-lock.json'){ & npm.cmd ci --no-audit --no-fund }else{ & npm.cmd install --no-audit --no-fund }
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+      # Package managers may suppress dependency install hooks. Acquire the pinned
+      # desktop runtime through its own verified installer when it is absent.
+      if(-not (Test-Path 'node_modules/electron/dist/electron.exe')) {
+        & node 'node_modules/electron/install.js'
+        if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+        if(-not (Test-Path 'node_modules/electron/dist/electron.exe')) {
+          throw 'Desktop runtime acquisition did not produce the required executable.'
+        }
+      }
       & node (Join-Path $root 'engines/prepare-runtime.mjs')
       if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
       if($env:MATERIAL_BROWSER_BUNDLE_ONLY -eq '1'){ & npm.cmd run build:bundle }
