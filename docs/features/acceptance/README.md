@@ -32,9 +32,24 @@ This is a family-level discovery ledger. It does not yet claim exhaustive per-co
 
 ## Local verification baseline
 
-- Ledger negative regressions: 9 passed, 0 failed.
+- Ledger negative regressions: 15 passed, 0 failed.
 - Documentation: 6 passed, 0 failed after `npm ci --ignore-scripts`; the first isolated run lacked `markdown-it` and did not establish a product failure. Package installation reported three advisory findings (one low, one moderate, one high); no dependency upgrades were performed in this documentation-only scope.
 - Offline handbook: 3 passed, 0 failed.
 - Desktop initial full run: 162 tests, 161 passed and one test-file import failed because the isolated checkout lacked `typescript`. After resolving the existing pinned dependency, the affected suite passed all 10 tests. The full native-history suite was not repeated because its results were unaffected. Its existing test command already includes `src/app/*.test.mjs` and `electron/services/*.test.cjs`, so no discovery repair was necessary.
 - Storage service: 6 passed, 0 failed.
 - Native build, Rust suites, installed applications, GUI interaction, deployment and release acceptance are not established by this ledger change.
+
+
+## Child-surface source review
+
+`child-surfaces.json` names 26 reviewed desktop child surfaces, their actual state consumers and source files. Every child inherits all applicable obligations from its parent; highlighted identities only record review priorities. The list deliberately remains `complete: false`. Its source baseline is `60e65ef`, not a claim that later concurrent implementation was audited. Current built interaction remains unverified for every child. The local checker validates declared parent and feature identities, source references and consumer descriptions; its negative cases reject false runtime claims. The independent test list prevents removal of a reviewed child from passing silently.
+
+The main ledger now links source and focused test locations for language, narration, appearance, notifications, attention controls, palette, guidance, progress and protected history. A linked test file is a discovery reference; terminal execution results above remain separate. Local avatar shape/tone persistence does not prove a complete per-element appearance editor. Presentation datasets do not establish current pixels or all customization controls.
+
+Desktop service discovery now uses `electron/services/**/*.test.cjs`, preserving the existing top-level and application test patterns while including nested native server suites. The server sources were supplied by separate implementation commits, not authored by this acceptance change. Recursive-suite terminal results are recorded below when available.
+
+
+The presentation-mode source audit specifically found an application-local `school-mode.v1` record and an explicit no-shared-record disclosure. Its transaction updates message-style values and dialog decoration, which does not establish the required shared renameable mode, live propagation, forced English, complete capability omission or shared unlock credential. This row remains partial. The source audit also names the personal-wording import and celebration state without treating source presence as proof of outcome sounds or accessible built interaction.
+
+
+The completed clean baseline run passed **171 of 171** desktop tests. After recursive service discovery and the two separately authored native server inputs, the full desktop run passed **182 of 182**, including all 11 nested native server tests. `local-tests.json` records exact counts, observed durations, source inputs and the package-script digest. The two runs overlapped, so their durations are not performance benchmarks. Native fixture tests do not prove a real distribution download, server process lifecycle, container launch or GUI workflow. No full-suite failure remains in these desktop results.
