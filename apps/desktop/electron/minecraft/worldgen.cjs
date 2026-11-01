@@ -137,6 +137,23 @@ async function runReports(jarPath, outDir, { spawnImpl = spawn, java = "java", t
   }
 }
 
+/** Admit only the command-report route actually used by readiness probes. */
+function readinessCapability(commands) {
+  const execute = commands?.children?.execute?.children;
+  const position = execute?.if?.children?.loaded?.children?.pos;
+  const run = execute?.run;
+  const message = commands?.children?.say?.children?.message;
+  const available = position?.type === "argument" && position.parser === "minecraft:block_pos" &&
+    Array.isArray(position.redirect) && position.redirect.length === 1 && position.redirect[0] === "execute" &&
+    run?.type === "literal" && Array.isArray(run.redirect) && run.redirect.length === 0 &&
+    message?.parser === "minecraft:message" && message.executable === true;
+  return {
+    available,
+    route: available ? "execute-if-loaded-say" : null,
+    reason: available ? null : "This version's command report does not provide the verified execute if loaded readiness route. World generation remains unavailable for this version.",
+  };
+}
+
 /** Turn a jar and its reports into the picker catalogue for that exact version. */
 function catalogueFrom(jarBuffer, reportsDir) {
   const jar = innerJar(openZip(jarBuffer));
@@ -146,6 +163,7 @@ function catalogueFrom(jarBuffer, reportsDir) {
     return { supported: false, reason: "This version predates data-driven world presets, so only seed, world type and structures can be set.", version: version?.id ?? null };
   const registries = JSON.parse(fs.readFileSync(path.join(reportsDir, "reports", "registries.json"), "utf8"));
   const commands = JSON.parse(fs.readFileSync(path.join(reportsDir, "reports", "commands.json"), "utf8"));
+  const readiness = readinessCapability(commands);
   const rules = commands?.children?.gamerule?.children || {};
   const gameRules = Object.entries(rules)
     .map(([name, node]) => {
@@ -160,7 +178,9 @@ function catalogueFrom(jarBuffer, reportsDir) {
   const overworldNoise = readJson(jar, "data/minecraft/worldgen/noise_settings/overworld.json");
   const overworldType = readJson(jar, "data/minecraft/dimension_type/overworld.json");
   return {
-    supported: true,
+    supported: readiness.available,
+    reason: readiness.reason,
+    capabilities: { chunkReadiness: readiness },
     version: version.id,
     packFormat: version.pack_version?.data ?? version.pack_version,
     presets: presets.filter((p) => PRESET_IDS.includes(p.slice(10))),
@@ -208,7 +228,8 @@ const isInt = (v) => Number.isInteger(v);
 
 /** Validate every option against the version's catalogue. Anything not typed is refused. */
 function validate(options, catalogue) {
-  if (!catalogue.supported) throw fail("WORLDGEN_UNSUPPORTED", catalogue.reason);
+  if (!catalogue.supported || catalogue.capabilities?.chunkReadiness?.available !== true)
+    throw fail("WORLDGEN_UNSUPPORTED", catalogue.reason || "No verified chunk readiness route is available.");
   const o = { ...defaults(catalogue), ...options };
   if (typeof o.name !== "string" || !/^[A-Za-z0-9 _-]{1,40}$/.test(o.name)) throw fail("INVALID_NAME");
   if (typeof o.seed !== "string" || o.seed.length > 64 || /[\r\n]/.test(o.seed)) throw fail("INVALID_SEED");
@@ -397,16 +418,29 @@ async function generate({ options, catalogue, jarPath, jarBytes, jarIntegrity, s
     await waitFor(/Done \(/, deps.startTimeout ?? 600000);
     step("ready");
     for (const cmd of setupCommands(o)) send(cmd);
+    const runIdentity = crypto.randomBytes(16).toString("hex");
     const batches = planBatches(o.area);
     for (let i = 0; i < batches.length; i++) {
       const r = batches[i];
       const bx1 = r.x1 * 16, bz1 = r.z1 * 16, bx2 = r.x2 * 16 + 15, bz2 = r.z2 * 16 + 15;
       send(`forceload add ${bx1} ${bz1} ${bx2} ${bz2}`);
-      const tag = `MBGEN-${i}`;
-      const done = waitFor(new RegExp(`\\b${tag}\\b`), deps.batchTimeout ?? 300000);
+      const batchIdentity = crypto.randomBytes(16).toString("hex");
+      const pending = new Map();
       const y = probeY(o.dimension);
+      for (let z = r.z1; z <= r.z2; z++) for (let x = r.x1; x <= r.x2; x++) {
+        const tag = `MBGEN-${runIdentity}-${batchIdentity}-${pending.size}`;
+        pending.set(tag, `execute if loaded ${x * 16} ${y} ${z * 16} run say ${tag}`);
+      }
+      // One exact current-run/current-batch response per requested chunk. Diagnostic
+      // echoes, player chat and partial text never discharge a readiness probe.
+      const response = /^\[\d{2}:\d{2}:\d{2}\] \[Server thread\/INFO\]: \[Server\] (MBGEN-[a-f0-9]{32}-[a-f0-9]{32}-\d+)$/;
+      const done = waitFor({ test(line) {
+        const match = response.exec(line);
+        if (!match || !pending.delete(match[1])) return false;
+        return pending.size === 0;
+      } }, deps.batchTimeout ?? 300000);
       const poll = setInterval(() => {
-        try { send(`execute if loaded ${bx1} ${y} ${bz1} if loaded ${bx2} ${y} ${bz2} if loaded ${bx1} ${y} ${bz2} if loaded ${bx2} ${y} ${bz1} run say ${tag}`); }
+        try { for (const command of pending.values()) send(command); }
         catch (error) { rejectWaiters(error); }
       }, deps.pollMs ?? 1000);
       try { await done; } finally { clearInterval(poll); }

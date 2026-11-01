@@ -41,7 +41,7 @@ function reportsDir() {
   const dir = tmp();
   writeTree(dir, {
     "reports/registries.json": { "minecraft:block": { entries: { "minecraft:stone": {}, "minecraft:water": {}, "minecraft:bedrock": {}, "minecraft:dirt": {}, "minecraft:grass_block": {} } } },
-    "reports/commands.json": { children: { gamerule: { children: { keepInventory: { children: { value: { parser: "brigadier:bool" } } }, randomTickSpeed: { children: { value: { parser: "brigadier:integer" } } }, futureRule: { children: { value: { parser: "minecraft:something_new" } } } } } } },
+    "reports/commands.json": { children: { execute: {children:{if:{children:{loaded:{children:{pos:{type:"argument",parser:"minecraft:block_pos",redirect:["execute"]}}}}},run:{type:"literal",redirect:[]}}}, say:{children:{message:{parser:"minecraft:message",executable:true}}}, gamerule: { children: { keepInventory: { children: { value: { parser: "brigadier:bool" } } }, randomTickSpeed: { children: { value: { parser: "brigadier:integer" } } }, futureRule: { children: { value: { parser: "minecraft:something_new" } } } } } } },
   });
   return dir;
 }
@@ -145,8 +145,8 @@ function fakeServer() {
       write(text) {
         const line = text.trim();
         child.commands.push(line);
-        const m = /run say (MBGEN-\d+)$/.exec(line);
-        if (m) say(`[Server] ${m[1]}`);
+        const m = /run say (MBGEN-[a-f0-9]{32}-[a-f0-9]{32}-\d+)$/.exec(line);
+        if (m) say(`[12:34:56] [Server thread/INFO]: [Server] ${m[1]}`);
         if (line === "save-all flush") say("Saved the game");
         if (line === "stop") setImmediate(() => child.emit("exit", 0));
       },
