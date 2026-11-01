@@ -334,4 +334,7 @@ export const serversZh: Record<string, string> = {
   "Server ready, setting rules": "伺服器準備好，設定緊規則",
   "Saving the world": "儲存緊世界",
   "Starting the server": "啟動緊伺服器",
+  "The server runtime failed verification and was not executed. Rejected cache files are retained separately. Retry to acquire verified bytes.": "伺服器執行檔驗證未通過，冇執行。被拒絕嘅快取會另外保留，請重試下載已驗證檔案。",
+  "The rejected cache file could not be retained safely. Review storage access before retrying.": "無法安全保留被拒絕嘅快取檔，請先檢查儲存存取權限再重試。",
+  "The runtime cache path is linked, shared or changed. Review the managed cache location before retrying.": "執行檔快取路徑係連結、共用或者已改變，請先檢查受管理快取位置再重試。",
 };
