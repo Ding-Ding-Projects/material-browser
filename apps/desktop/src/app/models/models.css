@@ -1,0 +1,15 @@
+.models-workspace { display:flex; flex-direction:column; flex:1; gap:16px; min-width:0; padding:20px; }
+.models-workspace h1,.models-workspace h2 { margin:0; }
+.models-layout { display:flex; flex-wrap:wrap; align-items:flex-start; gap:16px; min-width:0; }
+.models-main { flex:2 1 520px; min-width:0; }
+.models-queue { flex:1 1 320px; min-width:0; }
+.models-panel { display:flex; flex-direction:column; gap:16px; padding:20px; overflow-wrap:anywhere; }
+.models-stack { display:flex; flex-direction:column; gap:16px; min-width:0; }
+.models-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.models-actions h1 { flex:1 1 200px; }
+.models-job { display:flex; flex-direction:column; gap:8px; padding:16px; }
+.models-error { color:var(--error); overflow-wrap:anywhere; }
+.models-provenance { overflow-wrap:anywhere; }
+.models-workspace .li { flex-wrap:wrap; }
+.models-workspace [hidden] { display:none; }
+@media(max-width:600px) { .models-workspace { padding:8px; } .models-panel { padding:12px; } .models-main,.models-queue { flex-basis:100%; } }
