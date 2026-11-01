@@ -5,7 +5,7 @@ import { readFileSync, readdirSync } from "node:fs";
 // Every label the redesigned screens pass to t("...") has Cantonese wording.
 test("redesigned screens have Cantonese for every literal label", () => {
   const known = new Set();
-  for (const f of ["./locale.ts", "../i18n.ts", "../workspace/locale.ts", "../SuperProfiles.locale.ts", "../settings/locale.mjs", "./Servers.locale.ts", "./servers/locale.ts", "./Ollama.locale.ts", "./Toolbox.locale.ts"]) {
+  for (const f of ["./locale.ts", "../i18n.ts", "../workspace/locale.ts", "../SuperProfiles.locale.ts", "../settings/locale.mjs", "./Servers.locale.ts", "./servers/locale.ts", "./Ollama.locale.ts", "./Toolbox.locale.ts", "./Personalize.locale.ts"]) {
     const text = readFileSync(new URL(f, import.meta.url), "utf8");
     for (const m of text.matchAll(/(?:^|[{,\s])(?:"((?:[^"\\]|\\.)+)"|'((?:[^'\\]|\\.)+)'|([A-Za-z][A-Za-z0-9]*))\s*:\s*["'`]/gm))
       known.add(m[1] || m[2] || m[3]);
