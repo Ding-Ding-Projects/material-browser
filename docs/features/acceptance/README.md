@@ -1,0 +1,40 @@
+# Required-feature acceptance
+
+This inventory records a conservative source-review baseline at `60e65ef`. It is not a certification, implementation report, or release approval. `inventory.json` lists 111 neutral requirement identities across seven surface families, including the productive workspace, Settings, hosted documentation, offline handbook, storage dashboard, hosting wizard and repository delivery records. Nested dialogs, menus, pickers, tool panels and article routes inherit the owning family's obligations; they still need explicit child-surface inventories before completion.
+
+The independent `required-identities.json` list prevents deleting a feature row to make the inventory appear complete. Names are product-facing descriptions, not an embedded private dictionary. This baseline deliberately does not copy private instruction prose, mappings or local paths.
+
+## Reading evidence states
+
+`not-audited` means no behavior verdict has been established. `partial` means relevant source was found, not that all required behavior works. `implemented` requires a completed source review. `verified` additionally requires documentation, localization, persistence evidence or a specific non-persistence explanation, focused tests, built interaction and genuine current screenshots. Every unverified applicable row retains an explicit gap. `not-applicable` requires an individual reason and cannot silently stand in for an unimplemented feature.
+
+The baseline has no `verified` rows. Existing evidence in `docs/evidence/` belongs to its original source versions. It has not been revalidated for this candidate and is not attached as current runtime evidence. Test success is a separate dimension from installed, GUI, deployment and release verification.
+
+## Validation and intentional failure
+
+Run `node scripts/check-feature-acceptance.mjs` to validate identity, surface and row integrity. Run `node --test scripts/check-feature-acceptance.test.mjs` for the removal and false-claim regressions. Structural success means the ledger is internally consistent, not that the product is complete.
+
+Run `node scripts/check-feature-acceptance.mjs --require-complete` for a fail-closed delivery decision. It currently returns nonzero because applicable acceptance remains unfinished. Do not remove this flag from a delivery decision to turn a planning inventory into a passing product claim. The checker is a local tool; this change does not add tests or lint to release workflows.
+
+The negative tests independently remove an identity and a surface row, duplicate a row, remove an exclusion reason, fabricate verified state, fabricate completion, break a source reference, and attach stale evidence. Each altered case must fail, and the restored baseline must pass.
+
+## Implementation priorities and limits
+
+1. Review Settings consumers and scope each control to actual rendered behavior. The existing Settings inventory is narrower than the complete product inventory. Source presence alone does not verify persistence or localization.
+2. Inventory every nested search and context-menu surface, then review independent query state, anchored builder access, bounded execution and the full RegexBuddy topic set. A pattern tester is not parity proof.
+3. Review the initial-screen provenance in `apps/desktop/src/app/Shell.tsx`. Date-only formatting is not the required date/time-with-seconds-and-timezone evidence; source and current built behavior need reconciliation.
+4. Complete workflow-specific implementation and acceptance for server management, local model management and conversion. Concurrent implementation must be reviewed against its own resulting source commit, not this baseline.
+5. Expand guidance and information-button coverage to individual controls, including worked examples, isolated playgrounds and negative omissions. Review workspace tab catalog behavior and destructive/locked input paths independently.
+6. Verify hosted documentation and each companion independently. Shared source does not prove hosted routes, offline navigation, settings persistence, responsive layouts or installed behavior.
+7. Produce current source/hash-bound layout, interaction and release receipts. Retain historical evidence unchanged and keep unavailable proof unfinished.
+
+This is a family-level discovery ledger. It does not yet claim exhaustive per-control decomposition or full behavioral auditing of 414 applicable rows. Most source links and all current runtime-evidence fields remain deliberately empty until reviewed. Applicability exclusions cover non-rendered repository records, documentation-only deliverables on productive screens, job-document workflows, repository publishing, extension download interception, private-source build routing, shared-status-service internals, suspended display reporting and instruction-distribution/Roblox-only deliverables. Revisit an exclusion if product scope changes.
+
+## Local verification baseline
+
+- Ledger negative regressions: 9 passed, 0 failed.
+- Documentation: 6 passed, 0 failed after `npm ci --ignore-scripts`; the first isolated run lacked `markdown-it` and did not establish a product failure. Package installation reported three advisory findings (one low, one moderate, one high); no dependency upgrades were performed in this documentation-only scope.
+- Offline handbook: 3 passed, 0 failed.
+- Desktop initial full run: 162 tests, 161 passed and one test-file import failed because the isolated checkout lacked `typescript`. After resolving the existing pinned dependency, the affected suite passed all 10 tests. The full native-history suite was not repeated because its results were unaffected. Its existing test command already includes `src/app/*.test.mjs` and `electron/services/*.test.cjs`, so no discovery repair was necessary.
+- Storage service: 6 passed, 0 failed.
+- Native build, Rust suites, installed applications, GUI interaction, deployment and release acceptance are not established by this ledger change.
