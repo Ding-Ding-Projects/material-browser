@@ -56,7 +56,7 @@ Each `.dc.html` artboard links `theme.css` and `m3.css` and has a `dark` toggle 
 
 ## Design tokens
 
-`theme.css` holds the full Material 3 colour role set, for light and dark, from the Material 3 baseline palette that the product's own app icon uses (`#4F378B` on `#EADDFF`): primary `#6750A4`, secondary `#625B71`, tertiary `#7D5260`, error `#B3261E`, and the five surface-container tones. The product's current code borrows another project's blue tokens; the brand icon decides here, and Swiftie can override. `m3.css` holds the following:
+`theme.css` holds the full Material 3 colour role set, for light and dark, from the Material 3 baseline palette that the product's own app icon uses (`#4F378B` on `#EADDFF`): primary `#6750A4`, secondary `#625B71`, tertiary `#7D5260`, error `#B3261E`, and the five surface-container tones. The product's current code borrows another project's blue tokens; the brand icon decides here, and the owner can override. `m3.css` holds the following:
 
 - **Type scale:** the full Material 3 scale with emphasized weights, in Roboto Flex with Noto Sans HK for Cantonese.
 - **Shapes:** corner radii 4, 8, 12, 16, 20, 28 and full, plus the Expressive cookie and sunny shapes for avatars.
