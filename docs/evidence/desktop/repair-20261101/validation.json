@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "47e8ae104755d38e9d115fbb08636143bc6278cb",
+  "validator": "promote-ui-evidence/verify-evidence-receipt.mjs",
+  "validatedAt": "2026-11-01T09:16:12.701Z",
+  "records": [
+    {
+      "id": "repair-11-cold-start",
+      "valid": true,
+      "artifactSha256": "0bba7e09f291f4ca7952023ba8a7dd1b34212b7cc11fdd153fd4a007b7c46dbf",
+      "captureSha256": "c621130b35f14b69ba78634b10485db711c26b04dedb6e56eb32ee744838ac29",
+      "width": 1280,
+      "height": 1200,
+      "documentationFiles": 1
+    },
+    {
+      "id": "repair-12-storage-warning",
+      "valid": true,
+      "artifactSha256": "0bba7e09f291f4ca7952023ba8a7dd1b34212b7cc11fdd153fd4a007b7c46dbf",
+      "captureSha256": "13cd574c8ee76196ff05980f6cbebdfa763f98c70cb52ef7592505962219d076",
+      "width": 1280,
+      "height": 1200,
+      "documentationFiles": 1
+    },
+    {
+      "id": "repair-13-unavailable-contrast",
+      "valid": true,
+      "artifactSha256": "0bba7e09f291f4ca7952023ba8a7dd1b34212b7cc11fdd153fd4a007b7c46dbf",
+      "captureSha256": "b4df22867b820609572e112f286287b6c40be20e21667912da69009fa97621ac",
+      "width": 1280,
+      "height": 1200,
+      "documentationFiles": 1
+    },
+    {
+      "id": "repair-14-hue-endpoint",
+      "valid": true,
+      "artifactSha256": "0bba7e09f291f4ca7952023ba8a7dd1b34212b7cc11fdd153fd4a007b7c46dbf",
+      "captureSha256": "6c9e85c556b373356e7945c3c9ffb224fc30a83a1c478e6e6240b8fc8d271782",
+      "width": 1280,
+      "height": 1200,
+      "documentationFiles": 1
+    }
+  ],
+  "negativeInventoryCheck": {
+    "renamedExactIdRejected": true,
+    "restoredOriginalPassed": true,
+    "trackedInventoryChanged": false
+  },
+  "scope": "Byte equality, source/build binding, PNG integrity, declared observations, inventory and exact documentation links. Visual inspection performed separately.",
+  "limitations": [
+    "No full minimum-layout or scale matrix",
+    "No physical keyboard or native pointer proof",
+    "Storage failure is deliberately injected into isolated preference keys",
+    "Contrast is one real opacity-dependent unavailable state",
+    "No installer, release, model or server operation verification"
+  ]
+}

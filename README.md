@@ -48,24 +48,36 @@ The desktop interface follows the eight Material 3 Expressive artboards in [the 
 
 Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
 
-## Current desktop screenshots
+## Verified repair screenshots
 
-Captured from the running application (real Electron shell and native host, disposable data) at source `264d81d` on Linux. [Capture method, hashes and limits](docs/evidence/desktop/m3-redesign/README.md).
+These genuine Windows desktop images are bound to source `47e8ae104755d38e9d115fbb08636143bc6278cb`.
+They show four bounded repair checks, not complete feature, layout, accessibility or installer acceptance.
+[Evidence and limitations](docs/evidence/desktop/repair-20261101/README.md).
+[Earlier screenshots and original provenance](docs/evidence/desktop/m3-redesign/readme-image-archive.md).
 
-| | |
-| --- | --- |
-| ![Profiles list and inspector](docs/evidence/desktop/m3-redesign/03-profiles.png) | ![Launch page with review](docs/evidence/desktop/m3-redesign/04-launch.png) |
-| Profiles: list-detail, split launch buttons, floating toolbar | Launch: engine, automation and the review card |
-| ![Super Profiles](docs/evidence/desktop/m3-redesign/05-super-profiles.png) | ![Synchronization](docs/evidence/desktop/m3-redesign/06-sync.png) |
-| Super Profiles: template, overview and revision history | Synchronization: storage, this computer and conflicts |
-| ![Settings](docs/evidence/desktop/m3-redesign/07-settings.png) | ![Command palette](docs/evidence/desktop/m3-redesign/08-command-palette.png) |
-| Settings: navigation drawer and segmented lists | Command palette with the regex builder |
-| ![Super confirmation](docs/evidence/desktop/m3-redesign/09-super-confirmation.png) | ![Unlock ladder](docs/evidence/desktop/m3-redesign/10-unlock-ladder.png) |
-| Two-key confirmation before a delete | Unlock ladder for an element lock |
-| ![Create the vault](docs/evidence/desktop/m3-redesign/01-create-vault.png) | ![Compact window](docs/evidence/desktop/m3-redesign/11-compact.png) |
-| First start: create the vault | Compact window |
+### Saved appearance at cold startup
 
-Earlier native Windows captures from released version 0.1.58 remain described in [the preservation record](docs/evidence/desktop/native-preservation.md); [historical WorldLens captures](docs/evidence/desktop/worldlens/README.md) and the [earlier image archive](docs/evidence/archive.md) are kept for their original sources.
+The saved red primary-button appearance is applied before the vault is unlocked.
+
+![Saved appearance restored before vault unlock](docs/evidence/desktop/repair-20261101/issue-11.png)
+
+### Truthful storage feedback
+
+This is an explicitly injected, fixture-only storage failure. Session-only warnings and retry controls remain visible.
+
+![Injected storage failure with session-only warnings and retry controls](docs/evidence/desktop/repair-20261101/issue-12.png)
+
+### Unresolved rendered contrast
+
+The real focus-mode opacity state reports contrast as unavailable rather than inventing a passing value.
+
+![Dimmed pane with contrast explicitly unavailable](docs/evidence/desktop/repair-20261101/issue-13.png)
+
+### Hue accessibility boundary
+
+The pointer endpoint remains within the declared hue range. This does not claim physical keyboard or screen-reader acceptance.
+
+![Hue pointer endpoint with the handle at the right edge](docs/evidence/desktop/repair-20261101/issue-14.png)
 
 ## Documentation and remaining work
 
