@@ -361,10 +361,14 @@ function placeAtomically(folder, base, extension, bytes) {
       } catch (error) {
         if (error.code === "EEXIST") continue;
         if (!["EPERM", "ENOTSUP", "EXDEV", "ENOSYS", "EACCES", "EINVAL"].includes(error.code)) throw error;
-        // File systems without hard links: check, then rename.
-        if (fs.existsSync(target)) continue;
-        fs.renameSync(temporary, target);
-        return target;
+        // Exclusive creation preserves no-overwrite semantics without hard links.
+        try {
+          fs.copyFileSync(temporary, target, fs.constants.COPYFILE_EXCL);
+          return target;
+        } catch (copyError) {
+          if (copyError.code === "EEXIST") continue;
+          throw copyError;
+        }
       }
     }
     throw new ConversionError("NAME_EXHAUSTED", "Could not find a free output name");
@@ -536,6 +540,8 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
     for (const item of items)
       if (!item || typeof item.path !== "string" || !path.isAbsolute(item.path)) throw new Error("INVALID_REQUEST");
     if (!outputFolder && items.some((item) => describe(item.path).available)) throw new Error("NO_OUTPUT_FOLDER");
+    if (jobs.filter((job) => ["queued", "running"].includes(job.state)).length + items.length > MAX_JOBS)
+      throw new Error("QUEUE_FULL");
     const added = [];
     for (const item of items) {
       const info = describe(item.path);

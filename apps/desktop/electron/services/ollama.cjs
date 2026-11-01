@@ -6,6 +6,14 @@ const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const childProcess = require("node:child_process");
+const { Readable, Transform } = require("node:stream");
+const { pipeline } = require("node:stream/promises");
+function awaitSpawn(child) {
+  return new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("spawn", resolve);
+  });
+}
 
 const BASE = "http://127.0.0.1:11434";
 const RELEASE_API = "https://api.github.com/repos/ollama/ollama/releases/latest";
@@ -407,6 +415,7 @@ function createOllamaService({
     try {
       const response = await fetchImpl(`${BASE}${pathname}`, {
         method,
+        redirect: "error",
         headers: body ? { "content-type": "application/json" } : undefined,
         body: body ? JSON.stringify(body) : undefined,
         signal: scope.signal,
@@ -461,7 +470,7 @@ function createOllamaService({
     if (current.state === "running") return current;
     if (!current.executable) throw new Error("OLLAMA_NOT_INSTALLED");
     const child = spawnImpl(current.executable, ["serve"], { detached: true, stdio: "ignore", windowsHide: true });
-    child.on?.("error", () => {});
+    await awaitSpawn(child);
     child.unref?.();
     for (let i = 0; i < 30; i++) {
       await new Promise((r) => setTimeout(r, 500));
@@ -529,6 +538,7 @@ function createOllamaService({
       hashSource,
       file: null,
       integrity: null,
+      admission: "INSTALLER_ADMISSION_INCOMPLETE",
     };
     const { file, ...visible } = state.installer;
     return visible;
@@ -550,24 +560,20 @@ function createOllamaService({
     try {
       const response = await fetchImpl(plan.url, { signal: controller.signal, headers: { "user-agent": "MaterialBrowser" } });
       if (!response.ok || !response.body) throw new Error(`DOWNLOAD_HTTP_${response.status}`);
-      const out = fs.createWriteStream(partial, { mode: 0o600 });
-      const reader = response.body.getReader();
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          received += value.byteLength;
-          if (received > plan.size) throw new Error("INSTALLER_SIZE_MISMATCH");
-          hash.update(value);
-          if (!out.write(Buffer.from(value))) await new Promise((r) => out.once("drain", r));
+      const progress = new Transform({
+        transform(chunk, encoding, callback) {
+          received += chunk.length;
+          if (received > plan.size) return callback(new Error("INSTALLER_SIZE_MISMATCH"));
+          hash.update(chunk);
           if (now() - lastEmit > 250) {
             lastEmit = now();
             emit({ type: "ollama.installer", phase: "downloading", received, total: plan.size });
           }
-        }
-      } finally {
-        await new Promise((r) => out.end(r));
-      }
+          callback(null, chunk);
+        },
+      });
+      await pipeline(Readable.fromWeb(response.body), progress,
+        fs.createWriteStream(partial, { mode: 0o600, flags: "wx" }), { signal: controller.signal });
       if (received !== plan.size) throw new Error("INSTALLER_SIZE_MISMATCH");
       const digest = hash.digest("hex");
       if (plan.sha256 && digest !== plan.sha256) throw new Error("INSTALLER_HASH_MISMATCH");
@@ -576,7 +582,7 @@ function createOllamaService({
       plan.integrity = plan.sha256 ? "verified" : "unverified";
       plan.actualSha256 = digest;
       emit({ type: "ollama.installer", phase: "ready", received, total: plan.size, integrity: plan.integrity });
-      return { ready: true, size: received, sha256: digest, integrity: plan.integrity, version: plan.version };
+      return { ready: false, admission: "INSTALLER_ADMISSION_INCOMPLETE", size: received, sha256: digest, integrity: plan.integrity, version: plan.version };
     } catch (error) {
       fs.rmSync(partial, { force: true });
       const cancelled = controller.signal.aborted;
@@ -589,18 +595,9 @@ function createOllamaService({
 
   async function installerRun(params) {
     if (params.confirmed !== true) throw new Error("CONFIRMATION_REQUIRED");
-    const plan = state.installer;
-    if (!plan?.file) throw new Error("INSTALLER_NOT_DOWNLOADED");
-    // Check the file again just before running it.
-    const data = fs.readFileSync(plan.file);
-    if (data.length !== plan.size) throw new Error("INSTALLER_SIZE_MISMATCH");
-    const digest = crypto.createHash("sha256").update(data).digest("hex");
-    if (digest !== plan.actualSha256 || (plan.sha256 && digest !== plan.sha256)) throw new Error("INSTALLER_HASH_MISMATCH");
-    // The official installer runs with its own interface; no silent flags are passed.
-    const child = spawnImpl(plan.file, [], { detached: true, stdio: "ignore" });
-    child.on?.("error", () => {});
-    child.unref?.();
-    return { launched: true, integrity: plan.integrity };
+    // A release digest proves downloaded bytes, not native publisher admission.
+    // No native publisher/final-file admission implementation is bundled yet.
+    throw new Error("INSTALLER_ADMISSION_INCOMPLETE");
   }
 
   // ----- catalogue -----
@@ -753,6 +750,7 @@ function createOllamaService({
     try {
       const response = await fetchImpl(`${BASE}/api/pull`, {
         method: "POST",
+        redirect: "error",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ model: item.name, stream: true }),
         signal: item.controller.signal,
@@ -842,6 +840,7 @@ function createOllamaService({
     const chatId = typeof params.chatId === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(params.chatId) ? params.chatId : null;
     if (!chatId) throw new Error("INVALID_CHAT");
     if (state.chats.has(chatId)) throw new Error("CHAT_BUSY");
+    if (state.chats.size >= LIMITS.parallelismMax) throw new Error("CHAT_LIMIT");
     const controller = new AbortController();
     state.chats.set(chatId, controller);
     (async () => {
@@ -849,6 +848,7 @@ function createOllamaService({
       try {
         const response = await fetchImpl(`${BASE}/api/chat`, {
           method: "POST",
+          redirect: "error",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ model, messages, stream: true }),
           signal: controller.signal,
