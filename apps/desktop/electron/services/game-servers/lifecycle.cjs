@@ -40,7 +40,10 @@ function createLifecycle({
       );
     const jar = await fs.readFile(await safeFile(dir, "server.jar"));
     if (
-      crypto.createHash("sha1").update(jar).digest("hex") !== s.integrity.sha1
+      crypto
+        .createHash(s.integrity.sha256 ? "sha256" : "sha1")
+        .update(jar)
+        .digest("hex") !== (s.integrity.sha256 || s.integrity.sha1)
     )
       fail("INTEGRITY_FAILED", "Installed distribution has changed");
     if (
