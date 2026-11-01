@@ -39,6 +39,19 @@ results remain superseded. These results do not establish whole-profile live sna
 All five component branches are integrated into main; native engine source candidates remain inactive;
 no end-to-end completion, release, deployment or two-computer acceptance is claimed.
 
+## Minecraft server manager and remaining features
+
+- [x] Design the server manager and remaining feature surfaces in `design/remaining-features/`
+- [x] Java version discovery from the official catalogue with per-version server and runtime resolution
+- [x] Vanilla, Paper and Fabric server software with verified downloads where checksums are published
+- [x] Four execution targets: local process, local Docker, SSH process, Docker over SSH
+- [x] Typed, version-bound server configuration, players and permissions, plugins, backups and restore
+- [x] Servers destination and guided creation in the desktop renderer, with Cantonese strings
+- [ ] Bedrock Edition servers (no machine-readable official catalogue)
+- [ ] Real start and stop acceptance after user EULA consent, on Windows and on each target
+- [ ] Running-application screenshots of every server state
+- [ ] Local Ollama suite, focus modes, appearance editor, colour picker, file converter and changelog viewer
+
 ## Super Profiles
 - [x] Verify encrypted template CRUD, immutable revision history and chunked archive storage with 19 focused core tests
 - [x] Compile the Super Profiles desktop through the root Desktop build entrypoint

@@ -1,5 +1,9 @@
 # Material Browser handoff
-> Current state: [Material 3 Expressive desktop, 2026-10-31](#material-3-expressive-desktop-2026-10-31). The redesign is implemented and captured on Linux; Windows runtime acceptance remains.
+> Current state: [Minecraft server manager, 2026-11-01](#minecraft-server-manager-2026-11-01). The server manager is implemented from its design; real server runs, Docker, SSH and Windows acceptance remain.
+
+## Minecraft server manager, 2026-11-01
+
+New design in `design/remaining-features/` covers the server manager, the local Ollama suite, focus modes with the appearance editor and colour picker, and the file converter with the changelog viewer. The Servers destination is implemented from the four server artboards; see [the feature article](docs/features/desktop/minecraft-server-manager.md) for behaviour, verification and gaps. The other remaining surfaces are designed and in progress.
 ## Material 3 Expressive desktop, 2026-10-31
 
 The whole desktop renderer now follows the eight `design/` artboards. `design/m3.css` is vendored as the renderer's component anatomy and colour roles are bridged to the saved presentation theme. Shell, Profiles, Launch, Super Profiles, Synchronization, Settings, vault and first run, command palette, notifications, the two-key confirmation, element locks, unlock ladder and Support Tickets are implemented and wired to the native host. The core gained `sync.status`; the main process gained a separate `element-locks/` store outside the vault. Material Web and MDI are no longer used by the desktop renderer.
