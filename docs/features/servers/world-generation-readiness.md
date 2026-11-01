@@ -1,5 +1,23 @@
 # World-generation readiness and completion evidence
 
+## Complete preset discovery
+
+The selected JAR's complete preset identity list is retained in `presets`. Each identity also
+has a `presetOptions` record with `id`, `supported` and a nullable `reason`. The support flag
+describes the current customization builder; top-level `supported` separately requires the
+selected version's readiness capability and at least one implemented preset.
+
+Unsupported entries, including `minecraft:debug_all_block_states` and unfamiliar future IDs,
+remain in the inventory with an explicit reason. Validation rejects a discovered but
+unimplemented preset with `WORLD_PRESET_UNSUPPORTED`; it never sends that generator through
+the existing pack builder. Defaults select an implemented discovered ID, preferring normal.
+An all-unsupported inventory has an explicit unavailable result.
+
+Completeness regressions compare every supplied registry ID with the returned inventory and
+capability records, including an unfamiliar synthetic preset. The supported-plus-unsupported
+set must equal the full discovered set. This is discovery and truthful availability evidence,
+not proof that an unsupported preset can generate a world.
+
 ## Version admission
 
 World presets alone do not establish that a version can execute the generator's readiness probes. The selected server distribution's actual command report must expose `execute if loaded` with a `minecraft:block_pos` argument redirected to `execute`, the root `execute run` form (the vanilla exporter omits an empty root redirect), and an executable `say` message argument. The catalogue retains the selected version and extracted picker data but sets `supported: false` with an explicit readiness-route explanation when that schema is missing or incompatible. Validation rejects generation before spawning a Java server. No guessed version-number threshold substitutes for those reports.
