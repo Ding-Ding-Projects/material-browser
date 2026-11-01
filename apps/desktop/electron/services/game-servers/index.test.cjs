@@ -114,7 +114,12 @@ test("metadata hash mismatch and foreign endpoints are rejected", async () => {
       new Response(
         JSON.stringify({
           versions: [
-            { id: "test", url: "https://example.com/a", sha1: "0".repeat(40) },
+            {
+              id: "test",
+              type: "release",
+              url: "https://example.com/a",
+              sha1: "0".repeat(40),
+            },
           ],
         }),
       ),
@@ -488,4 +493,51 @@ test("restart routes through the owned lifecycle implementation", async (t) => {
   await service.request({ action: "restart", params });
   assert.equal(launches, 2);
   await service.dispose();
+});
+test("bootstrap installs require explicit integrity acknowledgement and preserve selected flavour options", async (t) => {
+  let selected;
+  let downloads = 0;
+  const bytes = Buffer.from("fabric bootstrap");
+  const catalogue = {
+    resolve: async (version, signal, options) => {
+      selected = options;
+      return {
+        available: true,
+        javaMajor: 21,
+        integrityKnown: false,
+        loaderVersion: "0.16.10",
+        installerVersion: "1.0.1",
+        integrityNote: "No published checksum",
+        download: { url: "https://meta.fabricmc.net/bootstrap" },
+      };
+    },
+    download: async () => {
+      downloads++;
+      return bytes;
+    },
+  };
+  const { service } = await fixture(t, { catalogue });
+  const params = {
+    name: "Fabric",
+    version: "1.21.4",
+    flavour: "fabric",
+    eulaAccepted: true,
+    loaderVersion: "0.16.10",
+    installerVersion: "1.0.1",
+  };
+  await assert.rejects(service.request({ action: "create", params }), {
+    code: "INTEGRITY_ACKNOWLEDGEMENT_REQUIRED",
+  });
+  assert.equal(downloads, 0);
+  const created = await service.request({
+    action: "create",
+    params: { ...params, unverifiedDistributionAccepted: true },
+  });
+  assert.equal(created.flavour, "fabric");
+  assert.equal(selected.loaderVersion, "0.16.10");
+  assert.equal(created.integrity.integrityKnown, false);
+  assert.equal(
+    created.integrity.sha256,
+    crypto.createHash("sha256").update(bytes).digest("hex"),
+  );
 });

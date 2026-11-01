@@ -40,3 +40,13 @@ The single game-servers service reuses the typed properties inventory in `electr
 Numeric release identifiers retain declared version boundaries. Snapshot, prerelease and historical identifiers without a schema expose unresolved applicability and no invented defaults; only the common message and port controls remain available. All descriptors remain implemented but runtime-unverified. The service currently persists configuration while stopped, so it exposes restart behavior even for descriptors that describe a possible live command in a future consumer.
 
 Verification: `node --test apps/desktop/electron/minecraft/properties.test.cjs apps/desktop/electron/services/game-servers/index.test.cjs` passed 24 tests. This includes preservation, Unicode, duplicate escaped keys, version uncertainty, invalid stored values and prototype-safe property names. It is separate from actual server-version runtime acceptance.
+
+## Flavour catalogues and distribution integrity
+
+The sole service supports vanilla, Paper and Fabric resolution. `discoverVersions({flavour})` retains each provider-listed version, including explicit unavailable rows where provider identifiers have no matching current Java metadata. `resolveVersion({version,flavour,buildId?,loaderVersion?,installerVersion?})` binds the exact distribution before creation.
+
+Paper selects an explicitly chosen build or a stable build, never an experimental fallback. It requires bounded published SHA-256 metadata and verifies downloaded bytes. Fabric resolves the loader against the selected game version and binds an exact installer. Its bootstrap endpoint has no published catalogue checksum, so the response discloses that limit and creation requires `unverifiedDistributionAccepted: true`. The recorded local SHA-256 binds later launches to those installed bytes and does not become publisher verification. The standard Fabric bootstrap may download additional components on first launch; those are not falsely included in the manager's own integrity verdict.
+
+Provider references: [Paper downloads service](https://docs.papermc.io/misc/downloads-service/), [Fabric server launcher](https://fabricmc.net/use/?page=server) and [Fabric metadata API](https://meta.fabricmc.net/). The provider user-agent identifies Material Browser and its public source/contact URL.
+
+Read-only live provider checks at 2026-11-01T07:28Z returned 68 Paper version identifiers and 533 Fabric identifiers. Of the Fabric identifiers, 26 had no matching current Mojang catalogue entry and remain unavailable with an explicit reason. No server or bootstrap was launched. Thirty focused tests pass across the typed-properties, flavour and native service suites; runtime installation acceptance remains separate.

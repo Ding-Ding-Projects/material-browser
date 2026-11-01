@@ -141,7 +141,7 @@ function createGameServerService({
         "EDITION_UNAVAILABLE",
         "Bedrock distribution installation is not implemented",
       );
-    if (p.flavour && p.flavour !== "vanilla")
+    if (p.flavour && !["vanilla", "paper", "fabric"].includes(p.flavour))
       fail(
         "FLAVOUR_UNAVAILABLE",
         "Only official vanilla distributions are currently installed",
@@ -196,8 +196,21 @@ function createGameServerService({
     }
     let created = false;
     try {
-      const version = await catalogue.resolve(p.version, controller.signal);
+      const version = await catalogue.resolve(p.version, controller.signal, {
+        flavour: p.flavour || "vanilla",
+        buildId: p.buildId,
+        loaderVersion: p.loaderVersion,
+        installerVersion: p.installerVersion,
+      });
       if (!version.available) fail("DISTRIBUTION_UNAVAILABLE", version.reason);
+      if (
+        version.integrityKnown === false &&
+        p.unverifiedDistributionAccepted !== true
+      )
+        fail(
+          "INTEGRITY_ACKNOWLEDGEMENT_REQUIRED",
+          "This bootstrap has no published checksum; review and explicitly accept its disclosed integrity limit",
+        );
       const bytes = await catalogue.download(
         version.download,
         controller.signal,
@@ -214,7 +227,14 @@ function createGameServerService({
         id,
         name: p.name.trim(),
         edition: "java",
-        flavour: "vanilla",
+        flavour: p.flavour || "vanilla",
+        distribution: {
+          buildId: version.buildId,
+          loaderVersion: version.loaderVersion,
+          installerVersion: version.installerVersion,
+          licence: version.licence,
+          licenceUrl: version.licenceUrl,
+        },
         version: p.version,
         target: p.target || "local-process",
         imageDigest: ["local-docker", "ssh-docker"].includes(p.target)
@@ -227,8 +247,12 @@ function createGameServerService({
         createdAt: new Date().toISOString(),
         eulaAcceptedAt: new Date().toISOString(),
         integrity: {
-          sha1: version.download.sha1,
-          size: version.download.size,
+          sha1: version.download.sha1 || null,
+          sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+          publishedSha256: version.download.sha256 || null,
+          integrityKnown: version.integrityKnown !== false,
+          integrityNote: version.integrityNote || null,
+          size: bytes.length,
           source: version.download.url,
         },
         runtime: { javaMajor: version.javaMajor },
@@ -332,7 +356,7 @@ function createGameServerService({
               reason: "Official distribution adapter is incomplete",
             },
           ],
-          flavours: ["vanilla"],
+          flavours: ["vanilla", "paper", "fabric"],
           actions: [
             "list",
             "discoverVersions",
@@ -372,9 +396,11 @@ function createGameServerService({
       case "list":
         return list();
       case "discoverVersions":
-        return catalogue.discover();
+        return catalogue.discover(undefined, {
+          flavour: p.flavour || "vanilla",
+        });
       case "resolveVersion":
-        return catalogue.resolve(p.version);
+        return catalogue.resolve(p.version, undefined, p);
       case "create":
         return create(p);
       case "start":
@@ -442,6 +468,7 @@ function createGameServerService({
           typed: sourceView.typed.map((descriptor) => ({
             ...descriptor,
             declaredApply: descriptor.apply,
+            ...(descriptor.key === "server-port" ? { min: 1024 } : {}),
             apply: "restart",
             liveAvailable: false,
           })),
