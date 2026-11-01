@@ -1,7 +1,7 @@
 {
-  "source": "5cdfee13c0df7c0c6c9e1b5da6b6f28cacab21d7",
-  "builtAt": "2026-10-24T00:58:37.753144+00:00",
-  "route": "Existing static handbook build; generated from committed source",
+  "source": "65eb448413a6085c8118117a887640bbde188fc3",
+  "preparedAt": "2026-11-01T10:58:52.835Z",
+  "publicationBytesFromGit": true,
   "files": [
     {
       "path": ".nojekyll",
@@ -10,8 +10,8 @@
     },
     {
       "path": "app.js",
-      "bytes": 556660,
-      "sha256": "9c907cce5fa3afcfb2905b022c8a3c89c4fcbfbb00a0c1d5b6ac61ef80e80f42"
+      "bytes": 746427,
+      "sha256": "efd6ff8142d37efb067ba6485f4ebab5187b734d9fb206da825415d9d519ea29"
     },
     {
       "path": "assets/00437d253d62757b296212aed76f090673a0ef7b5dc4c463cd9f7993dc78e619.png",
@@ -32,6 +32,11 @@
       "path": "assets/1322b836b52f53001248a5f3061e50d0c69a182eb68b52091570489c3ebf5658.png",
       "bytes": 55436,
       "sha256": "1322b836b52f53001248a5f3061e50d0c69a182eb68b52091570489c3ebf5658"
+    },
+    {
+      "path": "assets/13cd574c8ee76196ff05980f6cbebdfa763f98c70cb52ef7592505962219d076.png",
+      "bytes": 193446,
+      "sha256": "13cd574c8ee76196ff05980f6cbebdfa763f98c70cb52ef7592505962219d076"
     },
     {
       "path": "assets/146d6457f95e6fd76ffe3ffb86df42989e77eb03b994138a0ab779ee26e3e761.png",
@@ -94,9 +99,19 @@
       "sha256": "5a02aa577a49989ef631d8c58a2e3e06ab8a1be8c4571001d008579bcf3e35b9"
     },
     {
+      "path": "assets/62a864dbb6d6c1756cf23fff831367da2149ca1618920c7bd799add10ccf20ce.png",
+      "bytes": 95260,
+      "sha256": "62a864dbb6d6c1756cf23fff831367da2149ca1618920c7bd799add10ccf20ce"
+    },
+    {
       "path": "assets/62e4a3889805f4bb00456739697a790b7ac0f2ba4c1f9ca5df12071513300e4d.png",
       "bytes": 114635,
       "sha256": "62e4a3889805f4bb00456739697a790b7ac0f2ba4c1f9ca5df12071513300e4d"
+    },
+    {
+      "path": "assets/6c9e85c556b373356e7945c3c9ffb224fc30a83a1c478e6e6240b8fc8d271782.png",
+      "bytes": 156992,
+      "sha256": "6c9e85c556b373356e7945c3c9ffb224fc30a83a1c478e6e6240b8fc8d271782"
     },
     {
       "path": "assets/7af317ca751cbad08313821107d22b11da8d302d21f2d777c55fd1f84fc35d9c.png",
@@ -144,6 +159,16 @@
       "sha256": "ae283e5e7f6d780192f90ef3b6a035a25ac22d1ebce2fe253a860ddfcfefbf79"
     },
     {
+      "path": "assets/b4df22867b820609572e112f286287b6c40be20e21667912da69009fa97621ac.png",
+      "bytes": 143146,
+      "sha256": "b4df22867b820609572e112f286287b6c40be20e21667912da69009fa97621ac"
+    },
+    {
+      "path": "assets/c621130b35f14b69ba78634b10485db711c26b04dedb6e56eb32ee744838ac29.png",
+      "bytes": 73842,
+      "sha256": "c621130b35f14b69ba78634b10485db711c26b04dedb6e56eb32ee744838ac29"
+    },
+    {
       "path": "assets/cb43f4da41792f11fe7991ffdf6b5a7904a822bcae820d2f1cd97a5a16ff2109.png",
       "bytes": 147258,
       "sha256": "cb43f4da41792f11fe7991ffdf6b5a7904a822bcae820d2f1cd97a5a16ff2109"
@@ -152,6 +177,11 @@
       "path": "assets/d72af2104bf4fca9cee5db7f41d01afaec4593f930ea1eaa22aa15f0bae919e2.png",
       "bytes": 80013,
       "sha256": "d72af2104bf4fca9cee5db7f41d01afaec4593f930ea1eaa22aa15f0bae919e2"
+    },
+    {
+      "path": "assets/de47ea847d33a3331a0dd73fcedd705155519ca1e9ab094f133e0b3b56fcd0e2.png",
+      "bytes": 111223,
+      "sha256": "de47ea847d33a3331a0dd73fcedd705155519ca1e9ab094f133e0b3b56fcd0e2"
     },
     {
       "path": "assets/e71ba5bf9995272bbc704414a2d8d1685700604a0932c0cbf751892b099c0f05.png",
@@ -175,8 +205,8 @@
     },
     {
       "path": "inventory.json",
-      "bytes": 2110,
-      "sha256": "a53bc930c1bf63dba33e872982bb35a76ee43ecebec951f333bf8c64ac4f4c87"
+      "bytes": 3017,
+      "sha256": "07411727db399fd9e1421cb5ac56020c5b57aca04ab73cc8178ef61cad11d3de"
     },
     {
       "path": "regex.worker.js",
@@ -185,9 +215,8 @@
     },
     {
       "path": "style.css",
-      "bytes": 6188,
-      "sha256": "fa7a51c392e74a7e9a805c0daf01783c33f229156c652bb0ecdab12f387d2057"
+      "bytes": 6359,
+      "sha256": "203a61438849f31c642ccf9f14c0b41e2fb6653ee29f8065d718596b7792a043"
     }
-  ],
-  "publicationBytesFromGit": true
+  ]
 }
