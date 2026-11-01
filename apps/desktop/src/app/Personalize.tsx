@@ -8,6 +8,7 @@ import { contrastCheck, formatHex, normaliseHex, parseCssRgb, translate } from "
 import { RADIUS, SCALE } from "./appearance-elements-model.mjs";
 import {
   appearanceTarget,
+  applyAppearanceOverrides,
   elementLabel,
   firstElement,
   flashElements,
@@ -241,6 +242,7 @@ export function AppearanceContextMenu() {
   const [menu, setMenu] = useState<{ target: ElementChoice; x: number; y: number } | null>(null);
   const [editing, setEditing] = useState<ElementChoice | null>(null);
   useEffect(() => {
+    applyAppearanceOverrides();
     const onContext = (event: MouseEvent) => {
       if (event.defaultPrevented || editable(event.target as Element)) return;
       if ((event.target as Element)?.closest?.(".m3-overlay, [role=menu]")) return;
