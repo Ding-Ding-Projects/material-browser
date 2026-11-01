@@ -1,4 +1,15 @@
 export const serversZh: Record<string, string> = {
+  'This property is unavailable for the selected version.': '所揀版本無法使用此屬性。', 'Choose a boolean value.': '請選擇開關值。', 'Choose a listed value.': '請選擇清單內嘅值。',
+  'Enter a whole number within the displayed range.': '請輸入所示範圍內嘅整數。', 'Use the displayed step size.': '請使用所示步幅。', 'Text exceeds this property’s limits.': '文字超出此屬性限制。',
+  'Text does not match the supported format.': '文字唔符合支援格式。', 'The property descriptor is invalid.': '屬性描述無效。', 'No control for this setting': '未有此設定嘅控制項',
+  'Choose a value': '選擇數值', Enabled: '已啟用', Disabled: '已停用', Decrease: '減少', Increase: '增加', Step: '步幅', slider: '滑桿', 'Required format': '所需格式',
+  'Configuration saved. Changes apply at the next start.': '設定已儲存，下次啟動生效。',
+  'Configuration controls describe declared version support. Runtime behavior remains unverified. All changes are saved while stopped and apply at the next start.': '設定控制項描述已聲明嘅版本支援，運行行為仍未驗證。所有變更喺停止時儲存，下次啟動生效。',
+  'Search server properties': '搜尋伺服器屬性', 'Reading server properties': '讀取伺服器屬性中', 'Existing value is invalid or unresolved.': '現有值無效或未能解析。',
+  'Present in server.properties': '已存在於 server.properties', 'Not present; no value is written until you edit it': '尚未存在，編輯前唔會寫入值', 'Needs restart': '需要重新啟動',
+  'Unknown properties are preserved': '未知屬性會保留', 'Values are hidden because unknown properties may contain sensitive data.': '未知屬性可能包含敏感資料，因此唔顯示內容。',
+  'No additional description is available.': '未有其他說明。', Default: '預設值', 'Version applicability': '版本適用性', declared: '已聲明', unresolved: '未能確定',
+
   'SSH host name': 'SSH 主機名稱', 'SSH user': 'SSH 使用者', 'SSH port': 'SSH 連接埠', 'Dedicated remote directory': '專用遠端目錄', 'Remote Java path': '遠端 Java 路徑',
   'Identity file path (optional)': '身分檔案路徑（可選）', 'Known hosts file path (optional)': '已知主機檔案路徑（可選）',
   'Use an already trusted SSH host and existing authentication. Host identity checks remain enabled. These connection fields are not saved in the draft.': '請使用已信任嘅 SSH 主機同現有驗證方式。主機身分檢查保持啟用，連線欄位唔會存入草稿。',
