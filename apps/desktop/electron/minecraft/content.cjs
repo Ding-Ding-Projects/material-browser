@@ -176,13 +176,40 @@ async function restore(files, backupFolder, worldName) {
   if (!/^backups\/[A-Za-z0-9-]+$/.test(backupFolder)) throw fail("INVALID_REQUEST");
   const meta = JSON.parse((await files.readText(`${backupFolder}/backup.json`)) || "null");
   if (!meta) throw fail("BACKUP_DAMAGED");
+  const allowed = new Set([worldName, `${worldName}_nether`, `${worldName}_the_end`]);
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(worldName) || !Array.isArray(meta.worlds) ||
+      !meta.worlds.length || meta.worlds.length > 3 || new Set(meta.worlds).size !== meta.worlds.length ||
+      meta.worlds.some((w) => typeof w !== "string" || !allowed.has(w))) throw fail("BACKUP_DAMAGED");
   const check = await files.treeDigest(`${backupFolder}/data`);
   if (check.sha256 !== meta.sha256) throw fail("BACKUP_INTEGRITY_FAILED");
   const safety = await backup(files, worldName, "before-restore").catch((e) => (e.code === "NO_WORLD_TO_BACK_UP" ? null : Promise.reject(e)));
-  for (const w of meta.worlds) {
-    await files.remove(w);
-    await files.copyTree(`${backupFolder}/data/${w}`, w);
+  const stage = `.restore-${require("node:crypto").randomUUID()}`;
+  const moved = [], installed = [];
+  await files.mkdir(`${stage}/new`);
+  await files.mkdir(`${stage}/old`);
+  try {
+    for (const w of meta.worlds) await files.copyTree(`${backupFolder}/data/${w}`, `${stage}/new/${w}`);
+    const staged = await files.treeDigest(`${stage}/new`);
+    if (staged.sha256 !== meta.sha256) throw fail("BACKUP_INTEGRITY_FAILED");
+    try {
+      for (const w of meta.worlds) {
+        if (await files.exists(w)) { await files.rename(w, `${stage}/old/${w}`); moved.push(w); }
+        await files.rename(`${stage}/new/${w}`, w);
+        installed.push(w);
+      }
+    } catch (error) {
+      // Preserve the recovery directory if rollback itself fails.
+      try {
+        for (const w of installed.reverse()) await files.rename(w, `${stage}/new/${w}`);
+        for (const w of moved.reverse()) await files.rename(`${stage}/old/${w}`, w);
+      } catch { throw fail("RESTORE_ROLLBACK_REQUIRED"); }
+      throw error;
+    }
+  } catch (error) {
+    if (error.code !== "RESTORE_ROLLBACK_REQUIRED") await files.remove(stage);
+    throw error;
   }
+  await files.remove(stage);
   return { restored: meta.worlds, safetyBackup: safety?.folder ?? null, verifiedFiles: check.files };
 }
 
