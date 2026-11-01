@@ -1,24 +1,25 @@
-/* Material Browser colour scheme: Material 3 tonal palette from a teal seed. */
+/* Material Browser colour scheme: the Material 3 baseline palette that the
+   product's own app icon uses (#4F378B on #EADDFF). */
 .m3{
-  --primary:#006A6A;--on-primary:#FFFFFF;--primary-container:#9CF1F0;--on-primary-container:#004F4F;
-  --secondary:#4A6363;--on-secondary:#FFFFFF;--secondary-container:#CCE8E7;--on-secondary-container:#324B4B;
-  --tertiary:#4B607C;--on-tertiary:#FFFFFF;--tertiary-container:#D3E4FF;--on-tertiary-container:#334863;
-  --error:#BA1A1A;--on-error:#FFFFFF;--error-container:#FFDAD6;--on-error-container:#93000A;
-  --surface:#F4FBFA;--surface-dim:#D5DBDA;--surface-bright:#F4FBFA;
-  --surface-container-lowest:#FFFFFF;--surface-container-low:#EFF5F4;--surface-container:#E9EFEE;--surface-container-high:#E3E9E8;--surface-container-highest:#DDE4E3;
-  --on-surface:#161D1D;--on-surface-variant:#3F4948;--outline:#6F7979;--outline-variant:#BEC9C8;
-  --inverse-surface:#2B3231;--inverse-on-surface:#ECF2F1;--inverse-primary:#80D5D4;--scrim:#000000;
+  --primary:#6750A4;--on-primary:#FFFFFF;--primary-container:#EADDFF;--on-primary-container:#4F378B;
+  --secondary:#625B71;--on-secondary:#FFFFFF;--secondary-container:#E8DEF8;--on-secondary-container:#4A4458;
+  --tertiary:#7D5260;--on-tertiary:#FFFFFF;--tertiary-container:#FFD8E4;--on-tertiary-container:#633B48;
+  --error:#B3261E;--on-error:#FFFFFF;--error-container:#F9DEDC;--on-error-container:#8C1D18;
+  --surface:#FEF7FF;--surface-dim:#DED8E1;--surface-bright:#FEF7FF;
+  --surface-container-lowest:#FFFFFF;--surface-container-low:#F7F2FA;--surface-container:#F3EDF7;--surface-container-high:#ECE6F0;--surface-container-highest:#E6E0E9;
+  --on-surface:#1D1B20;--on-surface-variant:#49454F;--outline:#79747E;--outline-variant:#CAC4D0;
+  --inverse-surface:#322F35;--inverse-on-surface:#F5EFF7;--inverse-primary:#D0BCFF;--scrim:#000000;
   --e1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);
   --e2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);
   --e3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);
 }
 .m3.dark{
-  --primary:#80D5D4;--on-primary:#003737;--primary-container:#004F4F;--on-primary-container:#9CF1F0;
-  --secondary:#B0CCCB;--on-secondary:#1B3534;--secondary-container:#324B4B;--on-secondary-container:#CCE8E7;
-  --tertiary:#B3C8E8;--on-tertiary:#1C314B;--tertiary-container:#334863;--on-tertiary-container:#D3E4FF;
-  --error:#FFB4AB;--on-error:#690005;--error-container:#93000A;--on-error-container:#FFDAD6;
-  --surface:#0E1514;--surface-dim:#0E1514;--surface-bright:#343A3A;
-  --surface-container-lowest:#090F0F;--surface-container-low:#161D1D;--surface-container:#1A2121;--surface-container-high:#252B2B;--surface-container-highest:#2F3636;
-  --on-surface:#DDE4E3;--on-surface-variant:#BEC9C8;--outline:#889392;--outline-variant:#3F4948;
-  --inverse-surface:#DDE4E3;--inverse-on-surface:#2B3231;--inverse-primary:#006A6A;
+  --primary:#D0BCFF;--on-primary:#381E72;--primary-container:#4F378B;--on-primary-container:#EADDFF;
+  --secondary:#CCC2DC;--on-secondary:#332D41;--secondary-container:#4A4458;--on-secondary-container:#E8DEF8;
+  --tertiary:#EFB8C8;--on-tertiary:#492532;--tertiary-container:#633B48;--on-tertiary-container:#FFD8E4;
+  --error:#F2B8B5;--on-error:#601410;--error-container:#8C1D18;--on-error-container:#F9DEDC;
+  --surface:#141218;--surface-dim:#141218;--surface-bright:#3B383E;
+  --surface-container-lowest:#0F0D13;--surface-container-low:#1D1B20;--surface-container:#211F26;--surface-container-high:#2B2930;--surface-container-highest:#36343B;
+  --on-surface:#E6E0E9;--on-surface-variant:#CAC4D0;--outline:#938F99;--outline-variant:#49454F;
+  --inverse-surface:#E6E0E9;--inverse-on-surface:#322F35;--inverse-primary:#6750A4;
 }

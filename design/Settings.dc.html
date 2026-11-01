@@ -13,9 +13,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
 <style>body{margin:0}</style>
 </helmet>
-<div class="m3 win {{theme}}" style="min-height: 1240px; height: auto">
+<div class="m3 win {{theme}}" style="min-height: 1440px; height: auto">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <div class="rail-x" style="height: 76px"></div>
+      <button class="fab flat sl rail-x" aria-label="Create profile" style="margin: 4px 0 20px"><span class="ms">person_add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">group</span></span>Profiles</a>
       <a class="ri" href="SuperProfiles.dc.html"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
       <a class="ri" href="Sync.dc.html"><span class="ind"><span class="ms">sync</span></span>Sync</a>
@@ -50,7 +50,18 @@
       </aside>
       <section class="pane" aria-labelledby="lang-h" style="flex: 1; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 28px">
         <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap"><div style="flex: 1; min-width: 240px"><h2 id="lang-h" class="headline-l em">Language and voice</h2><p class="body-m on-sv">Saved on this computer. Every change appears in local history.</p></div><button class="btn outlined sl"><span class="ms">restart_alt</span>Reset section</button></div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px; align-items: start">
+        <div class="cols">
+          <section style="display: flex; flex-direction: column; gap: 8px" aria-labelledby="g0">
+            <h3 id="g0" class="title-s c-primary" style="padding: 0 16px">Browsing</h3>
+            <div class="seglist">
+              <div class="li tall" style="flex-wrap: wrap"><span class="ms">public</span><span class="txt"><span>Default engine for new profiles</span><span class="sup">Both engines ship with the app</span></span>
+                <div class="cbg" role="radiogroup" aria-label="Default engine"><button class="on" role="radio" aria-checked="true"><span class="ms">check</span>Chromium</button><button role="radio" aria-checked="false">Firefox</button></div></div>
+              <div class="li tall" style="--tf-bg: var(--surface-container)"><span class="ms">smart_toy</span><span class="txt"><span>Default automation</span><span class="sup">Each launch still asks for review</span></span><button class="tf" aria-haspopup="listbox" style="width: 200px; height: 48px"><span class="lab">Automation</span><span class="val">Off</span><span class="ms">arrow_drop_down</span></button></div>
+              <div class="li tall" style="--tf-bg: var(--surface-container)"><span class="ms">extension</span><span class="txt"><span>Extensions</span><span class="sup">What a profile may install</span></span><button class="tf" aria-haspopup="listbox" style="width: 200px; height: 48px"><span class="lab">Policy</span><span class="val">Ask each time</span><span class="ms">arrow_drop_down</span></button></div>
+              <div class="li tall"><span class="ms">download</span><span class="txt"><span>Downloads folder</span><span class="sup mono">Downloads\Material Browser</span></span><button class="btn text sl">Change</button></div>
+              <div class="li tall"><span class="ms">lock_clock</span><span class="txt"><span>Lock the vault when idle</span><span class="sup">After 15 minutes</span></span><button class="sw sl" role="switch" aria-checked="true" aria-label="Lock the vault when idle"><span><span class="ms">check</span></span></button></div>
+            </div>
+          </section>
           <section style="display: flex; flex-direction: column; gap: 8px" aria-labelledby="g1">
             <h3 id="g1" class="title-s c-primary" style="padding: 0 16px">Language</h3>
             <div class="seglist">
@@ -98,9 +109,10 @@
       </section>
     </div>
   </div>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1240}}'>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1440}}'>
 class Component extends DCLogic {
   renderVals() {
     return { theme: this.props.dark ? 'dark' : '' };

@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <button class="fab flat sl rail-x" aria-label="Sync now" style="margin: 4px 0 20px"><span class="ms">sync</span></button>
+      <button class="fab flat sl rail-x" aria-label="Create profile" style="margin: 4px 0 20px"><span class="ms">person_add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">group</span></span>Profiles</a>
       <a class="ri" href="SuperProfiles.dc.html"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
       <a class="ri on" href="Sync.dc.html" aria-current="page"><span class="ind"><span class="ms">sync</span><span class="badge">1</span></span>Sync</a>
@@ -39,11 +39,11 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px">
           <section class="card tint" style="padding: 24px; border-radius: 28px; display: flex; flex-direction: column; gap: 16px">
             <div style="display: flex; align-items: center; gap: 12px"><span class="ms s32 fill">cloud_done</span><div style="flex: 1"><h2 class="title-l">Your storage</h2><p class="body-m">Connected · last sync 3 min ago</p></div></div>
-            <div class="wavy" aria-label="Uploading 2 of 3 changes" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><svg viewBox="0 0 200 14" preserveAspectRatio="none" style="width: 66%" aria-hidden="true"><path d="M2 7 Q7 1 12 7 T22 7 T32 7 T42 7 T52 7 T62 7 T72 7 T82 7 T92 7 T102 7 T112 7 T122 7 T132 7 T142 7 T152 7 T162 7 T172 7 T182 7 T192 7 T198 7"></path></svg><span class="ina"></span></div>
+            <div class="wavy" aria-label="Uploading 2 of 3 changes" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><svg viewBox="0 0 200 14" preserveAspectRatio="none" style="width: 66%" aria-hidden="true"><path d="M2 7 Q7 1 12 7 T22 7 T32 7 T42 7 T52 7 T62 7 T72 7 T82 7 T92 7 T102 7 T112 7 T122 7 T132 7 T142 7 T152 7 T162 7 T172 7 T182 7 T192 7 T198 7"></path></svg><span class="ina" style="background: var(--surface)"></span></div>
             <p class="body-s">Uploading 2 of 3 changes</p>
           </section>
-          <section class="card filled" style="padding: 24px; border-radius: 28px; display: flex; flex-direction: column; gap: 12px">
-            <div style="display: flex; align-items: center; gap: 12px"><span class="ms s32 c-primary">devices</span><div style="flex: 1"><h2 class="title-l">This computer</h2><p class="body-m on-sv">[DEVICE NAME] · joined [DATE]</p></div></div>
+          <section class="card filled" style="padding: 24px; border-radius: 28px; background: var(--surface-container-high); display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; gap: 12px"><span class="ms s32 c-primary">devices</span><div style="flex: 1"><h2 class="title-l">This computer</h2><p class="body-m on-sv">STUDIO-PC · joined 28 Oct 2026</p></div></div>
             <div style="display: flex; align-items: center; gap: 16px"><span class="body-l" style="flex: 1">Sync automatically</span><button class="sw sl" role="switch" aria-checked="true" aria-label="Sync automatically"><span><span class="ms">check</span></span></button></div>
             <button class="btn tonal sl" style="align-self: flex-start"><span class="ms">qr_code_2</span>Join another computer</button>
           </section>
@@ -51,22 +51,38 @@
         <section style="display: flex; flex-direction: column; gap: 12px" aria-labelledby="server-h">
           <h2 id="server-h" class="title-m">Server</h2>
           <div class="seglist">
-            <div class="li"><span class="ms">dns</span><span class="txt"><span class="ov">Address</span><span>[YOUR SERVER ADDRESS]</span></span><button class="btn text sl">Change</button></div>
+            <div class="li"><span class="ms">dns</span><span class="txt"><span class="ov">Address</span><span>vault.home.arpa:8443</span></span><button class="btn text sl">Change</button></div>
             <div class="li"><span class="ms">verified</span><span class="txt"><span class="ov">Certificate</span><span>Trusted · pinned on this computer</span></span></div>
             <div class="li"><span class="ms">inventory_2</span><span class="txt"><span class="ov">Vault on server</span><span>Revision 41 · 3 profiles</span></span></div>
           </div>
           <button class="btn text sl" style="align-self: flex-start"><span class="ms">add_to_queue</span>Set up a storage server</button>
         </section>
+        <section style="display: flex; flex-direction: column; gap: 12px" aria-labelledby="act-h">
+          <h2 id="act-h" class="title-m">Recent activity</h2>
+          <div class="seglist">
+            <div class="li"><span class="ms">cloud_upload</span><span class="txt"><span>Work uploaded</span><span class="sup">Revision 41 · 3 min ago</span></span></div>
+            <div class="li"><span class="ms">cloud_download</span><span class="txt"><span>Banking downloaded</span><span class="sup">From STUDIO-PC · 1 h ago</span></span></div>
+            <div class="li"><span class="ms">merge</span><span class="txt"><span>Shopping conflict resolved</span><span class="sup">Kept this computer · yesterday</span></span></div>
+          </div>
+        </section>
+        <div style="height: 8px; flex-shrink: 0"></div>
       </section>
       <aside class="pane scroll" aria-labelledby="conf-h" style="width: 420px; flex-shrink: 1; min-width: 0; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; align-items: center; gap: 12px"><span class="ms c-error">merge</span><h2 id="conf-h" class="title-l" style="flex: 1">1 conflict to review</h2><button class="ib sl" aria-label="Select conflicts"><span class="ms">checklist</span></button></div>
         <p class="body-m on-sv">Research changed here and on the server. Pick which to keep.</p>
         <div class="seglist" role="radiogroup" aria-label="Research conflict">
-          <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span class="ov">On this computer</span><span>Renamed to “Research lab”</span><span class="sup">Changed [DATE]</span></span><span class="ms">laptop_windows</span></button>
-          <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span class="ov">On the server</span><span>Engine changed to Chromium</span><span class="sup">Changed [DATE]</span></span><span class="ms">cloud</span></button>
+          <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span class="ov">On this computer</span><span>Renamed to “Research lab”</span><span class="sup">Changed 28 Oct 2026</span></span><span class="ms">laptop_windows</span></button>
+          <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span class="ov">On the server</span><span>Engine changed to Chromium</span><span class="sup">Changed 28 Oct 2026</span></span><span class="ms">cloud</span></button>
           <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span class="ov">Both</span><span>Keep both</span><span class="sup">The server version becomes a copy</span></span><span class="ms">call_split</span></button>
         </div>
         <div style="display: flex; gap: 8px; justify-content: flex-end"><button class="btn text sl">Later</button><button class="btn filled sl">Apply</button></div>
+        <div class="div"></div>
+        <h3 class="title-m">What each choice keeps</h3>
+        <div class="seglist">
+          <div class="li"><span class="ms">laptop_windows</span><span class="txt"><span>This computer</span><span class="sup">The server copy becomes a revision you can restore</span></span></div>
+          <div class="li"><span class="ms">cloud</span><span class="txt"><span>The server</span><span class="sup">Your local change becomes a revision</span></span></div>
+          <div class="li"><span class="ms">call_split</span><span class="txt"><span>Both</span><span class="sup">Two profiles, nothing replaced</span></span></div>
+        </div>
       </aside>
     </div>
   </div>

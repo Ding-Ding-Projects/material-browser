@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
 <style>body{margin:0}</style>
 </helmet>
-<div class="m3 {{theme}}" style="min-height: 960px; padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-content: start; --tf-bg: var(--surface-container-high)">
+<div class="m3 {{theme}}" style="min-height: 960px; padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-content: start; align-items: start; --tf-bg: var(--surface-container-high)">
   <section class="dialog" role="alertdialog" aria-labelledby="del-h">
     <span class="ms s32 hero c-error">person_remove</span>
     <h2 id="del-h" class="headline-s" style="text-align: center">Delete “Research”?</h2>
@@ -25,7 +25,8 @@
     </div>
     <p class="label-l on-sv">Then slide all the way</p>
     <div class="slider" role="slider" tabindex="-1" aria-disabled="true" aria-label="Confirm deletion, waiting for key two" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="opacity: .38"><span class="handle" style="background: var(--on-surface)"></span><span class="ina" style="background: var(--on-surface); border-radius: 999px"></span></div>
-    <div class="acts"><button class="btn outlined sl"><span class="ms">logout</span>Emergency exit</button></div>
+    <p class="body-s on-sv">Turn key two to unlock the slider. The slider deletes when it reaches the end.</p>
+    <div class="acts"><button class="btn outlined sl"><span class="ms">logout</span>Emergency exit</button><button class="btn error" disabled>Delete</button></div>
   </section>
   <section class="dialog" role="dialog" aria-labelledby="lock-h">
     <span class="ms s32 hero">lock</span>
@@ -48,7 +49,7 @@
     <h2 id="ladder-h" class="headline-s" style="text-align: center">Play your way out</h2>
     <p class="body-m on-sv">Locked for 4 minutes after too many tries. Each rung clears waiting time, never the lock.</p>
     <div class="cbg" aria-label="Ladder progress" style="flex-wrap: nowrap">
-      <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px; background: var(--secondary-container); color: var(--on-secondary-container)"><span class="ms">check</span>Dim sum</button>
+      <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px"><span class="ms">check</span>Dim sum</button>
       <button class="on" aria-current="step" style="flex: 1 1 auto; padding: 0 10px">Sums</button>
       <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px">Moles</button>
       <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px">Clock</button>

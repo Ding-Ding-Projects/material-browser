@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -53,15 +53,15 @@
           </div>
           <p class="body-m on-sv">Selenium attaches a WebDriver session you can script from your own tools.</p>
         </section>
-        <section class="card tint-t" style="padding: 20px 20px 12px; border-radius: 24px; display: flex; flex-direction: column; gap: 4px" aria-labelledby="review-h">
+        <section class="card filled" style="padding: 20px 20px 12px; border-radius: 24px; background: var(--surface-container-high); display: flex; flex-direction: column; gap: 4px" aria-labelledby="review-h">
           <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 8px"><span class="ms">fact_check</span><h2 id="review-h" class="title-m">Review before launch</h2></div>
           <div style="display: flex; align-items: center; gap: 4px; margin-left: -10px"><button class="cbt sl" role="checkbox" aria-checked="true" aria-labelledby="c1"><span class="cb"><span class="ms">check</span></span></button><span id="c1" class="body-m">Automation can read and control pages in this profile while it runs.</span></div>
           <div style="display: flex; align-items: center; gap: 4px; margin-left: -10px"><button class="cbt sl" role="checkbox" aria-checked="false" aria-labelledby="c2"><span class="cb"></span></button><span id="c2" class="body-m">The driver listens on this computer only (127.0.0.1).</span></div>
         </section>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
-          <button class="btn filled m sl"><span class="ms">rocket_launch</span>Launch Firefox</button>
+          <button class="btn filled m" disabled aria-describedby="gate"><span class="ms">rocket_launch</span>Launch Firefox</button>
           <a class="btn text sl" href="Main.dc.html">Cancel</a>
-          <span class="body-s on-sv">One review left to confirm</span>
+          <span id="gate" class="body-m on-sv">Confirm both reviews to launch</span>
         </div>
       </section>
       <aside class="pane scroll hide-s" aria-label="About launching" style="width: 380px; flex-shrink: 0; padding: 28px 24px; display: flex; flex-direction: column; gap: 24px">
@@ -76,8 +76,15 @@
         <section style="display: flex; flex-direction: column; gap: 12px">
           <h2 class="title-l">Running now</h2>
           <div class="seglist">
-            <div class="li"><div class="av p shape-cookie" aria-hidden="true">W</div><span class="txt"><span>Work</span><span class="sup">Chromium · 42 min</span></span><button class="btn text sl">Stop</button></div>
+            <div class="li"><div class="av p shape-cookie" aria-hidden="true">W</div><span class="txt"><span>Work</span><span class="sup">Chromium · running 42 min</span></span><button class="btn text sl">Stop</button></div>
             <div class="li"><div class="av s shape-sq" aria-hidden="true">T</div><span class="txt"><span>Testing</span><span class="sup">Puppeteer · 6 min</span></span><button class="btn text sl">Stop</button></div>
+          </div>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <h2 class="title-l">Recent launches</h2>
+          <div class="seglist">
+            <div class="li"><span class="ms">history</span><span class="txt"><span>Research</span><span class="sup">Firefox · Selenium · yesterday</span></span></div>
+            <div class="li"><span class="ms">history</span><span class="txt"><span>Banking</span><span class="sup">Firefox · 2 days ago</span></span></div>
           </div>
         </section>
       </aside>

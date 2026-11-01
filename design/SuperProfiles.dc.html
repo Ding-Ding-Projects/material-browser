@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search profiles, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,20 +24,26 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <button class="fab flat sl rail-x" aria-label="Create Super Profile" style="margin: 4px 0 20px"><span class="ms">library_add</span></button>
+      <button class="fab flat sl rail-x" aria-label="Create profile" style="margin: 4px 0 20px"><span class="ms">person_add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">group</span></span>Profiles</a>
       <a class="ri on" href="SuperProfiles.dc.html" aria-current="page"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
       <a class="ri" href="Sync.dc.html"><span class="ind"><span class="ms">sync</span></span>Sync</a>
       <a class="ri" href="Settings.dc.html"><span class="ind"><span class="ms">settings</span></span>Settings</a>
     </nav>
     <div class="panes">
-      <section class="pane scroll hide-m" aria-labelledby="sp-h" style="width: 340px; flex-shrink: 0; padding: 28px 16px 16px; display: flex; flex-direction: column; gap: 16px">
+      <section class="pane scroll hide-m" aria-labelledby="sp-h" style="width: 300px; flex-shrink: 0; padding: 28px 16px 16px; display: flex; flex-direction: column; gap: 16px">
         <div style="padding: 0 8px"><h1 id="sp-h" class="headline-m em">Super Profiles</h1><p class="body-m on-sv">Reusable guest environments</p></div>
         <label class="search sm"><span class="ms">search</span><input aria-label="Search Super Profiles" placeholder="Search templates"><button class="ib sl" aria-label="Open regex builder for template search"><span class="ms">regular_expression</span></button></label>
         <div class="seglist">
-          <button class="li tall sel sl"><div class="av l p shape-cookie" aria-hidden="true"><span class="ms">terminal</span></div><span class="txt"><span>Dev workstation</span><span class="sup">WSL 2 · revision 7</span></span><span class="stat"><span class="ms fill">circle</span>Open</span></button>
-          <button class="li tall sl"><div class="av l t shape-sq" aria-hidden="true"><span class="ms">desktop_windows</span></div><span class="txt"><span>Clean sandbox</span><span class="sup">Windows Sandbox · revision 3</span></span></button>
-          <button class="li tall sl"><div class="av l s shape-arch" aria-hidden="true"><span class="ms">science</span></div><span class="txt"><span>Extension lab</span><span class="sup">WSL 2 · draft</span></span><span class="trail">Draft</span></button>
+          <button class="li tall sel sl"><div class="av p shape-cookie" aria-hidden="true"><span class="ms">terminal</span></div><span class="txt"><span>Dev workstation</span><span class="sup">WSL 2 · revision 7</span></span><span class="stat st-run"><span class="ms fill">play_circle</span>Open</span></button>
+          <button class="li tall sl"><div class="av t shape-sq" aria-hidden="true"><span class="ms">desktop_windows</span></div><span class="txt"><span>Clean sandbox</span><span class="sup">Windows Sandbox · revision 3</span></span></button>
+          <button class="li tall sl"><div class="av s shape-arch" aria-hidden="true"><span class="ms">science</span></div><span class="txt"><span>Extension lab</span><span class="sup">WSL 2 · draft</span></span><span class="trail">Draft</span></button>
+          <button class="li tall sl"><div class="av t shape-pill" aria-hidden="true"><span class="ms">school</span></div><span class="txt"><span>Classroom</span><span class="sup">Windows Sandbox · revision 2</span></span></button>
+        </div>
+        <div class="nd-head">Recent sessions</div>
+        <div class="seglist">
+          <div class="li"><span class="ms">history</span><span class="txt"><span>Dev workstation</span><span class="sup">Saved as revision 7 · 2 days ago</span></span></div>
+          <div class="li"><span class="ms">history</span><span class="txt"><span>Clean sandbox</span><span class="sup">Discarded · last week</span></span></div>
         </div>
         <div style="flex: 1"></div>
         <button class="btn outlined sl" style="align-self: flex-start"><span class="ms">memory</span>Host capabilities</button>
@@ -54,27 +60,39 @@
           <button class="tab sl on" role="tab" aria-selected="true"><span class="tl">Session</span></button>
           <button class="tab sl" role="tab" aria-selected="false"><span class="tl">Revisions</span></button>
         </div>
-        <section class="card filled" style="padding: 24px; border-radius: 28px; display: flex; flex-direction: column; gap: 16px">
+        <section class="card filled" style="padding: 24px; border-radius: 28px; background: var(--surface-container-high); display: flex; flex-direction: column; gap: 16px">
           <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-            <div class="loading" aria-hidden="true"><span></span></div>
+            <div class="av l p shape-sunny" aria-hidden="true"><span class="ms fill">play_arrow</span></div>
             <div style="flex: 1; min-width: 200px"><h3 class="title-l">Session open</h3><p class="body-m on-sv">Healthy · started 26 min ago</p></div>
             <button class="btn outlined sl"><span class="ms">stop</span>Stop</button>
           </div>
           <p class="body-m">Changes stay in this session until you save them back. Preview shows exactly what will change.</p>
           <div class="seglist">
-            <div class="li"><span class="ms c-primary">add_circle</span><span class="txt"><span>Work · bookmarks</span><span class="sup">14 added</span></span><span class="trail">Added</span></div>
-            <div class="li"><span class="ms c-tertiary">change_circle</span><span class="txt"><span>Research · extensions</span><span class="sup">2 updated</span></span><span class="trail">Changed</span></div>
-            <div class="li"><span class="ms c-error">remove_circle</span><span class="txt"><span>Workspace · scratch folder</span><span class="sup">Removed in the guest</span></span><span class="trail">Removed</span></div>
+            <div class="li"><span class="ms c-primary">add_circle</span><span class="txt"><span>Work · bookmarks</span><span class="sup">14 added</span></span><span class="label-l c-primary">Added</span></div>
+            <div class="li"><span class="ms c-tertiary">change_circle</span><span class="txt"><span>Research · extensions</span><span class="sup">2 updated</span></span><span class="label-l c-tertiary">Changed</span></div>
+            <div class="li"><span class="ms c-error">remove_circle</span><span class="txt"><span>Workspace · scratch folder</span><span class="sup">Removed in the guest</span></span><span class="label-l c-error">Removed</span></div>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap"><div class="split"><button class="btn filled m sl"><span class="ms">save</span>Save as revision 8</button><button class="btn filled m sl" aria-label="Choose what to save"><span class="ms">keyboard_arrow_down</span></button></div><button class="btn text m sl">Discard changes</button></div>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 12px" aria-labelledby="inside-h">
+          <h3 id="inside-h" class="title-m">In this template</h3>
+          <div class="seglist">
+            <div class="li"><div class="av p shape-cookie" aria-hidden="true">W</div><span class="txt"><span>Work</span><span class="sup">Chromium · KeePassXC</span></span></div>
+            <div class="li"><div class="av t shape-sunny" aria-hidden="true">R</div><span class="txt"><span>Research</span><span class="sup">Firefox · Selenium</span></span></div>
+            <div class="li"><span class="ms">folder</span><span class="txt"><span>Workspace folder</span><span class="sup mono">~/projects</span></span></div>
+            <div class="li"><span class="ms">terminal</span><span class="txt"><span>Start-up commands</span><span class="sup">3 commands · run as UID 1000</span></span></div>
+          </div>
         </section>
       </section>
       <aside class="pane scroll hide-s" aria-label="Revision history" style="width: 340px; flex-shrink: 0; padding: 28px 16px 16px; display: flex; flex-direction: column; gap: 16px">
         <h2 class="title-l" style="padding: 0 8px">Revision history</h2>
         <div class="seglist">
-          <div class="li tall sel"><span class="ms fill">radio_button_checked</span><span class="txt"><span>Revision 7 · current</span><span class="sup">Saved from session · [DATE]</span></span></div>
+          <div class="li tall sel"><span class="ms fill">radio_button_checked</span><span class="txt"><span>Revision 7 · current</span><span class="sup">Saved from session · 28 Oct 2026</span></span></div>
           <div class="li tall"><span class="ms">history</span><span class="txt"><span>Revision 6</span><span class="sup">Added Research</span></span><button class="btn text xs sl">Restore</button></div>
           <div class="li tall"><span class="ms">history</span><span class="txt"><span>Revision 5</span><span class="sup">Template created</span></span><button class="btn text xs sl">Restore</button></div>
+          <div class="li tall"><span class="ms">history</span><span class="txt"><span>Revision 4</span><span class="sup">Installed KeePassXC</span></span><button class="btn text xs sl">Restore</button></div>
+          <div class="li tall"><span class="ms">history</span><span class="txt"><span>Revision 3</span><span class="sup">Clipboard sharing turned off</span></span><button class="btn text xs sl">Restore</button></div>
+          <div class="li tall"><span class="ms">history</span><span class="txt"><span>Revision 2</span><span class="sup">Memory raised to 8 GB</span></span><button class="btn text xs sl">Restore</button></div>
         </div>
         <div class="card outlined" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px"><span class="ms on-sv">info</span><p class="body-m on-sv">Restoring creates a new revision. Nothing is deleted.</p></div>
       </aside>

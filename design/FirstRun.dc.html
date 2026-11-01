@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · First run</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 win {{theme}}">
+  <header class="tbar">
+    <div class="brand" style="flex: 1"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
+    <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
+    <div class="wctl"><button aria-label="Minimize"><span class="ms s20">minimize</span></button><button aria-label="Maximize"><span class="ms s18">crop_square</span></button><button aria-label="Close"><span class="ms s20">close</span></button></div>
+  </header>
+  <main class="panes" style="padding: 0 16px 16px">
+    <aside class="pane low hide-s" aria-label="Setup steps" style="width: 360px; flex-shrink: 0; padding: 32px 16px; display: flex; flex-direction: column; gap: 16px">
+      <p class="label-l c-primary" style="padding: 0 8px">Setup · step 2 of 4</p>
+      <div class="lp thick" role="progressbar" aria-label="Setup progress" aria-valuenow="2" aria-valuemin="0" aria-valuemax="4" style="padding: 0 8px"><span class="act" style="width: 50%"></span><span class="ina"></span></div>
+      <div class="seglist">
+        <div class="li tall"><div class="av p" aria-hidden="true"><span class="ms">check</span></div><span class="txt"><span>Create the vault</span><span class="sup">Passphrase set just now</span></span></div>
+        <div class="li tall sel" aria-current="step"><div class="av p shape-sunny" aria-hidden="true">2</div><span class="txt"><span>Password manager</span><span class="sup">KeePassXC</span></span></div>
+        <div class="li tall"><div class="av s" aria-hidden="true">3</div><span class="txt"><span>Sync storage</span><span class="sup">Optional</span></span></div>
+        <div class="li tall"><div class="av s" aria-hidden="true">4</div><span class="txt"><span>First profile</span><span class="sup">Opens Profiles when done</span></span></div>
+      </div>
+      <div style="flex: 1"></div>
+      <p class="body-s on-sv" style="padding: 0 8px">Progress is saved. You can close the app and continue later.</p>
+    </aside>
+    <section class="pane scroll" aria-labelledby="pm-h" style="flex: 1; padding: 40px 48px 32px; display: flex; flex-direction: column; gap: 24px">
+      <div class="av xl t shape-cookie" aria-hidden="true"><span class="ms s32">key</span></div>
+      <div style="max-width: 640px"><h1 id="pm-h" class="display-s em">Connect a password manager</h1><p class="body-l on-sv">Each profile fills passwords and passkeys from KeePassXC. Your database stays where it is; the vault stores only the link to it.</p></div>
+      <section style="display: flex; flex-direction: column; gap: 12px; max-width: 720px" aria-labelledby="src-h">
+        <h2 id="src-h" class="title-m">Where KeePassXC runs</h2>
+        <div class="seglist" role="radiogroup" aria-labelledby="src-h">
+          <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span>Installed on this computer</span><span class="sup">Found KeePassXC 2.7.9 in Program Files</span></span><span class="label-l st-ok">Recommended</span></button>
+          <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span>Inside WSL</span><span class="sup">Ubuntu 24.04 is available</span></span></button>
+        </div>
+      </section>
+      <section style="display: flex; flex-direction: column; gap: 12px; max-width: 720px" aria-labelledby="db-h">
+        <h2 id="db-h" class="title-m">Database</h2>
+        <div class="seglist">
+          <div class="li tall"><span class="ms">database</span><span class="txt"><span>Passwords.kdbx</span><span class="sup mono">Documents\Passwords.kdbx</span></span><button class="btn text sl">Change</button></div>
+          <div class="li tall"><span class="ms">extension</span><span class="txt"><span>Browser extension in every profile</span><span class="sup">Fills passwords inside each profile</span></span><button class="sw sl" role="switch" aria-checked="true" aria-label="Browser extension in every profile"><span><span class="ms">check</span></span></button></div>
+          <div class="li tall"><span class="ms">passkey</span><span class="txt"><span>Passkeys</span><span class="sup">Stored in KeePassXC, not in the browser</span></span><button class="sw sl" role="switch" aria-checked="true" aria-label="Passkeys"><span><span class="ms">check</span></span></button></div>
+        </div>
+      </section>
+      <div style="flex: 1"></div>
+      <div style="display: flex; gap: 8px; align-items: center; max-width: 720px"><button class="btn text sl"><span class="ms">arrow_back</span>Back</button><span style="flex: 1"></span><button class="btn text sl">Skip</button><button class="btn filled m sl">Connect<span class="ms">arrow_forward</span></button></div>
+    </section>
+  </main>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

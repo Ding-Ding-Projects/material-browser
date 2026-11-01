@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Material Browser · Vault setup and unlock</title>
+<title>Material Browser · Unlock the vault</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="./theme.css">
 <link rel="stylesheet" href="./m3.css">
@@ -15,39 +15,28 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand" style="flex: 1"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="brand" style="flex: 1"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Browser</span></div></div>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
     <div class="wctl"><button aria-label="Minimize"><span class="ms s20">minimize</span></button><button aria-label="Maximize"><span class="ms s18">crop_square</span></button><button aria-label="Close"><span class="ms s20">close</span></button></div>
   </header>
-  <main class="scroll" style="flex: 1; padding: 24px 16px 40px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; align-content: flex-start">
-    <section class="pane" aria-labelledby="unlock-h" style="flex: 1 1 380px; max-width: 480px; padding: 40px 32px 32px; display: flex; flex-direction: column; gap: 24px; --tf-bg: var(--surface)">
-      <div class="av xl p shape-cookie" aria-hidden="true"><span class="ms s32 fill">lock</span></div>
-      <div><h1 id="unlock-h" class="headline-l em">Unlock your vault</h1><p class="body-l on-sv">Your profiles are encrypted on this computer. Enter your vault passphrase to open them.</p></div>
-      <div>
-        <label class="tf focus"><span class="lab">Vault passphrase</span><input type="password" value="correct horse" aria-label="Vault passphrase"><button class="ib sl" type="button" aria-label="Show passphrase"><span class="ms">visibility</span></button></label>
-        <p class="tf-sup">Caps Lock is off</p>
+  <main class="panes" style="padding: 0 16px 16px">
+    <section class="pane" aria-labelledby="unlock-h" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px">
+      <div style="width: min(520px, 100%); display: flex; flex-direction: column; gap: 24px; --tf-bg: var(--surface)">
+        <div class="av xl p shape-cookie" aria-hidden="true" style="width: 96px; height: 96px"><span class="ms s40 fill">lock</span></div>
+        <div><h1 id="unlock-h" class="display-s em">Unlock your vault</h1><p class="body-l on-sv">6 profiles and 4 Super Profiles are encrypted on this computer. Enter your passphrase to open them.</p></div>
+        <div>
+          <label class="tf focus"><span class="lab">Vault passphrase</span><input type="password" value="correct horse" aria-label="Vault passphrase"><button class="ib sl" type="button" aria-label="Show passphrase"><span class="ms">visibility</span></button></label>
+          <p class="tf-sup">Caps Lock is off</p>
+        </div>
+        <button class="btn filled m sl"><span class="ms">lock_open</span>Unlock</button>
+        <div class="seglist">
+          <button class="li sl"><span class="ms">devices</span><span class="txt"><span>Join a vault from another computer</span><span class="sup">Scan a pairing code from that computer</span></span><span class="ms">chevron_right</span></button>
+          <button class="li sl"><span class="ms">confirmation_number</span><span class="txt"><span>Locked out?</span><span class="sup">Support Tickets shows where your data lives</span></span><span class="ms">chevron_right</span></button>
+        </div>
       </div>
-      <button class="btn filled m sl"><span class="ms">lock_open</span>Unlock</button>
-      <div class="div"></div>
-      <div style="display: flex; flex-direction: column; gap: 4px; margin: 0 -12px">
-        <button class="btn text sl" style="justify-content: flex-start"><span class="ms">devices</span>Join a vault from another computer</button>
-        <button class="btn text sl" style="justify-content: flex-start"><span class="ms">confirmation_number</span>Locked out? Open Support Tickets</button>
-      </div>
-    </section>
-    <section class="pane" aria-labelledby="setup-h" style="flex: 1 1 440px; max-width: 600px; padding: 40px 32px 32px; display: flex; flex-direction: column; gap: 20px">
-      <span class="label-l c-primary">First run · step 2 of 4</span>
-      <div class="lp thick" role="progressbar" aria-label="Setup progress" aria-valuenow="2" aria-valuemin="0" aria-valuemax="4"><span class="act" style="width: 50%"></span><span class="ina"></span></div>
-      <h2 id="setup-h" class="headline-m em">Set up in four steps</h2>
-      <div class="seglist">
-        <div class="li tall"><div class="av p" aria-hidden="true"><span class="ms">check</span></div><span class="txt"><span>Create the vault</span><span class="sup">Encrypted with your passphrase</span></span><span class="trail">Done</span></div>
-        <div class="li tall sel"><div class="av t shape-sunny" aria-hidden="true">2</div><span class="txt"><span>Connect a password manager</span><span class="sup">KeePassXC found on this computer</span></span><button class="btn filled sl">Connect</button></div>
-        <div class="li tall"><div class="av s" aria-hidden="true">3</div><span class="txt"><span>Add sync storage</span><span class="sup">Optional · you can skip this</span></span></div>
-        <div class="li tall"><div class="av s" aria-hidden="true">4</div><span class="txt"><span>Create your first profile</span><span class="sup">Profiles opens when you finish</span></span></div>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><button class="btn text sl"><span class="ms">arrow_back</span>Back</button><span style="flex: 1"></span><button class="btn outlined sl">Skip this step</button><button class="btn filled sl">Next<span class="ms">arrow_forward</span></button></div>
-      <p class="body-s on-sv">Progress is saved. You can close the app and continue later.</p>
     </section>
   </main>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
