@@ -48,6 +48,13 @@ function localFs(root) {
   const inside = (rel) => {
     const full = path.resolve(root, rel);
     if (full !== root && !full.startsWith(root + path.sep)) throw fail("PATH_OUTSIDE_SERVER");
+    let at = path.resolve(root);
+    for (const part of ["", ...path.relative(root, full).split(path.sep).filter(Boolean)]) {
+      if (part) at = path.join(at, part);
+      try {
+        if (fs.lstatSync(at).isSymbolicLink()) throw fail("PATH_OUTSIDE_SERVER");
+      } catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
     return full;
   };
   return {
@@ -85,7 +92,15 @@ function localFs(root) {
       }
     },
     async remove(rel) {
-      fs.rmSync(inside(rel), { recursive: true, force: true });
+      const full = inside(rel);
+      if (full === path.resolve(root)) throw fail("PATH_OUTSIDE_SERVER");
+      fs.rmSync(full, { recursive: true, force: true });
+    },
+    async rename(fromRel, toRel) {
+      const from = inside(fromRel), to = inside(toRel);
+      if (from === path.resolve(root) || to === path.resolve(root)) throw fail("PATH_OUTSIDE_SERVER");
+      if (fs.existsSync(to)) throw fail("DESTINATION_EXISTS");
+      fs.renameSync(from, to);
     },
     async copyTree(fromRel, toRel) {
       fs.cpSync(inside(fromRel), inside(toRel), { recursive: true, errorOnExist: true, force: false });
@@ -165,6 +180,11 @@ function sshFs(host, root, runner = sshRun) {
       const p = inside(rel);
       if (p === root) throw fail("PATH_OUTSIDE_SERVER");
       await run(`rm -rf -- ${shQuote(p)}`);
+    },
+    async rename(fromRel, toRel) {
+      const from = inside(fromRel), to = inside(toRel);
+      if (from === root || to === root) throw fail("PATH_OUTSIDE_SERVER");
+      await run(`test ! -e ${shQuote(to)} && mv -- ${shQuote(from)} ${shQuote(to)}`);
     },
     async copyTree(fromRel, toRel) {
       await run(`test ! -e ${shQuote(inside(toRel))} && cp -a -- ${shQuote(inside(fromRel))} ${shQuote(inside(toRel))}`);
