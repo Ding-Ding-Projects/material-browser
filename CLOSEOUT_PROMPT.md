@@ -17,7 +17,17 @@ branch and included in this explicitly incomplete runtime-verification checkpoin
 production-handler checks passed independently after red-before repair evidence; TypeScript
 passed. No post-repair build/runtime verdict is claimed. Audio is unchanged. Keep both issues
 open until their actual completion criteria pass. See the wording-import-outcomes article.
-The dedicated public evidence gallery is being reconciled separately and is not product proof.
+The dedicated public evidence gallery is preserved at69eaddc32021e0e52c259444751e0df7ef7a52b3.
+Its live deploymentb47ef18809fbe7b9fc450dc928f4a1d185727fc5 passed run41322462247 and all45
+HTTP/byte checks, including40original image hashes. Source/image provenance and19recorded UTC
+dates are retained;21dates are explicitly unavailable. Current gallery browser interaction and
+wiki publication remain unverified. URL: https://ding-ding-projects.github.io/material-browser-evidence/ .
+The product README backlink was read back from the remote. Gallery delivery is not product proof.
+
+Last verified account allowance was4percent remaining. One existing reset credit is available,
+but its one-time confirmation remains pending and no credit was consumed. All product worktrees
+were clean with zero nonignored untracked files and no stashes. Retain them and all private
+evidence. No cleanup deletion or new release is authorized by this preservation result.
 
 The design contributor owns incoming design and feature implementation. This task owns
 integration, independent defect/layout hunting, focused repairs and actionable GitHub issues.
