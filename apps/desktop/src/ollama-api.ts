@@ -56,8 +56,8 @@ export type Store = { catalogue: Omit<Catalogue, "models">; hardware: Hardware; 
 export type QueueState = "queued" | "pulling" | "done" | "failed" | "cancelled";
 export type QueueItem = { id: string; name: string; state: QueueState; completed: number; total: number; status: string; error: string | null; sizeHint: number | null };
 export type Queue = { parallelism: number; running: boolean; items: QueueItem[] };
-export type InstallerPlan = { version: string; url: string; size: number; sha256: string | null; hashSource: string | null; integrity: string | null };
-export type InstallerResult = { ready: boolean; size: number; sha256: string; integrity: "verified" | "unverified"; version: string };
+export type InstallerPlan = { version: string; url: string; size: number; sha256: string | null; hashSource: string | null; integrity: string | null; admission?: "INSTALLER_ADMISSION_INCOMPLETE" };
+export type InstallerResult = { ready: boolean; size: number; sha256: string; integrity: "verified" | "unverified"; version: string; admission?: "INSTALLER_ADMISSION_INCOMPLETE" };
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 export type OllamaEvent =

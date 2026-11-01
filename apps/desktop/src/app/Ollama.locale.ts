@@ -138,4 +138,6 @@ export const ollamaZh: Record<string, string> = {
   "h ago": "小時前",
   "days ago": "日前",
   Unavailable: "用唔到",
+  "Installation is unavailable until publisher and final-file verification are implemented.": "發行者同最終檔案驗證未完成，所以暫時無法安裝。",
+  "Check installer availability": "檢查安裝程式可用狀態",
 };

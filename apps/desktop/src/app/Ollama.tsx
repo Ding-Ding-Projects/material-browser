@@ -206,6 +206,11 @@ function InstallCard({ onDone }: { onDone: () => void }) {
     try {
       const checked = await ollama("installer.check");
       setPlan(checked);
+      if (checked.admission) {
+        setError(t("Installation is unavailable until publisher and final-file verification are implemented."));
+        setPhase("idle");
+        return;
+      }
       setPhase("downloading");
       setProgress({ received: 0, total: checked.size });
       setResult(await ollama("installer.download"));
@@ -218,6 +223,7 @@ function InstallCard({ onDone }: { onDone: () => void }) {
   };
 
   const runInstaller = async () => {
+    if (!result?.ready) return;
     try {
       await ollama("installer.run", { confirmed: true });
       setPhase("launched");
@@ -232,7 +238,7 @@ function InstallCard({ onDone }: { onDone: () => void }) {
       <Ms name="download" size={32} />
       <div style={{ flex: "1 1 320px", display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="title-l" style={{ margin: 0 }}>{t("Ollama is not installed")}</h2>
-        <p className="body-m" style={{ margin: 0 }}>{t("Material Browser can install the official Ollama for Windows into its own folder. It checks the download size and hash, never changes your PATH and does not start Ollama until you ask.")}</p>
+        <p className="body-m" style={{ margin: 0 }}>{t("Installation is unavailable until publisher and final-file verification are implemented.")}</p>
         {phase === "downloading" && progress && (
           <>
             <LinearProgress value={progress.total ? progress.received / progress.total : 0} label={t("Downloading the installer")} />
@@ -247,7 +253,7 @@ function InstallCard({ onDone }: { onDone: () => void }) {
       ) : phase === "launched" ? (
         <Btn variant="tonal" icon="refresh" onClick={onDone}>{t("Check again")}</Btn>
       ) : (
-        <Btn icon="install_desktop" disabled={phase === "checking"} onClick={() => void install()}>{t("Install Ollama")}</Btn>
+        <Btn icon="install_desktop" disabled={phase === "checking"} onClick={() => void install()}>{t("Check installer availability")}</Btn>
       )}
       {phase === "confirm" && plan && result && (
         <Dialog
@@ -258,7 +264,7 @@ function InstallCard({ onDone }: { onDone: () => void }) {
           actions={
             <>
               <Btn variant="text" onClick={() => setPhase("idle")}>{t("Cancel")}</Btn>
-              <Btn onClick={() => void runInstaller()}>{t("Run installer")}</Btn>
+              <Btn disabled={!result.ready} onClick={() => void runInstaller()}>{t("Run installer")}</Btn>
             </>
           }
         >
