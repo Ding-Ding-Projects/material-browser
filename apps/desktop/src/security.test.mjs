@@ -93,6 +93,7 @@ function fixture({
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
           "./services/element-locks.cjs": desktopRequire("../electron/services/element-locks.cjs"),
           "./game-servers-ipc.cjs": desktopRequire("../electron/game-servers-ipc.cjs"),
+          "./worldgen-ipc.cjs": desktopRequire("../electron/worldgen-ipc.cjs"),
           "./services/ollama.cjs": desktopRequire("../electron/services/ollama.cjs"),
           "./services/converter.cjs": desktopRequire("../electron/services/converter.cjs"),
           "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
@@ -253,4 +254,14 @@ test("Minecraft server manager refuses untrusted frames and unknown operations",
   await assert.rejects(call(trusted, "shell", { line: "rm -rf /" }), /INVALID_REQUEST/);
   await assert.rejects(call(trusted, "start", { id: "../x" }), /INVALID_ID/);
   assert.deepEqual((await call(trusted, "capabilities")).targets.map((t) => t.id).sort(), ["local-docker", "local-process", "ssh-docker", "ssh-process"]);
+});
+
+test("world generator channel refuses untrusted frames and unknown operations", async () => {
+  const f = fixture();
+  const call = f.handlers.get("material:worldgen");
+  const trusted = { sender: f.contents, senderFrame: f.contents.mainFrame };
+  await assert.rejects(call({ sender: {}, senderFrame: {} }, "releases"), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "spawnShell", {}), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "catalogue", { version: "../../etc" }), /INVALID_VERSION/);
+  await assert.rejects(call(trusted, "browse", { kind: "everything" }), /INVALID_REQUEST/);
 });

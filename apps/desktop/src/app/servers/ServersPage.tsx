@@ -5,6 +5,7 @@ import { useApp } from '../context';
 import { serverRequest, errorText, targetNames, type Server, type Capabilities } from './service';
 import { CreateServer } from './CreateServer';
 import { ServerDetail } from './ServerDetail';
+import { WorldGenerator } from './WorldGenerator';
 import './servers.css';
 
 export function ServersPage() {
@@ -14,6 +15,7 @@ export function ServersPage() {
   const [selected, setSelected] = useState('');
   const [target, setTarget] = useState('all');
   const [creating, setCreating] = useState(false);
+  const [generator, setGenerator] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fresh, setFresh] = useState(false);
@@ -34,8 +36,9 @@ export function ServersPage() {
   useEffect(() => { const create = () => setCreating(true); window.addEventListener('servers-create', create); return () => window.removeEventListener('servers-create', create); }, []);
   const visible = search.indices.map(i => servers[i]).filter(s => target === 'all' || s.target === target);
   const server = visible.find(s => s.id === selected) || visible[0];
+  if (generator) return <div className="servers-workspace scroll"><WorldGenerator onBack={() => setGenerator(false)} /></div>;
   return <div className="servers-workspace scroll">
-    <section className="pane server-list" aria-label={t('Servers')}><div className="server-actions"><Ms name="dns" /><h1 className="headline-s">{t('Minecraft servers')}</h1></div><SearchBar {...search} t={t} label={t('Search servers')} /><div className="server-actions">{['all', ...Object.keys(targetNames)].map(id => <button type="button" className={`chip sl ${id === target ? 'on' : ''}`} key={id} aria-pressed={id === target} onClick={() => setTarget(id)}>{t(id === 'all' ? 'All targets' : targetNames[id])}</button>)}</div><div className="server-actions"><Btn icon="add" disabled={!capabilities || !fresh} onClick={() => setCreating(true)}>{t('New server')}</Btn><Btn variant="outlined" disabled={loading} onClick={() => void refresh()}>{t('Refresh')}</Btn></div>
+    <section className="pane server-list" aria-label={t('Servers')}><div className="server-actions"><Ms name="dns" /><h1 className="headline-s">{t('Minecraft servers')}</h1></div><SearchBar {...search} t={t} label={t('Search servers')} /><div className="server-actions">{['all', ...Object.keys(targetNames)].map(id => <button type="button" className={`chip sl ${id === target ? 'on' : ''}`} key={id} aria-pressed={id === target} onClick={() => setTarget(id)}>{t(id === 'all' ? 'All targets' : targetNames[id])}</button>)}</div><div className="server-actions"><Btn icon="add" disabled={!capabilities || !fresh} onClick={() => setCreating(true)}>{t('New server')}</Btn><Btn variant="tonal" icon="public" onClick={() => setGenerator(true)}>{t('Generate a world')}</Btn><Btn variant="outlined" disabled={loading} onClick={() => void refresh()}>{t('Refresh')}</Btn></div>
     {error && <p role="alert" className="server-error">{t(error)} · {t('Status is stale; lifecycle actions are unavailable.')}</p>}
     <div className="seglist">{visible.map(s => <button type="button" key={s.id} className={`li tall sl ${server?.id === s.id ? 'sel' : ''}`} aria-pressed={server?.id === s.id} onClick={() => setSelected(s.id)}><Ms name="dns" /><span className="txt"><strong>{s.name}</strong><small>{t(targetNames[s.target] || s.target)} · {s.version}</small></span><span>{t(fresh ? s.status : 'Unknown')}</span></button>)}</div>{!!servers.length && !visible.length && <p>{t('No matches')}</p>}{!servers.length && <p>{t(loading ? 'Loading servers' : 'No managed servers. Create one to get started.')}</p>}
     </section>
