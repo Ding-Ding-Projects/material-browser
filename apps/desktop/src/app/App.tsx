@@ -23,6 +23,7 @@ import { useLockStore } from "./locks";
 import { SyncPage } from "./Sync";
 import { SuperProfilesPage } from "./SuperProfiles";
 import { SettingsPage } from "./Settings";
+import { ServersPage } from "./servers/ServersPage";
 
 const read = (key: string, fallback: any) => {
   try {
@@ -190,6 +191,9 @@ export function App() {
     });
     return off;
   }, []);
+  useEffect(() => window.materialBrowser?.onEvent((event: any) => {
+    if (event?.type === "server-shutdown-pending") setNotice(t("Graceful server shutdown is still pending. Keep the application open until the server stops."));
+  }), [t]);
   useEffect(() => {
     if (!status?.unlocked) return;
     void refreshRuntime();
@@ -283,7 +287,9 @@ export function App() {
   const vaultScreen = !status?.unlocked;
   const setupScreen = status?.unlocked && (showSetup || (!setupDone && profiles.length === 0));
   const fab: [string, string, () => void] =
-    page === "super-profiles"
+    page === "servers"
+      ? ["dns", t("New server"), () => window.dispatchEvent(new Event("servers-create"))]
+      : page === "super-profiles"
       ? ["library_add", t("New template"), () => window.dispatchEvent(new Event("super-profiles-create"))]
       : page === "sync"
         ? ["sync", t("Sync now"), () => window.dispatchEvent(new Event("sync-now"))]
@@ -330,6 +336,7 @@ export function App() {
                 {page === "launch" && <LaunchPage />}
                 {page === "super-profiles" && <SuperProfilesPage />}
                 {page === "sync" && <SyncPage />}
+                {page === "servers" && <ServersPage />}
                 {page === "settings" && (
                   <SettingsPage
                     section={settingsSection}

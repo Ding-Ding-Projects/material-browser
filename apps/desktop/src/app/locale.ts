@@ -1,5 +1,7 @@
+import { serversZh } from "./servers/locale";
 /** Cantonese for the redesigned shell and destinations. Technical names stay as they are. */
 export const appZh: Record<string, string> = {
+  ...serversZh,
   "4 to 12 digits": "4 至 12 位數字",
   "A dim sum surprise. Closes by itself.": "點心驚喜，會自己收埋。",
   "About launching": "關於啟動",

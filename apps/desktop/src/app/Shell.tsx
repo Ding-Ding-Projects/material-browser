@@ -141,6 +141,7 @@ const DESTINATIONS: [Page, string, string, string][] = [
   ["profiles", "Profiles", "group", "Profiles"],
   ["super-profiles", "Super Profiles", "layers", "Super Profiles"],
   ["sync", "Sync", "sync", "Synchronization"],
+  ["servers", "Servers", "dns", "Minecraft servers"],
   ["settings", "Settings", "settings", "Settings"],
 ];
 
