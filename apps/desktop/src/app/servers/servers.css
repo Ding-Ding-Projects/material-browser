@@ -17,3 +17,6 @@
 .server-error { color:var(--error); overflow-wrap:anywhere; }
 .server-backup { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:14px; overflow-wrap:anywhere; }
 @media(max-width:600px) { .servers-workspace { padding:4px; } .server-list,.server-detail { padding:12px; flex-basis:100%; } .server-facts { grid-template-columns:1fr; } }
+
+.server-property { padding:16px; min-width:0; overflow-wrap:anywhere; }
+.server-property .server-actions>div { flex:1 1 160px; }
