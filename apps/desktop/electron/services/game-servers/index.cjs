@@ -5,6 +5,7 @@ const childProcess = require("node:child_process");
 const { createCatalogue, fail } = require("./catalogue.cjs");
 const { createBackups } = require("./backups.cjs");
 const content = require("./content.cjs");
+const properties = require("../../minecraft/properties.cjs");
 const remote = require("./ssh.cjs");
 const { createLifecycle } = require("./lifecycle.cjs");
 const TARGETS = ["local-process", "local-docker", "ssh-process", "ssh-docker"];
@@ -265,29 +266,28 @@ function createGameServerService({
       Object.keys(changes).length > 100
     )
       fail("INVALID_CONFIGURATION", "Provide bounded property changes");
-    const supported = {
-      motd: (v) =>
-        typeof v === "string" && v.length <= 200 && /^[\x20-\x7e]*$/.test(v),
-      "server-port": (v) => Number.isInteger(v) && v >= 1024 && v <= 65535,
-    };
-    for (const [key, value] of Object.entries(changes))
-      if (!supported[key]?.(value))
+    if (
+      Object.hasOwn(changes, "server-port") &&
+      (!Number.isInteger(changes["server-port"]) ||
+        changes["server-port"] < 1024 ||
+        changes["server-port"] > 65535)
+    )
+      fail(
+        "INVALID_CONFIGURATION",
+        "Managed server port must be between 1024 and 65535",
+      );
+    let result;
+    try {
+      result = properties.applyChanges(original, s.version, changes);
+    } catch (error) {
+      if (error.code === "NO_CONTROL_FOR_KEY")
         fail(
           "UNSUPPORTED_PROPERTY",
-          "This property lacks a verified editable descriptor",
+          "This property has no supported version-bound descriptor",
         );
-    const remaining = new Map(Object.entries(changes));
-    const lines = original.split(/\r?\n/).map((line) => {
-      const m = /^([^#!\s][^=:]*?)[=:]/.exec(line);
-      if (m && Object.hasOwn(changes, m[1])) {
-        const value = changes[m[1]];
-        remaining.delete(m[1]);
-        return `${m[1]}=${value}`;
-      }
-      return line;
-    });
-    for (const [k, v] of remaining) lines.push(`${k}=${v}`);
-    await atomic(file, lines.join("\n"));
+      throw error;
+    }
+    await atomic(file, result.text);
     s.properties = { ...s.properties, ...changes };
     if (changes["server-port"]) s.port = changes["server-port"];
     await save(s);
@@ -436,30 +436,36 @@ function createGameServerService({
           "server.properties",
         );
         const text = await fs.readFile(file, "utf8");
-        const properties = {};
-        for (const line of text.split(/\r?\n/)) {
-          const match = /^([^#!\s][^=:]*?)[=:](.*)$/.exec(line);
-          if (match) properties[match[1]] = match[2];
-        }
+        const sourceView = properties.typedView(text, s.version);
+        const view = {
+          ...sourceView,
+          typed: sourceView.typed.map((descriptor) => ({
+            ...descriptor,
+            declaredApply: descriptor.apply,
+            apply: "restart",
+            liveAvailable: false,
+          })),
+        };
         return {
           id: s.id,
-          properties,
-          descriptors: [
-            {
-              key: "motd",
-              type: "text",
-              maxLength: 200,
-              restartRequired: true,
-            },
-            {
-              key: "server-port",
-              type: "integer",
-              min: 1024,
-              max: 65535,
-              restartRequired: true,
-            },
-          ],
+          properties: properties.toObject(properties.parse(text)),
+          descriptors: view.typed.map((descriptor) => ({
+            ...descriptor,
+            type:
+              descriptor.control === "number"
+                ? "integer"
+                : descriptor.control === "switch"
+                  ? "boolean"
+                  : descriptor.control === "choice"
+                    ? "enum"
+                    : "text",
+            restartRequired: true,
+          })),
+          typed: view.typed,
+          unknown: view.unknown,
           unknownPreserved: true,
+          version: s.version,
+          verification: "implemented-unverified",
         };
       }
       case "logs":

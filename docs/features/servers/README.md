@@ -32,3 +32,11 @@ Read-only official discovery on 2026-11-01 returned 921 versions, from 26.4-snap
 
 Bedrock distribution installation, third-party flavours, runtime provisioning, server readiness, typed administration, players/permissions/metrics, schedules, remote data transfers, complete version-bound configuration and world migration remain incomplete.
 
+
+## Consolidated typed configuration
+
+The single game-servers service reuses the typed properties inventory in `electron/minecraft/properties.cjs`; no second registry or lifecycle owner is introduced. Its parser retains unchanged byte formatting, comments, unknown keys, escaped key identities, Unicode and continuation lines. Every duplicate occurrence of an edited key receives the same effective value. Malformed stored numeric/switch values remain visible with validation detail instead of acquiring guessed fallback values.
+
+Numeric release identifiers retain declared version boundaries. Snapshot, prerelease and historical identifiers without a schema expose unresolved applicability and no invented defaults; only the common message and port controls remain available. All descriptors remain implemented but runtime-unverified. The service currently persists configuration while stopped, so it exposes restart behavior even for descriptors that describe a possible live command in a future consumer.
+
+Verification: `node --test apps/desktop/electron/minecraft/properties.test.cjs apps/desktop/electron/services/game-servers/index.test.cjs` passed 24 tests. This includes preservation, Unicode, duplicate escaped keys, version uncertainty, invalid stored values and prototype-safe property names. It is separate from actual server-version runtime acceptance.
