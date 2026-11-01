@@ -236,6 +236,8 @@ export const serversZh: Record<string, string> = {
   "World seed": "世界種子",
   "World type": "世界類型",
   "No preset in this version has an implemented customization route.": "呢個版本嘅預設都未有已實作嘅自訂途徑。",
+  "This version's command report does not provide the verified execute if loaded readiness route. World generation remains unavailable for this version.": "呢個版本嘅指令報告未有提供經驗證嘅 execute if loaded 就緒檢查途徑，所以呢個版本仍然未能生成世界。",
+  "This version predates data-driven world presets, so only seed, world type and structures can be set.": "呢個版本早於資料驅動世界預設，只能設定種子、世界類型同建築。",
   "Unavailable world presets": "未能使用嘅世界預設",
   "This preset is present in the selected version, but its generator is not implemented by the world customization builder.": "所揀版本包含呢個預設，但世界自訂建構器尚未實作佢嘅生成器。",
   "Support information is unavailable for this preset.": "未有呢個預設嘅支援資料。",
