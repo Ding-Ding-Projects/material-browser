@@ -1,4 +1,7 @@
 export const serversZh: Record<string, string> = {
+  'Reload properties': '重新載入屬性', 'Configuration readback loaded.': '已重新讀取設定。',
+  'Configuration was saved, but readback is unavailable. Reload properties before editing again.': '設定已儲存，但未能重新讀取；請重新載入屬性再編輯。',
+
   'This property is unavailable for the selected version.': '所揀版本無法使用此屬性。', 'Choose a boolean value.': '請選擇開關值。', 'Choose a listed value.': '請選擇清單內嘅值。',
   'Enter a whole number within the displayed range.': '請輸入所示範圍內嘅整數。', 'Use the displayed step size.': '請使用所示步幅。', 'Text exceeds this property’s limits.': '文字超出此屬性限制。',
   'Text does not match the supported format.': '文字唔符合支援格式。', 'The property descriptor is invalid.': '屬性描述無效。', 'No control for this setting': '未有此設定嘅控制項',
