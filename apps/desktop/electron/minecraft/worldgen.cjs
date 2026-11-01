@@ -2,6 +2,7 @@
 // and the generation run. Pickers always come from the selected version's own server jar.
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
+const crypto = require("node:crypto");
 const path = require("node:path");
 const { fail, atomicWrite } = require("./util.cjs");
 const { openZip, zipFolder, verifyZip } = require("./zip.cjs");
@@ -44,24 +45,96 @@ function readJson(jar, name) {
   return entry ? JSON.parse(entry.read().toString("utf8")) : null;
 }
 
-/** Run Mojang's data generator for the registry and command reports. It does not start a server. */
-function runReports(jarPath, outDir, { spawnImpl = spawn, java = "java", timeout = 300000 } = {}) {
-  return new Promise((resolve, reject) => {
-    fs.mkdirSync(outDir, { recursive: true });
-    const child = spawnImpl(java, ["-DbundlerMainClass=net.minecraft.data.Main", "-jar", jarPath, "--reports", "--output", outDir], { cwd: outDir, windowsHide: true });
-    const timer = setTimeout(() => {
-      child.kill();
-      reject(fail("REPORTS_TIMEOUT"));
-    }, timeout);
-    child.on("error", (e) => {
-      clearTimeout(timer);
-      reject(fail(e.code === "ENOENT" ? "JAVA_MISSING" : "REPORTS_FAILED"));
-    });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      code === 0 ? resolve() : reject(fail("REPORTS_FAILED", String(code)));
-    });
-  });
+/** Observe one exact child for its whole lifetime. Timeouts retain ownership. */
+function ownChild(child, { server = false, stopTimeout = 60000, onOwned = () => {} } = {}) {
+  let active = true, outcome = null, stopSent = false, spawned = false;
+  const listeners = new Set();
+  let resolveExit;
+  const exit = new Promise((resolve) => { resolveExit = resolve; });
+  const finish = (value) => {
+    if (!active) return;
+    active = false; outcome = value; resolveExit(value);
+    for (const listener of [...listeners]) listener(value);
+    listeners.clear();
+  };
+  child.once("spawn", () => { spawned = true; });
+  child.on("error", (error) => { if (!spawned) finish({ error: fail(error.code === "ENOENT" ? "JAVA_MISSING" : "SERVER_LAUNCH_FAILED") }); });
+  child.once("exit", (code) => finish({ code }));
+  child.once("close", (code) => finish({ code }));
+  child.stdin?.on?.("error", () => {});
+  const receipt = {
+    child, exit,
+    get active() { return active; },
+    get outcome() { return outcome; },
+    subscribe(listener) { if (!active) listener(outcome); else listeners.add(listener); return () => listeners.delete(listener); },
+    async wait(ms, signal) {
+      return new Promise((resolve, reject) => {
+        let timer, unsubscribe = () => {};
+        const cleanup = () => { clearTimeout(timer); unsubscribe(); signal?.removeEventListener("abort", aborted); };
+        const aborted = () => { cleanup(); reject(fail("CANCELLED")); };
+        unsubscribe = receipt.subscribe((value) => { cleanup(); resolve(value); });
+        if (!active) return;
+        timer = setTimeout(() => { cleanup(); reject(fail("STOP_PENDING")); }, ms);
+        signal?.addEventListener("abort", aborted, { once: true });
+        if (signal?.aborted) aborted();
+      });
+    },
+    requestStop() {
+      if (active && !stopSent) {
+        stopSent = true;
+        try { if (server) child.stdin?.write("stop\n"); else child.stdin?.end?.(); } catch {}
+      }
+    },
+    async stop() {
+      receipt.requestStop();
+      return receipt.wait(stopTimeout);
+    },
+  };
+  onOwned(receipt);
+  return receipt;
+}
+
+function admittedBytes(jarPath, jarBytes, integrity) {
+  let bytes;
+  if (jarBytes === undefined) {
+    const before = fs.lstatSync(jarPath);
+    if (!before.isFile() || before.isSymbolicLink() || before.nlink !== 1) throw fail("UNSAFE_JAR_PATH");
+    const fd = fs.openSync(jarPath, "r");
+    try {
+      const opened = fs.fstatSync(fd);
+      if (opened.ino !== before.ino || opened.dev !== before.dev || !opened.isFile() || opened.nlink !== 1)
+        throw fail("UNSAFE_JAR_PATH");
+      bytes = fs.readFileSync(fd);
+    } finally { fs.closeSync(fd); }
+  } else bytes = Buffer.from(jarBytes);
+  if (integrity) {
+    if (bytes.length !== integrity.size || crypto.createHash("sha1").update(bytes).digest("hex") !== integrity.sha1)
+      throw fail("JAR_INTEGRITY_FAILED");
+    verifyJarIdentity(bytes, integrity.version);
+  }
+  return bytes;
+}
+
+/** Report generation is owned too; cancellation never force-kills its JVM. */
+async function runReports(jarPath, outDir, { spawnImpl = spawn, java = "java", timeout = 300000, signal, onOwned, stopTimeout, jarBytes, jarIntegrity } = {}) {
+  if (signal?.aborted) throw fail("CANCELLED");
+  fs.mkdirSync(outDir, { recursive: true });
+  const runtimeDir = fs.mkdtempSync(path.join(outDir, ".runtime-"));
+  const snapshot = path.join(runtimeDir, "server.jar");
+  fs.writeFileSync(snapshot, admittedBytes(jarPath, jarBytes, jarIntegrity), { flag: "wx", mode: 0o600 });
+  admittedBytes(snapshot, undefined, jarIntegrity);
+  const child = spawnImpl(java, ["-DbundlerMainClass=net.minecraft.data.Main", "-jar", snapshot, "--reports", "--output", outDir], { cwd: outDir, windowsHide: true });
+  const receipt = ownChild(child, { onOwned, stopTimeout });
+  receipt.exit.then(() => { try { fs.rmSync(runtimeDir, { recursive: true, force: true }); } catch {} });
+  child.stdout?.resume?.(); child.stderr?.resume?.();
+  try {
+    const result = await receipt.wait(timeout, signal);
+    if (result.error) throw result.error;
+    if (result.code !== 0) throw fail("REPORTS_FAILED");
+  } catch (error) {
+    if (receipt.active) await receipt.stop();
+    throw error;
+  }
 }
 
 /** Turn a jar and its reports into the picker catalogue for that exact version. */
@@ -271,16 +344,17 @@ function setupCommands(o) {
  * Run the generation. `deps.spawn` launches java; events report each step and batch.
  * The caller supplies an EULA flag the user switched on; without it nothing starts.
  */
-async function generate({ options, catalogue, jarPath, stagingRoot, eulaAccepted, emit = () => {}, signal, deps = {} }) {
+async function generate({ options, catalogue, jarPath, jarBytes, jarIntegrity, stagingRoot, eulaAccepted, emit = () => {}, signal, deps = {} }) {
   if (eulaAccepted !== true) throw fail("EULA_NOT_ACCEPTED");
   const o = validate(options, catalogue);
   if (fs.existsSync(o.output.destination)) throw fail("DESTINATION_EXISTS");
   const spawnImpl = deps.spawn || spawn;
-  const dir = path.join(stagingRoot, `run-${Date.now()}`);
+  if (signal?.aborted) throw fail("CANCELLED");
+  const dir = path.join(stagingRoot, `run-${crypto.randomUUID()}`);
   const world = path.join(dir, "world");
   fs.mkdirSync(path.join(world, "datapacks", PACK), { recursive: true });
   for (const [rel, value] of Object.entries(buildPack(o, catalogue))) atomicWrite(path.join(world, "datapacks", PACK, rel), JSON.stringify(value, null, 2));
-  fs.copyFileSync(jarPath, path.join(dir, "server.jar"));
+  fs.writeFileSync(path.join(dir, "server.jar"), admittedBytes(jarPath, jarBytes, jarIntegrity), { flag: "wx", mode: 0o600 });
   let port = 0;
   for (let p = 25600; p < 25700; p++) if (await (deps.portFree || portFree)(p, "127.0.0.1")) { port = p; break; }
   if (!port) throw fail("NO_FREE_PORT");
@@ -288,69 +362,71 @@ async function generate({ options, catalogue, jarPath, stagingRoot, eulaAccepted
   fs.writeFileSync(path.join(dir, "eula.txt"), "# Accepted in Material Browser by the user for this world generation.\neula=true\n");
   const step = (key, detail) => emit({ type: "minecraft.worldgen", step: key, detail });
   step("start");
+  if (signal?.aborted) throw fail("CANCELLED");
+  admittedBytes(path.join(dir, "server.jar"), undefined, jarIntegrity);
   const child = spawnImpl(deps.java || "java", ["-Xmx2G", "-jar", "server.jar", "nogui"], { cwd: dir, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
-  const waiters = [];
-  let exited = false;
-  const onLine = (line) => {
-    for (let i = waiters.length - 1; i >= 0; i--) if (waiters[i].test.test(line)) waiters.splice(i, 1)[0].resolve(line);
-  };
-  let buffer = "";
-  child.stdout.on("data", (d) => {
-    buffer += d.toString("utf8");
-    const lines = buffer.split(/\r?\n/);
-    buffer = lines.pop();
-    lines.forEach(onLine);
+  const receipt = ownChild(child, { server: true, stopTimeout: deps.stopTimeout, onOwned: deps.onOwned });
+  const waiters = new Set();
+  let buffer = "", outputError = null;
+  const rejectWaiters = (error) => { for (const waiter of [...waiters]) waiter.reject(error); };
+  child.stdout.on("data", (data) => {
+    buffer += data.toString("utf8");
+    if (buffer.length > 65536) { buffer = ""; outputError = fail("SERVER_OUTPUT_TOO_LARGE"); rejectWaiters(outputError); return; }
+    const lines = buffer.split(/\r?\n/); buffer = lines.pop();
+    for (const line of lines) for (const waiter of [...waiters]) if (waiter.test.test(line)) waiter.resolve(line);
   });
   child.stderr?.on("data", () => {});
-  const exit = new Promise((resolve) => child.on("exit", (code) => { exited = true; resolve(code); }));
-  const waitFor = (test, ms) =>
-    new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        const i = waiters.indexOf(w);
-        if (i >= 0) { waiters.splice(i, 1); reject(fail("SERVER_TIMEOUT")); }
-      }, ms);
-      const w = { test, resolve: (line) => { clearTimeout(timer); resolve(line); } };
-      waiters.push(w);
-      exit.then(() => { clearTimeout(timer); reject(fail("SERVER_EXITED")); });
-    });
-  const send = (cmd) => child.stdin.write(`${cmd}\n`);
-  const cancelled = () => signal?.aborted;
+  const waitFor = (test, ms) => new Promise((resolve, reject) => {
+    let timer, unsubscribe = () => {};
+    const cleanup = () => { clearTimeout(timer); waiters.delete(waiter); unsubscribe(); signal?.removeEventListener("abort", aborted); };
+    const waiter = { test, resolve: (line) => { cleanup(); resolve(line); }, reject: (error) => { cleanup(); reject(error); } };
+    const aborted = () => waiter.reject(fail("CANCELLED"));
+    waiters.add(waiter);
+    unsubscribe = receipt.subscribe((result) => waiter.reject(result.error || fail("SERVER_EXITED")));
+    if (!receipt.active) return;
+    timer = setTimeout(() => waiter.reject(fail("SERVER_TIMEOUT")), ms);
+    signal?.addEventListener("abort", aborted, { once: true });
+    if (signal?.aborted) aborted(); else if (outputError) waiter.reject(outputError);
+  });
+  const send = (cmd) => {
+    if (!receipt.active) throw receipt.outcome?.error || fail("SERVER_EXITED");
+    if (signal?.aborted) throw fail("CANCELLED");
+    child.stdin.write(`${cmd}\n`);
+  };
   try {
     await waitFor(/Done \(/, deps.startTimeout ?? 600000);
     step("ready");
     for (const cmd of setupCommands(o)) send(cmd);
     const batches = planBatches(o.area);
     for (let i = 0; i < batches.length; i++) {
-      if (cancelled()) throw fail("CANCELLED");
       const r = batches[i];
       const bx1 = r.x1 * 16, bz1 = r.z1 * 16, bx2 = r.x2 * 16 + 15, bz2 = r.z2 * 16 + 15;
       send(`forceload add ${bx1} ${bz1} ${bx2} ${bz2}`);
       const tag = `MBGEN-${i}`;
       const done = waitFor(new RegExp(`\\b${tag}\\b`), deps.batchTimeout ?? 300000);
       const y = probeY(o.dimension);
-      const poll = setInterval(() => send(`execute if loaded ${bx1} ${y} ${bz1} if loaded ${bx2} ${y} ${bz2} if loaded ${bx1} ${y} ${bz2} if loaded ${bx2} ${y} ${bz1} run say ${tag}`), deps.pollMs ?? 1000);
-      try {
-        await done;
-      } finally {
-        clearInterval(poll);
-      }
+      const poll = setInterval(() => {
+        try { send(`execute if loaded ${bx1} ${y} ${bz1} if loaded ${bx2} ${y} ${bz2} if loaded ${bx1} ${y} ${bz2} if loaded ${bx2} ${y} ${bz1} run say ${tag}`); }
+        catch (error) { rejectWaiters(error); }
+      }, deps.pollMs ?? 1000);
+      try { await done; } finally { clearInterval(poll); }
       send(`forceload remove ${bx1} ${bz1} ${bx2} ${bz2}`);
       emit({ type: "minecraft.worldgen", step: "batch", done: i + 1, total: batches.length });
     }
+    const saved = waitFor(/Saved the game/, deps.saveTimeout ?? 300000);
     send("save-all flush");
-    await waitFor(/Saved the game/, deps.saveTimeout ?? 300000);
-    send("stop");
-    await exit;
+    await saved;
+    receipt.requestStop();
+    const result = await receipt.wait(deps.stopTimeout ?? 60000, signal);
+    if (result.error) throw result.error;
+    if (result.code !== 0) throw fail("SERVER_EXITED");
     step("saved");
   } catch (error) {
-    if (!exited) {
-      send("stop");
-      let t;
-      await Promise.race([exit, new Promise((r) => { t = setTimeout(r, 60000); })]);
-      clearTimeout(t);
-    }
+    rejectWaiters(error);
+    if (receipt.active) await receipt.stop();
     throw error;
   }
+  if (signal?.aborted) throw fail("CANCELLED");
   for (const f of ["session.lock"]) fs.rmSync(path.join(world, f), { force: true });
   const digest = localTreeDigest(world);
   let result;
@@ -369,4 +445,4 @@ async function generate({ options, catalogue, jarPath, stagingRoot, eulaAccepted
   return { ...result, sha256: digest.sha256, chunksRequested: o.area.width * o.area.depth };
 }
 
-module.exports = { verifyJarIdentity, probeY, NAMESPACE, DEFAULT_AREA, FORCELOAD_MAX, PRESET_IDS, runReports, catalogueFrom, defaults, validate, chunkBounds, planBatches, buildPack, serverProperties, setupCommands, generate, innerJar };
+module.exports = { admittedBytes, ownChild, verifyJarIdentity, probeY, NAMESPACE, DEFAULT_AREA, FORCELOAD_MAX, PRESET_IDS, runReports, catalogueFrom, defaults, validate, chunkBounds, planBatches, buildPack, serverProperties, setupCommands, generate, innerJar };
