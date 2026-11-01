@@ -4,6 +4,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const zlib = require("node:zlib");
+const crypto = require("node:crypto");
 const { fail } = require("./util.cjs");
 
 const CRC_TABLE = (() => {
@@ -86,8 +87,8 @@ function zipFolder(folder, destination, rootName, { now = new Date() } = {}) {
     }
   };
   walk(folder, rootName);
-  const temporary = `${destination}.${process.pid}.part`;
-  const handle = fs.openSync(temporary, "w");
+  const temporary = `${destination}.${crypto.randomUUID()}.part`;
+  const handle = fs.openSync(temporary, "wx", 0o600);
   const central = [];
   let offset = 0;
   const { time, day } = dosTime(now);
@@ -143,8 +144,8 @@ function zipFolder(folder, destination, rootName, { now = new Date() } = {}) {
     fs.rmSync(temporary, { force: true });
     throw error;
   }
-  fs.linkSync(temporary, destination);
-  fs.rmSync(temporary, { force: true });
+  try { fs.linkSync(temporary, destination); }
+  finally { fs.rmSync(temporary, { force: true }); }
   return { files: files.length, bytes: fs.statSync(destination).size };
 }
 

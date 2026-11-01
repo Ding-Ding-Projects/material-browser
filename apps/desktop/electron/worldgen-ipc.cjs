@@ -3,6 +3,7 @@
 // verified server jar; generation only starts after the user switches on EULA acceptance.
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const catalogue = require("./minecraft/catalogue.cjs");
 const util = require("./minecraft/util.cjs");
 const worldgen = require("./minecraft/worldgen.cjs");
@@ -19,20 +20,47 @@ function createWorldgenService({ root, dialog, getWindow = () => null, emit = ()
   /** The verified vanilla jar for a version, downloaded once into the app's cache. */
   async function cachedJar(version) {
     const file = path.join(root, "jars", `${version.replace(/[^A-Za-z0-9._-]/g, "_")}.jar`);
-    if (fs.existsSync(file)) return file;
     const java = await catalogue.javaCatalogue(root, { fetchImpl });
     const entry = java.versions.find((v) => v.id === version);
     if (!entry) throw util.fail("VERSION_NOT_IN_CATALOGUE");
     const detail = await catalogue.javaVersionDetail(root, entry, { fetchImpl });
     if (!detail.server) throw util.fail("NO_SERVER_DOWNLOAD");
-    await util.downloadVerified(detail.server.url, file, { sha1: detail.server.sha1, size: detail.server.size }, { fetchImpl });
+    if (detail.id !== version || !/^[a-f0-9]{40}$/.test(detail.server.sha1 || "") ||
+        !Number.isSafeInteger(detail.server.size) || detail.server.size < 1 || detail.server.size > 1024 ** 3)
+      throw util.fail("JAR_METADATA_INVALID");
+    // Reject existing linked components before a missing cache entry can be downloaded.
+    let candidate = path.resolve(root);
+    for (const part of ["", ...path.relative(root, file).split(path.sep)]) {
+      if (part) candidate = path.join(candidate, part);
+      try { if (fs.lstatSync(candidate).isSymbolicLink()) throw util.fail("UNSAFE_JAR_PATH"); }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+    if (!fs.existsSync(file)) await util.downloadVerified(detail.server.url, file, { sha1: detail.server.sha1, size: detail.server.size }, { fetchImpl });
+    // Check every cache component and the open file, not just a stale cache receipt.
+    let at = path.resolve(root);
+    for (const part of ["", ...path.relative(root, file).split(path.sep)]) {
+      if (part) at = path.join(at, part);
+      if (fs.lstatSync(at).isSymbolicLink()) throw util.fail("UNSAFE_JAR_PATH");
+    }
+    const before = fs.lstatSync(file);
+    if (!before.isFile() || before.nlink !== 1) throw util.fail("UNSAFE_JAR_PATH");
+    const fd = fs.openSync(file, "r");
+    try {
+      const opened = fs.fstatSync(fd);
+      if (!opened.isFile() || opened.nlink !== 1 || opened.ino !== before.ino || opened.dev !== before.dev || opened.size !== detail.server.size)
+        throw util.fail("JAR_INTEGRITY_FAILED");
+      const bytes = fs.readFileSync(fd);
+      if (bytes.length !== detail.server.size || crypto.createHash("sha1").update(bytes).digest("hex") !== detail.server.sha1)
+        throw util.fail("JAR_INTEGRITY_FAILED");
+      worldgen.verifyJarIdentity(bytes, version);
+    } finally { fs.closeSync(fd); }
     return file;
   }
 
   async function versionCatalogue(version) {
     if (typeof version !== "string" || !/^[A-Za-z0-9._ -]{1,40}$/.test(version)) throw util.fail("INVALID_VERSION");
-    if (catalogues.has(version)) return catalogues.get(version);
     const jar = await cachedJar(version);
+    if (catalogues.has(version)) return catalogues.get(version);
     const reports = path.join(root, "worldgen-reports", version.replace(/[^A-Za-z0-9._-]/g, "_"));
     if (!fs.existsSync(path.join(reports, "reports", "registries.json"))) await worldgen.runReports(jar, reports, { spawnImpl: deps.spawn });
     const value = { ...worldgen.catalogueFrom(fs.readFileSync(jar), reports), jar };
