@@ -203,12 +203,17 @@ function stringifyCsv(rows) {
 }
 
 function uniqueHeaders(headers) {
-  const seen = new Map();
-  return headers.map((h, index) => {
-    const base = h === "" ? `column${index + 1}` : h;
-    const count = (seen.get(base) || 0) + 1;
-    seen.set(base, count);
-    return count === 1 ? base : `${base}_${count}`;
+  const bases = headers.map((h, index) => h === "" ? `column${index + 1}` : h);
+  const reserved = new Set(bases);
+  const used = new Set();
+  return bases.map((base) => {
+    let name = base;
+    for (let suffix = 2; used.has(name); suffix++) {
+      name = `${base}_${suffix}`;
+      while (reserved.has(name)) name = `${base}_${++suffix}`;
+    }
+    used.add(name);
+    return name;
   });
 }
 
@@ -227,7 +232,7 @@ function csvToObjects(text) {
     }
     const record = {};
     headers.forEach((h, k) => {
-      record[h] = row[k];
+      Object.defineProperty(record, h, { value: row[k], enumerable: true, writable: true, configurable: true });
     });
     records.push(record);
   }
@@ -348,28 +353,31 @@ function availableName(folder, base, extension, exists = (p) => fs.existsSync(p)
  * the first free name. A hard link fails if the name is taken, so an existing file is
  * never replaced even if it appears between the check and the move.
  */
-function placeAtomically(folder, base, extension, bytes) {
+function placeAtomically(folder, base, extension, bytes, onPlaced = () => {}) {
   const temporary = path.join(folder, `.${base}.${process.pid}.${crypto.randomBytes(6).toString("hex")}.tmp`);
   fs.writeFileSync(temporary, bytes, { flag: "wx" });
   try {
+    const temporaryIdentity = fs.statSync(temporary);
     for (let attempt = 0; attempt < 50; attempt++) {
       const target = availableName(folder, base, extension);
+      let identity = temporaryIdentity;
       try {
         fs.linkSync(temporary, target);
-        fs.unlinkSync(temporary);
-        return target;
       } catch (error) {
         if (error.code === "EEXIST") continue;
         if (!["EPERM", "ENOTSUP", "EXDEV", "ENOSYS", "EACCES", "EINVAL"].includes(error.code)) throw error;
         // Exclusive creation preserves no-overwrite semantics without hard links.
         try {
           fs.copyFileSync(temporary, target, fs.constants.COPYFILE_EXCL);
-          return target;
         } catch (copyError) {
           if (copyError.code === "EEXIST") continue;
           throw copyError;
         }
+        identity = fs.statSync(target);
       }
+      // Placement is complete. Later bookkeeping or cleanup must never retry it.
+      onPlaced(identity);
+      return target;
     }
     throw new ConversionError("NAME_EXHAUSTED", "Could not find a free output name");
   } finally {
@@ -381,6 +389,28 @@ function placeAtomically(folder, base, extension, bytes) {
 
 // ---------------------------------------------------------------------------------------
 // Conversion and verification
+
+const digest = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
+function sameOutputIdentity(actual, expected) {
+  return actual.isFile() && !actual.isSymbolicLink() &&
+    actual.dev === expected.dev && actual.ino === expected.ino &&
+    actual.birthtimeMs === expected.birthtimeMs && actual.size === expected.size &&
+    actual.mtimeMs === expected.mtimeMs;
+}
+
+function removeUnchangedOutput(file, identity, expectedDigest) {
+  // Preserve observed replacements and changes. The final path check and unlink
+  // are not atomic against arbitrary concurrent filesystem writers.
+  try {
+    if (!identity || !sameOutputIdentity(fs.lstatSync(file), identity)) return;
+    const fd = fs.openSync(file, "r");
+    let unchanged = false;
+    try {
+      unchanged = sameOutputIdentity(fs.fstatSync(fd), identity) && digest(fs.readFileSync(fd)) === expectedDigest;
+    } finally { fs.closeSync(fd); }
+    if (unchanged && sameOutputIdentity(fs.lstatSync(file), identity)) fs.unlinkSync(file);
+  } catch {}
+}
 
 function readInput(file, category, limits) {
   const stat = fs.statSync(file);
@@ -452,6 +482,9 @@ function convertBytes(plan, bytes, options, nativeImage) {
 /** Reads the written file back from disk and checks it against what the conversion produced. */
 function verifyOutput(file, expect, nativeImage) {
   const bytes = fs.readFileSync(file);
+  if (bytes.length !== expect.byteLength || digest(bytes) !== expect.sha256) {
+    throw new ConversionError("VERIFY_FAILED", "The written output does not match the converted bytes");
+  }
   if (expect.image) {
     const image = nativeImage.createFromBuffer(bytes);
     const size = image.getSize();
@@ -487,7 +520,7 @@ const tick = () => new Promise((resolve) => setImmediate(resolve));
 /**
  * One-at-a-time queue. Only the file being converted is in memory; queued jobs hold a
  * path and options. Cancelling a running job stops it at the next stage boundary and
- * removes anything it had written.
+ * removes an output only while its recorded identity and content still match.
  */
 function createConverter({ nativeImage = null, limits = LIMITS, onChange = () => {} } = {}) {
   const jobs = [];
@@ -608,6 +641,8 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
 
   async function runJob(job) {
     let written = null;
+    let writtenIdentity = null;
+    let expectedDigest = null;
     const step = async (stage, progress) => {
       if (job.cancel) throw new ConversionError("CANCELED");
       job.stage = stage;
@@ -621,19 +656,19 @@ function createConverter({ nativeImage = null, limits = LIMITS, onChange = () =>
       let bytes = readInput(job.input, job.category, limits);
       await step("converting", 0.35);
       const result = convertBytes(job.plan, bytes, job.options, nativeImage);
+      expectedDigest = digest(result.bytes);
+      result.expect = { ...result.expect, byteLength: result.bytes.length, sha256: expectedDigest };
       bytes = null;
       await step("writing", 0.7);
       const base = path.basename(job.input, path.extname(job.input));
-      written = placeAtomically(job.folder, base, job.plan.extension, result.bytes);
+      written = placeAtomically(job.folder, base, job.plan.extension, result.bytes, (identity) => { writtenIdentity = identity; });
       await step("checking", 0.9);
       const size = verifyOutput(written, result.expect, nativeImage);
       if (job.cancel) throw new ConversionError("CANCELED");
       Object.assign(job, { state: "done", stage: "", progress: 1, output: written, bytes: size });
     } catch (error) {
       if (written) {
-        try {
-          fs.unlinkSync(written);
-        } catch {}
+        removeUnchangedOutput(written, writtenIdentity, expectedDigest);
       }
       if (error && error.code === "CANCELED") Object.assign(job, { state: "canceled", stage: "", progress: 0 });
       else
