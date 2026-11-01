@@ -12,6 +12,7 @@ const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
 const { registerSettingsIpc } = require("./settings-ipc.cjs");
 const { registerElementLocksIpc } = require("./services/element-locks.cjs");
+const { registerGameServersIpc } = require("./game-servers-ipc.cjs");
 const publishSessionEvents = require("./session-events.cjs").createSessionEvents(event => {
   if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
     window.webContents.send("material:event", event);
@@ -155,6 +156,7 @@ registerSettingsIpc({
   explicitDataDirectory: dataArguments.length === 1,
 });
 registerElementLocksIpc({ ipcMain, app, shell, trusted });
+const gameServers = registerGameServersIpc({ ipcMain, app, trusted });
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||
@@ -233,6 +235,13 @@ app.whenReady().then(() => {
     },
   });
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  // Keep the workspace open while its owned servers stop, including title-bar close.
+  window.on("close", event => {
+    if (gameServers.active && !serverShutdownComplete) {
+      event.preventDefault();
+      app.quit();
+    }
+  });
   window.webContents.on("will-navigate", (event) => event.preventDefault());
   const reportWindowState = () => {
     if (window && !window.isDestroyed() && !window.webContents.isDestroyed())
@@ -244,7 +253,24 @@ app.whenReady().then(() => {
   window.loadFile(rendererFile);
 });
 app.on("window-all-closed", () => app.quit());
-app.on("before-quit", () => {
+let serverShutdownComplete = false;
+let serverShutdownPending = false;
+app.on("before-quit", (event) => {
+  if (gameServers.active && !serverShutdownComplete) {
+    event.preventDefault();
+    if (serverShutdownPending) return;
+    serverShutdownPending = true;
+    gameServers.dispose().then(() => {
+      serverShutdownComplete = true;
+      app.quit();
+    }).catch(() => {
+      serverShutdownPending = false;
+      if (window && !window.isDestroyed()) {
+        window.webContents.send("material:event", { type: "server-shutdown-pending", code: "STOP_PENDING" });
+      }
+    });
+    return;
+  }
   host?.kill();
   failPending();
 });

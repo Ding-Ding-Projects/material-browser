@@ -28,6 +28,7 @@ export type PasswordManagerDetection = {
   limits: string[];
 };
 export type Bridge = {
+  gameServers?: (action: string, params?: Record<string, unknown>) => Promise<any>;
   windowAction?: (action: "minimize" | "maximize" | "restore" | "close") => Promise<{ maximized: boolean }>;
   request: (method: string, params?: Record<string, unknown>) => Promise<any>;
   chooseDirectory: () => Promise<string | null>;
