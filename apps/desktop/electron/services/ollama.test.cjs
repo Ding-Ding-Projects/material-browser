@@ -187,7 +187,7 @@ test("installer only accepts the official asset and reports unverified integrity
     createOllamaService({
       userData: tmp(),
       platform: "win32",
-      spawnImpl: (file, args) => { spawned = { file, args }; return { on() {}, unref() {} }; },
+      spawnImpl: (file, args) => { spawned = { file, args }; const child = new (require("node:events").EventEmitter)(); child.unref = () => {}; queueMicrotask(() => child.emit("spawn")); return child; },
       fetchImpl: async (url) => (String(url).includes("api.github.com") ? new Response(release(asset)) : new Response(installer)),
     });
   await assert.rejects(make({ ...official, browser_download_url: "https://example.com/OllamaSetup.exe" }).handle("installer.check", {}), /INSTALLER_URL_UNEXPECTED/);
@@ -198,8 +198,8 @@ test("installer only accepts the official asset and reports unverified integrity
   assert.equal(done.integrity, "unverified");
   await assert.rejects(plain.handle("installer.run", {}), /CONFIRMATION_REQUIRED/);
   assert.equal(spawned, null);
-  await plain.handle("installer.run", { confirmed: true });
-  assert.deepEqual(spawned.args, []);
+  await assert.rejects(plain.handle("installer.run", { confirmed: true }), /INSTALLER_ADMISSION_INCOMPLETE/);
+  assert.equal(spawned, null);
 
   const bad = make({ ...official, digest: `sha256:${"0".repeat(64)}` });
   await bad.handle("installer.check", {});
