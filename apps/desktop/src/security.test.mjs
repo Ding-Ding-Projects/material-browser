@@ -92,6 +92,7 @@ function fixture({
           electron,
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
           "./services/element-locks.cjs": desktopRequire("../electron/services/element-locks.cjs"),
+          "./minecraft/service.cjs": desktopRequire("../electron/minecraft/service.cjs"),
           "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
           "node:child_process": { spawn: () => { hostSpawns++; return host; } },
           "node:path": path,
@@ -238,4 +239,15 @@ test("element lock storage refuses untrusted frames and unknown operations", asy
   await assert.rejects(call(trusted, "delete", {}), /INVALID_REQUEST/);
   await assert.rejects(call(trusted, "read", { kind: "../vault" }), /INVALID_REQUEST/);
   assert.equal((await call(trusted, "folder")).path.endsWith("element-locks"), true);
+});
+
+test("Minecraft server manager refuses untrusted frames and unknown operations", async () => {
+  const f = fixture();
+  const call = f.handlers.get("material:minecraft");
+  const trusted = { sender: f.contents, senderFrame: f.contents.mainFrame };
+  await assert.rejects(call({ sender: {}, senderFrame: {} }, "list"), /INVALID_REQUEST/);
+  await assert.rejects(call({ sender: f.contents, senderFrame: {} }, "targets"), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "shell", { line: "rm -rf /" }), /INVALID_REQUEST/);
+  await assert.rejects(call(trusted, "start", { id: "../x" }), /INVALID_SERVER_ID/);
+  assert.deepEqual((await call(trusted, "targets")).map((t) => t.id).sort(), ["docker", "local", "ssh", "ssh-docker"]);
 });

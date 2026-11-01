@@ -12,7 +12,7 @@
     "build:bundle": "vite build",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "test": "node --test src/*.test.mjs src/app/*.test.mjs electron/*.test.cjs electron/services/*.test.cjs"
+    "test": "node --test src/*.test.mjs src/app/*.test.mjs electron/*.test.cjs electron/services/*.test.cjs electron/minecraft/*.test.cjs"
   },
   "dependencies": {
     "@fontsource-variable/material-symbols-rounded": "5.3.9",

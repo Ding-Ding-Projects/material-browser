@@ -12,6 +12,7 @@ const readline = require("node:readline");
 const { randomUUID } = require("node:crypto");
 const { registerSettingsIpc } = require("./settings-ipc.cjs");
 const { registerElementLocksIpc } = require("./services/element-locks.cjs");
+const { registerMinecraftIpc } = require("./minecraft/service.cjs");
 const publishSessionEvents = require("./session-events.cjs").createSessionEvents(event => {
   if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
     window.webContents.send("material:event", event);
@@ -155,6 +156,7 @@ registerSettingsIpc({
   explicitDataDirectory: dataArguments.length === 1,
 });
 registerElementLocksIpc({ ipcMain, app, shell, trusted });
+registerMinecraftIpc({ ipcMain, app, trusted, getWindow: () => window });
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||
