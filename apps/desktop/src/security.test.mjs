@@ -93,6 +93,8 @@ function fixture({
           "./settings-ipc.cjs": { registerSettingsIpc() {} },
           "./services/element-locks.cjs": desktopRequire("../electron/services/element-locks.cjs"),
           "./game-servers-ipc.cjs": desktopRequire("../electron/game-servers-ipc.cjs"),
+          "./services/ollama.cjs": desktopRequire("../electron/services/ollama.cjs"),
+          "./services/converter.cjs": desktopRequire("../electron/services/converter.cjs"),
           "./session-events.cjs": desktopRequire("../electron/session-events.cjs"),
           "node:child_process": { spawn: () => { hostSpawns++; return host; } },
           "node:path": path,

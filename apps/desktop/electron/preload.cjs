@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 contextBridge.exposeInMainWorld(
   "materialBrowser",
   Object.freeze({
@@ -13,6 +13,11 @@ contextBridge.exposeInMainWorld(
       ipcRenderer.invoke("material:element-locks", operation, params),
     gameServers: (action, params = {}) =>
       ipcRenderer.invoke("material:game-servers", action, params),
+    ollama: (operation, params = {}) =>
+      ipcRenderer.invoke("material:ollama", operation, params),
+    converter: (operation, params = {}) =>
+      ipcRenderer.invoke("material:converter", operation, params),
+    pathForFile: (file) => webUtils.getPathForFile(file),
     onEvent: (listener) => {
       const handler = (_event, value) => listener(value);
       ipcRenderer.on("material:event", handler);

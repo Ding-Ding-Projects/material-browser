@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Ollama states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 1200px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px; align-content: start">
+  <section class="pane" aria-labelledby="hdr-h" style="padding: 20px; display: flex; flex-direction: column; gap: 10px">
+    <h2 id="hdr-h" class="title-m" style="margin: 0">Header status</h2>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+      <span class="chip" style="pointer-events: none"><span class="ms">progress_activity</span>Checking</span>
+      <span class="chip" style="pointer-events: none"><span class="ms">pause_circle</span>Installed, not running</span>
+      <span class="chip" style="pointer-events: none"><span class="ms fill c-error">error</span>Not responding</span>
+      <button class="ib sl" aria-label="Check Ollama again"><span class="ms">refresh</span></button>
+    </div>
+    <div class="card tint" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap"><span class="ms">pause_circle</span><div style="flex: 1 1 220px"><p class="title-s" style="margin: 0">Ollama is installed but not running</p><p class="body-s" style="margin: 2px 0 0">Starting it runs ollama serve on this PC on 127.0.0.1 only.</p></div><button class="btn filled m sl"><span class="ms">play_arrow</span>Start Ollama</button></div>
+    <div class="card" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--error-container); color: var(--on-error-container)"><span class="ms">error</span><div style="flex: 1 1 220px"><p class="title-s" style="margin: 0">Ollama is not responding</p><p class="body-s" style="margin: 2px 0 0">[REASON FROM THE LOCAL API]</p></div><button class="btn outlined m sl"><span class="ms">refresh</span>Check again</button></div>
+    <div class="card outlined" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px"><span class="ms">desktop_windows</span><p class="body-m" style="margin: 0">Local models need the Material Browser desktop app. Open this page there to manage Ollama.</p></div>
+  </section>
+
+  <section class="pane" aria-labelledby="inst-h" style="padding: 20px; display: flex; flex-direction: column; gap: 10px">
+    <h2 id="inst-h" class="title-m" style="margin: 0">Installer</h2>
+    <div class="li"><span class="ms">download</span><div class="txt"><span>Downloading OllamaSetup.exe · [VERSION]</span><div class="lp" role="progressbar" aria-label="Downloading the installer" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"><span style="width: 62%"></span></div><span class="body-s on-sv">[MB] of [MB]</span></div><button class="btn text xs sl">Cancel</button></div>
+    <section class="dialog" role="dialog" aria-labelledby="ins-h" style="margin: 0; max-width: none">
+      <span class="ms s32 hero">install_desktop</span>
+      <h3 id="ins-h" class="headline-s" style="text-align: center; margin: 0">Run the Ollama installer?</h3>
+      <div class="seglist">
+        <div class="li"><span class="ms">tag</span><div class="txt"><span class="ov">Version</span><span>[VERSION]</span></div></div>
+        <div class="li"><span class="ms">straighten</span><div class="txt"><span class="ov">Size</span><span>[MB] MB</span></div></div>
+        <div class="li"><span class="ms">fingerprint</span><div class="txt"><span class="ov">SHA-256</span><span class="mono">[HASH]</span></div></div>
+        <div class="li"><span class="ms fill c-primary">verified</span><div class="txt"><span class="ov">Integrity</span><span>Matches the published checksum</span></div></div>
+      </div>
+      <p class="body-s on-sv" style="margin: 0">When no checksum is published this line reads "Integrity unverified" and the warning icon replaces the tick.</p>
+      <div class="acts"><button class="btn text sl">Cancel</button><button class="btn filled sl">Run installer</button></div>
+    </section>
+    <div class="card tint" style="padding: 14px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap"><span class="ms">open_in_new</span><p class="body-m" style="margin: 0; flex: 1">The installer is open. Finish it, then check again.</p><button class="btn tonal m sl"><span class="ms">refresh</span>Check again</button></div>
+  </section>
+
+  <section class="pane" aria-labelledby="tab-h" style="padding: 20px; display: flex; flex-direction: column; gap: 10px">
+    <h2 id="tab-h" class="title-m" style="margin: 0">Installed and chat</h2>
+    <div class="tabs" role="tablist" aria-label="Model sections">
+      <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="2">
+        <button class="{{tb.cls}}" role="tab" aria-selected="{{tb.on}}" onClick="{{tb.pick}}"><span class="tl">{{tb.label}}</span></button>
+      </sc-for>
+    </div>
+    <sc-if value="{{installed}}" hint-placeholder-val="{{ true }}">
+      <div class="seglist">
+        <div class="li tall"><span class="av s"><span class="ms">chat</span></span><div class="txt"><span class="title-s">[MODEL]:[TAG]</span><span class="body-s on-sv">[SIZE] · loaded now</span></div><span class="chip" style="pointer-events: none"><span class="ms fill c-primary">check_circle</span>Runs well</span><button class="ib sm sl" aria-label="Remove [MODEL]"><span class="ms">delete</span></button></div>
+        <div class="li tall"><span class="av s"><span class="ms">code</span></span><div class="txt"><span class="title-s">[MODEL]:[TAG]</span><span class="body-s on-sv">[SIZE]</span></div><span class="chip" style="pointer-events: none"><span class="ms">help</span>Unknown</span><button class="ib sm sl" aria-label="Remove [MODEL]"><span class="ms">delete</span></button></div>
+      </div>
+      <section class="dialog" role="alertdialog" aria-labelledby="rm-h" style="margin: 0; max-width: none"><span class="ms s32 hero c-error">delete</span><h3 id="rm-h" class="headline-s" style="text-align: center; margin: 0">Remove [MODEL]:[TAG]?</h3><p class="body-m on-sv" style="margin: 0">Frees [SIZE]. Your chats stay. You can pull it again later.</p><div class="acts"><button class="btn text sl">Cancel</button><button class="btn error sl">Remove</button></div></section>
+    </sc-if>
+    <sc-if value="{{chat}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><label class="tf" style="flex: 1 1 220px"><span class="lab">Model</span><input value="[MODEL]:[TAG]" aria-label="Model"><span class="ms">arrow_drop_down</span></label><button class="btn text m sl"><span class="ms">delete_sweep</span>Clear chat</button></div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div class="card filled" style="padding: 12px 16px; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%"><p class="body-m" style="margin: 0">[YOUR MESSAGE]</p></div>
+        <div class="card outlined" style="padding: 12px 16px; border-radius: 20px 20px 20px 4px; align-self: flex-start; max-width: 80%"><p class="body-m" style="margin: 0">[STREAMED ANSWER]…</p></div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: flex-end"><label class="tf" style="flex: 1"><span class="lab">Message</span><input aria-label="Message"></label><button class="btn tonal m sl"><span class="ms">stop</span>Stop</button></div>
+    </sc-if>
+  </section>
+
+  <section class="pane" aria-labelledby="q-h" style="padding: 20px; display: flex; flex-direction: column; gap: 10px">
+    <h2 id="q-h" class="title-m" style="margin: 0">Pull queue and catalogue</h2>
+    <div class="seglist">
+      <div class="li"><span class="ms on-sv">schedule</span><div class="txt"><span>[MODEL]:[TAG]</span><span class="body-s on-sv">Waiting</span></div><button class="ib sm sl" aria-label="Remove from queue"><span class="ms">close</span></button></div>
+      <div class="li"><span class="ms fill c-primary">check_circle</span><div class="txt"><span>[MODEL]:[TAG]</span><span class="body-s on-sv">Done</span></div><button class="ib sm sl" aria-label="Remove from list"><span class="ms">close</span></button></div>
+      <div class="li"><span class="ms fill c-error">error</span><div class="txt"><span>[MODEL]:[TAG]</span><span class="body-s c-error">Failed · [REASON]</span></div><button class="ib sm sl" aria-label="Remove from list"><span class="ms">close</span></button></div>
+      <div class="li"><span class="ms on-sv">block</span><div class="txt"><span>[MODEL]:[TAG]</span><span class="body-s on-sv">Stopped</span></div><button class="ib sm sl" aria-label="Remove from list"><span class="ms">close</span></button></div>
+    </div>
+    <p class="body-m" style="margin: 0">1 done · 1 failed · 1 stopped</p>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><label class="tf" style="width: 160px"><span class="lab">Pulls at once</span><input value="1" aria-label="Pulls at once"><span class="ms">arrow_drop_down</span></label><button class="btn text m sl">Clear finished</button></div>
+    <p class="body-s on-sv" style="margin: 0">Empty queue reads: Nothing queued. Choose Queue pull on any model.</p>
+    <div class="card" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--error-container); color: var(--on-error-container)"><span class="ms">cloud_off</span><p class="body-m" style="margin: 0; flex: 1">The model catalogue could not be read. Installed models still work.</p><button class="btn outlined m sl">Try again</button></div>
+    <p class="body-s on-sv" style="margin: 0">Store footer evidence: memory detected by the system, graphics by [METHOD], [GB] free on the models drive. Incomplete or offline catalogues say so here with their age.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'installed' }; }
+  renderVals() {
+    const tabs = [['installed', 'Installed'], ['chat', 'Chat']].map((t) => ({ label: t[1], on: t[0] === this.state.tab ? 'true' : 'false', cls: t[0] === this.state.tab ? 'tab sl on' : 'tab sl', pick: () => this.setState({ tab: t[0] }) }));
+    return { theme: this.props.dark ? 'dark' : '', tabs, installed: this.state.tab === 'installed', chat: this.state.tab === 'chat' };
+  }
+}
+</script>
+</body>
+</html>
