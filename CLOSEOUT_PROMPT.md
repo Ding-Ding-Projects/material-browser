@@ -32,3 +32,31 @@ remain outside this pass; preservation commits use the supported workflow-skip m
 Next: monitor incoming design fixes at meaningful checkpoints, independently reproduce and
 refute suspected defects, verify accepted repairs on exact builds, update issue5 and evidence,
 and preserve each coherent verification milestone without rewriting concurrent work.
+
+## Latest completed verification pass
+
+Source7e66f50135e1331e21e9ab7e284f14ca74202e9b passed all302 desktop tests with zero
+failures or skips and the exact Desktop build. This supersedes the earlier273-test count
+only for this source. Rust103-pass evidence is unchanged and separately source-bound.
+
+Actual Personalize testing confirmed minimum-width content overflow and missing saved
+appearance application after a full process restart. Both owned runs were closed normally
+by2026-11-01T08:13:01Z with unchanged build hashes. The saved appearance key remained present
+but its style was absent on cold startup. Calm, timer, swatch, reset and theme samples worked.
+
+Open handoffs5-14: navigation rail; generator lifecycle/concurrency; cached JAR integrity;
+ZIP temporary-file safety; dimension readiness height; Personalize minimum layout; cold-start
+appearance; persistence-error feedback; partial-alpha contrast; hue accessibility bounds.
+See https://github.com/Ding-Ding-Projects/material-browser/issues . Each finding states its
+source and evidence limits. Source/helper findings are not labelled built-runtime proof.
+
+The owner assigns incoming implementation to the design contributor and assigns integration,
+defect/layout hunting, focused repairs and issue verification to this task. Separate model
+alternatives are inactive and preserved. Do not restart parallel feature implementation.
+Public image promotion, full keyboard/theme/scale coverage, actual world/server generation,
+installation and release acceptance remain incomplete. No release/update was performed here.
+
+Status reporting uses the owner's SSH-only route. Host/container health succeeded, but the
+host-local client received HTTP400 for unsupported private-emission metadata. No accepted
+Hub session update is claimed. Continue using the recorded issue and source handoffs while
+that existing protocol compatibility problem remains unresolved.

@@ -229,3 +229,12 @@ No rail fix or whole-product completion is claimed. The current inventory contai
 identities,784 rows and420 applicable unfinished rows, including world generation.
 Separate model alternatives remain inactive for selective review; no additional parallel
 feature-building lane should be started. Keep private runtime evidence and active branches.
+
+## Latest defect-hunt pass, source7e66f50
+
+The full desktop suite passed302 tests, zero failed/skipped. Actual Personalize interaction
+confirmed content overflow at760x580 and missing appearance application after a cold process
+restart. Issues5-14 carry ten focused design/implementation handoffs, with runtime findings
+clearly separated from source/helper evidence. All owned test desktops/processes were closed.
+The design contributor owns incoming implementation; this task verifies, repairs and tracks
+findings. No whole-product completion, generation, installer, release or update proof exists.
