@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Plugins, worlds and backups</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 960px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+  <section class="pane" aria-labelledby="pg-h" style="flex: 999 1 560px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+      <h1 id="pg-h" class="headline-s" style="margin: 0; flex: 1">Plugins</h1>
+      <button class="btn tonal m"><span class="ms">upload_file</span>Add a file</button>
+      <button class="btn filled m"><span class="ms">travel_explore</span>Browse catalogue</button>
+    </div>
+    <label class="search sm"><span class="ms">search</span><input aria-label="Search plugins" placeholder="Search Modrinth for Paper [VERSION] plugins"><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label>
+    <div class="seglist">
+      <div class="li tall"><span class="av s"><span class="ms">map</span></span><div class="txt"><span class="title-s">[PLUGIN NAME]</span><span class="body-s on-sv">[VERSION] · MIT · compatible with Paper [VERSION] per catalogue · SHA-512 verified</span></div><button class="sw on" role="switch" aria-checked="true" aria-label="Enable [PLUGIN NAME]"><span class="handle"></span></button><button class="ib sm" aria-label="More actions for [PLUGIN NAME]"><span class="ms">more_vert</span></button></div>
+      <div class="li tall"><span class="av s"><span class="ms">shield</span></span><div class="txt"><span class="title-s">[PLUGIN NAME]</span><span class="body-s on-sv">[VERSION] · GPL-3.0 · update available [VERSION] · needs restart</span></div><button class="btn tonal xs">Update</button><button class="ib sm" aria-label="More actions"><span class="ms">more_vert</span></button></div>
+      <div class="li tall"><span class="av s"><span class="ms">help</span></span><div class="txt"><span class="title-s">custom-tool.jar</span><span class="body-s on-sv">Added from a file · compatibility unknown, no catalogue data · not fully managed</span></div><button class="sw" role="switch" aria-checked="false" aria-label="Enable custom-tool.jar"><span class="handle"></span></button><button class="ib sm" aria-label="More actions"><span class="ms">more_vert</span></button></div>
+    </div>
+    <div class="card outlined" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap"><span class="ms">inventory_2</span><p class="body-m" style="margin: 0; flex: 1">Every install, update or removal makes a backup first and rolls back if the server fails to start.</p></div>
+  </section>
+  <section class="pane low" aria-labelledby="wb-h" style="flex: 1 1 380px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="wb-h" class="title-l" style="margin: 0">Worlds and backups</h2>
+    <div class="seglist">
+      <div class="li"><span class="ms fill c-primary">public</span><div class="txt"><span class="title-s">world</span><span class="body-s on-sv">Overworld, Nether, End · [SIZE]</span></div><button class="btn text xs">Export</button></div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn filled m"><span class="ms">backup</span>Back up now</button><button class="btn tonal m"><span class="ms">drive_folder_upload</span>Import a world</button></div>
+    <div class="li plain" style="gap: 12px; flex-wrap: wrap"><div class="txt" style="flex: 1 1 180px"><span class="body-l">Automatic backups</span><span class="body-s on-sv">Every day at 04:00 · keep 7</span></div><button class="sw on" role="switch" aria-checked="true" aria-label="Automatic backups"><span class="handle"></span></button></div>
+    <h3 class="title-s" style="margin: 4px 0 0">Restore points</h3>
+    <div class="seglist">
+      <div class="li"><span class="ms">schedule</span><div class="txt"><span>[DATE] 04:00 · automatic</span><span class="body-s on-sv">[SIZE] · SHA-256 recorded</span></div><button class="btn text xs">Restore</button></div>
+      <div class="li"><span class="ms">bolt</span><div class="txt"><span>[DATE] 21:12 · before update to [VERSION]</span><span class="body-s on-sv">[SIZE] · SHA-256 recorded</span></div><button class="btn text xs">Restore</button></div>
+    </div>
+    <p class="body-s on-sv" style="margin: 0">Restoring stops the server first and keeps the current world as a new restore point.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.dark ? 'dark' : '' }; }
+}
+</script>
+</body>
+</html>

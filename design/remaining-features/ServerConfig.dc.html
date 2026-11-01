@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Server configuration</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 1080px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+  <section class="pane" aria-labelledby="cfg-h" style="flex: 999 1 560px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+      <a class="ib sl" href="Main.dc.html" aria-label="Back to servers"><span class="ms">arrow_back</span></a>
+      <h1 id="cfg-h" class="headline-s" style="margin: 0; flex: 1">Family survival · Configuration</h1>
+      <span class="chip" style="pointer-events: none"><span class="ms">description</span>server.properties for Java [VERSION]</span>
+    </div>
+    <label class="search sm"><span class="ms">search</span><input aria-label="Search settings" placeholder="Search the 50+ settings for this version"><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label>
+    <div class="seglist">
+      <sc-for list="{{toggles}}" as="t" hint-placeholder-count="4">
+        <div class="li plain" style="gap: 12px">
+          <div class="txt"><span class="body-l">{{t.label}}</span><span class="body-s on-sv mono">{{t.key}} · {{t.when}}</span></div>
+          <button class="ib sm sl" aria-label="{{t.helpLabel}}"><span class="ms">info</span></button>
+          <button class="{{t.cls}}" role="switch" aria-checked="{{t.on}}" aria-label="{{t.label}}" onClick="{{t.flip}}"><span class="handle"></span></button>
+        </div>
+      </sc-for>
+      <div class="li plain" style="gap: 12px; flex-wrap: wrap">
+        <div class="txt" style="flex: 1 1 200px"><span class="body-l">Difficulty</span><span class="body-s on-sv mono">difficulty · applies live</span></div>
+        <div class="cbg" aria-label="Difficulty">
+          <sc-for list="{{difficulties}}" as="d" hint-placeholder-count="4">
+            <button class="{{d.cls}}" aria-pressed="{{d.on}}" onClick="{{d.pick}}">{{d.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div class="li plain" style="gap: 12px; flex-wrap: wrap">
+        <div class="txt" style="flex: 1 1 200px"><span class="body-l">Maximum players</span><span class="body-s on-sv mono">max-players · 1 to 2147483647 · needs restart</span></div>
+        <button class="ib outlined sm sl" aria-label="One fewer player" onClick="{{less}}"><span class="ms">remove</span></button>
+        <label class="tf" style="width: 96px"><span class="lab">Players</span><input inputmode="numeric" value="{{maxPlayers}}" aria-label="Maximum players"></label>
+        <button class="ib outlined sm sl" aria-label="One more player" onClick="{{more}}"><span class="ms">add</span></button>
+      </div>
+      <div class="li plain" style="gap: 12px; flex-wrap: wrap">
+        <div class="txt" style="flex: 1 1 200px"><span class="body-l">View distance</span><span class="body-s on-sv mono">view-distance · 3 to 32 chunks · needs restart</span></div>
+        <div class="slider" role="slider" tabindex="0" aria-label="View distance" aria-valuemin="3" aria-valuemax="32" aria-valuenow="10" style="flex: 1 1 200px"><span class="act" style="width: 24%"></span><span class="handle"></span><span class="ina"></span></div>
+        <label class="tf" style="width: 96px"><span class="lab">Chunks</span><input inputmode="numeric" value="10" aria-label="View distance in chunks"></label>
+      </div>
+      <div class="li plain" style="gap: 12px; flex-wrap: wrap">
+        <div class="txt" style="flex: 1 1 200px"><span class="body-l">Message of the day</span><span class="body-s on-sv mono">motd · text · needs restart</span></div>
+        <label class="tf" style="flex: 2 1 240px"><span class="lab">Shown in the server list</span><input value="Welcome home" aria-label="Message of the day"><span class="ms">close</span></label>
+      </div>
+    </div>
+    <div class="card tint" style="padding: 14px; border-radius: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap"><span class="ms">history</span><p class="body-m" style="margin: 0; flex: 1">2 changes need a restart. Unknown keys in your file are kept as they are.</p><button class="btn text sl">Undo</button><button class="btn filled sl">Save</button></div>
+  </section>
+  <section class="pane low" aria-labelledby="pl-h" style="flex: 1 1 380px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="pl-h" class="title-l" style="margin: 0">Players and rules</h2>
+    <div class="tabs sec" role="tablist" aria-label="Player lists"><button class="tab sl on" role="tab" aria-selected="true"><span class="tl">Permissions</span></button><button class="tab sl" role="tab" aria-selected="false"><span class="tl">Bans</span></button><button class="tab sl" role="tab" aria-selected="false"><span class="tl">Game rules</span></button></div>
+    <div style="overflow-x: auto">
+      <div role="grid" aria-label="Player permissions" style="display: grid; grid-template-columns: minmax(140px, 1.6fr) repeat(3, minmax(72px, 1fr)); gap: 4px; align-items: center">
+        <span class="label-m on-sv" role="columnheader">Player</span><span class="label-m on-sv" role="columnheader">Allowlist</span><span class="label-m on-sv" role="columnheader">Operator</span><span class="label-m on-sv" role="columnheader">Level</span>
+        <sc-for list="{{players}}" as="p" hint-placeholder-count="3">
+          <span class="body-m" role="gridcell" style="display: flex; gap: 8px; align-items: center"><span class="av s"><span class="ms">person</span></span>{{p.name}}</span>
+          <span role="gridcell"><button class="{{p.allowCls}}" role="switch" aria-checked="{{p.allow}}" aria-label="{{p.allowLabel}}" onClick="{{p.flipAllow}}"><span class="handle"></span></button></span>
+          <span role="gridcell"><button class="{{p.opCls}}" role="switch" aria-checked="{{p.op}}" aria-label="{{p.opLabel}}" onClick="{{p.flipOp}}"><span class="handle"></span></button></span>
+          <span class="body-m" role="gridcell">{{p.level}}</span>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap"><label class="tf" style="flex: 1 1 180px"><span class="lab">Add a player by name</span><input placeholder="Exact Minecraft name" aria-label="Add a player by name"></label><button class="btn tonal m sl"><span class="ms">person_add</span>Look up and add</button></div>
+    <p class="body-s on-sv" style="margin: 0">Names are checked against the official profile service before they are added. Operator changes go through a two-key confirmation.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { t: { pvp: true, 'online-mode': true, 'white-list': true, hardcore: false }, diff: 'normal', max: 10, allow: { Alex: true, Sam: true, Jo: false }, op: { Alex: true, Sam: false, Jo: false } }; }
+  renderVals() {
+    const defs = [['pvp', 'Players can fight', 'applies live'], ['online-mode', 'Check accounts with Minecraft services', 'needs restart'], ['white-list', 'Only allowlisted players can join', 'applies live'], ['hardcore', 'Hardcore', 'needs restart']];
+    const toggles = defs.map((d) => { const on = !!this.state.t[d[0]]; return { key: d[0], label: d[1], when: d[2], on: on ? 'true' : 'false', cls: on ? 'sw on sl' : 'sw sl', helpLabel: 'About ' + d[1], flip: () => this.setState({ t: { ...this.state.t, [d[0]]: !on } }) }; });
+    const difficulties = ['peaceful', 'easy', 'normal', 'hard'].map((d) => ({ label: d[0].toUpperCase() + d.slice(1), on: d === this.state.diff ? 'true' : 'false', cls: d === this.state.diff ? 'on' : '', pick: () => this.setState({ diff: d }) }));
+    const players = ['Alex', 'Sam', 'Jo'].map((n) => { const a = !!this.state.allow[n], o = !!this.state.op[n]; return { name: n, allow: a ? 'true' : 'false', op: o ? 'true' : 'false', allowCls: a ? 'sw on sl' : 'sw sl', opCls: o ? 'sw on sl' : 'sw sl', level: o ? '4' : '-', allowLabel: n + ' on the allowlist', opLabel: n + ' is an operator', flipAllow: () => this.setState({ allow: { ...this.state.allow, [n]: !a } }), flipOp: () => this.setState({ op: { ...this.state.op, [n]: !o } }) }; });
+    return {
+      theme: this.props.dark ? 'dark' : '', toggles, difficulties, players,
+      maxPlayers: this.state.max,
+      less: () => this.setState({ max: Math.max(1, this.state.max - 1) }),
+      more: () => this.setState({ max: this.state.max + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

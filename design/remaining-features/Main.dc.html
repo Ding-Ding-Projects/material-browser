@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Minecraft servers</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 win {{theme}}">
+  <header class="tbar">
+    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">shield_lock</span></div><div class="bt"><span class="title-m em">Material Browser</span><span class="label-s on-sv">0.1.1 · updated [UPDATED-AT]</span></div></div>
+    <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search servers, versions, settings and help"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
+    <button class="ib sl" aria-label="Notifications, 1 new"><span class="ms">notifications</span><span class="badge">1</span></button>
+    <div class="wctl"><button aria-label="Minimize"><span class="ms s20">minimize</span></button><button aria-label="Maximize"><span class="ms s18">crop_square</span></button><button aria-label="Close"><span class="ms s20">close</span></button></div>
+  </header>
+  <div class="body">
+    <nav class="rail" aria-label="Destinations">
+      <button class="ib sl" aria-label="Expand navigation"><span class="ms">menu</span></button>
+      <a class="fab flat sl" href="ServerCreate.dc.html" aria-label="Create a Minecraft server" style="margin: 4px 0 20px; text-decoration: none"><span class="ms">add</span></a>
+      <a class="ri" href="#"><span class="ind"><span class="ms">group</span></span>Profiles</a>
+      <a class="ri" href="#"><span class="ind"><span class="ms">layers</span></span>Super Profiles</a>
+      <a class="ri on" href="Main.dc.html" aria-current="page"><span class="ind"><span class="ms">dns</span></span>Servers</a>
+      <a class="ri" href="Ollama.dc.html"><span class="ind"><span class="ms">neurology</span></span>Models</a>
+      <a class="ri" href="Toolbox.dc.html"><span class="ind"><span class="ms">construction</span></span>Tools</a>
+      <a class="ri" href="Personalize.dc.html"><span class="ind"><span class="ms">settings</span></span>Settings</a>
+    </nav>
+    <div class="panes">
+      <section class="pane" aria-label="Servers" style="flex: 1 1 420px; min-width: 0; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+          <h1 class="headline-s" style="margin: 0; flex: 1">Minecraft servers</h1>
+          <a class="btn filled m sl" href="ServerCreate.dc.html" style="text-decoration: none"><span class="ms">add</span>New server</a>
+          <button class="btn tonal m sl"><span class="ms">travel_explore</span>Find existing</button>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap" role="group" aria-label="Filter by target">
+          <button class="chip on sl" aria-pressed="true"><span class="ms">check</span>All targets</button>
+          <button class="chip sl" aria-pressed="false"><span class="ms">desktop_windows</span>This PC</button>
+          <button class="chip sl" aria-pressed="false"><span class="ms">deployed_code</span>Docker here</button>
+          <button class="chip sl" aria-pressed="false"><span class="ms">terminal</span>SSH host</button>
+          <button class="chip sl" aria-pressed="false"><span class="ms">cloud</span>Docker over SSH</button>
+        </div>
+        <div class="seglist" role="listbox" aria-label="Servers">
+          <sc-for list="{{servers}}" as="s" hint-placeholder-count="4">
+            <button class="li tall sl" role="option" aria-selected="{{s.selected}}" onClick="{{s.pick}}" style="{{s.style}}">
+              <span class="av s"><span class="ms">{{s.icon}}</span></span>
+              <span class="txt"><span class="ov">{{s.target}}</span><span class="title-s">{{s.name}}</span><span class="body-s on-sv">{{s.detail}}</span></span>
+              <span class="chip" style="pointer-events: none"><span class="ms fill">{{s.stateIcon}}</span>{{s.state}}</span>
+            </button>
+          </sc-for>
+        </div>
+        <p class="body-s on-sv" style="margin: 0">Servers found on a target stay read-only until you adopt them. A lost SSH connection shows as Disconnected, never as Stopped.</p>
+      </section>
+      <section class="pane low" aria-label="Server details" style="flex: 1.4 1 520px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap">
+          <span class="av l shape-cookie"><span class="ms fill">landscape</span></span>
+          <div style="flex: 1; min-width: 200px"><h2 class="headline-s" style="margin: 0">{{sel.name}}</h2><p class="body-m on-sv" style="margin: 4px 0 0">{{sel.detail}}</p></div>
+          <sc-if value="{{running}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; gap: 8px"><button class="btn tonal m sl" onClick="{{toggle}}"><span class="ms">stop</span>Stop gracefully</button><button class="btn outlined m sl"><span class="ms">restart_alt</span>Restart</button></div>
+          </sc-if>
+          <sc-if value="{{stopped}}" hint-placeholder-val="{{ false }}">
+            <button class="btn filled m sl" onClick="{{toggle}}"><span class="ms">play_arrow</span>Start</button>
+          </sc-if>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Server sections">
+          <button class="tab sl on" role="tab" aria-selected="true"><span class="tl">Overview</span></button>
+          <a class="tab sl" role="tab" aria-selected="false" href="ServerConfig.dc.html" style="text-decoration: none"><span class="tl">Configuration</span></a>
+          <a class="tab sl" role="tab" aria-selected="false" href="ServerConfig.dc.html" style="text-decoration: none"><span class="tl">Players</span></a>
+          <a class="tab sl" role="tab" aria-selected="false" href="ServerContent.dc.html" style="text-decoration: none"><span class="tl">Plugins and worlds</span></a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <div class="card filled" style="padding: 16px; border-radius: 20px"><p class="label-m on-sv" style="margin: 0">Players</p><p class="display-s em" style="margin: 4px 0 0">{{players}}</p></div>
+          <div class="card filled" style="padding: 16px; border-radius: 20px"><p class="label-m on-sv" style="margin: 0">Memory</p><p class="display-s em" style="margin: 4px 0 0">{{memory}}</p></div>
+          <div class="card filled" style="padding: 16px; border-radius: 20px"><p class="label-m on-sv" style="margin: 0">Ticks per second</p><p class="display-s em" style="margin: 4px 0 0">{{tps}}</p></div>
+        </div>
+        <div class="seglist">
+          <div class="li"><span class="ms">fingerprint</span><div class="txt"><span class="ov">Server file</span><span class="mono">server.jar · SHA-1 [HASH] · verified against the official catalogue</span></div></div>
+          <div class="li"><span class="ms">coffee</span><div class="txt"><span class="ov">Runtime</span><span>Java [21] · required by this version</span></div></div>
+          <div class="li"><span class="ms">lan</span><div class="txt"><span class="ov">Listening</span><span>TCP 25565 · port checked free before start</span></div></div>
+          <div class="li"><span class="ms">badge</span><div class="txt"><span class="ov">Owned process</span><span>PID [PID] · started by Material Browser</span></div></div>
+        </div>
+        <div class="card outlined" style="padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: center; gap: 8px"><span class="ms">terminal</span><h3 class="title-m" style="margin: 0; flex: 1">Run a command</h3><span class="label-s on-sv">Commands for {{sel.version}} only</span></div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <label class="tf" style="flex: 1 1 160px"><span class="lab">Command</span><input value="say" aria-label="Command"><span class="ms">arrow_drop_down</span></label>
+            <label class="tf" style="flex: 2 1 220px"><span class="lab">Message</span><input value="Backup in five minutes" aria-label="Message"></label>
+            <button class="btn filled m sl"><span class="ms">send</span>Send</button>
+          </div>
+          <pre class="mono body-s" style="margin: 0; padding: 12px; border-radius: 12px; background: var(--surface-container-highest); white-space: pre-wrap">[12:04:11] Done (6.2s)! For help, type "help"
+[12:05:30] [Server] Backup in five minutes</pre>
+        </div>
+      </section>
+    </div>
+  </div>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span>{{runCount}} server running</span><span style="flex: 1"></span><span>Version catalogue refreshed [TIME] · complete</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { picked: 'survival', running: { survival: true } }; }
+  renderVals() {
+    const base = [
+      { id: 'survival', name: 'Family survival', target: 'This PC', icon: 'desktop_windows', version: 'Java 1.21.x', detail: 'Paper · Java [VERSION] · C:\\Servers\\family', players: '3 / 10', memory: '2.1 GB', tps: '20.0' },
+      { id: 'creative', name: 'Creative build', target: 'Docker here', icon: 'deployed_code', version: 'Java 1.20.x', detail: 'Vanilla · Java [VERSION] · container mb-creative', players: '0 / 8', memory: '-', tps: '-' },
+      { id: 'bedrock', name: 'Phone friends', target: 'SSH host', icon: 'terminal', version: 'Bedrock 1.21.x', detail: 'Bedrock Dedicated Server [VERSION] · [HOST]', players: '-', memory: '-', tps: '-' },
+      { id: 'lobby', name: 'Network lobby', target: 'Docker over SSH', icon: 'cloud', version: 'Java 1.21.x', detail: 'Velocity proxy · [HOST]', players: '-', memory: '-', tps: '-' }
+    ];
+    const run = this.state.running;
+    const servers = base.map((s) => {
+      const on = !!run[s.id];
+      const disc = s.id === 'bedrock';
+      return { ...s, selected: s.id === this.state.picked ? 'true' : 'false',
+        style: s.id === this.state.picked ? 'background: var(--secondary-container)' : '',
+        state: disc ? 'Disconnected' : (on ? 'Running' : 'Stopped'),
+        stateIcon: disc ? 'link_off' : (on ? 'play_circle' : 'stop_circle'),
+        pick: () => this.setState({ picked: s.id }) };
+    });
+    const sel = base.find((s) => s.id === this.state.picked);
+    const isOn = !!run[sel.id];
+    return {
+      theme: this.props.dark ? 'dark' : '', servers, sel,
+      running: isOn, stopped: !isOn,
+      players: isOn ? sel.players : '-', memory: isOn ? sel.memory : '-', tps: isOn ? sel.tps : '-',
+      runCount: Object.values(run).filter(Boolean).length,
+      toggle: () => this.setState({ running: { ...run, [sel.id]: !isOn } })
+    };
+  }
+}
+</script>
+</body>
+</html>

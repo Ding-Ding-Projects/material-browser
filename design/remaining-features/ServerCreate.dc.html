@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Create a Minecraft server</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 960px; padding: 32px; box-sizing: border-box; background: var(--surface-container); display: flex; justify-content: center; align-items: flex-start">
+  <section class="dialog" role="dialog" aria-labelledby="cw-h" style="width: 100%; max-width: 920px; gap: 20px">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <span class="ms s32 c-primary">dns</span>
+      <h1 id="cw-h" class="headline-s" style="margin: 0; flex: 1">New Minecraft server</h1>
+      <a class="ib sl" href="Main.dc.html" aria-label="Close and save draft"><span class="ms">close</span></a>
+    </div>
+    <div class="cbg" aria-label="Steps" style="flex-wrap: wrap">
+      <sc-for list="{{steps}}" as="st" hint-placeholder-count="5">
+        <button class="{{st.cls}}" aria-current="{{st.current}}" onClick="{{st.go}}" style="flex: 1 1 auto; padding: 0 12px"><span class="ms">{{st.icon}}</span>{{st.label}}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{s0}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <p class="body-l" style="margin: 0">Where should this server run?</p>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <sc-for list="{{targets}}" as="t" hint-placeholder-count="4">
+            <button class="card outlined sl" onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="{{t.style}}">
+              <span class="ms s32">{{t.icon}}</span>
+              <span class="title-m">{{t.name}}</span>
+              <span class="body-s on-sv">{{t.help}}</span>
+              <span class="chip" style="pointer-events: none; align-self: flex-start"><span class="ms fill">{{t.checkIcon}}</span>{{t.check}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{s1}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div class="cbg" aria-label="Edition"><button class="on" aria-pressed="true" style="flex: 1">Java Edition</button><button aria-pressed="false" style="flex: 1">Bedrock Edition</button></div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap" role="group" aria-label="Release channels">
+          <button class="chip on sl" aria-pressed="true"><span class="ms">check</span>Releases</button>
+          <button class="chip sl" aria-pressed="false">Snapshots</button>
+          <button class="chip sl" aria-pressed="false">Old beta</button>
+          <button class="chip sl" aria-pressed="false">Old alpha</button>
+        </div>
+        <label class="search sm"><span class="ms">search</span><input aria-label="Search versions" placeholder="Search every version"><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label>
+        <div class="seglist" role="listbox" aria-label="Versions" style="max-height: 260px; overflow: auto">
+          <div class="li sel" role="option" aria-selected="true"><span class="ms fill c-primary">radio_button_checked</span><div class="txt"><span class="title-s">[LATEST RELEASE]</span><span class="body-s on-sv">Release · server download available · needs Java [21]</span></div></div>
+          <div class="li" role="option" aria-selected="false"><span class="ms">radio_button_unchecked</span><div class="txt"><span class="title-s">[OLDER RELEASE]</span><span class="body-s on-sv">Release · server download available · needs Java [17]</span></div></div>
+          <div class="li" role="option" aria-selected="false" aria-disabled="true" style="opacity: .6"><span class="ms">block</span><div class="txt"><span class="title-s">[VERY OLD VERSION]</span><span class="body-s on-sv">Old alpha · the official catalogue lists no server download for this version</span></div></div>
+        </div>
+        <p class="body-s on-sv" style="margin: 0">Catalogue: [N] versions from the official manifest, retrieved [TIME], complete. Offline shows the last verified list with its age.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <p class="body-l" style="margin: 0">Server software</p>
+        <div role="radiogroup" aria-label="Server software" style="display: flex; flex-direction: column">
+          <button class="li plain sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span class="body-l">Vanilla</span><span class="body-s on-sv">The official server, verified by SHA-1 from the catalogue</span></span></button>
+          <button class="li plain sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span class="body-l">Paper</span><span class="body-s on-sv">Plugins supported · build list from the Paper download service</span></span></button>
+          <button class="li plain sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span class="body-l">Fabric</span><span class="body-s on-sv">Mods supported · loader list from the Fabric meta service</span></span></button>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap">
+          <label class="tf" style="flex: 1 1 240px"><span class="lab">Server name</span><input value="Family survival" aria-label="Server name"></label>
+          <label class="tf" style="flex: 1 1 240px"><span class="lab">Folder</span><input value="C:\Servers\family" aria-label="Folder"><span class="ms">folder_open</span></label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+          <span class="label-l" style="min-width: 120px">Memory</span>
+          <div class="slider" role="slider" tabindex="0" aria-label="Maximum memory" aria-valuemin="1" aria-valuemax="16" aria-valuenow="4" style="flex: 1 1 240px"><span class="act" style="width: 25%"></span><span class="handle"></span><span class="ina"></span></div>
+          <label class="tf" style="width: 120px"><span class="lab">GB</span><input inputmode="numeric" value="4" aria-label="Maximum memory in gigabytes"></label>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div class="card tint" style="padding: 16px; border-radius: 20px; display: flex; gap: 12px"><span class="ms">gavel</span><div><p class="title-s" style="margin: 0">Minecraft End User License Agreement</p><p class="body-m" style="margin: 4px 0 0">The server will not start until you accept the EULA. Material Browser writes eula=true only after you switch this on.</p></div></div>
+        <div class="li plain" style="gap: 12px"><span class="txt body-l">I have read and accept the Minecraft EULA</span><button class="sw sl" role="switch" aria-checked="{{eulaStr}}" onClick="{{toggleEula}}" aria-label="Accept the Minecraft EULA"><span class="handle"></span></button></div>
+        <div class="li plain" style="gap: 12px"><span class="txt body-l">Start the server when setup finishes</span><button class="sw on sl" role="switch" aria-checked="true" aria-label="Start when finished"><span class="handle"></span></button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div class="wavy" role="progressbar" aria-label="Setting up" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="seglist">
+          <div class="li"><span class="ms fill c-primary">check_circle</span><div class="txt"><span>Checked port 25565 is free</span></div></div>
+          <div class="li"><span class="ms fill c-primary">check_circle</span><div class="txt"><span>Downloaded server.jar · [SIZE] · SHA-1 matches</span></div></div>
+          <div class="li"><span class="ms">progress_activity</span><div class="txt"><span>Writing server.properties</span></div></div>
+          <div class="li"><span class="ms on-sv">radio_button_unchecked</span><div class="txt"><span class="on-sv">First start</span></div></div>
+        </div>
+        <div style="display: flex; gap: 8px"><button class="btn outlined m sl"><span class="ms">close</span>Cancel setup</button></div>
+      </div>
+    </sc-if>
+
+    <div class="acts" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap">
+      <button class="btn text sl" onClick="{{back}}">Back</button>
+      <button class="btn text sl">Save and finish later</button>
+      <button class="btn filled sl" onClick="{{next}}" aria-disabled="{{nextDisabled}}">{{nextLabel}}</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { step: 0, target: 'local', eula: false }; }
+  renderVals() {
+    const labels = [['Where', 'location_on'], ['Version', 'history'], ['Software', 'extension'], ['Agreement', 'gavel'], ['Set up', 'rocket_launch']];
+    const step = this.state.step;
+    const steps = labels.map((l, i) => ({ label: l[0], icon: i < step ? 'check' : l[1], cls: i === step ? 'on' : '', current: i === step ? 'step' : 'false', go: () => this.setState({ step: i }) }));
+    const tg = [
+      { id: 'local', name: 'This PC', icon: 'desktop_windows', help: 'Runs as a process Material Browser owns and stops gracefully.', check: 'Java [21] found', checkIcon: 'check_circle' },
+      { id: 'docker', name: 'Docker on this PC', icon: 'deployed_code', help: 'Runs in a labelled container with a mounted world folder.', check: 'Docker engine running', checkIcon: 'check_circle' },
+      { id: 'ssh', name: 'Process on an SSH host', icon: 'terminal', help: 'Uses your approved host key and SSH agent. No passwords are stored.', check: 'Pick a host', checkIcon: 'help' },
+      { id: 'sshdocker', name: 'Docker on an SSH host', icon: 'cloud', help: 'Checks the remote Docker engine before creating anything.', check: 'Pick a host', checkIcon: 'help' }
+    ];
+    const targets = tg.map((t) => ({ ...t, on: t.id === this.state.target ? 'true' : 'false', style: 'padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px; text-align: left; align-items: flex-start' + (t.id === this.state.target ? '; background: var(--secondary-container); border-color: var(--primary)' : ''), pick: () => this.setState({ target: t.id }) }));
+    const blocked = step === 3 && !this.state.eula;
+    return {
+      theme: this.props.dark ? 'dark' : '', steps, targets,
+      s0: step === 0, s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4,
+      eulaStr: this.state.eula ? 'true' : 'false',
+      toggleEula: () => this.setState({ eula: !this.state.eula }),
+      nextLabel: step === 3 ? 'Create server' : (step === 4 ? 'Open server' : 'Next'),
+      nextDisabled: blocked ? 'true' : 'false',
+      next: () => { if (!blocked && step < 4) this.setState({ step: step + 1 }); },
+      back: () => this.setState({ step: Math.max(0, step - 1) })
+    };
+  }
+}
+</script>
+</body>
+</html>

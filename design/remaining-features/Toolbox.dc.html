@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · File converter and changelog</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 1080px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+  <section class="pane" aria-labelledby="fc-h" style="flex: 999 1 560px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <h1 id="fc-h" class="headline-s" style="margin: 0">Convert files</h1>
+    <div class="card outlined" style="padding: 28px; border-radius: 28px; border-style: dashed; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center"><span class="ms s32">upload_file</span><p class="title-m" style="margin: 0">Drop files here</p><p class="body-s on-sv" style="margin: 0">Converted on this PC with bundled tools. Nothing is uploaded.</p><button class="btn tonal m"><span class="ms">folder_open</span>Choose files</button></div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap" role="group" aria-label="Category"><button class="chip on" aria-pressed="true"><span class="ms">check</span>Images</button><button class="chip" aria-pressed="false">Documents</button><button class="chip" aria-pressed="false">Data</button><button class="chip" aria-pressed="false">Audio and video</button></div>
+    <div class="seglist">
+      <div class="li"><span class="ms">image</span><div class="txt"><span>photo.png → WebP</span><span class="body-s on-sv">Done · reopened and checked · [SIZE]</span></div><button class="btn text xs">Show</button></div>
+      <div class="li"><span class="ms">table</span><div class="txt"><span>bookmarks.csv → JSON</span><div class="lp" role="progressbar" aria-label="Converting" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"><span style="width: 70%"></span></div></div><button class="ib sm" aria-label="Cancel conversion"><span class="ms">close</span></button></div>
+      <div class="li"><span class="ms on-sv">movie</span><div class="txt"><span class="on-sv">clip.mov → MP4</span><span class="body-s on-sv">Unavailable: no bundled video converter in this build</span></div></div>
+    </div>
+  </section>
+  <section class="pane low" aria-labelledby="cl-h" style="flex: 1 1 380px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="cl-h" class="title-l" style="margin: 0">What's new</h2>
+    <label class="search sm"><span class="ms">search</span><input aria-label="Search the changelog" placeholder="Search releases"><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label>
+    <div class="seglist">
+      <div class="li tall"><span class="ms fill c-primary">new_releases</span><div class="txt"><span class="ov">This version · [DATE]</span><span class="title-s">[VERSION]</span><span class="body-s on-sv">Minecraft server manager, local models, file converter</span></div></div>
+      <div class="li tall"><span class="ms">history</span><div class="txt"><span class="ov">[DATE]</span><span class="title-s">[VERSION]</span><span class="body-s on-sv">Material 3 Expressive desktop</span></div></div>
+    </div>
+    <p class="body-s on-sv" style="margin: 0">Read from the release notes bundled with this build, so it works offline.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.dark ? 'dark' : '' }; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Focus modes and appearance</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 1080px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+  <section class="pane" aria-labelledby="ad-h" style="flex: 1 1 420px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+    <h1 id="ad-h" class="headline-s" style="margin: 0">Focus modes</h1>
+    <p class="body-m on-sv" style="margin: 0">Built for ADHD-friendly work. Each mode changes the whole app right away and can be turned off any time.</p>
+    <div class="seglist">
+      <sc-for list="{{modes}}" as="m" hint-placeholder-count="4">
+        <div class="li plain" style="gap: 12px">
+          <span class="ms">{{m.icon}}</span>
+          <div class="txt"><span class="body-l">{{m.label}}</span><span class="body-s on-sv">{{m.help}}</span></div>
+          <button class="ib sm" aria-label="{{m.infoLabel}}"><span class="ms">info</span></button>
+          <button class="{{m.cls}}" role="switch" aria-checked="{{m.on}}" aria-label="{{m.label}}" onClick="{{m.flip}}"><span class="handle"></span></button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+  <section class="pane low" aria-labelledby="ap-h" style="flex: 1 1 520px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="ap-h" class="title-l" style="margin: 0">Appearance editor</h2>
+    <p class="body-m on-sv" style="margin: 0">Pick any element, then change its colour, shape and size. Right-click anything and choose Customize appearance.</p>
+    <div class="li plain" style="gap: 12px; flex-wrap: wrap"><span class="label-l" style="min-width: 120px">Element</span><label class="tf" style="flex: 1 1 220px"><span class="lab">Chosen element</span><input value="Primary buttons" aria-label="Chosen element"><span class="ms">arrow_drop_down</span></label></div>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center">
+      <div role="img" aria-label="Colour area, current colour {{hex}}" style="width: 220px; height: 160px; border-radius: 16px; background: {{area}}; position: relative"></div>
+      <div style="display: flex; flex-direction: column; gap: 10px; flex: 1 1 200px">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap" role="group" aria-label="Swatches">
+          <sc-for list="{{swatches}}" as="s" hint-placeholder-count="6">
+            <button class="ib sl" aria-label="{{s.label}}" aria-pressed="{{s.on}}" onClick="{{s.pick}}" style="{{s.style}}"></button>
+          </sc-for>
+        </div>
+        <label class="tf"><span class="lab">Hex</span><input value="{{hex}}" aria-label="Hex colour"></label>
+        <p class="body-s on-sv mono" style="margin: 0">{{translations}}</p>
+        <p class="body-s on-sv" style="margin: 0">Contrast with its text: {{contrast}}</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn filled m" style="background: {{hex}}"><span class="ms">visibility</span>Preview</button><button class="btn text m">Reset this element</button></div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { on: { calm: false, focus: true, steps: true, timer: false }, hex: '#006A6A' }; }
+  renderVals() {
+    const defs = [['calm', 'self_improvement', 'Calm screen', 'Hides badges, motion and non-urgent notifications'], ['focus', 'center_focus_strong', 'One thing at a time', 'Dims everything except the pane you are working in'], ['steps', 'checklist', 'Break it into steps', 'Long forms show one step at a time with progress'], ['timer', 'timer', 'Gentle timer', 'A visible work-and-break timer in the status bar']];
+    const modes = defs.map((d) => { const on = !!this.state.on[d[0]]; return { icon: d[1], label: d[2], help: d[3], infoLabel: 'About ' + d[2], on: on ? 'true' : 'false', cls: on ? 'sw on sl' : 'sw sl', flip: () => this.setState({ on: { ...this.state.on, [d[0]]: !on } }) }; });
+    const sw = ['#006A6A', '#4B607C', '#8B5000', '#B3261E', '#5B4B9C', '#1D6B2B'];
+    const swatches = sw.map((h) => ({ label: 'Colour ' + h, on: h === this.state.hex ? 'true' : 'false', style: 'width: 44px; height: 44px; border-radius: 22px; background: ' + h + (h === this.state.hex ? '; outline: 3px solid var(--on-surface); outline-offset: 2px' : ''), pick: () => this.setState({ hex: h }) }));
+    const hex = this.state.hex;
+    const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    const ratio = (1.05) / (L + 0.05);
+    return { theme: this.props.dark ? 'dark' : '', modes, swatches, hex,
+      area: 'linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ' + hex + ')',
+      translations: 'rgb(' + r + ', ' + g + ', ' + b + ')',
+      contrast: ratio.toFixed(1) + ':1 with white ' + (ratio >= 4.5 ? '(passes)' : '(too low, pick darker)') };
+  }
+}
+</script>
+</body>
+</html>
