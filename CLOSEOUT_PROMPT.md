@@ -1,11 +1,30 @@
-# Material Browser continuation
+# Implementation continuation
 
-The user requested preservation and task-owned cleanup and cleared the implementation goal. The entire GUI migration is incomplete. Preserve the current work on main as an explicitly incomplete checkpoint, without presenting that checkpoint as runtime acceptance.
+Objective: implement and verify all applicable required features across Material Browser's
+surfaces, including Minecraft server management, and repair defects found along the way.
+New release publication and installed update remain outside the selected delivery boundary.
 
-Use only the latest reviewed repository `design/` folder, currently `0ab6165fd3c5f59f23ce7e586f0979bd0f501fc8`. The original ZIP is obsolete. Renderer `445b80384b4fd358d49dfd2472fcabea237736eb` passed `build.bat -Component Desktop` and all 131 desktop tests with zero skipped. Documentation `555fa30f77056e0f81f2ff651ce6b7b624dbdd18` built 48 articles and passed six documentation tests. Both hosted runs passed.
+Current built server candidate: 91142ea. Exact Host and Desktop build entrypoints passed.
+A source-bound hidden-desktop session reached the real workspace through onboarding,
+verified the empty server state and retrieved the 921-entry Vanilla catalogue. Its remaining
+interaction, layout, language and teardown checks are in progress, not completed proof.
 
-Actual released 0.1.58, source `555fa30`, ran through the native direct CLI on an isolated hidden desktop and application-data directory. Five inspected genuine PNGs show setup, language Settings, Appearance, empty Profiles and locked Super Profiles. All are 1941 by 1213 pixels, native DPI 144. Native background clicks established navigation. Normal product-close exit left all seven recorded identities and the exact desktop absent at `2026-10-30T18:47:38.3244695Z`. No credentials or private wording were entered. The denied HTTP service startup was not retried.
+Verification so far: 103 Rust workspace tests passed. The latest focused server/configuration/
+bridge run passed 64 tests. The full integrated desktop suite is still running. Acceptance
+ledger: 111 identities, seven surface families, 26 child surfaces, 414 unfinished applicable
+rows, no blanket runtime completion claim.
 
-Incomplete: formal screenshot promotion, current screenshot embedding in README, new gallery image publication, complete layout/language/theme/scale matrix, unlocked workflows, restart persistence, installer and installed-update acceptance. Receipts lack the required browser-error/native-layout observation coverage. The raw captures remain privately preserved; no zero-error or complete-layout declaration was fabricated. The public gallery remains unchanged.
+The single active server authority is electron/services/game-servers. Incoming contributions
+2cd5263, abed939 and 51370c7 were preserved through merges. The incoming independent backend
+and duplicate GUI are inactive while useful capabilities are consolidated. Typed properties,
+Paper/Fabric resolution and explicit integrity consent are integrated. Restart, shutdown
+ordering, unsafe restore roots and staged rollback have focused regression coverage.
 
-Next: use an appropriate supported fresh producer with exact source/artifact/provenance and truthful browser observations; inspect current controls, complete the matrix, promote unchanged accepted originals, embed/push README images and publish the existing gallery. Retain unfinished worktrees/branches and every original/receipt. No force push, unrelated cleanup, real-user data changes, new publication destination or host power/login action is authorized by this handoff.
+Next: inspect and record final runtime evidence, fix any verified defects, finish the full
+local tests, and continue local model management in the isolated implementation branches.
+Bedrock, broad player/plugin workflows, remote-world transfer, all-target runtime proof,
+complete companion coverage and many required-feature rows remain unfinished.
+
+The Docker daemon is unavailable. No real server EULA acceptance, remote test-host adoption,
+model installation, release or installed update has been invented. Preserve active branches,
+worktrees and ignored private evidence. Do not delete active work or rewrite history.
