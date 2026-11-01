@@ -1,77 +1,71 @@
 # November 2026 defect verification
 
-The owner assigned incoming design and feature implementation to the design contributor.
-This pass owns integration, independent defect and layout checks, focused repairs and
-actionable issue handoffs. It does not certify every required feature.
+The design contributor owns incoming design and feature implementation. This pass owns
+integration, independent defect/layout checks, focused repairs and actionable issue handoffs.
+It does not certify every required feature.
 
-## Source and executed checks
+## Current executed source
 
-Source `b086d867b5a5441784c92395c8dacae14e319bca` passed all 334 desktop tests, with no
-failures or skips, and the exact root `build.bat -Component Desktop` entrypoint. Earlier
-Rust workspace evidence contains 103 passing tests and remains bound to its original run.
-The documentation build at `f0dcd29` assembled 60 complete articles. None of these results
-establish an installer, a new release, an installed update or whole-product acceptance.
+Runtime source `62563ae1626f966bd063ce0e38c53353de84ba22` passed the exact root
+`build.bat -Component Desktop` entrypoint and all **361 desktop tests**, with no failures
+or skips. Build-receipt SHA-256:
+`a4e4fe0b2b76a0384d5982943df36a52493ecaaf0f774698c93c4df24d8a8907`.
+Renderer SHA-256:
+`e396adfbbc514edd48dc16a3c2dee8a83b7bf513bed991cf2eeec7ec23fbc820`.
+Source and build inputs remained unchanged throughout verification.
 
-## Repairs with independent runtime evidence
+Three [current original screenshots](../../evidence/desktop/current-20261101/README.md)
+retain that source binding. Every promotion receipt passed, including rejection of a missing
+inventory identity and successful exact-byte restoration. The earlier six-image README
+presentation is archived beside them without changing historical image bytes or metadata.
 
-| Finding | Evidence | Limit |
+## Verified repairs and limits
+
+| Area | Executed evidence | Boundary |
 | --- | --- | --- |
-| Cached server runtime integrity, issue 7 | Official 1.21.4 bytes and identity were verified; corruption started zero new JVMs and made zero downloads; an explicit retry downloaded the verified runtime once and completed a report-only JVM | No server or EULA operation |
-| ZIP temporary path and placement, issue 8 | Exclusive temporary output, verification before placement, non-overwriting final destination, independent Python ZIP CRC/inventory/content checks including a Unicode filename | Report copies, not a generated world's completeness |
-| Cold appearance, persistence feedback, contrast and hue, issues 11 through 14 | Four inspected images from exact source `47e8ae1`, validated provenance and negative receipt checks | Four bounded runtime cases, not full accessibility/layout acceptance |
-| Owned report-process shutdown, issue 6 | Real pending catalogue request, identified direct-child JVM, normal Close and absence of the process tree/listener/hidden desktop | Report-only IPC integration; real generation cancellation remains open |
+| Preset discovery | Actual 1.21.4 inventory retains six presets: five selectable, debug explicitly unavailable; renderer ArrowRight visits all five with visible focus | No EULA or generation |
+| Version schema | Actual 26.3 retains seven unavailable presets and 1.19.3 retains six; both keep the renderer alive with zero interactive presets or EULA controls | Modern customization is unavailable, not implemented |
+| Generator layout | All 12 tuples passed: 1280x802/760x580, English/Cantonese/bilingual, light/dark; every layout receipt validated | Page emulation at scale 1, not physical display scaling |
+| Bundled fonts | 267 declarations, 303 references, 188 local font assets and six required identities passed source-byte checks; 13 CLI regressions passed | Static CSS checks do not prove all glyphs or arbitrary runtime styles |
+| Font startup | Cached diagnostics and fully observed English/bilingual renderer reloads had zero font-policy blocks, uncaught exceptions or resource failures | Every native process-start event was not observed |
+| Converter preservation | 24 focused checks cover duplicate/literal headers, special keys, exact-byte verification, replacement preservation and post-placement cleanup | Path checks and removal are not atomic against arbitrary external writers |
+| Converter directory recovery | Actual native dialogs rejected a replaced destination, reselected safely and produced exact two-row CSV conversion; localized recovery passed | Integrity-failure GUI outcome remains unobserved despite service/component evidence |
 
-The shutdown request occurred at `2026-11-01T09:49:25.332Z`; absence was observed at
-`2026-11-01T09:49:45.4847913Z`. The 20.152-second value is an observation upper bound,
-not exact exit latency. No forced termination was used. Source and built inputs remained
-unchanged throughout. Build-receipt SHA-256:
-`82b01aa12ee01d01fc627ae440173390375c0063a7e61ae69212bc1c42489608`.
+Nineteen images were inspected in the current run. Normal Close was followed by observed
+absence of the owned process tree at `2026-11-01T14:35:22.2004282Z` and absence of the named
+hidden desktop. Isolated profiles remain retained. No forced termination, EULA acceptance,
+world generation, installer, release or installed update occurred.
 
-See [the four public repair images](../../evidence/desktop/repair-20261101/README.md).
-Historical README presentation remains archived with its original source and provenance.
+## Earlier source-bound evidence
 
-## Later integrated repairs and evidence
+- Source `5c6662455bd968edfe4a4ebcad30b1e902d03b20`: 348 desktop tests and exact build;
+  rail/Personalize repairs passed 96 emulated tuples and 96 validated receipts. Twenty
+  representative images were inspected and two unchanged originals were published.
+- Source `47e8ae1`: four inspected Personalize cases cover cold appearance, persistence
+  feedback, rendered contrast and hue bounds. Images retain their original provenance.
+- Source `b086d867b5a5441784c92395c8dacae14e319bca`: 334 tests; corrupted official runtime
+  bytes started zero JVMs/downloads, explicit retry recovered verified bytes, and ZIP placement
+  passed independent CRC/inventory/content checks including Unicode.
+- A real pending report-only JVM closed normally. Absence was observed within 20.152 seconds,
+  an observation upper bound. Actual generation cancellation remains unproven.
+- Handbook deployment `af1020fb6a486b5fb73e97fc818a3c1e1f01816c`, source `65eb448`:
+  all 43 delivered files matched recorded bytes; six 320-pixel language/theme cases and a
+  desktop case passed with actual renderer Tab/Enter reset. Issue 15 was closed. A newer
+  publication must carry its own source and live verdict.
+- Earlier Rust workspace evidence contains 103 passing tests, bound to its original run.
 
-Source `5c6662455bd968edfe4a4ebcad30b1e902d03b20` passed 348 integrated desktop tests and
-the exact Desktop build. The navigation and Personalize corrections passed all 96 requested
-tuples: two supported viewports, three languages, two themes, collapsed/expanded rail and
-four explicitly emulated CDP scales. Every layout receipt validated. Twenty representative
-images were visually inspected, and [two unchanged originals](../../evidence/desktop/layout-20261101/README.md)
-passed publication validation and a missing-inventory-ID negative check. Issues 5 and 10
-are closed within that measured scope; physical display/input and full parity remain unverified.
+## Remaining acceptance
 
-Issue 17 is closed after real official report extraction from 1.19.3 confirmed the absent
-readiness command and explicit unavailable generation state with zero additional processes.
-The actual 1.21.4 report remains accepted. No EULA or real generation operation occurred.
+[Issue 6](https://github.com/Ding-Ding-Projects/material-browser/issues/6) retains actual
+generation cancellation/quit acceptance, [issue 9](https://github.com/Ding-Ding-Projects/material-browser/issues/9)
+retains custom-dimension generation, and [issue 18](https://github.com/Ding-Ding-Projects/material-browser/issues/18)
+retains actual generated-area completeness. Their source repairs and simulated negative
+checks do not prove a real generated world.
+[Issue 20](https://github.com/Ding-Ding-Projects/material-browser/issues/20) retains direct
+observation of the integrity-failure GUI result. The broader task remains in
+[issue 1](https://github.com/Ding-Ding-Projects/material-browser/issues/1).
 
-The handbook reset-label repair at `48b8fcb` passed the exact Docs build, six 320-pixel
-language/theme tuples, a desktop tuple and actual renderer keyboard focus/Enter reset checks.
-Profiles were retained, so the full audit schema's profile-removal requirement is not claimed
-passed. This is local built evidence; issue 15 awaits the deployed version.
-
-Converter source at `7d310e9` repairs five independently reproduced data-preservation defects,
-tracked by issues 19 through 22. Five causal cases were red before the repair; all 21 existing
-and new converter checks passed afterwards and in independent review. See
-[converter integrity](../desktop/converter-integrity.md) for the remaining non-atomic path
-cleanup limitation and possible retained temporary file after a cleanup fault.
-
-## Open design and behavioral handoffs
-
-- [Issue 6](https://github.com/Ding-Ding-Projects/material-browser/issues/6): real generation cancellation/quit acceptance after the implemented lifecycle repair.
-- [Issue 9](https://github.com/Ding-Ding-Projects/material-browser/issues/9): real custom-dimension generation after the valid-height probe repair.
-- [Issue 15](https://github.com/Ding-Ding-Projects/material-browser/issues/15): the live handbook's bilingual reset control extends beyond a 320-pixel viewport.
-- [Issue 16](https://github.com/Ding-Ding-Projects/material-browser/issues/16): the preset picker silently omits a discovered preset.
-- [Issue 18](https://github.com/Ding-Ding-Projects/material-browser/issues/18): completion accepts four corners for an area and accepts diagnostic marker echoes.
-
-Issues 17 and 18 have exact-source and official-reference evidence. Fake-process simulations
-prove missing completion evidence and false-positive parsing under those injected conditions.
-They do not prove that a real world contains missing chunks or that a particular older server
-emits the synthetic diagnostic. Repair and real runtime verdicts remain separate.
-
-## Remaining delivery boundaries
-
-No real server EULA has been accepted during this pass. Full server lifecycle across four
-targets, Bedrock, complete version/flavour/plugin/player workflows, real generation, broad
-keyboard/language/theme/scale acceptance, companion delivery and all 420 unfinished inventory
-rows remain incomplete. No new release or installed update was performed. Preserve active
-implementation branches and evidence; do not replace another contributor's in-progress work.
+The inventory still has **112 identities, 784 rows and 420 applicable unfinished rows**.
+Four-target lifecycle, Bedrock, complete version/flavour/plugin/player workflows, real
+generation, broad keyboard/accessibility/physical-scale acceptance and companion delivery
+remain incomplete. Preserve incoming contributor work and inactive alternatives.

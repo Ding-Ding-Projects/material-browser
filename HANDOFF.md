@@ -270,3 +270,23 @@ keyboard reset. Live deployment remains pending. No profile deletion was attempt
 full audit schema requiring profile removal is not claimed passed. Open runtime/design
 findings include6,9,15,16,18; converter19-22 await final integrated verification/closure.
 The structured EULA choice is pending. No acceptance or generation is inferred from silence.
+
+## Current verified repair batch, 2026-11-01
+
+This section supersedes the pending repair states above without rewriting their history.
+Runtime source62563ae passed the exact Desktop build and361 desktop tests. Generator
+inventory, explicit unavailable-version states and12 layout tuples passed; no EULA or
+generation was requested. Font delivery passed267 declarations/303 references/188 emitted
+files/six required identities and13 CLI regressions. Observed English/bilingual renderer
+reloads had zero font-policy blocks, exceptions or resource failures.
+
+Evidence7a2f04c is verified on origin/main. Three current originals replace the README
+presentation; the earlier six images and provenance remain unchanged in an archive.
+Converter24 focused checks and actual native directory rejection/reselection passed, while
+issue20 still requires direct observation of its integrity-failure GUI outcome. Issues6,9,18
+retain actual-generation acceptance. The broad inventory still has420 unfinished rows.
+
+Handbook deploymentaf1020f passed all43 file checks and seven live cases. Current-source
+publication is next. No release or installed update is authorized in this repair pass.
+Owned runtime processes/desktops closed normally; profiles and active/unmerged work remain
+intact. Read CLOSEOUT_PROMPT.md and the defect-verification article for exact source bindings.

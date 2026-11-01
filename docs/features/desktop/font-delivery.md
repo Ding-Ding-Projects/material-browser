@@ -33,3 +33,14 @@ not analysis of arbitrary runtime-generated styles.
 The check was first run against the affected output and rejected its inline font reference.
 Post-repair build, startup, layout and negative-byte results are recorded separately. No tests
 or lint were added to hosted build workflows by this repair.
+
+## Executed current result
+
+Source `62563ae1626f966bd063ce0e38c53353de84ba22` passed the exact Desktop build and the
+checker: 267 declarations, 303 references, 188 emitted font files and all six required
+identities matched their source bytes. All 13 checked-in positive/negative CLI cases passed.
+Cached diagnostics and fully observed English/bilingual renderer reloads recorded zero
+font-policy blocks, exceptions or resource failures; observed font responses were local
+files with successful status. This does not claim observation of every native process-start
+event, all glyphs, physical display scaling or complete visual parity. See the
+[verification report](../acceptance/2026-11-01-defect-verification.md) and its source-bound images.

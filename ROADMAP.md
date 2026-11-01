@@ -25,14 +25,19 @@ unfinished rows. The earlier 111-identity/414-row counts describe the original b
 - [x] Verify and publish four source-bound Personalize repair images with historical originals retained
 - [x] Verify normal application quit during a pending report-only JVM operation
 - [ ] Verify real generation cancellation, custom-dimension generation and area completeness
-- [ ] Repair and repeat the navigation rail, Personalize and handbook minimum-layout cases
+- [x] Repair and repeat the navigation rail, Personalize and handbook minimum-layout cases within the recorded emulated scope
 - [x] Verify rail and Personalize repairs through96 measured tuples and publish two unchanged representative images
 - [x] Verify actual1.19.3 command-report rejection and1.21.4 admission without generation
 - [x] Verify handbook reset-label layout and renderer keyboard behavior in the local build
-- [ ] Verify the repaired handbook on its actual deployed URL
+- [x] Verify the repaired handbook on its actual deployed URL at af1020f, including all 43 files and seven interaction/layout cases
 - [x] Repair five converter field/output preservation defects with21 focused tests and independent review
-- [ ] Complete final integrated checks and close the scoped converter findings
-- [ ] Preserve all discovered presets and verify version-specific readiness admission
+- [x] Pass 361 integrated desktop checks at62563ae and verify converter directory replacement/reselection through actual native dialogs
+- [ ] Observe the converter integrity-failure GUI outcome directly; issue20 remains open
+- [x] Preserve all discovered presets and verify actual1.21.4,1.19.3 and26.3 availability states without generation
+- [x] Verify generator minimum layout across12 language/theme/size cases at62563ae
+- [x] Verify emitted font bytes,13 CLI checks and observed renderer startup without font-policy blocks
+- [x] Publish three current source-bound originals in README and archive the earlier six-image presentation
+- [ ] Refresh the hosted handbook from final documentation source and verify its live bytes and interaction
 
 ## Current repository design migration
 
