@@ -15,6 +15,7 @@ const { registerElementLocksIpc } = require("./services/element-locks.cjs");
 const { registerGameServersIpc } = require("./game-servers-ipc.cjs");
 const { registerOllamaIpc } = require("./services/ollama.cjs");
 const { registerConverterIpc } = require("./services/converter.cjs");
+const { registerWorldgenIpc } = require("./worldgen-ipc.cjs");
 const publishSessionEvents = require("./session-events.cjs").createSessionEvents(event => {
   if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
     window.webContents.send("material:event", event);
@@ -161,6 +162,7 @@ registerElementLocksIpc({ ipcMain, app, shell, trusted });
 const gameServers = registerGameServersIpc({ ipcMain, app, trusted });
 registerOllamaIpc({ ipcMain, app, trusted, getWindow: () => window });
 registerConverterIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
+registerWorldgenIpc({ ipcMain, app, dialog, trusted, getWindow: () => window });
 ipcMain.handle("material:request", (event, method, params) => {
   if (
     !trusted(event) ||

@@ -64,7 +64,7 @@ export function Palette({
             run: () => requireUnlock(p.id, () => void perform(async () => { await request("profiles.stop", { id: p.id }); await refreshRuntime(); }, [p.id], ["Stopped", "已停止"])) });
         out.push({ id: `open:${p.id}`, kind: "profiles", icon: "person", title: p.name, support: where, run: () => navigate("profiles", { profile: p.id }) });
       }
-    for (const [id, label, icon] of [["profiles", "Profiles", "group"], ["super-profiles", "Super Profiles", "layers"], ["sync", "Synchronization", "sync"], ["servers", "Minecraft servers", "dns"], ["models", "Local models", "neurology"], ["tools", "Tools", "construction"], ["settings", "Settings", "settings"]] as const)
+    for (const [id, label, icon] of [["profiles", "Profiles", "group"], ["super-profiles", "Super Profiles", "layers"], ["sync", "Synchronization", "sync"], ["servers", "Minecraft servers", "dns"], ["models", "Local models", "neurology"], ["tools", "Tools", "construction"], ["personalize", "Focus and appearance", "format_paint"], ["settings", "Settings", "settings"]] as const)
       out.push({ id: `page:${id}`, kind: "help", icon, title: t(label), support: t("Go to"), tab: { id: `page:${id}`, label, page: id } });
     for (const [id, label] of categories as [string, string][])
       out.push({ id: `category:${id}`, kind: "settings", icon: "tune", title: t(label), support: t("Settings"), tab: { id: `category:${id}`, label: `Settings: ${label}`, page: "settings", section: id } });

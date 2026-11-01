@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Browser · Focus and appearance details</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./theme.css">
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="m3 {{theme}}" style="min-height: 1080px; padding: 24px; box-sizing: border-box; background: var(--surface-container); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-content: start">
+  <section class="pane" aria-labelledby="tm-h" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+    <h2 id="tm-h" class="title-m" style="margin: 0">Gentle timer</h2>
+    <div class="li plain" style="gap: 12px"><span class="ms">timer</span><span class="txt"><span class="body-l">Gentle timer</span><span class="body-s on-sv">A visible work-and-break timer in the status bar</span></span><button class="ib sm sl" aria-label="About Gentle timer"><span class="ms">info</span></button><button class="sw on sl" role="switch" aria-checked="true" aria-label="Gentle timer"><span class="handle"></span></button></div>
+    <div class="li plain" style="gap: 8px; flex-wrap: wrap; padding-left: 48px"><span class="txt body-m" style="flex: 1 1 120px">Work for</span><button class="ib outlined sm sl" aria-label="Shorter work time"><span class="ms">remove</span></button><label class="tf" style="width: 110px"><span class="lab">Minutes</span><input inputmode="numeric" value="25" aria-label="Work minutes"></label><button class="ib outlined sm sl" aria-label="Longer work time"><span class="ms">add</span></button><button class="ib sm sl" aria-label="About work time"><span class="ms">info</span></button></div>
+    <div class="li plain" style="gap: 8px; flex-wrap: wrap; padding-left: 48px"><span class="txt body-m" style="flex: 1 1 120px">Break for</span><button class="ib outlined sm sl" aria-label="Shorter break"><span class="ms">remove</span></button><label class="tf" style="width: 110px"><span class="lab">Minutes</span><input inputmode="numeric" value="5" aria-label="Break minutes"></label><button class="ib outlined sm sl" aria-label="Longer break"><span class="ms">add</span></button><button class="ib sm sl" aria-label="About break time"><span class="ms">info</span></button></div>
+    <h3 class="title-s" style="margin: 8px 0 0">In the status bar</h3>
+    <footer class="sbar" style="border-radius: 12px"><span class="stat"><span class="ms fill c-primary">verified_user</span>Native host connected</span><span style="flex: 1"></span><span class="stat"><span class="ms">timer</span>Work · 18:42</span><button class="ib sm sl" aria-label="Pause timer"><span class="ms">pause</span></button><button class="ib sm sl" aria-label="Reset timer"><span class="ms">restart_alt</span></button></footer>
+    <p class="body-s on-sv" style="margin: 0">Changes apply right away and are saved on this computer only.</p>
+  </section>
+
+  <section class="pane low" aria-labelledby="ed-h" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+    <h2 id="ed-h" class="title-m" style="margin: 0">Appearance editor details</h2>
+    <div class="menu" role="menu" aria-label="Element menu" style="position: static; width: 240px"><button class="mi" role="menuitem"><span class="ms">palette</span>Customize appearance<span class="kbd" style="margin-left: auto">Shift+F10</span></button></div>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center"><span class="label-l">Colour for</span><div class="cbg" aria-label="Colour for"><button class="on" aria-pressed="true">Background</button><button aria-pressed="false">Text</button></div><button class="ib sm sl" aria-label="About colour for"><span class="ms">info</span></button></div>
+    <div style="display: flex; flex-direction: column; gap: 8px; width: 260px">
+      <div role="img" aria-label="Colour area" style="width: 260px; height: 160px; border-radius: 16px; background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, #006A6A)"></div>
+      <div role="slider" tabindex="0" aria-label="Hue" aria-valuemin="0" aria-valuemax="360" aria-valuenow="180" style="height: 16px; border-radius: 8px; background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); position: relative"><span style="position: absolute; left: 50%; top: -4px; width: 4px; height: 24px; border-radius: 2px; background: var(--on-surface)"></span></div>
+    </div>
+    <p class="body-s on-sv" style="margin: 0">Contrast with its text (#FFFFFF): 5.4:1 (passes). When it fails the line says pick darker or pick lighter, whichever fixes it.</p>
+    <div class="li plain" style="gap: 8px; flex-wrap: wrap"><span class="txt body-m" style="flex: 1 1 120px">Corner radius</span><button class="ib outlined sm sl" aria-label="Less rounded"><span class="ms">remove</span></button><label class="tf" style="width: 110px"><span class="lab">px</span><input inputmode="numeric" value="20" aria-label="Corner radius"></label><button class="ib outlined sm sl" aria-label="More rounded"><span class="ms">add</span></button><button class="ib sm sl" aria-label="About corner radius"><span class="ms">info</span></button></div>
+    <div class="li plain" style="gap: 8px; flex-wrap: wrap"><span class="txt body-m" style="flex: 1 1 120px">Size</span><div class="slider" role="slider" tabindex="0" aria-label="Size" aria-valuemin="80" aria-valuemax="150" aria-valuenow="100" style="flex: 1 1 200px"><span class="act" style="width: 29%"></span><span class="handle"></span><span class="ina"></span></div><span class="body-m">100%</span><button class="ib sm sl" aria-label="About size"><span class="ms">info</span></button></div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn text m sl">Reset this element</button><button class="btn outlined m sl"><span class="ms">restart_alt</span>Reset all elements</button></div>
+    <section class="dialog" role="alertdialog" aria-labelledby="ra-h" style="margin: 0; max-width: none"><span class="ms s32 hero">restart_alt</span><h3 id="ra-h" class="headline-s" style="text-align: center; margin: 0">Reset every element?</h3><p class="body-m on-sv" style="margin: 0">All custom colours, corners and sizes go back to the theme. Focus modes are not changed.</p><div class="acts"><button class="btn text sl">Cancel</button><button class="btn filled sl">Reset all</button></div></section>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.dark ? 'dark' : '' }; }
+}
+</script>
+</body>
+</html>

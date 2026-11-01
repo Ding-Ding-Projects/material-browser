@@ -66,7 +66,11 @@ no end-to-end completion, release, deployment or two-computer acceptance is clai
 - [ ] Bedrock Edition servers (no machine-readable official catalogue)
 - [ ] Real start and stop acceptance after user EULA consent, on Windows and on each target
 - [ ] Running-application screenshots of every server state
-- [ ] Local Ollama suite, focus modes, appearance editor, colour picker, file converter and changelog viewer
+- [x] Local Ollama suite, focus modes, appearance editor, colour picker, file converter and changelog viewer in source, from their designs
+- [x] World generator: per-version pickers, 100 x 100 chunk default with a drawing canvas, folder or ZIP output
+- [ ] Real world generation run after user EULA acceptance, and running-application captures of every new surface
+- [ ] Windows runtime checks for the Ollama installer, GPU detection, converter image paths and hard-link placement
+- [ ] Status Hub, Discord bridge, panic webhooks and Tidbyt status surfaces
 
 ## Super Profiles
 - [x] Verify encrypted template CRUD, immutable revision history and chunked archive storage with 19 focused core tests

@@ -1,0 +1,83 @@
+/* Focus modes. Attributes are set on <html> by FocusModesProvider (focus-modes.tsx). */
+
+/* Calm screen: no badges, no non-urgent notifications, no motion.
+   Error toasts use role="alert" and stay visible. Hidden toasts remain in the notification list. */
+:root[data-focus-calm="true"] .m3 .badge { display: none !important; }
+/* Notification toasts start with an icon; the action snackbar (direct feedback to a click) does not. */
+:root[data-focus-calm="true"] .m3-toasts > .snack[role="status"]:has(> .ms:first-child),
+:root[data-focus-calm="true"] .m3-toasts > .card[role="status"] { display: none !important; }
+:root[data-focus-calm="true"] *,
+:root[data-focus-calm="true"] *::before,
+:root[data-focus-calm="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* One thing at a time: dim every pane except the one in use. */
+:root[data-focus-one-thing="true"][data-focus-has-current="true"] .m3 .pane:not([data-focus-current="true"]) {
+  opacity: .38;
+  filter: saturate(.4);
+  transition: opacity 200ms cubic-bezier(.2, 0, 0, 1);
+}
+:root[data-focus-one-thing="true"][data-focus-has-current="true"] .m3 .pane:not([data-focus-current="true"]):hover,
+:root[data-focus-one-thing="true"][data-focus-has-current="true"] .m3 .pane:not([data-focus-current="true"]):focus-within {
+  opacity: .72;
+}
+
+/* Gentle timer in the status bar. The bar is 32px tall, so the small icon buttons fit. */
+.m3 .sbar .focus-timer { gap: 4px; }
+.m3 .sbar .focus-timer .ib.sm { width: 28px; height: 28px; }
+.m3 .sbar .focus-timer .ib.sm .ms { font-size: 18px; }
+.m3 .sbar .focus-timer[data-phase="break"] { color: var(--tertiary); }
+
+/* Personalize page: duration steppers and the colour picker. */
+.m3 .pz-stepper { display: flex; align-items: center; gap: 8px; }
+.m3 .pz-stepper .tf { width: 96px; }
+.m3 .pz-stepper .tf input { text-align: center; }
+.m3 .pz-area {
+  width: 220px;
+  height: 160px;
+  border-radius: 16px;
+  position: relative;
+  flex-shrink: 0;
+  cursor: crosshair;
+  touch-action: none;
+  outline-offset: 3px;
+}
+.m3 .pz-area-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 999px;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), var(--e1, 0 1px 2px rgba(0, 0, 0, .3));
+  pointer-events: none;
+}
+.m3 .pz-swatch { width: 44px; height: 44px; border-radius: 22px; }
+.m3 .pz-swatch[aria-pressed="true"] { outline: 3px solid var(--on-surface); outline-offset: 2px; }
+.m3 .pz-hue {
+  position: relative;
+  height: 16px;
+  border-radius: 999px;
+  margin: 8px 0;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  cursor: pointer;
+  touch-action: none;
+  outline-offset: 3px;
+}
+.m3 .pz-hue > span {
+  position: absolute;
+  top: -8px;
+  width: 4px;
+  height: 32px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--on-surface);
+  box-shadow: 0 0 0 2px var(--surface);
+  pointer-events: none;
+}
+
+/* Preview highlight for the elements an override applies to. */
+.m3 [data-appearance-preview="true"] { outline: 3px dashed var(--primary) !important; outline-offset: 2px; }

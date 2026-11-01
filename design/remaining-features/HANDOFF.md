@@ -45,6 +45,9 @@ as the main canvas. Each artboard has a `dark` toggle.
   Date not recorded and the no-results state. Image output is PNG or JPEG only.
 - `Personalize.dc.html`: ADHD-friendly focus modes and the per-element appearance editor with a
   colour picker, colour translations and a live contrast check.
+- `PersonalizeStates.dc.html`: Gentle timer durations and its status-bar timer, the Customize
+  appearance menu item, background or text colour choice, hue bar, contrast line, corner radius
+  and size controls, info icons, and Reset all elements with its confirmation.
 
 ## Implementation notes
 

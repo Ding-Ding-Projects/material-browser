@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld(
       ipcRenderer.invoke("material:settings-service", operation, params),
     elementLocks: (operation, params = {}) =>
       ipcRenderer.invoke("material:element-locks", operation, params),
+    worldgen: (operation, params = {}) =>
+      ipcRenderer.invoke("material:worldgen", operation, params),
     gameServers: (action, params = {}) =>
       ipcRenderer.invoke("material:game-servers", action, params),
     ollama: (operation, params = {}) =>
