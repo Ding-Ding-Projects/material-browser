@@ -2,7 +2,7 @@
 
 ## Version admission
 
-World presets alone do not establish that a version can execute the generator's readiness probes. The selected server distribution's actual command report must expose `execute if loaded` with a `minecraft:block_pos` argument redirected to `execute`, the root `execute run` redirect, and an executable `say` message argument. The catalogue retains the selected version and extracted picker data but sets `supported: false` with an explicit readiness-route explanation when that schema is missing or incompatible. Validation rejects generation before spawning a Java server. No guessed version-number threshold substitutes for those reports.
+World presets alone do not establish that a version can execute the generator's readiness probes. The selected server distribution's actual command report must expose `execute if loaded` with a `minecraft:block_pos` argument redirected to `execute`, the root `execute run` form (the vanilla exporter omits an empty root redirect), and an executable `say` message argument. The catalogue retains the selected version and extracted picker data but sets `supported: false` with an explicit readiness-route explanation when that schema is missing or incompatible. Validation rejects generation before spawning a Java server. No guessed version-number threshold substitutes for those reports.
 
 The older preset-bearing route remains unavailable until a compatible implementation is independently verified. Discovery is retained. This change does not add older-version support or remove the user's EULA decision.
 
@@ -18,7 +18,7 @@ Official Java 1.21.4 source assets support the expected console framing: the bun
 
 ## Verification and remaining limits
 
-The new semantic regressions invoke the actual `generate` function with injected process events and filesystem fixtures. Before the repair, the initial ten-case regression run produced nine failures, including admission of an old preset-bearing report, false completion with an interior chunk pending, and acceptance of diagnostic/chat/partial marker text. After the repair, all eleven readiness cases passed. They independently cover:
+The new semantic regressions invoke the actual `generate` function with injected process events and filesystem fixtures. Before the repair, the initial ten-case regression run produced nine failures, including admission of an old preset-bearing report, false completion with an interior chunk pending, and acceptance of diagnostic/chat/partial marker text. After the repair, all twelve readiness cases passed. They independently cover:
 
 - Preset-bearing reports without the required command schema, with no server spawn.
 - Schema-derived admission independent of a guessed version threshold.
@@ -27,6 +27,9 @@ The new semantic regressions invoke the actual `generate` function with injected
 - All 256 requested chunk positions and bounded individual command lengths.
 - Stale previous-batch and previous-run replies, with distinct random run/batch identities.
 
-`node --test apps/desktop/electron/minecraft/worldgen*.test.cjs` passed **41 tests, zero failed**, including existing cancellation at startup/batch/save/exit, graceful-stop ownership, retry, admitted-byte snapshots, cache integrity and output verification tests. The existing synthetic success fixtures were updated to supply the admitted command schema and the exact response envelope.
+`node --test apps/desktop/electron/minecraft/worldgen*.test.cjs` passed **42 tests, zero failed**, including existing cancellation at startup/batch/save/exit, graceful-stop ownership, retry, admitted-byte snapshots, cache integrity and output verification tests. The existing synthetic success fixtures were updated to supply the admitted command schema and the exact response envelope.
 
 These are deterministic simulation and source results. No real server was started, no actual server EULA was accepted, and no generated world was reopened. Real selected-version execution, generated-area completeness, output reopening and current GUI interaction remain separate unverified acceptance work. This repair does not establish whole-product completion.
+
+
+Independent review against retained official 1.21.4 reports found that `execute.children.run` is exactly `{ "type": "literal" }`: the exporter omits its empty root redirect. The initial repair incorrectly required an explicit empty array and would have marked this verified version unavailable. Admission now accepts the omitted root form or an explicit empty redirect, while rejecting non-root or malformed redirects. The fixture and dedicated regression use the actual omitted-field shape; independent real-report revalidation is recorded separately from synthetic tests.
