@@ -144,7 +144,11 @@ function zipFolder(folder, destination, rootName, { now = new Date() } = {}) {
     fs.rmSync(temporary, { force: true });
     throw error;
   }
-  try { fs.linkSync(temporary, destination); }
+  try {
+    // Verify owned bytes before making the final destination visible.
+    verifyZip(temporary, files.length);
+    fs.linkSync(temporary, destination);
+  }
   finally { fs.rmSync(temporary, { force: true }); }
   return { files: files.length, bytes: fs.statSync(destination).size };
 }
