@@ -1,0 +1,16 @@
+{
+  "format": 1,
+  "source": "initial",
+  "releases": [
+    {
+      "version": "0.1.1",
+      "date": null,
+      "summary": "Material 3 Expressive desktop",
+      "notes": [
+        "First bundled changelog entry. Earlier releases have no recorded notes in this repository, so none are listed.",
+        "Redesigned desktop interface built on Material 3 Expressive components.",
+        "Local file converter for images and data files, and this offline changelog."
+      ]
+    }
+  ]
+}
