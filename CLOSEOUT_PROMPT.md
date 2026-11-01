@@ -65,3 +65,29 @@ removal. No automatic cleanup candidate is ready while this work remains active.
 Status reporting uses SSH to the verified host-local client. It rejected session updates
 with HTTP400 unsupported private-emission metadata. No accepted Hub update is claimed;
 keep the existing protocol issue and continue independent product work.
+
+## Latest preserved integration and next verification
+
+Main94a9303 merges source-bound layout evidence4ada16d and contains converter repair7d310e9.
+Both source branches were preserved with exact remote proof. All348 desktop tests passed
+at5c66624; its exact Desktop build passed96 requested layout tuples and96 standard receipts.
+Two original760x580 bilingual images were validated, including a missing-ID negative case,
+and integrated into README without changing their5c66624 source identity. Issues5/10 are closed.
+
+Issue17 is closed after actual official1.19.3 report extraction showed the unavailable
+readiness command and validation started zero additional processes. The positive1.21.4
+report remains admitted. Real generation still awaits the pending explicit EULA choice.
+
+Converter19-22 are repaired in source and passed21 focused tests plus independent review.
+Five causal cases were red first. Final integrated checks and closure remain next. Cleanup
+identity checks are not atomic against arbitrary external writers; failed temporary removal
+may retain that temporary file but does not duplicate final output.
+
+The handbook48b8fcb local build passed six320px language/theme cases, desktop layout and
+renderer Tab/Enter reset. Its live deployment is still pending. Profiles were retained, so
+the full audit schema requiring profile removal is not claimed passed.
+
+Next: complete integrated Desktop/Docs checks, publish the reviewed documentation and
+verify actual live assets/interaction, update findings19-22 and15, and preserve this handoff.
+The generator ledger row now records partial source progress, with784 rows and420 unfinished;
+all17 inventory tests pass. No full-product, physical-scale, release or installed-update claim.

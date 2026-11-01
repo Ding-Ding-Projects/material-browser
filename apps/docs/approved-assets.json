@@ -153,5 +153,35 @@
     "path": "docs/evidence/desktop/worldlens/minimum-bilingual-dark.png",
     "sha256": "00437d253d62757b296212aed76f090673a0ef7b5dc4c463cd9f7993dc78e619",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/layout-20261101/minimum-bilingual-focus.png",
+    "sha256": "de47ea847d33a3331a0dd73fcedd705155519ca1e9ab094f133e0b3b56fcd0e2",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/layout-20261101/minimum-bilingual-appearance.png",
+    "sha256": "62a864dbb6d6c1756cf23fff831367da2149ca1618920c7bd799add10ccf20ce",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/repair-20261101/issue-11.png",
+    "sha256": "c621130b35f14b69ba78634b10485db711c26b04dedb6e56eb32ee744838ac29",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/repair-20261101/issue-12.png",
+    "sha256": "13cd574c8ee76196ff05980f6cbebdfa763f98c70cb52ef7592505962219d076",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/repair-20261101/issue-13.png",
+    "sha256": "b4df22867b820609572e112f286287b6c40be20e21667912da69009fa97621ac",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/repair-20261101/issue-14.png",
+    "sha256": "6c9e85c556b373356e7945c3c9ffb224fc30a83a1c478e6e6240b8fc8d271782",
+    "reviewedForPublication": true
   }
 ]

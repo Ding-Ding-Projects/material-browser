@@ -370,7 +370,7 @@
       "id": "server-world-generator",
       "parent": "desktop-workspace",
       "purpose": "Required world-generator workflow within the server workspace",
-      "source": "apps/desktop/electron/services/game-servers/index.cjs",
+      "source": "apps/desktop/src/app/servers/WorldGenerator.tsx",
       "reviewedFeatures": [
         "minecraft-server-manager",
         "minecraft-world-generator",
@@ -379,10 +379,10 @@
         "exports",
         "progress-recovery"
       ],
-      "consumer": "No active generator state consumer found in the reviewed desktop runtime at 37ff81f; the referenced service file identifies the existing server boundary only.",
-      "review": "WorldGenerator.dc.html at product commit 37ff81f is a design reference, not implementation. Extraction, pack writing, real generation, bounded pre-generation, Folder output, ZIP output and GUI acceptance remain independently unfinished.",
+      "consumer": "materialBrowser.worldgen preload IPC, version catalogue, option state, EULA choice and generation event state",
+      "review": "The prior 37ff81f design-only discovery is historical. Source 5c666245 has an active renderer and owned native generator; report-only official-version admission, native lifecycle and output safety have focused evidence. Real EULA-driven generation, full control behavior, reopening and comprehensive GUI acceptance remain unverified.",
       "runtimeState": "unverified",
-      "reviewCommit": "37ff81f",
+      "reviewCommit": "5c6662455bd968edfe4a4ebcad30b1e902d03b20",
       "designReference": {
         "path": "design/remaining-features/WorldGenerator.dc.html",
         "sourceCommit": "37ff81f",

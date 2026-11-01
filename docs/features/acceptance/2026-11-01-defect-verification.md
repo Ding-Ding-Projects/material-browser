@@ -30,15 +30,37 @@ unchanged throughout. Build-receipt SHA-256:
 See [the four public repair images](../../evidence/desktop/repair-20261101/README.md).
 Historical README presentation remains archived with its original source and provenance.
 
+## Later integrated repairs and evidence
+
+Source `5c6662455bd968edfe4a4ebcad30b1e902d03b20` passed 348 integrated desktop tests and
+the exact Desktop build. The navigation and Personalize corrections passed all 96 requested
+tuples: two supported viewports, three languages, two themes, collapsed/expanded rail and
+four explicitly emulated CDP scales. Every layout receipt validated. Twenty representative
+images were visually inspected, and [two unchanged originals](../../evidence/desktop/layout-20261101/README.md)
+passed publication validation and a missing-inventory-ID negative check. Issues 5 and 10
+are closed within that measured scope; physical display/input and full parity remain unverified.
+
+Issue 17 is closed after real official report extraction from 1.19.3 confirmed the absent
+readiness command and explicit unavailable generation state with zero additional processes.
+The actual 1.21.4 report remains accepted. No EULA or real generation operation occurred.
+
+The handbook reset-label repair at `48b8fcb` passed the exact Docs build, six 320-pixel
+language/theme tuples, a desktop tuple and actual renderer keyboard focus/Enter reset checks.
+Profiles were retained, so the full audit schema's profile-removal requirement is not claimed
+passed. This is local built evidence; issue 15 awaits the deployed version.
+
+Converter source at `7d310e9` repairs five independently reproduced data-preservation defects,
+tracked by issues 19 through 22. Five causal cases were red before the repair; all 21 existing
+and new converter checks passed afterwards and in independent review. See
+[converter integrity](../desktop/converter-integrity.md) for the remaining non-atomic path
+cleanup limitation and possible retained temporary file after a cleanup fault.
+
 ## Open design and behavioral handoffs
 
-- [Issue 5](https://github.com/Ding-Ding-Projects/material-browser/issues/5): navigation rail bounds in bilingual mode.
 - [Issue 6](https://github.com/Ding-Ding-Projects/material-browser/issues/6): real generation cancellation/quit acceptance after the implemented lifecycle repair.
 - [Issue 9](https://github.com/Ding-Ding-Projects/material-browser/issues/9): real custom-dimension generation after the valid-height probe repair.
-- [Issue 10](https://github.com/Ding-Ding-Projects/material-browser/issues/10): Personalize minimum-width layout.
 - [Issue 15](https://github.com/Ding-Ding-Projects/material-browser/issues/15): the live handbook's bilingual reset control extends beyond a 320-pixel viewport.
 - [Issue 16](https://github.com/Ding-Ding-Projects/material-browser/issues/16): the preset picker silently omits a discovered preset.
-- [Issue 17](https://github.com/Ding-Ding-Projects/material-browser/issues/17): readiness capability is not admitted from the selected version's actual command report.
 - [Issue 18](https://github.com/Ding-Ding-Projects/material-browser/issues/18): completion accepts four corners for an area and accepts diagnostic marker echoes.
 
 Issues 17 and 18 have exact-source and official-reference evidence. Fake-process simulations

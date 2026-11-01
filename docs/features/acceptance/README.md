@@ -1,6 +1,6 @@
 # Required-feature acceptance
 
-The current catalogue contains **112 identities across seven surface families: 784 rows, with 420 applicable rows unfinished**. The added world-generator identity is missing on every applicable parent-server surface; no completion state was upgraded.
+The current catalogue contains **112 identities across seven surface families: 784 rows, with 420 applicable rows unfinished**. The generator's desktop workspace row now records partial source implementation and focused checks; its whole-workflow acceptance remains unfinished. The other applicable surface rows remain missing.
 
 The inventory is a historical discovery baseline, not a claim that later implementation is
 absent. The [November defect-verification record](2026-11-01-defect-verification.md) records
@@ -73,3 +73,8 @@ Acceptance must separately establish per-selected-version extraction, typed regi
 The original **111-identity / 777-row / 414-unfinished** baseline, 15-test ledger receipt and 171/182-test desktop receipts are historical results for their stated inputs. They are not silently relabelled as verification of the new 112-identity catalogue or generator implementation. Current catalogue regression results are reported separately by this update.
 
 The current 112-identity inventory validation passed with **784 rows, 420 unfinished and zero validation errors**. The updated local inventory suite passed **17 tests, zero failed**. These are structural and omission checks only, and do not upgrade generator completion or rerun the historical desktop acceptance suites.
+
+The later desktop generator discovery at `5c666245` supersedes the old absence statement
+for that child only. The child record names the real renderer and preload consumer while
+keeping runtime state unverified. The ledger test accepts that documented partial state
+without allowing runtime, persistence, localization or screenshot completion to be inferred.

@@ -51,9 +51,15 @@ test('current catalogue has 112 identities and world generation remains unfinish
   assert.equal(generator.length, data.surfaces.length);
   assert.deepEqual(generator.map(x => [x.surface, x.applicability, x.reason]), manager.map(x => [x.surface, x.applicability, x.reason]));
   for (const row of generator.filter(x => x.applicability === 'applicable')) {
-    assert.equal(row.implementationState, 'missing');
+    const desktop = row.surface === 'desktop-workspace';
+    assert.equal(row.implementationState, desktop ? 'partial' : 'missing');
     assert.ok(row.missing.length > 0);
-    for (const field of ['source','documentation','localization','persistence','tests','runtimeEvidence','screenshots']) assert.deepEqual(row[field], []);
+    if (desktop) {
+      assert.ok(row.source.includes('apps/desktop/src/app/servers/WorldGenerator.tsx'));
+      assert.ok(row.tests.includes('apps/desktop/electron/minecraft/worldgen-readiness.test.cjs'));
+      assert.ok(row.documentation.length > 0);
+    } else for (const field of ['source','documentation','tests']) assert.deepEqual(row[field], []);
+    for (const field of ['localization','persistence','runtimeEvidence','screenshots']) assert.deepEqual(row[field], []);
   }
 });
 test('removing the new world-generator identity or child scope fails', () => {

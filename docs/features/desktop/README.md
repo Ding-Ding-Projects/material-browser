@@ -7,6 +7,7 @@
 - [Element locks, unlock ladder and Support Tickets](element-locks.md)
 - [Local Ollama suite](ollama-suite.md)
 - [Focus modes and the appearance editor](focus-modes-and-appearance.md)
+- [Converter data preservation and output integrity](converter-integrity.md)
 - [Historical WorldLens visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
@@ -32,7 +33,7 @@ The renderer follows the eight artboards of `design/IMPLEMENTATION_HANDOFF.md` u
 
 Implemented source paths: isolated preload RPC, native folder picker, real vault creation/unlock, resumable setup progress, real profile list/create/duplicate/launch/stop/snapshot requests, immutable revision listing/restore requests, synchronization configuration/push/pull/conflict requests, saved automation preferences, local language/theme/density/accent, command navigation, strict local personal-wording upload/drop/clear and celebration. Host capability errors remain visible.
 
-Incomplete: the regex workbench currently provides raw/guided constructs, actual worker matching/captures/replacement, timing and timeout but lacks saved snippets/import-export, structured syntax tree, test-case suites and full independent surface coverage. Settings localization has English fallback for explanatory paragraphs. Full universal features such as scheduled settings, narration, shared school mode, per-element appearance/locks, advanced tab docking/groups, authenticator, support recovery, exports/history, bulk operations, converter, local model manager and game-server manager are not implemented here. These are acceptance gaps, not nonapplicability claims. No decorative switches claim these capabilities.
+Incomplete: the regex workbench currently provides raw/guided constructs, actual worker matching/captures/replacement, timing and timeout but lacks saved snippets/import-export, structured syntax tree, test-case suites and full independent surface coverage. Settings localization has English fallback for explanatory paragraphs. Complete acceptance for scheduled settings, narration, shared school mode, per-element appearance/locks, advanced tab docking/groups, authenticator, support recovery, exports/history, bulk operations, conversion, local models and server management remains unfinished. Several of these now have partial implementations and focused evidence in their linked articles; source presence does not establish the complete required workflow. These are acceptance gaps, not nonapplicability claims.
 
 Built runtime, accessibility, narrow/high-scale matrix, all-language copy, installer/update, restart persistence and backend integration acceptance remain unverified until actual evidence is recorded. The package source does not prove any of these.
 

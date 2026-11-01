@@ -1,5 +1,8 @@
 # Server management native service
 
+- [World-generation readiness and version boundaries](world-generation-readiness.md)
+- [World-generation cache validation and explicit recovery](worldgen-cache-recovery.md)
+
 The privileged desktop service owns managed Java vanilla installations under application data. It retrieves the full official Mojang catalogue, verifies selected metadata and server SHA-1 and size, and distinguishes historical client-only entries from dedicated server distributions. Discovery does not establish runtime support for every version. Installation requires explicit EULA consent.
 
 ## Request interface

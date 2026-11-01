@@ -251,3 +251,22 @@ Issues5, 9, 10 and15 through18 remain open. Focused source repairs for5/10 and17
 isolated task branches, not yet integrated or runtime-verified at this handoff. See
 docs/features/acceptance/2026-11-01-defect-verification.md for exact evidence and limits.
 No real EULA acceptance, server generation, new release or installed update occurred.
+
+## Latest integrated hunt checkpoint
+
+Main94a9303 contains converter repair7d310e9 and merged layout evidence4ada16d. The converter
+repair passed21 focused tests and independent review after five causal cases were first red.
+Its path identity/content cleanup is not atomic against arbitrary external writers; a temporary
+unlink fault may retain its temporary file but no longer repeats successful final placement.
+
+The full desktop suite passed348 tests at5c66624. Its exact Desktop build passed96 layout
+tuples and96 receipt validations, with20 representative originals visually inspected. Two
+unaltered images were promoted with valid receipts and a red/green missing-ID check.
+Issues5 and10 are closed. Issue17 is closed after actual official1.19.3 report extraction
+proved unavailable readiness without losing version discovery;1.21.4 remains admitted.
+
+The handbook48b8fcb local build passed six320px language/theme cases, desktop layout and
+keyboard reset. Live deployment remains pending. No profile deletion was attempted; the
+full audit schema requiring profile removal is not claimed passed. Open runtime/design
+findings include6,9,15,16,18; converter19-22 await final integrated verification/closure.
+The structured EULA choice is pending. No acceptance or generation is inferred from silence.
