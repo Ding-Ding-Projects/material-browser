@@ -183,5 +183,20 @@
     "path": "docs/evidence/desktop/repair-20261101/issue-14.png",
     "sha256": "6c9e85c556b373356e7945c3c9ffb224fc30a83a1c478e6e6240b8fc8d271782",
     "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/current-20261101/world-1.21.4-inventory.png",
+    "sha256": "ad909a04e9d9e592510a0e636b7bda5b639de3d601133e5c95803bdc0cd94397",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/current-20261101/world-26.3-unavailable.png",
+    "sha256": "04004458358acf92b4c90bcb1d35de643dea2b82981c1eb8492871188531f14d",
+    "reviewedForPublication": true
+  },
+  {
+    "path": "docs/evidence/desktop/current-20261101/personalize-minimum.png",
+    "sha256": "fd8c5b6ed5ab7cd247544808d0f9bf2fa886f95667c922c091a0f8a651159873",
+    "reviewedForPublication": true
   }
 ]

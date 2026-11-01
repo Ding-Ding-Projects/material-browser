@@ -48,55 +48,25 @@ The desktop interface follows the eight Material 3 Expressive artboards in [the 
 
 Short completion and failure tones are configurable in **Settings → Notifications**, with a persisted switch, volume and preview. Quiet hours and accessibility settings take precedence. [Sound behavior](docs/features/desktop/action-sounds.md).
 
-## Verified repair screenshots
+## Current desktop evidence
 
-These genuine Windows desktop images are bound to source `47e8ae104755d38e9d115fbb08636143bc6278cb`.
-They show four bounded repair checks, not complete feature, layout, accessibility or installer acceptance.
-[Evidence and limitations](docs/evidence/desktop/repair-20261101/README.md).
-[Earlier screenshots and original provenance](docs/evidence/desktop/m3-redesign/readme-image-archive.md).
+These three original screenshots are bound to source `62563ae1626f966bd063ce0e38c53353de84ba22`. They show the world-preset inventory, an explicit unsupported version and a current minimum-size Personalize state. Earlier images keep their original source and dates in the archive.
 
-### Saved appearance at cold startup
+![Current Minecraft 1.21.4 inventory with five selectable presets and the unavailable debug preset](docs/evidence/desktop/current-20261101/world-1.21.4-inventory.png)
 
-The saved red primary-button appearance is applied before the vault is unlocked.
+Inventory and renderer-keyboard evidence only. No EULA was accepted and no generation was started.
 
-![Saved appearance restored before vault unlock](docs/evidence/desktop/repair-20261101/issue-11.png)
+![Current Minecraft 26.3 unavailable customization state retaining all seven presets](docs/evidence/desktop/current-20261101/world-26.3-unavailable.png)
 
-### Truthful storage feedback
+The version remains unavailable for customization. Retaining its inventory does not imply generation support.
 
-This is an explicitly injected, fixture-only storage failure. Session-only warnings and retry controls remain visible.
+![Current bilingual Personalize controls at the minimum 760 by 580 viewport](docs/evidence/desktop/current-20261101/personalize-minimum.png)
 
-![Injected storage failure with session-only warnings and retry controls](docs/evidence/desktop/repair-20261101/issue-12.png)
+One current minimum-width representative state. Lower controls remain below the fold; this is not a new full Personalize matrix.
 
-### Unresolved rendered contrast
+The supported inventory passed the twelve requested language/theme/size observations and scoped horizontal checks. Local font validation found 267 declarations, 303 references, 188 unique font assets and all six required fonts with the unchanged self-only font policy. Cached diagnostics and observed English/bilingual renderer reloads reported zero font CSP blocks, uncaught exceptions or resource failures. These results are not full native-process startup, physical input, full visual parity or generation proof.
 
-The real focus-mode opacity state reports contrast as unavailable rather than inventing a passing value.
-
-![Dimmed pane with contrast explicitly unavailable](docs/evidence/desktop/repair-20261101/issue-13.png)
-
-### Hue accessibility boundary
-
-The pointer endpoint remains within the declared hue range. This does not claim physical keyboard or screen-reader acceptance.
-
-![Hue pointer endpoint with the handle at the right edge](docs/evidence/desktop/repair-20261101/issue-14.png)
-
-## Measured minimum-layout repairs
-
-These later captures are bound to source `5c6662455bd968edfe4a4ebcad30b1e902d03b20`.
-The four repair images above retain their original `47e8ae1` source and independent scope.
-The two images below show bilingual light mode at 760 × 580 with an expanded navigation rail
-and requested CDP scale 1. They provide bounded layout and renderer-keyboard evidence, not
-physical display-scale or full accessibility certification.
-[Exact inventory, capture times and verification limits](docs/evidence/desktop/layout-20261101/README.md).
-
-![Minimum bilingual Focus view with Settings reachable and Lock focused](docs/evidence/desktop/layout-20261101/minimum-bilingual-focus.png)
-
-Renderer Tab navigation reached Settings and then Lock, with visible focus. The destination
-list scrolls independently while Lock remains visible.
-
-![Minimum bilingual Appearance controls inside their owning pane](docs/evidence/desktop/layout-20261101/minimum-bilingual-appearance.png)
-
-The upper Appearance controls are shown after vertical scrolling. Lower controls remain below
-the fold; the measured horizontal containment does not claim complete visual parity.
+[Capture inventory and verification limits](docs/evidence/desktop/current-20261101/README.md) · [Earlier images with original provenance](docs/evidence/desktop/current-20261101/readme-image-archive.md)
 
 ## Documentation and remaining work
 

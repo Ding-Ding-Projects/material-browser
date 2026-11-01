@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "62563ae1626f966bd063ce0e38c53353de84ba22",
+  "validatedAt": "2026-11-01T14:49:03.481Z",
+  "validationContext": "Validated before the evidence commit at the captured source.",
+  "validator": "promote-ui-evidence/verify-evidence-receipt.mjs",
+  "records": [
+    {
+      "id": "current-world-1214-inventory",
+      "valid": true,
+      "artifactSha256": "e396adfbbc514edd48dc16a3c2dee8a83b7bf513bed991cf2eeec7ec23fbc820",
+      "captureSha256": "ad909a04e9d9e592510a0e636b7bda5b639de3d601133e5c95803bdc0cd94397",
+      "width": 1280,
+      "height": 1400,
+      "documentationFiles": 1
+    },
+    {
+      "id": "current-world-263-unavailable",
+      "valid": true,
+      "artifactSha256": "e396adfbbc514edd48dc16a3c2dee8a83b7bf513bed991cf2eeec7ec23fbc820",
+      "captureSha256": "04004458358acf92b4c90bcb1d35de643dea2b82981c1eb8492871188531f14d",
+      "width": 1280,
+      "height": 1400,
+      "documentationFiles": 1
+    },
+    {
+      "id": "current-personalize-minimum",
+      "valid": true,
+      "artifactSha256": "e396adfbbc514edd48dc16a3c2dee8a83b7bf513bed991cf2eeec7ec23fbc820",
+      "captureSha256": "fd8c5b6ed5ab7cd247544808d0f9bf2fa886f95667c922c091a0f8a651159873",
+      "width": 760,
+      "height": 580,
+      "documentationFiles": 1
+    }
+  ],
+  "missingIdNegative": {
+    "rejected": true,
+    "restoredOriginalPassed": true,
+    "exactOriginalBytesRestored": true
+  },
+  "earlierImagesAndMetadataUnchanged": true,
+  "scope": "Byte equality, build/source binding, PNG integrity, declared observations, inventory identity and exact documentation links. Visual review performed separately.",
+  "limits": [
+    "Page emulation and renderer input, not physical display or keyboard proof",
+    "No generation or EULA acceptance",
+    "No full native-process startup, accessibility, installer or release certification"
+  ]
+}
