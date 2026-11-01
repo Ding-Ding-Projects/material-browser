@@ -1,30 +1,34 @@
-# Implementation continuation
+# Verification continuation
 
-Objective: implement and verify all applicable required features across Material Browser's
-surfaces, including Minecraft server management, and repair defects found along the way.
-New release publication and installed update remain outside the selected delivery boundary.
+Latest owner direction: the design contributor owns incoming design and implementation.
+This task owns integration, defect and layout testing, focused repairs, and actionable
+GitHub issues when a finding needs design follow-up. Do not resume parallel feature building.
 
-Current built server candidate: 91142ea. Exact Host and Desktop build entrypoints passed.
-A source-bound hidden-desktop session reached the real workspace through onboarding,
-verified the empty server state and retrieved the 921-entry Vanilla catalogue. Its remaining
-interaction, layout, language and teardown checks are in progress, not completed proof.
+Verified product runtime source: 37ff81f453da0082a9465b6592b82d944cd0e0e2, present on main.
+Exact Host and Desktop build entrypoints passed. Integrated desktop tests: 273 passed,
+zero failed or skipped. Rust workspace: 103 passed.
 
-Verification so far: 103 Rust workspace tests passed. The latest focused server/configuration/
-bridge run passed 64 tests. The full integrated desktop suite is still running. Acceptance
-ledger: 111 identities, seven surface families, 26 child surfaces, 414 unfinished applicable
-rows, no blanket runtime completion claim.
+Real hidden-desktop verification reached the productive workspace through onboarding,
+verified the empty server state, retrieved 921 Vanilla versions, resolved selected metadata,
+checked name and EULA validation, and cancelled without creating a server. Language changes
+were observed. The repaired 760 x 580 bilingual dark server panes fit at 614 px, ending x722.
+All owned processes and the named hidden desktop were closed; source/build hashes stayed fixed.
 
-The single active server authority is electron/services/game-servers. Incoming contributions
-2cd5263, abed939 and 51370c7 were preserved through merges. The incoming independent backend
-and duplicate GUI are inactive while useful capabilities are consolidated. Typed properties,
-Paper/Fabric resolution and explicit integrity consent are integrated. Restart, shutdown
-ordering, unsafe restore roots and staged rollback have focused regression coverage.
+Open design handoff: https://github.com/Ding-Ding-Projects/material-browser/issues/5
+The navigation rail overflows in bilingual mode: 706 px client height, 756 px content height,
+Lock bottom820 against viewport802. Keep this issue open until rebuilt verification passes.
+Public screenshot publication remains pending its provenance checks.
 
-Next: inspect and record final runtime evidence, fix any verified defects, finish the full
-local tests, and continue local model management in the isolated implementation branches.
-Bedrock, broad player/plugin workflows, remote-world transfer, all-target runtime proof,
-complete companion coverage and many required-feature rows remain unfinished.
+The updated inventory has 112 identities, 784 rows and 420 applicable unfinished rows.
+World-generation designs are not implemented behavior. Actual server lifecycle across four
+targets, Bedrock, broad players/plugins, full scales/themes/keyboard coverage, installation,
+companion delivery and whole-product acceptance remain incomplete. No real EULA acceptance,
+remote test-host adoption, model installation, release or installed update was invented.
 
-The Docker daemon is unavailable. No real server EULA acceptance, remote test-host adoption,
-model installation, release or installed update has been invented. Preserve active branches,
-worktrees and ignored private evidence. Do not delete active work or rewrite history.
+Separate model alternatives remain inactive and retained for selective reuse on their owning
+branches. Preserve all active/unmerged worktrees and ignored private evidence. New releases
+remain outside this pass; preservation commits use the supported workflow-skip marker.
+
+Next: monitor incoming design fixes at meaningful checkpoints, independently reproduce and
+refute suspected defects, verify accepted repairs on exact builds, update issue5 and evidence,
+and preserve each coherent verification milestone without rewriting concurrent work.

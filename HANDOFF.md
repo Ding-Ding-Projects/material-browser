@@ -216,3 +216,16 @@ invented. A fresh integrated build and hidden-desktop verification are next.
 
 Preserve all task branches and ignored announcement images while work is active. New release
 publication and installed update remain outside this task's selected delivery boundary.
+
+## Verification ownership and current handoff, 2026-11-01
+
+The owner clarified that the design contributor owns incoming feature design/implementation.
+This task now leads integration, defect and layout hunting, focused repairs and issue handoff.
+Current accepted runtime source37ff81f passed the exact builds and all273 desktop tests.
+The earlier Rust workspace run passed103 tests. The 760x580 bilingual dark server-pane
+repair passed its exact built repeat. A distinct navigation rail overflow remains open in
+issue5: https://github.com/Ding-Ding-Projects/material-browser/issues/5 .
+No rail fix or whole-product completion is claimed. The current inventory contains112
+identities,784 rows and420 applicable unfinished rows, including world generation.
+Separate model alternatives remain inactive for selective review; no additional parallel
+feature-building lane should be started. Keep private runtime evidence and active branches.
