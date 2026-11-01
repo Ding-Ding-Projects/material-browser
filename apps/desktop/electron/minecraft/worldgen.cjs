@@ -143,9 +143,10 @@ function readinessCapability(commands) {
   const position = execute?.if?.children?.loaded?.children?.pos;
   const run = execute?.run;
   const message = commands?.children?.say?.children?.message;
+  // The vanilla report exporter omits an empty root redirect on execute run.
   const available = position?.type === "argument" && position.parser === "minecraft:block_pos" &&
     Array.isArray(position.redirect) && position.redirect.length === 1 && position.redirect[0] === "execute" &&
-    run?.type === "literal" && Array.isArray(run.redirect) && run.redirect.length === 0 &&
+    run?.type === "literal" && (run.redirect === undefined || (Array.isArray(run.redirect) && run.redirect.length === 0)) &&
     message?.parser === "minecraft:message" && message.executable === true;
   return {
     available,

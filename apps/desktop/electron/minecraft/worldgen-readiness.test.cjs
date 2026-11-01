@@ -19,7 +19,7 @@ function fixture(t, { ready = true, version = '1.21.4' } = {}) {
     'data/minecraft/dimension_type/overworld.json': {min_y:-64,height:384,logical_height:384},
   })) write(path.join(tree, name), value);
   write(path.join(reports, 'reports/registries.json'), {'minecraft:block':{entries:{'minecraft:stone':{},'minecraft:water':{}}}});
-  const commands = {children:{say:{children:{message:{type:'argument',parser:'minecraft:message',executable:true}}},execute:{children:{run:{type:'literal',redirect:[]},if:{children:{}}}}}};
+  const commands = {children:{say:{children:{message:{type:'argument',parser:'minecraft:message',executable:true}}},execute:{children:{run:{type:'literal'},if:{children:{}}}}}};
   if (ready) commands.children.execute.children.if.children.loaded = {type:'literal',children:{pos:{type:'argument',parser:'minecraft:block_pos',redirect:['execute']}}};
   write(path.join(reports, 'reports/commands.json'), commands);
   const jar = path.join(root, 'server.jar'); zip.zipFolder(tree, jar, '');
@@ -109,4 +109,15 @@ test('run and batch identities are fresh and prior-run replies cannot finish a n
   assert.equal(repeated.events.some(e=>e.step==='batch'),false);
   const currentTag=/run say (\S+)$/.exec(repeated.commands.find(c=>c.startsWith('execute if loaded')))[1];
   assert.notEqual(currentTag.split('-')[1],identities[0][1]);
+});
+
+test('actual vanilla root-run report omission is admitted while non-root redirects fail closed',t=>{
+  const f=fixture(t);
+  assert.deepEqual(f.commands.children.execute.children.run,{type:'literal'});
+  assert.equal(f.catalogue.supported,true);
+  for (const redirect of [[], ['execute'], ['say'], '']) {
+    f.commands.children.execute.children.run.redirect=redirect;
+    f.write(path.join(f.reports,'reports/commands.json'),f.commands);
+    assert.equal(w.catalogueFrom(fs.readFileSync(f.jar),f.reports).supported,Array.isArray(redirect)&&redirect.length===0);
+  }
 });

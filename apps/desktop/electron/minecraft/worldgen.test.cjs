@@ -41,7 +41,7 @@ function reportsDir() {
   const dir = tmp();
   writeTree(dir, {
     "reports/registries.json": { "minecraft:block": { entries: { "minecraft:stone": {}, "minecraft:water": {}, "minecraft:bedrock": {}, "minecraft:dirt": {}, "minecraft:grass_block": {} } } },
-    "reports/commands.json": { children: { execute: {children:{if:{children:{loaded:{children:{pos:{type:"argument",parser:"minecraft:block_pos",redirect:["execute"]}}}}},run:{type:"literal",redirect:[]}}}, say:{children:{message:{parser:"minecraft:message",executable:true}}}, gamerule: { children: { keepInventory: { children: { value: { parser: "brigadier:bool" } } }, randomTickSpeed: { children: { value: { parser: "brigadier:integer" } } }, futureRule: { children: { value: { parser: "minecraft:something_new" } } } } } } },
+    "reports/commands.json": { children: { execute: {children:{if:{children:{loaded:{children:{pos:{type:"argument",parser:"minecraft:block_pos",redirect:["execute"]}}}}},run:{type:"literal"}}}, say:{children:{message:{parser:"minecraft:message",executable:true}}}, gamerule: { children: { keepInventory: { children: { value: { parser: "brigadier:bool" } } }, randomTickSpeed: { children: { value: { parser: "brigadier:integer" } } }, futureRule: { children: { value: { parser: "minecraft:something_new" } } } } } } },
   });
   return dir;
 }
