@@ -1,5 +1,24 @@
 # Verification continuation, 2026-11-01
 
+## Latest preservation checkpoint
+
+Verified account allowance reached 10 percent remaining. New implementation and optional
+runtime work stopped. This continuation confirmed two additional defects and preserved a
+focused timer repair, without declaring the full goal complete.
+
+Issues 27 and 28 are open: successful wording imports omit the required native outcome cue,
+and an older timer can dismiss a newer celebration. The built baseline at51ef65b passed
+neutral synthetic-handler import, invalid-file preservation, renderer-reload persistence and
+clear/reset. Repeated synthetic drops reproduced the timer defect. Native picker/drop,
+full-process restart, actual audio and reduced-motion outcomes remain unverified.
+
+Timer source repaird654644c798bd95a332a9b1a501ad5c2014916d4 is preserved on its own remote
+branch and included in this explicitly incomplete runtime-verification checkpoint. Three
+production-handler checks passed independently after red-before repair evidence; TypeScript
+passed. No post-repair build/runtime verdict is claimed. Audio is unchanged. Keep both issues
+open until their actual completion criteria pass. See the wording-import-outcomes article.
+The dedicated public evidence gallery is being reconciled separately and is not product proof.
+
 The design contributor owns incoming design and feature implementation. This task owns
 integration, independent defect/layout hunting, focused repairs and actionable GitHub issues.
 Do not start competing feature implementations or overwrite incoming work.

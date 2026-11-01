@@ -1,4 +1,20 @@
 # Material Browser handoff
+
+## Latest preservation checkpoint, 2026-11-01
+
+Verified account allowance reached 10 percent remaining. New implementation and optional
+runtime work stopped. Designer handoffs 27 and 28 remain open for missing native wording
+outcome audio and a stale celebration timer. Built baseline51ef65b reproduced the timer
+defect and passed synthetic-handler valid/invalid import, renderer reload and clear/reset.
+Native input, full-process restart, actual audio and reduced-motion proof remain unverified.
+
+Repaird654644c is preserved on ai/fix/20261101-wording-celebration and integrated in this
+explicitly incomplete runtime-verification checkpoint. Three production-handler regressions
+and TypeScript passed; post-repair build/runtime remains pending. Audio is unchanged. No
+release, installed update or deletion occurred. Preserve private evidence and active work.
+
+## Earlier handoff history
+
 > Current state: [Minecraft server manager, 2026-11-01](#minecraft-server-manager-2026-11-01). The server manager is implemented from its design; real server runs, Docker, SSH and Windows acceptance remain.
 
 ## Minecraft server manager, 2026-11-01

@@ -1,5 +1,7 @@
 # Desktop workspace
 
+- [Personal wording import outcomes](wording-import-outcomes.md): timer ownership, baseline observations and unfinished native audio acceptance.
+
 - [Profile launch and identity capabilities](profile-launch.md)
 - [Super Profiles](super-profiles.md)
 - [Action sounds and quiet controls](action-sounds.md)

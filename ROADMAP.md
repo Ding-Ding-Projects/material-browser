@@ -2,6 +2,11 @@
 
 ## Required-feature verification, November 2026
 
+- [x] Confirm wording-import audio omission and repeated-import timer defect; open issues27/28
+- [x] Preserve the timer ownership repair with three executable regressions and TypeScript
+- [ ] Verify the timer repair in a fresh built runtime, including repeated imports, full-process restart and reduced motion
+- [ ] Implement and verify exact native wording-import outcome cues with sound controls and privacy boundaries
+
 - [x] Reconcile 111 requirement identities across seven surface families and 26 source-backed child surfaces
 - [x] Add positive and negative acceptance-inventory checks without claiming runtime completion
 - [x] Implement a single protected server bridge, four target adapters and owned lifecycle boundaries
