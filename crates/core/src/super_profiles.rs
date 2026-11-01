@@ -544,6 +544,12 @@ mod tests {
         fn check(path: &Path) {
             for entry in fs::read_dir(path).unwrap() {
                 let path = entry.unwrap().path();
+                // The live manager exclusively owns this operational lock on Windows.
+                // It contains no vault payload; all persisted content is still inspected.
+                if path.file_name().is_some_and(|name| name == ".vault.lock") {
+                    assert_eq!(fs::metadata(&path).unwrap().len(), 0);
+                    continue;
+                }
                 if path.is_dir() {
                     check(&path);
                 } else {

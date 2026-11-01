@@ -91,6 +91,7 @@ export function catalogDestinations(definitions, categories = []) {
     ...[
       ["profiles", "Profiles"],
       ["super-profiles", "Super Profiles"],
+      ["servers", "Servers"],
       ["sync", "Synchronization"],
       ["settings", "Settings"],
     ].map(([id, label]) => ({ id: `page:${id}`, label, page: id })),

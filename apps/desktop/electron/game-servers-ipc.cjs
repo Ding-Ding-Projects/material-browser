@@ -3,7 +3,7 @@ const { createGameServerService } = require("./services/game-servers/index.cjs")
 const actions = new Set([
   "capabilities", "list", "discoverVersions", "resolveVersion", "create", "configure",
   "readConfiguration", "start", "stop", "restart", "command", "logs", "cancel",
-  "backup", "restore", "remove", "listBackups", "listContent", "importContent",
+  "backup", "restore", "remove", "listBackups", "listContent", "installContent", "removeContent",
 ]);
 function registerGameServersIpc({ ipcMain, app, trusted, createService = createGameServerService }) {
   let service;
