@@ -142,6 +142,8 @@ const DESTINATIONS: [Page, string, string, string][] = [
   ["super-profiles", "Super Profiles", "layers", "Super Profiles"],
   ["sync", "Sync", "sync", "Synchronization"],
   ["servers", "Servers", "dns", "Minecraft servers"],
+  ["models", "Models", "neurology", "Local models"],
+  ["tools", "Tools", "construction", "Tools"],
   ["settings", "Settings", "settings", "Settings"],
 ];
 

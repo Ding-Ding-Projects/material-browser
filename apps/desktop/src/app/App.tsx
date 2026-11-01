@@ -23,6 +23,8 @@ import { useLockStore } from "./locks";
 import { SyncPage } from "./Sync";
 import { SuperProfilesPage } from "./SuperProfiles";
 import { ServersPage } from "./Servers";
+import { OllamaPage } from "./Ollama";
+import { ToolboxPage } from "./Toolbox";
 import { SettingsPage } from "./Settings";
 
 const read = (key: string, fallback: any) => {
@@ -334,6 +336,8 @@ export function App() {
                 {page === "super-profiles" && <SuperProfilesPage />}
                 {page === "sync" && <SyncPage />}
                 {page === "servers" && <ServersPage />}
+                {page === "models" && <OllamaPage />}
+                {page === "tools" && <ToolboxPage />}
                 {page === "settings" && (
                   <SettingsPage
                     section={settingsSection}
