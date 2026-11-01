@@ -1,5 +1,10 @@
 /** Cantonese for focus modes, the appearance editor, the colour picker and info icons. */
 export const personalizeZh: Record<string, string> = {
+  "Focus changes are session-only because storage failed. Restarting may restore earlier settings. If storage could not be read at startup, reopen the app after restoring storage access.": "儲存失敗，專注模式變更只喺今次有效，重新啟動可能恢復舊設定。如啟動時未能讀取儲存資料，請恢復存取後重新開啟應用程式。",
+  "Retry saving focus settings": "重試儲存專注設定",
+  "Appearance changes and resets are session-only because storage failed. Restarting may restore earlier values. If storage could not be read at startup, reopen the app after restoring storage access.": "儲存失敗，外觀變更同重設只喺今次有效，重新啟動可能恢復舊值。如啟動時未能讀取儲存資料，請恢復存取後重新開啟應用程式。",
+  "Retry saving appearance": "重試儲存外觀",
+
   "The current colour cannot be resolved from a solid backdrop. Choose a swatch to set an explicit colour.": "未能從純色背景確定目前顏色，請揀色板設定明確顏色。",
   "Contrast unavailable: the actual foreground or background cannot be determined. No passing verdict is claimed.": "未能確定實際前景或背景，無法計算對比，唔會聲稱通過。",
 

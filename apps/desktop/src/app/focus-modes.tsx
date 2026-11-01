@@ -28,6 +28,9 @@ export { WORK_MINUTES, BREAK_MINUTES };
 
 type FocusModesValue = {
   settings: FocusSettings;
+  persisted: boolean;
+  canRetryPersistence: boolean;
+  retryPersistence: () => void;
   setMode: (id: FocusModeId, on: boolean) => void;
   stepWork: (direction: 1 | -1) => void;
   stepBreak: (direction: 1 | -1) => void;
@@ -41,18 +44,19 @@ type FocusModesValue = {
 
 const FocusModesContext = createContext<FocusModesValue | null>(null);
 
-function load(): FocusSettings {
+function load(): { settings: FocusSettings; persisted: boolean } {
   try {
-    return parseFocusSettings(localStorage.getItem(FOCUS_MODES_KEY));
+    return { settings: parseFocusSettings(localStorage.getItem(FOCUS_MODES_KEY)), persisted: true };
   } catch {
-    return { ...FOCUS_DEFAULTS };
+    return { settings: { ...FOCUS_DEFAULTS }, persisted: false };
   }
 }
 function save(settings: FocusSettings) {
   try {
     localStorage.setItem(FOCUS_MODES_KEY, serialiseFocusSettings(settings));
+    return true;
   } catch {
-    /* Storage can be unavailable; the modes still work for this session. */
+    return false;
   }
 }
 
@@ -61,16 +65,19 @@ function save(settings: FocusSettings) {
  * and keeps them in localStorage ("focus-modes.v1"). Mount once, near the root.
  */
 export function FocusModesProvider({ children }: { children?: React.ReactNode }) {
-  const [settings, setSettings] = useState<FocusSettings>(load);
+  const [initial] = useState(load);
+  const [settings, setSettings] = useState<FocusSettings>(initial.settings);
+  const [persisted, setPersisted] = useState(initial.persisted);
+  const settingsRef = useRef(settings);
+  const initialReadAvailable = useRef(initial.persisted);
   const [timer, setTimer] = useState<TimerState>(() => resetTimer(settings));
   const [now, setNow] = useState(() => Date.now());
 
   const update = useCallback((change: (s: FocusSettings) => FocusSettings) => {
-    setSettings((current) => {
-      const next = normaliseFocusSettings(change(current));
-      save(next);
-      return next;
-    });
+    const next = normaliseFocusSettings(change(settingsRef.current));
+    settingsRef.current = next;
+    setSettings(next);
+    setPersisted(initialReadAvailable.current ? save(next) : false);
   }, []);
 
   // Root attributes for the CSS in focus-modes.css.
@@ -134,6 +141,12 @@ export function FocusModesProvider({ children }: { children?: React.ReactNode })
   const value = useMemo<FocusModesValue>(
     () => ({
       settings,
+      persisted,
+      canRetryPersistence: initialReadAvailable.current,
+      retryPersistence: () => {
+        if (!initialReadAvailable.current) return;
+        setPersisted(save(settingsRef.current));
+      },
       setMode: (id, on) => update((s) => ({ ...s, [id]: on })),
       stepWork: (direction) => update((s) => ({ ...s, workMinutes: stepMinutes(s.workMinutes, direction, WORK_MINUTES) })),
       stepBreak: (direction) => update((s) => ({ ...s, breakMinutes: stepMinutes(s.breakMinutes, direction, BREAK_MINUTES) })),
@@ -148,7 +161,7 @@ export function FocusModesProvider({ children }: { children?: React.ReactNode })
       },
       resetTimer: () => setTimer(resetTimer(settings)),
     }),
-    [settings, timer, now, update],
+    [settings, persisted, timer, now, update],
   );
   return <FocusModesContext.Provider value={value}>{children}</FocusModesContext.Provider>;
 }

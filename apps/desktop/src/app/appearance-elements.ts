@@ -16,6 +16,10 @@ export type ElementChoice = { id: string; label: string };
 
 const STYLE_ID = "appearance-elements";
 let current: Record<string, ElementOverride> | null = null;
+export type AppearancePersistence = "saved" | "session-only" | "reload-required";
+let persistence: AppearancePersistence = "saved";
+let readUnavailable = false;
+const persistenceListeners = new Set<(state: AppearancePersistence) => void>();
 const listeners = new Set<(all: Record<string, ElementOverride>) => void>();
 
 function read(): Record<string, ElementOverride> {
@@ -23,6 +27,8 @@ function read(): Record<string, ElementOverride> {
   try {
     current = parseOverrides(localStorage.getItem(APPEARANCE_ELEMENTS_KEY));
   } catch {
+    persistence = "reload-required";
+    readUnavailable = true;
     current = {};
   }
   return current;
@@ -43,13 +49,30 @@ export function applyAppearanceOverrides() {
 function commit(next: Record<string, ElementOverride>) {
   current = next;
   try {
+    if (readUnavailable) throw new Error("Stored appearance must be read before saving");
     if (Object.keys(next).length) localStorage.setItem(APPEARANCE_ELEMENTS_KEY, JSON.stringify(next));
     else localStorage.removeItem(APPEARANCE_ELEMENTS_KEY);
+    persistence = "saved";
   } catch {
-    /* Storage can be unavailable; the change still applies for this session. */
+    persistence = readUnavailable ? "reload-required" : "session-only";
   }
   applyAppearanceOverrides();
   listeners.forEach((fn) => fn(next));
+  persistenceListeners.forEach(fn => fn(persistence));
+}
+
+export const getAppearancePersistence = () => persistence;
+export const retryAppearancePersistence = () => {
+  if (!readUnavailable) commit(read());
+};
+export function useAppearancePersistence() {
+  const [state, setState] = useState(persistence);
+  useEffect(() => {
+    setState(persistence);
+    persistenceListeners.add(setState);
+    return () => { persistenceListeners.delete(setState); };
+  }, []);
+  return state;
 }
 
 export const getOverride = (id: string): ElementOverride | undefined => read()[id];

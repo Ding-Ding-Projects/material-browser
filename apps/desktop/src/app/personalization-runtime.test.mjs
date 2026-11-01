@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 import * as appearanceModel from './appearance-elements-model.mjs';
 import * as colours from './colour.mjs';
+import * as focusModel from './focus-modes-model.mjs';
 
 async function loadTs(file, dependencies, globals = {}) {
   const source = await readFile(new URL(file, import.meta.url), 'utf8');
@@ -77,7 +78,7 @@ test('explicit colour overrides do not claim contrast through unsupported render
     const surface = await loadTs('./Personalize.tsx', {
       react, '../m3': {}, './context': {}, './focus-modes': {}, './colour.mjs': colours,
       './appearance-elements-model.mjs': appearanceModel,
-      './appearance-elements': { useAppearanceOverrides: () => ({ 'primary-buttons': { background: '#000000', foreground: '#FFFFFF' } }), listElements: () => [], elementLabel: () => 'Buttons', firstElement: () => target },
+      './appearance-elements': { useAppearancePersistence: () => 'saved', useAppearanceOverrides: () => ({ 'primary-buttons': { background: '#000000', foreground: '#FFFFFF' } }), listElements: () => [], elementLabel: () => 'Buttons', firstElement: () => target },
       './personalize-controls': { useT: () => text => text },
     }, { getComputedStyle: () => ({ opacity: '1', filter: 'none', mixBlendMode: 'normal', backdropFilter: 'none', backgroundImage: 'none', backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)', ...effect }) });
     const tree = surface.AppearanceEditor({});
@@ -85,4 +86,87 @@ test('explicit colour overrides do not claim contrast through unsupported render
     assert.match(text, /Contrast unavailable/);
     assert.doesNotMatch(text, /21\.0:1/);
   }
+});
+
+test('appearance save and reset failures stay session-only until a successful retry', async () => {
+  let blocked = true;
+  let stored = JSON.stringify({ panes: { radius: 8 } });
+  const styles = new Map();
+  const store = {
+    getItem: () => stored,
+    setItem: (_key, value) => { if (blocked) throw new Error('quota'); stored = value; },
+    removeItem: () => { if (blocked) throw new Error('unavailable'); stored = null; },
+  };
+  const appearance = await loadTs('./appearance-elements.ts', { react: {}, './appearance-elements-model.mjs': appearanceModel }, {
+    localStorage: store, document: { getElementById: id => styles.get(id), createElement: () => ({ id: '', textContent: '' }), head: { appendChild: node => styles.set(node.id, node) } },
+  });
+  appearance.setOverride('panes', { radius: 12 });
+  assert.equal(appearance.getAppearancePersistence(), 'session-only');
+  assert.equal(JSON.parse(stored).panes.radius, 8);
+  assert.equal(appearance.getOverride('panes').radius, 12);
+  blocked = false; appearance.retryAppearancePersistence();
+  assert.equal(appearance.getAppearancePersistence(), 'saved');
+  assert.equal(JSON.parse(stored).panes.radius, 12);
+  blocked = true; appearance.resetAllOverrides();
+  assert.equal(appearance.getAppearancePersistence(), 'session-only');
+  assert.ok(stored);
+  blocked = false; appearance.retryAppearancePersistence();
+  assert.equal(stored, null);
+  assert.equal(appearance.getAppearancePersistence(), 'saved');
+});
+
+test('focus persistence exposes failure and retries the latest session settings', async () => {
+  const slots = []; let cursor = 0, blocked = true, stored = null;
+  const react = {
+    createContext: () => ({ Provider: 'provider' }), createElement: (type, props) => ({ type, props }),
+    useState: initial => { const i = cursor++; if (!(i in slots)) slots[i] = typeof initial === 'function' ? initial() : initial; return [slots[i], next => { slots[i] = typeof next === 'function' ? next(slots[i]) : next; }]; },
+    useRef: initial => { const i = cursor++; return slots[i] ?? (slots[i] = { current: initial }); },
+    useEffect() {}, useCallback: fn => fn, useMemo: fn => fn(),
+  };
+  const focus = await loadTs('./focus-modes.tsx', { react, '../m3': {}, './context': {}, './focus-modes-model.mjs': focusModel, './focus-modes.css': {} }, {
+    localStorage: { getItem: () => stored, setItem: (_key, value) => { if (blocked) throw new Error('quota'); stored = value; } },
+  });
+  const render = () => { cursor = 0; return focus.FocusModesProvider({}).props.value; };
+  render().setMode('calm', true);
+  assert.equal(render().persisted, false);
+  assert.equal(render().settings.calm, true);
+  assert.equal(stored, null);
+  blocked = false; render().retryPersistence();
+  assert.equal(render().persisted, true);
+  assert.equal(JSON.parse(stored).calm, true);
+});
+
+test('startup storage-read exceptions prevent overwriting earlier state after write access returns', async () => {
+  let writes = 0, readBlocked = true;
+  const original = JSON.stringify({ prior: 'durable record' });
+  let durable = original;
+  const storage = { getItem() { if (readBlocked) throw new Error('read unavailable'); return durable; }, setItem(_key, value) { writes++; durable = value; }, removeItem() { writes++; durable = null; } };
+  const styles = new Map();
+  const appearance = await loadTs('./appearance-elements.ts', { react: {}, './appearance-elements-model.mjs': appearanceModel }, {
+    localStorage: storage, document: { getElementById: id => styles.get(id), createElement: () => ({ id: '', textContent: '' }), head: { appendChild: node => styles.set(node.id, node) } },
+  });
+  appearance.setOverride('panes', { radius: 12 });
+  assert.equal(appearance.getAppearancePersistence(), 'reload-required');
+  readBlocked = false;
+  appearance.retryAppearancePersistence();
+  appearance.resetAllOverrides();
+  assert.equal(writes, 0);
+  assert.equal(durable, original);
+  readBlocked = true;
+  const slots = []; let cursor = 0;
+  const react = {
+    createContext: () => ({ Provider: 'provider' }), createElement: (type, props) => ({ type, props }),
+    useState: initial => { const i = cursor++; if (!(i in slots)) slots[i] = typeof initial === 'function' ? initial() : initial; return [slots[i], next => { slots[i] = typeof next === 'function' ? next(slots[i]) : next; }]; },
+    useRef: initial => { const i = cursor++; return slots[i] ?? (slots[i] = { current: initial }); },
+    useEffect() {}, useCallback: fn => fn, useMemo: fn => fn(),
+  };
+  const focus = await loadTs('./focus-modes.tsx', { react, '../m3': {}, './context': {}, './focus-modes-model.mjs': focusModel, './focus-modes.css': {} }, { localStorage: storage });
+  const render = () => { cursor = 0; return focus.FocusModesProvider({}).props.value; };
+  render().setMode('calm', true);
+  assert.equal(render().persisted, false);
+  assert.equal(render().canRetryPersistence, false);
+  readBlocked = false;
+  render().retryPersistence();
+  assert.equal(writes, 0);
+  assert.equal(durable, original);
 });
