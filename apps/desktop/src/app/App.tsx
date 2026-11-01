@@ -71,6 +71,16 @@ export function App() {
   const [unlocking, setUnlocking] = useState<{ id: string; then: () => void } | null>(null);
   const [snackbar, setSnackbar] = useState<{ id: number; message: string; action?: { label: string; run: () => void } } | null>(null);
   const [celebration, setCelebration] = useState("");
+  const celebrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const celebrationMounted = useRef(true);
+  useEffect(() => {
+    celebrationMounted.current = true;
+    return () => {
+      celebrationMounted.current = false;
+      if (celebrationTimer.current !== null) clearTimeout(celebrationTimer.current);
+      celebrationTimer.current = null;
+    };
+  }, []);
   const openLocks = useRef(new Set<string>());
   const [setupStep, setSetupStep] = useState<number>(() => read("setup", 0));
   const [setupDone, setSetupDone] = useState<boolean>(() => read("setupComplete", false));
@@ -233,9 +243,14 @@ export function App() {
       if (!file.name.toLowerCase().endsWith(".json") || file.size > 262144) throw Error();
       const parsed = parseVocabulary(await file.text());
       localStorage.setItem("wording", JSON.stringify(parsed));
+      if (!celebrationMounted.current) return;
       setEntries(parsed.entries);
+      if (celebrationTimer.current !== null) clearTimeout(celebrationTimer.current);
       setCelebration(parsed.entries["private vocabulary"] || t("Personal wording applied"));
-      setTimeout(() => setCelebration(""), 3000);
+      celebrationTimer.current = setTimeout(() => {
+        celebrationTimer.current = null;
+        setCelebration("");
+      }, 3000);
     } catch {
       setNotice(t("Invalid personal wording file"));
       void settings.notify(t("Invalid personal wording file"), "error");
