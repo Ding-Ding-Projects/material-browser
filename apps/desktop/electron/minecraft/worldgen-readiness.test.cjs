@@ -18,7 +18,7 @@ function fixture(t, { ready = true, version = '1.21.4' } = {}) {
     'data/minecraft/worldgen/noise_settings/overworld.json': { sea_level:63, default_block:{Name:'minecraft:stone'}, default_fluid:{Name:'minecraft:water'}, aquifers_enabled:true, ore_veins_enabled:true, disable_mob_generation:false, noise:{min_y:-64,height:384} },
     'data/minecraft/dimension_type/overworld.json': {min_y:-64,height:384,logical_height:384},
   })) write(path.join(tree, name), value);
-  write(path.join(reports, 'reports/registries.json'), {'minecraft:block':{entries:{'minecraft:stone':{},'minecraft:water':{}}}});
+  write(path.join(reports, 'reports/registries.json'), {'minecraft:block':{entries:{'minecraft:stone':{},'minecraft:water':{},'minecraft:bedrock':{}}}});
   const commands = {children:{say:{children:{message:{type:'argument',parser:'minecraft:message',executable:true}}},execute:{children:{run:{type:'literal'},if:{children:{}}}}}};
   if (ready) commands.children.execute.children.if.children.loaded = {type:'literal',children:{pos:{type:'argument',parser:'minecraft:block_pos',redirect:['execute']}}};
   write(path.join(reports, 'reports/commands.json'), commands);

@@ -16,6 +16,7 @@ const MAX_AREA_CHUNKS = 1000;
 const FORCELOAD_MAX = 256;
 const PRESET_IDS = ["normal", "flat", "large_biomes", "amplified", "single_biome_surface"];
 const PRESET_UNSUPPORTED_REASON = "This preset is present in the selected version, but its generator is not implemented by the world customization builder.";
+const CUSTOMIZATION_UNSUPPORTED_REASON = "This version uses world-generation settings or pack metadata that the customization builder does not support yet.";
 
 /** Bundled server jars (1.18 and newer) keep the real server jar inside META-INF/versions. */
 function innerJar(outer) {
@@ -156,6 +157,31 @@ function readinessCapability(commands) {
   };
 }
 
+/** The existing writer handles legacy typed settings, not later graph schemas. */
+function customizationCapability(packFormat, noise, dimension, blocks, biomes, flat) {
+  const unsupportedFields = [];
+  const requireField = (valid, field) => { if (!valid) unsupportedFields.push(field); };
+  const blockIds = new Set(blocks), biomeIds = new Set(biomes);
+  // Since data-pack format 82, pack metadata needs min_format/max_format.
+  requireField(Number.isSafeInteger(packFormat) && packFormat > 0 && packFormat < 82, "pack_format");
+  for (const key of ["aquifers_enabled", "ore_veins_enabled", "disable_mob_generation"])
+    requireField(typeof noise?.[key] === "boolean", `noise.${key}`);
+  for (const key of ["default_block", "default_fluid"])
+    requireField(typeof noise?.[key]?.Name === "string" && blockIds.has(noise[key].Name), `noise.${key}`);
+  requireField(Number.isInteger(noise?.sea_level) && Number.isInteger(noise?.noise?.min_y) &&
+    Number.isInteger(noise?.noise?.height) && noise.noise.height > 0, "noise.dimensions");
+  requireField(Number.isInteger(dimension?.min_y) && Number.isInteger(dimension?.height) &&
+    Number.isInteger(dimension?.logical_height) && dimension.height > 0 &&
+    dimension.logical_height >= 0 && dimension.logical_height <= dimension.height, "dimension");
+  requireField(biomeIds.has("minecraft:plains"), "default_biome");
+  if (flat !== undefined) requireField(typeof flat?.biome === "string" && biomeIds.has(flat.biome) &&
+    typeof flat.features === "boolean" && typeof flat.lakes === "boolean" &&
+    Array.isArray(flat.layers) && flat.layers.length > 0 && flat.layers.every(layer =>
+      typeof layer?.block === "string" && blockIds.has(layer.block) && Number.isInteger(layer.height) && layer.height > 0), "flat.settings");
+  else requireField(blockIds.has("minecraft:bedrock"), "flat.default_block");
+  return { available: unsupportedFields.length === 0, reason: unsupportedFields.length ? CUSTOMIZATION_UNSUPPORTED_REASON : null, unsupportedFields };
+}
+
 /** Turn a jar and its reports into the picker catalogue for that exact version. */
 function catalogueFrom(jarBuffer, reportsDir) {
   const jar = innerJar(openZip(jarBuffer));
@@ -184,17 +210,22 @@ function catalogueFrom(jarBuffer, reportsDir) {
   }));
   const overworldNoise = readJson(jar, "data/minecraft/worldgen/noise_settings/overworld.json");
   const overworldType = readJson(jar, "data/minecraft/dimension_type/overworld.json");
+  const packFormat = version.pack_version?.data ?? version.pack_version;
+  const blocks = Object.keys(registries["minecraft:block"]?.entries || {}).sort();
+  const biomes = stems(jar, "data/minecraft/worldgen/biome");
+  const customization = customizationCapability(packFormat, overworldNoise, overworldType, blocks, biomes,
+    flatPresets.find(entry => entry.id === "minecraft:classic_flat")?.settings);
   return {
-    supported: readiness.available && hasImplementedPreset,
-    reason: readiness.reason || (hasImplementedPreset ? null : "No preset in this version has an implemented customization route."),
-    capabilities: { chunkReadiness: readiness },
+    supported: readiness.available && customization.available && hasImplementedPreset,
+    reason: readiness.reason || customization.reason || (hasImplementedPreset ? null : "No preset in this version has an implemented customization route."),
+    capabilities: { chunkReadiness: readiness, customization },
     version: version.id,
-    packFormat: version.pack_version?.data ?? version.pack_version,
+    packFormat: Number.isSafeInteger(packFormat) ? packFormat : null,
     presets,
     presetOptions,
-    biomes: stems(jar, "data/minecraft/worldgen/biome"),
+    biomes,
     structureSets: stems(jar, "data/minecraft/worldgen/structure_set"),
-    blocks: Object.keys(registries["minecraft:block"]?.entries || {}).sort(),
+    blocks,
     gameRules,
     flatPresets,
     noise: overworldNoise && {
@@ -204,8 +235,8 @@ function catalogueFrom(jarBuffer, reportsDir) {
       disable_mob_generation: overworldNoise.disable_mob_generation,
       default_block: overworldNoise.default_block?.Name,
       default_fluid: overworldNoise.default_fluid?.Name,
-      height: overworldNoise.noise.height,
-      min_y: overworldNoise.noise.min_y,
+      height: overworldNoise.noise?.height,
+      min_y: overworldNoise.noise?.min_y,
     },
     dimension: overworldType && { height: overworldType.height, min_y: overworldType.min_y, logical_height: overworldType.logical_height },
     raw: { jarNoise: (name) => readJson(jar, `data/minecraft/worldgen/noise_settings/${name}.json`), overworldType },
@@ -213,6 +244,8 @@ function catalogueFrom(jarBuffer, reportsDir) {
 }
 
 function defaults(catalogue) {
+  if (!catalogue.supported || catalogue.capabilities?.customization?.available === false)
+    throw fail("WORLDGEN_UNSUPPORTED", catalogue.reason || CUSTOMIZATION_UNSUPPORTED_REASON);
   const supportedPresets = catalogue.presets.filter((id) => PRESET_IDS.includes(id.slice(10)));
   if (!supportedPresets.length) throw fail("WORLDGEN_UNSUPPORTED", "No preset in this version has an implemented customization route.");
   return {
@@ -238,7 +271,7 @@ const isInt = (v) => Number.isInteger(v);
 
 /** Validate every option against the version's catalogue. Anything not typed is refused. */
 function validate(options, catalogue) {
-  if (!catalogue.supported || catalogue.capabilities?.chunkReadiness?.available !== true)
+  if (!catalogue.supported || catalogue.capabilities?.chunkReadiness?.available !== true || catalogue.capabilities?.customization?.available === false)
     throw fail("WORLDGEN_UNSUPPORTED", catalogue.reason || "No verified chunk readiness route is available.");
   const o = { ...defaults(catalogue), ...options };
   if (typeof o.name !== "string" || !/^[A-Za-z0-9 _-]{1,40}$/.test(o.name)) throw fail("INVALID_NAME");
