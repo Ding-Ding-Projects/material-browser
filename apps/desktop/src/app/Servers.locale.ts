@@ -235,6 +235,12 @@ export const serversZh: Record<string, string> = {
   "World folder": "世界資料夾",
   "World seed": "世界種子",
   "World type": "世界類型",
+  "No preset in this version has an implemented customization route.": "呢個版本嘅預設都未有已實作嘅自訂途徑。",
+  "Unavailable world presets": "未能使用嘅世界預設",
+  "This preset is present in the selected version, but its generator is not implemented by the world customization builder.": "所揀版本包含呢個預設，但世界自訂建構器尚未實作佢嘅生成器。",
+  "Support information is unavailable for this preset.": "未有呢個預設嘅支援資料。",
+  "World customization is unavailable for the selected version.": "所揀版本未能使用世界自訂功能。",
+
   "Generate structures": "生成建築",
   "Kick idle players after": "閒置幾耐踢走玩家",
   "Show in the server list": "喺伺服器列表顯示",

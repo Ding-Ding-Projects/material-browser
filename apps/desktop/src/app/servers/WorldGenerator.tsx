@@ -18,6 +18,7 @@ type WorldCatalogue = {
   version: string;
   packFormat: number;
   presets: string[];
+  presetOptions?: { id: string; supported: boolean; reason: string | null }[];
   biomes: string[];
   structureSets: string[];
   blocks: string[];
@@ -47,12 +48,37 @@ export const DEFAULT_SIZE = { width: 100, depth: 100 };
 const PRESET_LABELS: Record<string, string> = { normal: "Normal", flat: "Superflat", large_biomes: "Large biomes", amplified: "Amplified", single_biome_surface: "Single biome" };
 const pretty = (id: string) => id.replace(/^minecraft:/, "").replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
 
+const PRESET_UNSUPPORTED = "This preset is present in the selected version, but its generator is not implemented by the world customization builder.";
+const presetValue = (id: string) => id.replace(/^minecraft:/, "");
+function presetInventory(catalogue: WorldCatalogue) {
+  return catalogue.presets.map(id => {
+    const capability = catalogue.presetOptions?.find(option => option.id === id);
+    return { id, value: presetValue(id), supported: capability?.supported === true, reason: capability?.reason || (capability ? PRESET_UNSUPPORTED : "Support information is unavailable for this preset.") };
+  });
+}
+function WorldPresetChoices({ catalogue, value, onChange }: { catalogue: WorldCatalogue; value: string; onChange: (value: string) => void }) {
+  const { t } = useApp();
+  const inventory = presetInventory(catalogue);
+  const selectable = catalogue.supported ? inventory.filter(option => option.supported) : [];
+  const unavailable = catalogue.supported ? inventory.filter(option => !option.supported) : inventory;
+  return <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+    {selectable.length > 0 && <ButtonGroup label={t("World type")} value={value} onChange={next => { if (selectable.some(option => option.value === next)) onChange(next); }} options={selectable.map(option => [option.value, t(PRESET_LABELS[option.value] || pretty(option.id))] as [string, string])} />}
+    {unavailable.length > 0 && <div className="card outlined" style={{ padding: 12, borderRadius: 16 }}>
+      <p className="label-l" style={{ margin: "0 0 8px" }}>{t("Unavailable world presets")}</p>
+      <ul style={{ margin: 0, paddingInlineStart: 20 }}>
+        {unavailable.map(option => <li key={option.id} style={{ overflowWrap: "anywhere" }}><code>{option.id}</code><p className="body-s on-sv" style={{ margin: "4px 0 12px" }}>{t(!catalogue.supported ? catalogue.reason || "World customization is unavailable for the selected version." : option.reason)}</p></li>)}
+      </ul>
+    </div>}
+  </div>;
+}
+
 /** World generator, built from the WorldGenerator artboard. */
 export function WorldGenerator({ onBack }: { onBack: () => void }) {
   const { t, snack } = useApp();
   const [releases, setReleases] = useState<string[]>([]);
   const [version, setVersion] = useState("");
   const [catalogue, setCatalogue] = useState<WorldCatalogue | null>(null);
+  const catalogueRequest = useRef(0);
   const [loading, setLoading] = useState("");
   const [o, setO] = useState<Options | null>(null);
   const [eula, setEula] = useState(false);
@@ -77,17 +103,20 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
     });
   }, []);
   useEffect(() => {
+    const request = ++catalogueRequest.current;
     if (!version) return;
     setCatalogue(null);
     setO(null);
     setLoading(t("Reading this version's world settings from its server…"));
     worldgen<WorldCatalogue>("catalogue", { version })
       .then((c) => {
+        if (request !== catalogueRequest.current) return;
         setCatalogue(c);
         if (c.supported) setO({ ...c.defaults, area: { ...c.defaults.area, ...DEFAULT_SIZE } });
       })
-      .catch((e) => snack(t(explain(e))))
-      .finally(() => setLoading(""));
+      .catch((e) => { if (request === catalogueRequest.current) snack(t(explain(e))); })
+      .finally(() => { if (request === catalogueRequest.current) setLoading(""); });
+    return () => { if (catalogueRequest.current === request) catalogueRequest.current++; };
   }, [version]);
 
   const set = <K extends keyof Options>(key: K, value: Options[K]) => setO((x) => (x ? { ...x, [key]: value } : x));
@@ -97,8 +126,10 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
     const dest = await worldgen<string | null>("browse", { kind: o.output.kind, name: o.name });
     if (dest) set("output", { ...o.output, destination: dest });
   };
+  const presetReady = !!(catalogue?.supported && catalogue.version === version && o && presetInventory(catalogue).some(option => option.supported && option.value === o.preset));
   const start = async () => {
     if (!o) return;
+    if (!presetReady) { snack(t(PRESET_UNSUPPORTED)); return; }
     try {
       const r = await worldgen<{ batches: number }>("start", { version, options: o, eulaAccepted: eula });
       setJob({ done: 0, total: r.batches, step: "start" });
@@ -119,6 +150,7 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
       </div>
       {loading && <p className="body-m on-sv">{loading}</p>}
       {catalogue && !catalogue.supported && <div className="card tint" style={{ padding: 16, borderRadius: 20, display: "flex", gap: 12 }}><Ms name="block" /><p className="body-m" style={{ margin: 0 }}>{t(catalogue.reason || "")}</p></div>}
+      {catalogue && !catalogue.supported && <WorldPresetChoices catalogue={catalogue} value="" onChange={() => {}} />}
       {catalogue?.supported && o && (
         <>
           <span className="chip" style={{ pointerEvents: "none", alignSelf: "flex-start" }}><Ms name="verified" />Java {catalogue.version} · {t("lists read from this version's server")}</span>
@@ -153,7 +185,7 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
             )}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
               <Btn variant="outlined" size="m" disabled={!running} onClick={() => void worldgen("cancel")}>{t("Cancel")}</Btn>
-              <Btn size="m" icon="public" disabled={!!running || !eula || !o.output.destination} onClick={() => void start()}>{t("Generate world")}</Btn>
+              <Btn size="m" icon="public" disabled={!!running || !eula || !o.output.destination || !presetReady} onClick={() => void start()}>{t("Generate world")}</Btn>
             </div>
           </section>
         </>
@@ -298,7 +330,6 @@ function Stepper({ label, value, step = 1, min, max, onChange, unit }: { label: 
 
 function WorldPanel({ o, set, catalogue }: { o: Options; set: <K extends keyof Options>(k: K, v: Options[K]) => void; catalogue: WorldCatalogue }) {
   const { t } = useApp();
-  const presets = catalogue.presets.map((p) => p.replace("minecraft:", ""));
   const ruleSearch = useSearch(catalogue.gameRules.map((r) => r.name));
   const shownRules = ruleSearch.query ? ruleSearch.indices.map((i) => catalogue.gameRules[i]) : catalogue.gameRules;
   const layersTopDown = o.flat.layers.slice().reverse();
@@ -321,7 +352,7 @@ function WorldPanel({ o, set, catalogue }: { o: Options; set: <K extends keyof O
         <div style={{ flex: "1 1 200px" }}><TextField label={t("Seed")} value={o.seed} maxLength={64} supporting={t("Leave empty for a random seed")} onChange={(v) => set("seed", v.replace(/[\r\n]/g, ""))} /></div>
         <Btn variant="tonal" size="m" icon="casino" onClick={() => set("seed", String(Math.floor(Math.random() * 2 ** 53) - 2 ** 52))}>{t("Random seed")}</Btn>
       </div>
-      <ButtonGroup label={t("World type")} value={o.preset} onChange={(v) => set("preset", v)} options={presets.map((p) => [p, t(PRESET_LABELS[p] || pretty(p))] as [string, string])} />
+      <WorldPresetChoices catalogue={catalogue} value={o.preset} onChange={value => set("preset", value)} />
       {o.preset === "flat" && (
         <div className="card outlined" style={{ padding: 16, borderRadius: 20, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}><h3 className="title-m" style={{ margin: 0, flex: 1 }}>{t("Superflat layers")}</h3><span className="label-s on-sv">{t("Top to bottom")}</span></div>

@@ -102,6 +102,7 @@ export function explain(error: unknown): string {
     UNSAFE_JAR_PATH: "The runtime cache path is linked, shared or changed. Review the managed cache location before retrying.",
     NO_PLUGIN_SUPPORT: "Vanilla servers do not load plugins. Use Paper for plugins or Fabric for mods.",
     PLAYER_NOT_FOUND: "No Minecraft account has that name.",
+    WORLD_PRESET_UNSUPPORTED: "This preset is present in the selected version, but its generator is not implemented by the world customization builder.",
     BACKEND_UNAVAILABLE: "The server manager is not available in this window.",
   };
   return known[code] || text;
