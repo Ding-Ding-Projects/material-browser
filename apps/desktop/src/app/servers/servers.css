@@ -23,3 +23,7 @@
 
 /* Compact shell panes use flex:none; bound intrinsic width to the workspace. */
 .servers-workspace > .pane { max-width:100%; overflow-wrap:anywhere; }
+
+/* The compact shell disables flex shrinking on every pane, including nested generator panels. */
+.m3 .world-generator, .m3 .world-generator .pane { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+.m3 .world-generator .chip { max-width:100%; height:auto; min-height:32px; white-space:normal; overflow-wrap:anywhere; }

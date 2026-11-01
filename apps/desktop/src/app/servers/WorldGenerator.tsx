@@ -173,7 +173,7 @@ export function WorldGenerator({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <section className="pane scroll" aria-labelledby="wg-h" style={{ flex: 1, minWidth: 0, padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+    <section className="pane scroll world-generator" aria-labelledby="wg-h" style={{ flex: 1, minWidth: 0, padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <IconBtn icon="arrow_back" label={t("Back to servers")} onClick={onBack} />
         <Ms name="public" size={32} className="c-primary" />
