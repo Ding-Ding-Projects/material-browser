@@ -170,3 +170,14 @@ test('startup storage-read exceptions prevent overwriting earlier state after wr
   assert.equal(writes, 0);
   assert.equal(durable, original);
 });
+
+test('Personalize bounds its compact panes without changing the shared pane rule', async () => {
+  const react = { createElement: (type, props, ...children) => ({ type, props, children }) };
+  const surface = await loadTs('./Personalize.tsx', { react, '../m3': {}, './context': {}, './focus-modes': {}, './colour.mjs': colours, './appearance-elements-model.mjs': appearanceModel, './appearance-elements': {}, './personalize-controls': {} });
+  const tree = surface.PersonalizePage();
+  assert.match(tree.props.className, /\bpersonalize-workspace\b/);
+  const css = await readFile(new URL('./focus-modes.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.m3 \.personalize-workspace > \.pane \{([^}]+)\}/)?.[1] || '';
+  assert.match(rule, /max-width:\s*100%/);
+  assert.match(rule, /overflow-wrap:\s*anywhere/);
+});
