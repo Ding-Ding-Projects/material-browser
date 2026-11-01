@@ -1,4 +1,11 @@
 export const serversZh: Record<string, string> = {
+  'Resolved build': '已解析組建', 'Resolved loader': '已解析載入器', Installer: '安裝器', 'Distribution source': '發行檔來源',
+  'Creation downloads the selected distribution with the integrity checks disclosed above. Starting the server is a separate action.': '建立時會下載所揀發行檔，並按上述說明檢查完整性；啟動係另一項操作。',
+  'The official bootstrap endpoint supplies no catalogue checksum. Its locally observed SHA-256 is not publisher integrity proof. Bootstrap may download additional files on first launch.': '官方啟動檔端點未有提供目錄核對碼，本機計算嘅 SHA-256 唔代表發行者完整性證明，首次啟動可能再下載其他檔案。',
+
+  'Server software': '伺服器軟件',
+  'This provider publishes no independent distribution checksum. I accept this unverified integrity boundary.': '此供應商未有發佈獨立發行檔核對碼，本人接受此完整性未驗證界線。',
+
   'Reload properties': '重新載入屬性', 'Configuration readback loaded.': '已重新讀取設定。',
   'Configuration was saved, but readback is unavailable. Reload properties before editing again.': '設定已儲存，但未能重新讀取；請重新載入屬性再編輯。',
 
