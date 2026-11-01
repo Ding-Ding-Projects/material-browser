@@ -383,3 +383,109 @@ test("owned lifecycle probes Java, remains starting and stops gracefully without
   );
   await service.dispose();
 });
+test("dispose closes admission and rejects queued mutations before returning", async (t) => {
+  const { service } = await fixture(t);
+  const queued = service.request({
+    action: "create",
+    params: { name: "Queued", version: "test", eulaAccepted: true },
+  });
+  const rejected = assert.rejects(queued, { code: "SERVICE_CLOSING" });
+  await service.dispose();
+  await rejected;
+  await assert.rejects(
+    service.request({
+      action: "create",
+      params: { name: "Late", version: "test", eulaAccepted: true },
+    }),
+    { code: "SERVICE_CLOSING" },
+  );
+});
+test("dispose waits for an admitted start probe then stops the child it creates", async (t) => {
+  const { EventEmitter } = require("node:events");
+  const { PassThrough } = require("node:stream");
+  let releaseProbe;
+  let probeObserved;
+  const probeReady = new Promise((resolve) => {
+    probeObserved = resolve;
+  });
+  let stopped = false;
+  const spawn = (exe, args) => {
+    const child = new EventEmitter();
+    child.pid = 9111;
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    child.stdin = new PassThrough();
+    child.kill = () => {};
+    process.nextTick(() => {
+      child.emit("spawn");
+      if (args.includes("-version")) {
+        releaseProbe = () => {
+          child.stderr.write('openjdk version "21.0.1"');
+          child.emit("exit", 0, null);
+        };
+        probeObserved();
+      }
+    });
+    child.stdin.on("data", (b) => {
+      if (b.toString() === "stop\n") {
+        stopped = true;
+        process.nextTick(() => child.emit("exit", 0, null));
+      }
+    });
+    return child;
+  };
+  const { service } = await fixture(t, { spawn });
+  const server = await service.request({
+    action: "create",
+    params: { name: "Race", version: "test", eulaAccepted: true },
+  });
+  const start = service.request({
+    action: "start",
+    params: { id: server.id, javaPath: path.resolve("java.exe") },
+  });
+  await probeReady;
+  let disposed = false;
+  const dispose = service.dispose().then(() => {
+    disposed = true;
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(disposed, false);
+  releaseProbe();
+  await start;
+  await dispose;
+  assert.equal(stopped, true);
+});
+test("restart routes through the owned lifecycle implementation", async (t) => {
+  const { EventEmitter } = require("node:events");
+  const { PassThrough } = require("node:stream");
+  let launches = 0;
+  const spawn = (exe, args) => {
+    const child = new EventEmitter();
+    child.pid = 10000 + launches;
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    child.stdin = new PassThrough();
+    child.kill = () => {};
+    process.nextTick(() => {
+      child.emit("spawn");
+      if (args.includes("-version")) {
+        child.stderr.write('openjdk version "21.0.1"');
+        child.emit("exit", 0, null);
+      } else launches++;
+    });
+    child.stdin.on("data", () =>
+      process.nextTick(() => child.emit("exit", 0, null)),
+    );
+    return child;
+  };
+  const { service } = await fixture(t, { spawn });
+  const server = await service.request({
+    action: "create",
+    params: { name: "Restart", version: "test", eulaAccepted: true },
+  });
+  const params = { id: server.id, javaPath: path.resolve("java.exe") };
+  await service.request({ action: "start", params });
+  await service.request({ action: "restart", params });
+  assert.equal(launches, 2);
+  await service.dispose();
+});

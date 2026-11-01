@@ -204,7 +204,7 @@ function createLifecycle({
         startedAt: new Date().toISOString(),
       }),
     );
-    owned.exited.then(async () => {
+    owned.cleanup = owned.exited.then(async () => {
       if (owned.remoteDisconnected) {
         try {
           await atomic(
@@ -250,6 +250,12 @@ function createLifecycle({
       fail(
         "STOP_PENDING",
         "Graceful stop is still pending; the owned process was not forcibly terminated",
+      );
+    await owned.cleanup;
+    if (owned.remoteDisconnected)
+      fail(
+        "SSH_DISCONNECTED",
+        "Connection ended before a successful owned server exit was verified",
       );
     return state(s);
   }
