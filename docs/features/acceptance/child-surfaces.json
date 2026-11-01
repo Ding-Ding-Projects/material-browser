@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "sourceBaseline": "60e65ef",
+  "complete": false,
+  "inheritance": "Each child inherits every applicable obligation from its parent surface. Highlighted identities are review priorities, not an exemption for unlisted identities.",
+  "records": [
+    {
+      "id": "workspace-title",
+      "parent": "desktop-workspace",
+      "purpose": "Version, display name and window actions",
+      "source": "apps/desktop/src/app/Shell.tsx",
+      "reviewedFeatures": [
+        "front-provenance",
+        "display-name",
+        "app-icon"
+      ],
+      "consumer": "APP_VERSION, BUILT_AT and useDisplayName",
+      "review": "Initial title bar formats the bound build date; exact time, seconds and timezone remain unverified.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "workspace-tabs",
+      "parent": "desktop-workspace",
+      "purpose": "Workspace tabs, ordering and docking",
+      "source": "apps/desktop/src/app/Shell.tsx",
+      "reviewedFeatures": [
+        "tabs",
+        "context-menus",
+        "element-locks"
+      ],
+      "consumer": "workspace.tabs.v1 and tabs.dock",
+      "review": "App.tsx restores validated destination IDs and stores tab IDs; full edge docking/group/pin acceptance remains open.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "profile-list",
+      "parent": "desktop-workspace",
+      "purpose": "Profile list, selection and bulk actions",
+      "source": "apps/desktop/src/app/Profiles.tsx",
+      "reviewedFeatures": [
+        "regex-search",
+        "bulk-actions",
+        "context-menus"
+      ],
+      "consumer": "profile records and selectedProfile",
+      "review": "Source includes actionable profiles; every item and input route still requires built interaction.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "profile-create",
+      "parent": "desktop-workspace",
+      "purpose": "Create profile form",
+      "source": "apps/desktop/src/app/CreateProfile.tsx",
+      "reviewedFeatures": [
+        "guided-forms",
+        "info-icon-guidance",
+        "progress-recovery"
+      ],
+      "consumer": "dialog-local draft and profiles.create",
+      "review": "Draft validation and actual operation parameters require runtime confirmation.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "profile-launch",
+      "parent": "desktop-workspace",
+      "purpose": "Launch review and runtime controls",
+      "source": "apps/desktop/src/app/Launch.tsx",
+      "reviewedFeatures": [
+        "guided-forms",
+        "progress-recovery",
+        "element-locks"
+      ],
+      "consumer": "selected profile and profiles.launch",
+      "review": "Engine and automation consent must be checked against each real supported adapter.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "profile-appearance",
+      "parent": "desktop-workspace",
+      "purpose": "Per-profile avatar appearance dialog",
+      "source": "apps/desktop/src/app/appearance.tsx",
+      "reviewedFeatures": [
+        "appearance-editor",
+        "color-picker",
+        "local-history"
+      ],
+      "consumer": "profile.appearance.v1",
+      "review": "Shape and tone are locally stored; this is not proof of a complete element appearance editor or history integration.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "setup-wizard",
+      "parent": "desktop-workspace",
+      "purpose": "First-run wizard and vault entry",
+      "source": "apps/desktop/src/app/Vault.tsx",
+      "reviewedFeatures": [
+        "onboarding-wizard",
+        "guided-forms"
+      ],
+      "consumer": "setup and setupComplete",
+      "review": "App.tsx stores progress; real setup outcomes, cancellation and resume need built proof.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "super-profile-wizard",
+      "parent": "desktop-workspace",
+      "purpose": "Advanced environment template wizard",
+      "source": "apps/desktop/src/app/TemplateWizard.tsx",
+      "reviewedFeatures": [
+        "guided-forms",
+        "progress-recovery",
+        "info-icon-guidance"
+      ],
+      "consumer": "wizard draft and environment template APIs",
+      "review": "Native round-trip historical evidence is not current candidate acceptance.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "synchronization",
+      "parent": "desktop-workspace",
+      "purpose": "Encrypted synchronization workflow",
+      "source": "apps/desktop/src/app/Sync.tsx",
+      "reviewedFeatures": [
+        "progress-recovery",
+        "guided-forms",
+        "super-confirmation"
+      ],
+      "consumer": "configured endpoints and vault synchronization APIs",
+      "review": "Actual data conflict and authentication paths need independent target evidence.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "command-palette",
+      "parent": "desktop-workspace",
+      "purpose": "Destination and command palette",
+      "source": "apps/desktop/src/app/Palette.tsx",
+      "reviewedFeatures": [
+        "command-palette",
+        "tabs",
+        "regex-search",
+        "rich-controls"
+      ],
+      "consumer": "component query, regex flags, active row and paletteSize",
+      "review": "Boolean settings use real Switch updates; complete rich control and teleport coverage remains unverified.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "context-menu-primitive",
+      "parent": "desktop-workspace",
+      "purpose": "Shared target menu primitive",
+      "source": "apps/desktop/src/m3/index.tsx",
+      "reviewedFeatures": [
+        "context-menus",
+        "menu-shortcuts",
+        "regex-search"
+      ],
+      "consumer": "component-local menu state",
+      "review": "A reusable menu does not prove every rendered element registers it.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "regex-workbench",
+      "parent": "desktop-workspace",
+      "purpose": "Search-owned regular-expression builder",
+      "source": "apps/desktop/src/m3/search.tsx",
+      "reviewedFeatures": [
+        "regex-search"
+      ],
+      "consumer": "query and regex/flags props; worker terminated after 150 milliseconds",
+      "review": "Current source offers pattern chips and three flag controls; complete topic-bound RegexBuddy parity remains unfinished.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "notification-overlay",
+      "parent": "desktop-workspace",
+      "purpose": "Non-blocking visible notices",
+      "source": "apps/desktop/src/app/Live.tsx",
+      "reviewedFeatures": [
+        "notifications",
+        "action-sound-effects",
+        "narration"
+      ],
+      "consumer": "settings.record.notices, quiet hours, toastSeconds and lowStimulation",
+      "review": "Quiet filtering and message lifetime are actual consumers; behavior at all presentation modes needs built proof.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "accessibility-overlay",
+      "parent": "desktop-workspace",
+      "purpose": "Quick accessibility panel",
+      "source": "apps/desktop/src/app/Live.tsx",
+      "reviewedFeatures": [
+        "accessibility-sizing",
+        "motion",
+        "settings-explanations"
+      ],
+      "consumer": "textScale and motion through settings.update",
+      "review": "The quick panel shares settings values; complete own search and guidance are not established.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "attention-controls",
+      "parent": "desktop-workspace",
+      "purpose": "Focus, next action and idle reminder",
+      "source": "apps/desktop/src/app/Live.tsx",
+      "reviewedFeatures": [
+        "adhd-modes",
+        "notifications"
+      ],
+      "consumer": "timeAwareness, oneThing, nextAction, momentum, idleMinutes and snoozeUntil",
+      "review": "Session timer and snooze logic consume preferences; full mode coverage and cross-surface interaction remain open.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "unlock-dialog",
+      "parent": "desktop-workspace",
+      "purpose": "Element unlock and recovery entry",
+      "source": "apps/desktop/src/app/Safety.tsx",
+      "reviewedFeatures": [
+        "element-locks",
+        "unlock-ladder",
+        "support-tickets"
+      ],
+      "consumer": "useLockStore and independent unlock method state",
+      "review": "Every credential combination and shortcut route needs actual source review and built evidence.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-finder",
+      "parent": "desktop-settings",
+      "purpose": "Settings category finder and control results",
+      "source": "apps/desktop/src/app/Settings.tsx",
+      "reviewedFeatures": [
+        "regex-search",
+        "settings-explanations",
+        "rich-controls"
+      ],
+      "consumer": "useSearch of definition labels and descriptions",
+      "review": "Search source currently derives label and help strings; provenance/current-value indexing needs verification.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "setting-row",
+      "parent": "desktop-settings",
+      "purpose": "Shared editable setting row and practice disclosure",
+      "source": "apps/desktop/src/settings/SettingControl.tsx",
+      "reviewedFeatures": [
+        "guided-forms",
+        "info-icon-guidance",
+        "settings-explanations"
+      ],
+      "consumer": "validateValue, preferenceProvenance and controller.update",
+      "review": "Shared component coverage is not an enumeration of every actual rendered control.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-schedules",
+      "parent": "desktop-settings",
+      "purpose": "Scheduled appearance and external sources",
+      "source": "apps/desktop/src/settings/sections/Schedules.tsx",
+      "reviewedFeatures": [
+        "scheduled-settings",
+        "guided-forms",
+        "local-history"
+      ],
+      "consumer": "settings.record schedules and persisted mutations",
+      "review": "Actual source types, timezone behavior and external credential handling remain independently reviewable.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-notifications",
+      "parent": "desktop-settings",
+      "purpose": "Notification list and management",
+      "source": "apps/desktop/src/settings/sections/NotificationCenter.tsx",
+      "reviewedFeatures": [
+        "notifications",
+        "bulk-actions",
+        "exports"
+      ],
+      "consumer": "settings.record.notices",
+      "review": "Selection, dismissal, exports and persisted undo need real interaction proof.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-history",
+      "parent": "desktop-settings",
+      "purpose": "Protected history access and revision browser",
+      "source": "apps/desktop/src/settings/sections/ProtectedHistory.tsx",
+      "reviewedFeatures": [
+        "local-history",
+        "super-confirmation",
+        "regex-search"
+      ],
+      "consumer": "independent history service authentication and encrypted revisions",
+      "review": "Native service tests exercise durability; current GUI input-route proof remains open.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-history-transfer",
+      "parent": "desktop-settings",
+      "purpose": "Protected export and import preview",
+      "source": "apps/desktop/src/settings/sections/HistoryTransfer.tsx",
+      "reviewedFeatures": [
+        "exports",
+        "guided-forms",
+        "progress-recovery"
+      ],
+      "consumer": "file preview and persisted import transaction",
+      "review": "Transition tests are source execution, not DOM, keyboard, focus or installed runtime evidence.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-editors",
+      "parent": "desktop-settings",
+      "purpose": "External editor selection and discovery",
+      "source": "apps/desktop/src/settings/sections/EditorIntegration.tsx",
+      "reviewedFeatures": [
+        "external-editor",
+        "guided-forms"
+      ],
+      "consumer": "native editor discovery and editor preferences",
+      "review": "Installed-editor execution and no-editor recovery remain unverified in this audit.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "presentation-effects",
+      "parent": "desktop-settings",
+      "purpose": "Theme, font, motion and accessibility consumers",
+      "source": "apps/desktop/src/settings/effects.ts",
+      "reviewedFeatures": [
+        "material-design",
+        "appearance-editor",
+        "motion",
+        "accessibility-sizing",
+        "narration"
+      ],
+      "consumer": "document dataset/CSS properties and speech voice identities",
+      "review": "Source applies theme, density, motion, contrast and focus and selects installed voices; runtime and restart evidence remain required.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "settings-presentation-lock",
+      "parent": "desktop-settings",
+      "purpose": "Presentation mode toggle and optional section lock",
+      "source": "apps/desktop/src/app/Settings.tsx",
+      "reviewedFeatures": [
+        "school-mode",
+        "element-locks",
+        "language"
+      ],
+      "consumer": "school-mode.v1 localStorage and transactions over funnyEnglish, funnyCantonese and dialogEmoji",
+      "review": "Source explicitly reports no shared school or family record. Shared live propagation, rename, forced language and complete capability omission remain unfinished. This is source evidence, not a built behavior result.",
+      "runtimeState": "unverified"
+    },
+    {
+      "id": "personal-wording-import",
+      "parent": "desktop-workspace",
+      "purpose": "Window-wide drop, Settings upload and local wording celebration",
+      "source": "apps/desktop/src/app/App.tsx",
+      "reviewedFeatures": [
+        "personal-vocabulary",
+        "vocabulary-drop-apply",
+        "action-sound-effects"
+      ],
+      "consumer": "parseVocabulary, wording localStorage, entries and celebration state",
+      "review": "Source applies validated local wording and a neutral fallback headline; complete drop event binding, exact outcome sounds, screen-reader state and restart/clear behavior require built verification.",
+      "runtimeState": "unverified"
+    }
+  ]
+}

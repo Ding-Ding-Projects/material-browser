@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-test-results",
+  "runtime": "Node.js v26.4.0",
+  "platform": "Windows x64",
+  "runtimeEvidence": false,
+  "baselineSource": "60e65ef",
+  "additionalNativeInputs": [
+    "b637f38",
+    "99c6bce"
+  ],
+  "discoveryScriptSha256": "88198a242e260ad59e1a4834af2c5c98eaaf5ba1267af92d75ac1098153c3e58",
+  "runs": [
+    {
+      "scope": "desktop baseline including application and direct service suites",
+      "command": "npm test",
+      "directory": "apps/desktop",
+      "tests": 171,
+      "passed": 171,
+      "failed": 0,
+      "durationMs": 170844.3372,
+      "note": "Original test command, after resolving existing TypeScript dependency. Nested server suites were not included."
+    },
+    {
+      "scope": "desktop recursive services including native server suite",
+      "command": "npm test",
+      "directory": "apps/desktop",
+      "tests": 182,
+      "passed": 182,
+      "failed": 0,
+      "durationMs": 187443.389,
+      "note": "Recursive service glob includes 11 native server tests. Fixture/service success does not prove a real server launch, network installation or container execution."
+    },
+    {
+      "scope": "acceptance inventory and negative regressions",
+      "command": "node --test scripts/check-feature-acceptance.test.mjs",
+      "directory": ".",
+      "tests": 15,
+      "passed": 15,
+      "failed": 0,
+      "note": "Planning ledger integrity, not product completion."
+    }
+  ],
+  "limitations": [
+    "No GUI interaction, current screenshot, installed application, deployment, Rust suite or release verification is asserted.",
+    "Two desktop runs overlapped; elapsed durations are observed local results, not performance benchmarks.",
+    "No runtime source edits were authored by the acceptance lane."
+  ]
+}

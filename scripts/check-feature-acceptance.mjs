@@ -49,8 +49,24 @@ export function validateInventory(data, required = read('required-identities.jso
   if (data.completed !== (unfinished === 0)) fail('Completion claim does not match evidence');
   return { errors, unfinished, rows: records.length };
 }
+export function validateChildSurfaces(data, inventory) {
+  const errors = [], seen = new Set();
+  const parents = new Set(inventory.surfaces.map(x => x.id));
+  const features = new Set(inventory.features.map(x => x.id));
+  if (data.schemaVersion !== 1 || data.complete !== false || !data.inheritance?.trim()) errors.push('Invalid child discovery declaration');
+  for (const row of data.records || []) {
+    if (!row.id || seen.has(row.id)) errors.push('Missing or duplicate child identity');
+    seen.add(row.id);
+    if (!parents.has(row.parent)) errors.push(`Unknown child parent: ${row.id}`);
+    if (!row.purpose?.trim() || !row.consumer?.trim() || !row.review?.trim() || row.runtimeState !== 'unverified') errors.push(`Unsubstantiated child state: ${row.id}`);
+    if (!row.reviewedFeatures?.length || row.reviewedFeatures.some(id => !features.has(id))) errors.push(`Unknown child requirement: ${row.id}`);
+    if (!row.source || path.isAbsolute(row.source) || row.source.split(/[\\/]/).includes('..') || !existsSync(path.join(root, row.source))) errors.push(`Missing child source: ${row.id}`);
+  }
+  return errors;
+}
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const result = validateInventory(read('inventory.json'), undefined, { requireComplete: process.argv.includes('--require-complete') });
+  result.errors.push(...validateChildSurfaces(read('child-surfaces.json'), read('inventory.json')));
   console.log(`Acceptance inventory: ${result.rows} rows, ${result.unfinished} unfinished, ${result.errors.length} validation errors`);
   for (const message of result.errors.slice(0, 20)) console.error(message);
   process.exitCode = result.errors.length ? 1 : 0;
