@@ -29,6 +29,8 @@
     "@types/react": "19.1.10",
     "@types/react-dom": "19.1.9",
     "electron": "44.9.0",
+    "htmlparser2": "8.0.2",
+    "postcss": "8.5.30",
     "typescript": "5.9.2",
     "vite": "8.3.4"
   },

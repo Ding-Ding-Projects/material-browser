@@ -18,5 +18,5 @@ export default defineConfig({
     __MATERIAL_BROWSER_VERSION__: JSON.stringify(version),
     __MATERIAL_BROWSER_BUILT_AT__: JSON.stringify(sourceDate()),
   },
-  build: { target: "es2022" },
+  build: { target: "es2022", assetsInlineLimit: 0 },
 });

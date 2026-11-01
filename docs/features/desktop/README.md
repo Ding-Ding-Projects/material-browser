@@ -8,6 +8,7 @@
 - [Local Ollama suite](ollama-suite.md)
 - [Focus modes and the appearance editor](focus-modes-and-appearance.md)
 - [Converter data preservation and output integrity](converter-integrity.md)
+- [Bundled font delivery and verification](font-delivery.md)
 - [Historical WorldLens visual design and accessibility](worldlens-design.md)
 - [Optional KeePassXC pairing for new profiles](password-manager.md)
 
