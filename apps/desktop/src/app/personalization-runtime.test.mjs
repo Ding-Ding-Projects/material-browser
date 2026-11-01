@@ -57,3 +57,32 @@ test('the hue control keeps right-edge accessibility values within its declared 
   assert.ok(hue.props['aria-valuenow'] <= hue.props['aria-valuemax']);
   assert.equal(hue.props['aria-valuetext'], `${hue.props['aria-valuenow']}°`);
 });
+
+test('translucent colour contrast is composited only against a known solid backdrop', () => {
+  assert.equal(colours.parseCssRgb('rgba(0, 0, 0, 0.5)'), null);
+  const result = colours.resolveCssBackground([
+    { color: 'rgba(0, 0, 0, 0.5)', image: 'none' },
+    { color: 'rgb(255, 255, 255)', image: 'none' },
+  ]);
+  assert.equal(colours.formatHex(result), '#808080');
+  assert.equal(colours.contrastCheck(colours.formatHex(result), '#FFFFFF').passes, false);
+  assert.equal(colours.resolveCssBackground([{ color: 'rgba(0, 0, 0, 0)', image: 'none' }]), null);
+  assert.equal(colours.resolveCssBackground([{ color: 'rgb(0, 0, 0)', image: 'linear-gradient(red, blue)' }]), null);
+});
+
+test('explicit colour overrides do not claim contrast through unsupported rendered effects', async () => {
+  const react = { createElement: (type, props, ...children) => ({ type, props, children }), Fragment: 'fragment', useEffect() {}, useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}] };
+  const target = { parentElement: null };
+  for (const effect of [{ opacity: '0.5' }, { backdropFilter: 'blur(4px)' }]) {
+    const surface = await loadTs('./Personalize.tsx', {
+      react, '../m3': {}, './context': {}, './focus-modes': {}, './colour.mjs': colours,
+      './appearance-elements-model.mjs': appearanceModel,
+      './appearance-elements': { useAppearanceOverrides: () => ({ 'primary-buttons': { background: '#000000', foreground: '#FFFFFF' } }), listElements: () => [], elementLabel: () => 'Buttons', firstElement: () => target },
+      './personalize-controls': { useT: () => text => text },
+    }, { getComputedStyle: () => ({ opacity: '1', filter: 'none', mixBlendMode: 'normal', backdropFilter: 'none', backgroundImage: 'none', backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)', ...effect }) });
+    const tree = surface.AppearanceEditor({});
+    const text = JSON.stringify(tree);
+    assert.match(text, /Contrast unavailable/);
+    assert.doesNotMatch(text, /21\.0:1/);
+  }
+});

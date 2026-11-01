@@ -221,12 +221,38 @@ export function translate(hex) {
  * Returns null for anything else and for fully transparent colours.
  * @param {string} text
  */
-export function parseCssRgb(text) {
+export function parseCssRgba(text) {
   const m = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i.exec(String(text || "").trim());
   if (!m) return null;
-  if (m[4] !== undefined) {
-    const alpha = m[4].endsWith("%") ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
-    if (alpha === 0) return null;
+  const a = m[4] === undefined ? 1 : m[4].endsWith("%") ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
+  const channels = [+m[1], +m[2], +m[3], a];
+  if (!channels.every(Number.isFinite) || a < 0 || a > 1) return null;
+  return { r: clamp(+m[1], 0, 255), g: clamp(+m[2], 0, 255), b: clamp(+m[3], 0, 255), a };
+}
+
+/** Opaque colours only; translucent values require a known backdrop. */
+export function parseCssRgb(text) {
+  const rgba = parseCssRgba(text);
+  return rgba?.a === 1 ? { r: rgba.r, g: rgba.g, b: rgba.b } : null;
+}
+
+/** Source-over composition, retaining alpha until an opaque backdrop is reached. */
+export function compositeColour(front, back) {
+  const a = front.a + back.a * (1 - front.a);
+  if (!a) return { r: 0, g: 0, b: 0, a: 0 };
+  const channel = key => (front[key] * front.a + back[key] * back.a * (1 - front.a)) / a;
+  return { r: channel('r'), g: channel('g'), b: channel('b'), a };
+}
+
+/** Front-to-back solid CSS backgrounds; unknown images never become guessed colours. */
+export function resolveCssBackground(layers) {
+  let value = { r: 0, g: 0, b: 0, a: 0 };
+  for (const layer of layers) {
+    if (layer.image && layer.image !== 'none') return null;
+    const colour = parseCssRgba(layer.color);
+    if (!colour) return null;
+    value = compositeColour(value, colour);
+    if (value.a === 1) return value;
   }
-  return { r: clamp(Math.round(+m[1]), 0, 255), g: clamp(Math.round(+m[2]), 0, 255), b: clamp(Math.round(+m[3]), 0, 255) };
+  return null;
 }

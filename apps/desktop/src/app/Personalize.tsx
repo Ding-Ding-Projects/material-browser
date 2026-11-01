@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Btn, ButtonGroup, Dialog, Dropdown, Menu, Ms, Slider, Switch } from "../m3";
 import { AppContext } from "./context";
 import { BREAK_MINUTES, WORK_MINUTES, useFocusModes, type FocusModeId } from "./focus-modes";
-import { contrastCheck, formatHex, normaliseHex, parseCssRgb, translate } from "./colour.mjs";
+import { contrastCheck, formatHex, normaliseHex, parseCssRgba, compositeColour, resolveCssBackground, translate } from "./colour.mjs";
 import { RADIUS, SCALE } from "./appearance-elements-model.mjs";
 import {
   appearanceTarget,
@@ -56,7 +56,6 @@ const MODES: { id: FocusModeId; icon: string; label: string; help: string; about
 ];
 
 const SWATCHES = ["#006A6A", "#4B607C", "#8B5000", "#B3261E", "#5B4B9C", "#1D6B2B"];
-const FALLBACK = { background: "#006A6A", foreground: "#FFFFFF" };
 type Part = "background" | "foreground";
 
 function FocusModesSection() {
@@ -95,12 +94,18 @@ function FocusModesSection() {
   );
 }
 
-function computedColour(id: string, part: Part): string {
+function computedColour(id: string, part: Part): string | null {
   const el = firstElement(id);
-  if (!el) return FALLBACK[part];
-  const style = getComputedStyle(el);
-  const rgb = parseCssRgb(part === "background" ? style.backgroundColor : style.color);
-  return rgb ? formatHex(rgb) : FALLBACK[part];
+  if (!el) return null;
+  const styles: CSSStyleDeclaration[] = [];
+  for (let node: HTMLElement | null = el; node; node = node.parentElement) styles.push(getComputedStyle(node));
+  if (styles.some(style => Number(style.opacity) !== 1 || style.filter !== 'none' || style.mixBlendMode !== 'normal' || (style.backdropFilter && style.backdropFilter !== 'none'))) return null;
+  const background = resolveCssBackground(styles.map(style => ({ color: style.backgroundColor, image: style.backgroundImage })));
+  if (part === 'background') return background ? formatHex(background) : null;
+  const foreground = parseCssRgba(styles[0].color);
+  if (!foreground) return null;
+  if (foreground.a === 1) return formatHex(foreground);
+  return background ? formatHex(compositeColour(foreground, background)) : null;
 }
 
 /**
@@ -123,12 +128,13 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
   const other: Part = part === "background" ? "foreground" : "background";
   const hex = normaliseHex(override[part] || "") || computedColour(id, part);
   const against = normaliseHex(override[other] || "") || computedColour(id, other);
-  const names = translate(hex);
-  const check = contrastCheck(hex, against);
+  const names = hex ? translate(hex) : null;
+  const renderedColoursKnown = computedColour(id, "background") !== null && computedColour(id, "foreground") !== null;
+  const check = renderedColoursKnown && hex && against ? contrastCheck(hex, against) : null;
   const label = choices.find((c) => c.id === id)?.label || elementLabel(id);
   const update = (change: Partial<typeof override>) => setOverride(id, { ...override, ...change });
   const verdict = !check ? "" : check.passes ? t("(passes)") : check.advice === "darker" ? t("(too low, pick darker)") : t("(too low, pick lighter)");
-  const textForPreview = check && contrastCheck(hex, "#FFFFFF")!.ratio >= contrastCheck(hex, "#000000")!.ratio ? "#FFFFFF" : "#000000";
+  const textForPreview = hex && check && contrastCheck(hex, "#FFFFFF")!.ratio >= contrastCheck(hex, "#000000")!.ratio ? "#FFFFFF" : "#000000";
 
   return (
     <>
@@ -146,7 +152,7 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
         <ButtonGroup label={t("Colour for")} value={part} onChange={setPart} options={[["background", t("Background")], ["foreground", t("Text")]]} />
         <InfoIcon control={t("Colour for")} text={t("Background fills the element. Text colours its words and icons. The contrast check always compares the two.")} />
       </div>
-      <ColourPicker
+      {hex ? <ColourPicker
         value={hex}
         label={t(part === "background" ? "Background" : "Text")}
         onChange={(next) => update({ [part]: next })}
@@ -173,7 +179,8 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
             </div>
           </>
         }
-      />
+      /> : <div><p role="status">{t("The current colour cannot be resolved from a solid backdrop. Choose a swatch to set an explicit colour.")}</p><div className="pz-swatches" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{SWATCHES.map(s => <button key={s} type="button" className="ib sl pz-swatch" aria-label={`${t("Colour")} ${s}`} style={{ background: s }} onClick={() => update({ [part]: s })} />)}</div></div>}
+      {!check && <p role="status">{t("Contrast unavailable: the actual foreground or background cannot be determined. No passing verdict is claimed.")}</p>}
       <div className="li plain" style={{ gap: 12, flexWrap: "wrap" }}>
         <div className="txt" style={{ flex: "1 1 160px" }}><span className="body-l">{t("Corner radius")}</span><span className="body-s on-sv">{RADIUS.min} {t("to")} {RADIUS.max} px</span></div>
         <InfoIcon control={t("Corner radius")} text={t("How round the corners are. 0 is square; 28 matches the large panes.")} />
@@ -189,7 +196,7 @@ export function AppearanceEditor({ initial, headingId, heading = true }: { initi
         </div>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <Btn icon="visibility" size="m" style={{ background: hex, color: textForPreview }} onClick={() => flashElements(id)}>{t("Preview")}</Btn>
+        <Btn icon="visibility" size="m" disabled={!hex} style={{ background: hex || undefined, color: textForPreview }} onClick={() => flashElements(id)}>{t("Preview")}</Btn>
         <Btn variant="text" size="m" disabled={!overrides[id]} onClick={() => resetOverride(id)}>{t("Reset this element")}</Btn>
         <span style={{ flex: 1 }} />
         <Btn variant="text" size="m" disabled={!Object.keys(overrides).length} onClick={() => setConfirmAll(true)}>{t("Reset all elements")}</Btn>

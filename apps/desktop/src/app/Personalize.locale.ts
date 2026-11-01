@@ -1,5 +1,8 @@
 /** Cantonese for focus modes, the appearance editor, the colour picker and info icons. */
 export const personalizeZh: Record<string, string> = {
+  "The current colour cannot be resolved from a solid backdrop. Choose a swatch to set an explicit colour.": "未能從純色背景確定目前顏色，請揀色板設定明確顏色。",
+  "Contrast unavailable: the actual foreground or background cannot be determined. No passing verdict is claimed.": "未能確定實際前景或背景，無法計算對比，唔會聲稱通過。",
+
   "(passes)": "（合格）",
   "(too low, pick darker)": "（太低，揀深啲）",
   "(too low, pick lighter)": "（太低，揀淺啲）",

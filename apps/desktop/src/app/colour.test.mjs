@@ -15,6 +15,7 @@ import {
   contrastCheck,
   translate,
   parseCssRgb,
+  parseCssRgba,
 } from "./colour.mjs";
 
 const near = (actual, expected, tolerance, message) =>
@@ -96,8 +97,10 @@ test("translations give every notation", () => {
 
 test("computed css colours are read and transparent ones ignored", () => {
   assert.deepEqual(parseCssRgb("rgb(0, 106, 106)"), { r: 0, g: 106, b: 106 });
-  assert.deepEqual(parseCssRgb("rgba(255, 255, 255, 0.5)"), { r: 255, g: 255, b: 255 });
-  assert.deepEqual(parseCssRgb("rgb(1 2 3 / 50%)"), { r: 1, g: 2, b: 3 });
+  assert.equal(parseCssRgb("rgba(255, 255, 255, 0.5)"), null);
+  assert.deepEqual(parseCssRgba("rgba(255, 255, 255, 0.5)"), { r: 255, g: 255, b: 255, a: 0.5 });
+  assert.equal(parseCssRgb("rgb(1 2 3 / 50%)"), null);
+  assert.deepEqual(parseCssRgba("rgb(1 2 3 / 50%)"), { r: 1, g: 2, b: 3, a: 0.5 });
   assert.equal(parseCssRgb("rgba(0, 0, 0, 0)"), null);
   assert.equal(parseCssRgb("transparent"), null);
 });
