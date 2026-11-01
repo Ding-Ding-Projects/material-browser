@@ -21,7 +21,7 @@ export function CreateServer({ capabilities, onClose, onCreated }: { capabilitie
   const sequence = useRef(0);
   const search = useSearch(versions.map(v => `${v.id} ${v.type}`));
   useEffect(() => { try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { setError('Draft could not be saved'); } }, [draft]);
-  const update = (key: keyof typeof initial, value: string) => { setDraft(d => ({ ...d, [key]: value })); if (key === 'version' || key === 'edition') { sequence.current++; setResolved(null); } };
+  const update = (key: keyof typeof initial, value: string) => { setDraft(d => ({ ...d, [key]: value, ...(key === 'edition' ? { version: '' } : {}) })); if (key === 'version' || key === 'edition') { sequence.current++; setResolved(null); } };
   async function discover() {
     const current = ++sequence.current;
     setPending('Loading versions'); setError(''); setResolved(null);
@@ -48,7 +48,7 @@ export function CreateServer({ capabilities, onClose, onCreated }: { capabilitie
     <Btn variant="text" disabled={!!pending} onClick={onClose}>{t('Close and keep draft')}</Btn>
     {step > 0 && <Btn variant="outlined" disabled={!!pending} onClick={() => setStep(step - 1)}>{t('Back')}</Btn>}
     {step === 0 && <Btn disabled={!!pending || !capabilities.targets.find(x => x.id === draft.target)?.available} onClick={() => { setStep(1); void discover(); }}>{t('Next')}</Btn>}
-    {step === 1 && <Btn disabled={!!pending || !draft.version} onClick={() => void resolve()}>{t('Check download')}</Btn>}
+    {step === 1 && <Btn disabled={!!pending || !versions.some(v => v.id === draft.version)} onClick={() => void resolve()}>{t('Check download')}</Btn>}
     {step === 2 && <Btn disabled={!validNumbers || !draft.name.trim() || (draft.target === 'local-docker' && !/^eclipse-temurin@sha256:[a-f0-9]{64}$/.test(draft.imageDigest))} onClick={() => setStep(3)}>{t('Next')}</Btn>}
     {step === 3 && <Btn disabled={!consent || !!pending} onClick={() => void create()}>{t('Create server')}</Btn>}
     {step === 4 && pending && <Btn variant="outlined" onClick={() => void serverRequest('cancel', { operationId: operation.current }).catch(e => setError(errorText(e)))}>{t('Cancel operation')}</Btn>}
