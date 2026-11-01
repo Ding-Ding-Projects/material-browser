@@ -41,3 +41,19 @@ test('the shell context-menu mount restores saved appearance before opening an e
   for (const effect of effects) effect();
   assert.match(styles.get('appearance-elements').textContent, /\.m3 \.btn\.filled.*#123456/);
 });
+
+test('the hue control keeps right-edge accessibility values within its declared bounds', async () => {
+  const react = {
+    createElement: (type, props, ...children) => ({ type, props, children }),
+    useContext: () => null, useEffect() {}, useRef: () => ({ current: null }),
+    useState: initial => { const value = typeof initial === 'function' ? initial() : initial; return [value && typeof value === 'object' && 'h' in value ? { h: 359.9, s: 100, v: 100 } : value, () => {}]; },
+  };
+  const controls = await loadTs('./personalize-controls.tsx', { react, '../m3': {}, './context': { AppContext: {} }, './colour.mjs': colours });
+  const tree = controls.ColourPicker({ value: '#FF0000', label: 'Colour', onChange() {} });
+  function find(node) { if (!node || typeof node !== 'object') return null; if (node.props?.className === 'pz-hue') return node; return node.children?.flat(Infinity).map(find).find(Boolean); }
+  const hue = find(tree);
+  assert.ok(hue);
+  assert.ok(hue.props['aria-valuenow'] >= hue.props['aria-valuemin']);
+  assert.ok(hue.props['aria-valuenow'] <= hue.props['aria-valuemax']);
+  assert.equal(hue.props['aria-valuetext'], `${hue.props['aria-valuenow']}°`);
+});

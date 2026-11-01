@@ -200,8 +200,8 @@ export function ColourPicker({
         aria-label={`${label}: ${t("Hue")}`}
         aria-valuemin={0}
         aria-valuemax={359}
-        aria-valuenow={Math.round(hsv.h)}
-        aria-valuetext={`${Math.round(hsv.h)}°`}
+        aria-valuenow={Math.min(359, Math.round(hsv.h))}
+        aria-valuetext={`${Math.min(359, Math.round(hsv.h))}°`}
         style={{ width: 220 }}
         onPointerDown={(event) => {
           event.currentTarget.setPointerCapture(event.pointerId);
