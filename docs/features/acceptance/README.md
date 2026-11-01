@@ -1,6 +1,8 @@
 # Required-feature acceptance
 
-This inventory records a conservative source-review baseline at `60e65ef`. It is not a certification, implementation report, or release approval. `inventory.json` lists 111 neutral requirement identities across seven surface families, including the productive workspace, Settings, hosted documentation, offline handbook, storage dashboard, hosting wizard and repository delivery records. Nested dialogs, menus, pickers, tool panels and article routes inherit the owning family's obligations; they still need explicit child-surface inventories before completion.
+The current catalogue contains **112 identities across seven surface families: 784 rows, with 420 applicable rows unfinished**. The added world-generator identity is missing on every applicable parent-server surface; no completion state was upgraded.
+
+This inventory originally recorded a conservative source-review baseline at `60e65ef`. It is not a certification, implementation report, or release approval. The original inventory contained 111 neutral requirement identities across seven surface families, including the productive workspace, Settings, hosted documentation, offline handbook, storage dashboard, hosting wizard and repository delivery records. Nested dialogs, menus, pickers, tool panels and article routes inherit the owning family's obligations; they still need explicit child-surface inventories before completion.
 
 The independent `required-identities.json` list prevents deleting a feature row to make the inventory appear complete. Names are product-facing descriptions, not an embedded private dictionary. This baseline deliberately does not copy private instruction prose, mappings or local paths.
 
@@ -28,7 +30,7 @@ The negative tests independently remove an identity and a surface row, duplicate
 6. Verify hosted documentation and each companion independently. Shared source does not prove hosted routes, offline navigation, settings persistence, responsive layouts or installed behavior.
 7. Produce current source/hash-bound layout, interaction and release receipts. Retain historical evidence unchanged and keep unavailable proof unfinished.
 
-This is a family-level discovery ledger. It does not yet claim exhaustive per-control decomposition or full behavioral auditing of 414 applicable rows. Most source links and all current runtime-evidence fields remain deliberately empty until reviewed. Applicability exclusions cover non-rendered repository records, documentation-only deliverables on productive screens, job-document workflows, repository publishing, extension download interception, private-source build routing, shared-status-service internals, suspended display reporting and instruction-distribution/Roblox-only deliverables. Revisit an exclusion if product scope changes.
+This is a family-level discovery ledger. It does not yet claim exhaustive per-control decomposition or full behavioral auditing of the original 414 applicable rows. Most source links and all current runtime-evidence fields remain deliberately empty until reviewed. Applicability exclusions cover non-rendered repository records, documentation-only deliverables on productive screens, job-document workflows, repository publishing, extension download interception, private-source build routing, shared-status-service internals, suspended display reporting and instruction-distribution/Roblox-only deliverables. Revisit an exclusion if product scope changes.
 
 ## Local verification baseline
 
@@ -53,3 +55,16 @@ The presentation-mode source audit specifically found an application-local `scho
 
 
 The completed clean baseline run passed **171 of 171** desktop tests. After recursive service discovery and the two separately authored native server inputs, the full desktop run passed **182 of 182**, including all 11 nested native server tests. `local-tests.json` records exact counts, observed durations, source inputs and the package-script digest. The two runs overlapped, so their durations are not performance benchmarks. Native fixture tests do not prove a real distribution download, server process lifecycle, container launch or GUI workflow. No full-suite failure remains in these desktop results.
+
+
+## World-generator requirement update
+
+The current catalogue adds `minecraft-world-generator` beside `minecraft-server-manager`. Its seven rows inherit exactly the parent manager's applicability: the six rendered surface families remain applicable and unfinished, while non-rendered repository delivery records retain the parent's explicit exclusion. The requirement has no implementation, localization, persistence, test, runtime or screenshot evidence attached.
+
+A bounded review of product source at `37ff81f` found `design/remaining-features/WorldGenerator.dc.html` and no active generator handlers in the desktop renderer, native services or server feature documentation. The artboard is design-only; its displayed progress and controls do not establish executable generation. The new child-surface record identifies the existing server-service boundary and explicitly states that no generator state consumer was found. There are now 27 discovery child records, all runtime-unverified; the original 26-record review remains historical context.
+
+Acceptance must separately establish per-selected-version extraction, typed registry-backed controls, pack writing, user EULA consent, server execution, bounded pre-generation (at most 256 chunks per batch), a default 100 by 100 chunk canvas synchronized with fields, native Browse, verified non-overwriting Folder and atomic ZIP outputs, and same-version server reopening. Edition/version limitations must state their real scope. No raw JSON textbox or hardcoded registry picker substitutes for those workflows.
+
+The original **111-identity / 777-row / 414-unfinished** baseline, 15-test ledger receipt and 171/182-test desktop receipts are historical results for their stated inputs. They are not silently relabelled as verification of the new 112-identity catalogue or generator implementation. Current catalogue regression results are reported separately by this update.
+
+The current 112-identity inventory validation passed with **784 rows, 420 unfinished and zero validation errors**. The updated local inventory suite passed **17 tests, zero failed**. These are structural and omission checks only, and do not upgrade generator completion or rerun the historical desktop acceptance suites.
